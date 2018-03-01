@@ -9,6 +9,8 @@ from WolfBot.WolfEmbed import Colors
 
 LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 
+
+# noinspection PyMethodMayBeStatic
 class AutoResponder:
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
@@ -24,7 +26,7 @@ class AutoResponder:
 #           "response": "my response"
 #       }
 #   }
-        
+
     async def on_message(self, message: discord.Message):
         responses = BOT_CONFIG.get("responses", {})
 
@@ -39,7 +41,8 @@ class AutoResponder:
             if WolfUtils.memberHasAnyRole(message.author, responses[response].get('requiredRoles')) \
                     or bool(message.author.permissions_in(message.channel).manage_messages):
                 if responses[response].get('isEmbed', False):
-                    await message.channel.send(content=None, embed=discord.Embed.from_data(responses[response]['response']))
+                    await message.channel.send(content=None,
+                                               embed=discord.Embed.from_data(responses[response]['response']))
                 else:
                     await message.channel.send(content=responses[response]['response'])
 
@@ -84,7 +87,8 @@ class AutoResponder:
 
     @responses.command(name="edit")
     @commands.has_permissions(manage_messages=True)
-    async def editResponse(self, ctx:discord.ext.commands.Context, trigger: str, param: str, action: str, value: str = None):
+    async def editResponse(self, ctx: discord.ext.commands.Context, trigger: str, param: str, action: str,
+                           value: str = None):
         responses = BOT_CONFIG.get("responses", {})
 
         try:
@@ -125,17 +129,15 @@ class AutoResponder:
                     ))
                     return
 
-                newValues = []
+                new_values = []
                 for v in value.split(','):
-                    newValues.append(int(v))
+                    new_values.append(int(v))
 
-                response[param] = newValues
+                response[param] = new_values
 
             elif action.lower() == 'add' or action.lower() == 'remove':
-                t = None
-
                 try:
-                    t = int(value)
+                    val = int(value)
                 except ValueError:
                     await ctx.send(embed=discord.Embed(
                         title="Response Manager",
@@ -145,9 +147,9 @@ class AutoResponder:
                     return
 
                 if action.lower() == "add":
-                    response[param].append(t)
+                    response[param].append(val)
                 else:
-                    response[param].remove(t)
+                    response[param].remove(val)
 
             elif action.lower() == 'clear':
                 response[param] = None
@@ -183,7 +185,7 @@ class AutoResponder:
 
     @responses.command(name="delete", aliases=["remove"])
     @commands.has_permissions(manage_messages=True)
-    async def deleteResponse(self, ctx:discord.ext.commands.Context, trigger: str):
+    async def deleteResponse(self, ctx: discord.ext.commands.Context, trigger: str):
         responses = BOT_CONFIG.get("responses", {})
 
         try:

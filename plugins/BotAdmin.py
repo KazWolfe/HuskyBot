@@ -13,6 +13,8 @@ from WolfBot.WolfEmbed import Colors
 
 LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 
+
+# noinspection PyMethodMayBeStatic
 class BotAdmin:
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
@@ -22,21 +24,25 @@ class BotAdmin:
 
     @commands.command(name="version", brief="Get version information for the bot")
     async def version_cmd(self, ctx: discord.ext.commands.Context):
-        repo = git.Repo(search_parent_directories = True)
+        repo = git.Repo(search_parent_directories=True)
         sha = repo.head.object.hexsha
-    
+
         await ctx.send(embed=discord.Embed(
-                title="DiyBot",
-                description="This is DIYBot, a fork of the WolfBot core Discord bot platform. It is responsible for managing"
-                + " and assisting the moderators on the DIY Tech subreddit.",
-                color = Colors.INFO
-            )
-            .add_field(name="Authors", value="KazWolfe, Clover", inline=False)
-            .add_field(name="Bot Version", value="[`" + sha[:8] + "`](https://www.github.com/KazWolfe/diy_tech-bot/commit/" + sha + ")", inline=True)
-            .add_field(name="Library Version", value=discord.__version__, inline=True)
-            .set_thumbnail(url="https://cdn.discordapp.com/avatars/" + str(ctx.bot.user.id) + "/" + str(ctx.bot.user.avatar) + ".png")
-            .set_footer(text="MIT License, © 2018 KazWolfe", icon_url="https://avatars3.githubusercontent.com/u/5192145")
+            title="DiyBot",
+            description="This is DIYBot, a fork of the WolfBot core Discord bot platform. It is responsible for "
+                        "managing and assisting the moderators on the DIY Tech subreddit.",
+            color=Colors.INFO
         )
+                       .add_field(name="Authors", value="KazWolfe, Clover", inline=False)
+                       .add_field(name="Bot Version", value="[`" + sha[:8]
+                                                            + "`](https://www.github.com/KazWolfe/diy_tech-bot/commit/"
+                                                            + sha + ")", inline=True)
+                       .add_field(name="Library Version", value=discord.__version__, inline=True)
+                       .set_thumbnail(url="https://cdn.discordapp.com/avatars/" + str(ctx.bot.user.id) + "/"
+                                          + str(ctx.bot.user.avatar) + ".png")
+                       .set_footer(text="MIT License, © 2018 KazWolfe",
+                                   icon_url="https://avatars3.githubusercontent.com/u/5192145")
+                       )
 
     @commands.group(pass_context=True, brief="Administrative bot control commands.", hidden=True)
     @commands.has_permissions(administrator=True)
@@ -45,7 +51,7 @@ class BotAdmin:
             await ctx.send(embed=discord.Embed(
                 title="Bot Manager",
                 description="The command you have requested is not available.",
-                color = Colors.DANGER
+                color=Colors.DANGER
             ))
             return
 
@@ -56,7 +62,7 @@ class BotAdmin:
         await ctx.send(embed=discord.Embed(
             title="Bot Manager",
             description="The bot configuration has been reloaded.",
-            color = Colors.INFO
+            color=Colors.INFO
         ))
 
     @admin.command(name="load", brief="Temporarily load a plugin into the bot.")
@@ -66,15 +72,17 @@ class BotAdmin:
         except (AttributeError, ImportError) as e:
             await ctx.send(embed=discord.Embed(
                 title="Plugin Manager",
-                description="The plugin `" + plugin_name + "` has failed to load. The following error is available:\n ```{}: {}```".format(type(e).__name__, str(e)),
-                color = Colors.DANGER
+                description="The plugin `" + plugin_name
+                            + "` has failed to load. The following "
+                            + "error is available:\n ```{}: {}```".format(type(e).__name__, str(e)),
+                color=Colors.DANGER
             ))
             return
         LOG.info("Loaded plugin %s", plugin_name)
         await ctx.send(embed=discord.Embed(
             title="Plugin Manager",
             description="The plugin `" + plugin_name + "` has been loaded.",
-            color = Colors.INFO
+            color=Colors.INFO
         ))
 
     @admin.command(name="unload", brief="Temporarily unload a plugin from the bot.")
@@ -89,7 +97,7 @@ class BotAdmin:
         await ctx.send(embed=discord.Embed(
             title="Plugin Manager",
             description="The plugin `" + plugin_name + "` has been unloaded.",
-            color = Colors.INFO
+            color=Colors.INFO
         ))
 
     @admin.command(name="reload", brief="Unload and reload a plugin.")
@@ -101,15 +109,17 @@ class BotAdmin:
         except (AttributeError, ImportError) as e:
             await ctx.send(embed=discord.Embed(
                 title="Plugin Manager",
-                description="The plugin `" + plugin_name + "` has failed to reload. The following error is available:\n ```{}: {}```".format(type(e).__name__, str(e)),
-                color = Colors.DANGER
+                description="The plugin `" + plugin_name
+                            + "` has failed to reload. The following "
+                            + "error is available:\n ```{}: {}```".format(type(e).__name__, str(e)),
+                color=Colors.DANGER
             ))
             return
         LOG.info("Reloaded plugin %s", plugin_name)
         await ctx.send(embed=discord.Embed(
             title="Plugin Manager",
             description="The plugin `" + plugin_name + "` has been reloaded.",
-            color = Colors.INFO
+            color=Colors.INFO
         ))
 
     @admin.command(name="enable", brief="Enable a plugin to run now and at bot load.")
@@ -125,8 +135,9 @@ class BotAdmin:
         except (AttributeError, ImportError) as e:
             await ctx.send(embed=discord.Embed(
                 title="Plugin Manager",
-                description="The plugin `" + plugin_name + "` has failed to enable. The following error is available:\n ```{}: {}```".format(type(e).__name__, str(e)),
-                color = Colors.DANGER
+                description="The plugin `" + plugin_name + "` has failed to enable. The following error is "
+                            + "available:\n ```{}: {}```".format(type(e).__name__, str(e)),
+                color=Colors.DANGER
             ))
             return
         LOG.info("Loaded plugin %s for enable", plugin_name)
@@ -137,7 +148,7 @@ class BotAdmin:
         await ctx.send(embed=discord.Embed(
             title="Plugin Manager",
             description="The plugin `" + plugin_name + "` has been enabled and will run automatically.",
-            color = Colors.SUCCESS
+            color=Colors.SUCCESS
         ))
 
     @admin.command(name="disable", brief="Disable a plugin from running at bot load. Also stops the plugin.")
@@ -161,74 +172,74 @@ class BotAdmin:
         await ctx.send(embed=discord.Embed(
             title="Plugin Manager",
             description="The plugin `" + plugin_name + "` has been disabled and will no longer run automatically.",
-            color = Colors.WARNING
+            color=Colors.WARNING
         ))
-        
+
     @admin.command(name="log", aliases=["logs"], brief="See the bot's current log.")
     async def log(self, ctx: discord.ext.commands.Context, lines: int = 10):
-        logFile = LOCAL_STORAGE.get('logPath')
-        logs = None
-        
-        if logFile is None:
+        log_file = LOCAL_STORAGE.get('logPath')
+
+        if log_file is None:
             await ctx.send(embed=discord.Embed(
                 title="Bot Manager",
-                description="A log file was expected, but was not found or configured. This suggests a *serious* problem with the bot.",
-                color = Colors.DANGER
+                description="A log file was expected, but was not found or configured. This suggests a *serious* "
+                            + "problem with the bot.",
+                color=Colors.DANGER
             ))
             return
-            
-        with open(logFile, 'r') as diskLog:
+
+        with open(log_file, 'r') as diskLog:
             logs = WolfUtils.tail(diskLog, lines)
 
         await ctx.send(embed=discord.Embed(
-            title="Log Entries from " + logFile,
+            title="Log Entries from " + log_file,
             description="```" + logs + "```",
-            color = Colors.SECONDARY
+            color=Colors.SECONDARY
         ))
-        
+
     @admin.command(name="presence", brief="Set the bot's presence mode.")
-    async def presence(self, ctx: discord.ext.commands.Context, game: str, presenceType: int, status: str):
-        newStatus = None
-    
+    async def presence(self, ctx: discord.ext.commands.Context, game: str, presence_type: int, status: str):
         if status.lower() == "invisible" or status.lower() == "offline":
             await ctx.send(embed=discord.Embed(
                 title="Bot Manager",
                 description="The bot status can not be set to invisible or offline.",
-                color = Colors.DANGER
+                color=Colors.DANGER
             ))
             return
-            
-        if not 0 <= presenceType <= 2:
+
+        if not 0 <= presence_type <= 2:
             await ctx.send(embed=discord.Embed(
                 title="Bot Manager",
-                description="The presence type must be **`0`** (\"Playing\"), **`1`** (\"Streaming\"), or **`2`** (\"Listening to\").",
-                color = Colors.DANGER
+                description="The presence type must be **`0`** (\"Playing\"), **`1`** (\"Streaming\"), "
+                            + "or **`2`** (\"Listening to\").",
+                color=Colors.DANGER
             ))
             return
-            
+
         try:
-            newStatus = discord.Status[status.lower()]
+            new_status = discord.Status[status.lower()]
         except KeyError:
             await ctx.send(embed=discord.Embed(
                 title="Bot Manager",
                 description="Valid values for status are: **`ONLINE`**, **`IDLE`**, **`DND`**.",
-                color = Colors.DANGER
+                color=Colors.DANGER
             ))
             return
-            
-        BOT_CONFIG.set('presence', {"game": game, "type": presenceType, "status": status})
-        await ctx.bot.change_presence(game=discord.Game(name=game, type=presenceType), status=newStatus)
+
+        BOT_CONFIG.set('presence', {"game": game, "type": presence_type, "status": status})
+        await ctx.bot.change_presence(game=discord.Game(name=game, type=presence_type), status=new_status)
         await ctx.send(embed=discord.Embed(
-                title="Bot Manager",
-                description="The bot's presence was updated.",
-                color = Colors.SUCCESS
-            ))
-            
+            title="Bot Manager",
+            description="The bot's presence was updated.",
+            color=Colors.SUCCESS
+        ))
+
     @admin.command(name="restart", brief="Restart the bot.")
     async def restart(self, ctx: discord.ext.commands.Context):
         await ctx.bot.change_presence(game=discord.Game(name="Restarting...", type=0), status=discord.Status.idle)
         LOG.info("Bot is going down for admin requested restart!")
-        os.execl(sys.executable, *([sys.executable]+sys.argv))
-            
+        os.execl(sys.executable, *([sys.executable] + sys.argv))
+
+
 def setup(bot: discord.ext.commands.Bot):
     bot.add_cog(BotAdmin(bot))

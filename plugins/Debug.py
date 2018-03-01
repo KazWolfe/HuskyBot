@@ -11,6 +11,7 @@ from WolfBot.WolfEmbed import Colors
 LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 
 
+# noinspection PyMethodMayBeStatic
 class Debug:
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
@@ -29,13 +30,13 @@ class Debug:
         config = config.replace(BOT_CONFIG.get('apiKey', '<WTF HOW DID 8741234723890423>'), '[EXPUNGED]')
 
         await ctx.send(embed=discord.Embed(
-            title="Bot Manager",
-            description="The current bot config is available below.",
-            color=Colors.INFO
+                title="Bot Manager",
+                description="The current bot config is available below.",
+                color=Colors.INFO
             )
             .add_field(name="BOT_CONFIG", value="```javascript\n" + config + "```", inline=False)
             .add_field(name="LOCAL_STORAGE", value="```javascript\n" + str(LOCAL_STORAGE.dump()) + "```",
-                      inline=False)
+                       inline=False)
         )
 
     @commands.command(name="serverinfo", aliases=["sinfo"])
@@ -49,7 +50,8 @@ class Debug:
 
         server_details.set_thumbnail(url=guild.icon_url)
         server_details.add_field(name="Guild ID", value=guild.id, inline=True)
-        server_details.add_field(name="Owner", value=guild.owner.display_name + "#" + guild.owner.discriminator, inline=True)
+        server_details.add_field(name="Owner", value=guild.owner.display_name + "#" + guild.owner.discriminator,
+                                 inline=True)
         server_details.add_field(name="Members", value=str(len(guild.members)) + " users", inline=True)
         server_details.add_field(name="Text Channels", value=str(len(guild.text_channels)) + " channels", inline=True)
         server_details.add_field(name="Roles", value=str(len(guild.roles)) + " roles", inline=True)
