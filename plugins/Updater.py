@@ -7,6 +7,7 @@ import discord
 import git
 from discord.ext import commands
 
+from BotCore import BOT_CONFIG
 from WolfBot.WolfEmbed import Colors
 
 LOG = logging.getLogger("DiyBot.Plugin." + __name__)
@@ -65,6 +66,7 @@ class Updater:
         ))
 
         LOG.info("Bot is going down for update restart!")
+        BOT_CONFIG.set("restartNotificationChannel", ctx.channel.id)
         os.execl(sys.executable, *([sys.executable] + sys.argv))
 
 

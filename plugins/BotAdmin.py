@@ -22,6 +22,16 @@ class BotAdmin:
     async def on_ready(self):
         LOG.info("Enabled plugin!")
 
+        # inform users if restart
+        if BOT_CONFIG.get("restartNotificationChannel") is not None:
+            channel = self.bot.get_channel(BOT_CONFIG.get("restartNotificationChannel"))
+            await channel.send(embed=discord.Embed(
+                title="Bot Manager",
+                description="The bot has been successfully restarted, and is now online.",
+                color=Colors.SUCCESS
+            ))
+            BOT_CONFIG.delete("restartNotificationChannel")
+
     @commands.command(name="version", brief="Get version information for the bot")
     async def version_cmd(self, ctx: discord.ext.commands.Context):
         repo = git.Repo(search_parent_directories=True)
@@ -238,6 +248,7 @@ class BotAdmin:
     async def restart(self, ctx: discord.ext.commands.Context):
         await ctx.bot.change_presence(game=discord.Game(name="Restarting...", type=0), status=discord.Status.idle)
         LOG.info("Bot is going down for admin requested restart!")
+        BOT_CONFIG.set("restartNotificationChannel", ctx.channel.id)
         os.execl(sys.executable, *([sys.executable] + sys.argv))
 
 
