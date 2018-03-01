@@ -50,6 +50,7 @@ class Updater:
             
         # we're clear to update. let's do it!
         LOG.info("All update sanity checks passed. Pulling...")
+        await ctx.bot.change_presence(game=discord.Game(name="Updating...", type=0), status=discord.Status.idle)
         remote.pull()
         newSHA = repo.head.object.hexsha
         await ctx.send(embed=discord.Embed(

@@ -70,8 +70,13 @@ async def on_command_error(ctx, error):
         title="Bot Error Handler",
         description="The bot has encountered a fatal error running the command given. Logs are below.",
         color = Colors.DANGER
-    ).add_field(name="Error Log", value=str(error), inline=False))
+    ).add_field(name="Error Log", value="```" + str(error) + "```", inline=False))
     
+    
+@bot.event
+async def on_message(message):
+    if message.content.startswith(bot.command_prefix):
+        await bot.process_commands(message)
 
 if __name__ == '__main__':
     sys.path.insert(1, os.getcwd() + "/plugins/")

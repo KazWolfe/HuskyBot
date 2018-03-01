@@ -10,6 +10,7 @@ import logging
 
 import git
 import os
+import sys
 
 LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 
@@ -35,6 +36,8 @@ class BotAdmin:
             .add_field(name="Authors", value="KazWolfe, Clover", inline=False)
             .add_field(name="Bot Version", value="[`" + sha[:8] + "`](https://www.github.com/KazWolfe/diy_tech-bot/commit/" + sha + ")", inline=True)
             .add_field(name="Library Version", value=discord.__version__, inline=True)
+            .set_thumbnail(url="https://cdn.discordapp.com/avatars/" + str(ctx.bot.user.id) + "/" + str(ctx.bot.user.avatar) + ".png")
+            .set_footer(text="MIT License, © 2018 KazWolfe", icon_url="https://avatars3.githubusercontent.com/u/5192145")
         )
 
     @commands.group(pass_context=True, brief="Administrative bot control commands.", hidden=True)
@@ -237,6 +240,12 @@ class BotAdmin:
                 description="The bot's presence was updated.",
                 color = Colors.SUCCESS
             ))
+            
+    @admin.command(name="restart", brief="Restart the bot.")
+    async def restart(self, ctx: discord.ext.commands.Context):
+        await ctx.bot.change_presence(game=discord.Game(name="Restarting...", type=0), status=discord.Status.idle)
+        LOG.info("Bot is going down for admin requested restart!")
+        os.execl(sys.executable, *([sys.executable]+sys.argv))
             
 def setup(bot: discord.ext.commands.Bot):
     bot.add_cog(BotAdmin(bot))
