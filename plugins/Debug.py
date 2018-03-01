@@ -63,7 +63,7 @@ class Debug:
     async def sendmsg(self, ctx: discord.ext.commands.Context, channel: discord.TextChannel, *, message: str):
         await channel.send(message)
 
-    @commands.command(name="serverinfo", aliases=["sinfo"])
+    @commands.command(name="serverinfo", aliases=["sinfo"], brief="Get information about the current server")
     async def serverInfo(self, ctx: discord.ext.commands.Context):
         guild = ctx.guild
 
@@ -88,7 +88,7 @@ class Debug:
 
         await ctx.send(embed=server_details)
 
-    @commands.command(name="roleinfo", aliases=["rinfo"])
+    @commands.command(name="roleinfo", aliases=["rinfo"], brief="Get information about a specified role.")
     async def roleInfo(self, ctx: discord.ext.commands.Context, *, role: discord.Role):
         role_details = discord.Embed(
             title="Role Information for " + role.name,
@@ -105,7 +105,8 @@ class Debug:
 
         await ctx.send(embed=role_details)
 
-    @commands.command(name="userinfo", aliases=["uinfo", "memberinfo", "minfo"])
+    @commands.command(name="userinfo", aliases=["uinfo", "memberinfo", "minfo"],
+                      brief="Get information about self or specified user")
     async def userInfo(self, ctx: discord.ext.commands.Context, *, member: discord.Member = None):
         member = member or ctx.author
         member_details = discord.Embed(

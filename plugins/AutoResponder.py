@@ -46,7 +46,7 @@ class AutoResponder:
                 else:
                     await message.channel.send(content=responses[response]['response'])
 
-    @commands.group(name="responses")
+    @commands.group(name="responses", brief="Manage the AutoResponder plugin")
     async def responses(self, ctx: discord.ext.commands.Context):
         if ctx.invoked_subcommand is None:
             await ctx.send(embed=discord.Embed(
@@ -56,7 +56,7 @@ class AutoResponder:
             ))
             return
 
-    @responses.command(name="add")
+    @responses.command(name="add", aliases=["create"], brief="Add a new automatic response")
     @commands.has_permissions(manage_messages=True)
     async def addResponse(self, ctx: discord.ext.commands.Context, trigger: str, response: str):
         responses = BOT_CONFIG.get("responses", {})
@@ -85,7 +85,7 @@ class AutoResponder:
             color=Colors.SUCCESS
         ))
 
-    @responses.command(name="edit")
+    @responses.command(name="edit", brief="Alter an existing automatic response")
     @commands.has_permissions(manage_messages=True)
     async def editResponse(self, ctx: discord.ext.commands.Context, trigger: str, param: str, action: str,
                            value: str = None):
@@ -183,7 +183,7 @@ class AutoResponder:
 
         await ctx.send(embed=confirmation)
 
-    @responses.command(name="delete", aliases=["remove"])
+    @responses.command(name="delete", aliases=["remove"], brief="Delete an existing automatic response")
     @commands.has_permissions(manage_messages=True)
     async def deleteResponse(self, ctx: discord.ext.commands.Context, trigger: str):
         responses = BOT_CONFIG.get("responses", {})
@@ -207,7 +207,7 @@ class AutoResponder:
             color=Colors.SUCCESS
         ))
 
-    @responses.command(name="list")
+    @responses.command(name="list", brief="List all registered automatic responses")
     @commands.has_permissions(manage_messages=True)
     async def listResponses(self, ctx: discord.ext.commands.Context):
         responses = BOT_CONFIG.get("responses", {})
@@ -218,7 +218,7 @@ class AutoResponder:
             color=Colors.SUCCESS
         ))
 
-    @responses.command(name="deleteAll")
+    @responses.command(name="deleteAll", hidden=True)
     @commands.has_permissions(administrator=True)
     async def purge(self, ctx: discord.ext.commands.Context):
         BOT_CONFIG.set('responses', {})

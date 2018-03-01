@@ -45,7 +45,7 @@ class ModTools:
             autobans.remove(member.id)
             BOT_CONFIG.set("autobans", autobans)
 
-    @commands.command(name="autoban")
+    @commands.command(name="autoban", aliases=["hackban"], brief="Ban a non-member online (preemptive)")
     @commands.has_permissions(ban_members=True)
     async def autoban(self, ctx: discord.ext.commands.Context, target: int):
         autobans = BOT_CONFIG.get("autobans", [])
@@ -66,7 +66,7 @@ class ModTools:
             color=Colors.SUCCESS
         ))
 
-    @commands.command(name="autopardon")
+    @commands.command(name="autopardon", aliases=["hackpardon"], brief="Pardon a member on the autoban list.")
     @commands.has_permissions(ban_members=True)
     async def autopardon(self, ctx: discord.ext.commands.Context, target: int):
         autobans = BOT_CONFIG.get("autobans", [])
@@ -87,14 +87,20 @@ class ModTools:
             color=Colors.SUCCESS
         ))
 
-    @commands.command(name="warn")
+    @commands.command(name="warn", brief="Issue an official warning to a user.", disabled=True)
     @commands.has_permissions(ban_members=True)
     async def warn(self, ctx: discord.ext.commands.Context, target: discord.Member, *, reason: str):
         pass
 
-    @commands.command(name="mute")
-    @commands.has_permissions(ban_members=True)
+    @commands.command(name="mute", brief="Temporarily mute a user from the current channel", disabled=True)
+    @commands.has_permissions(manage_messages=True)
     async def mute(self, ctx: discord.ext.commands.Context, target: discord.Member, time: str=None, * reason: str):
+        pass
+
+    @commands.command(name="globalmute", aliases=["gmute"],
+                      brief="Temporarily mute a user from the server", disabled=True)
+    @commands.has_permissions(ban_members=True)
+    async def globalmute(self, ctx: discord.ext.commands.Context, target: discord.Member, time: str=None, * reason: str):
         pass
 
 
