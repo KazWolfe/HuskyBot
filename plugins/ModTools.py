@@ -92,7 +92,7 @@ class ModTools:
     async def warn(self, ctx: discord.ext.commands.Context, target: discord.Member, *, reason: str):
         pass
 
-    @commands.command(name="warn")
+    @commands.command(name="mute")
     @commands.has_permissions(ban_members=True)
     async def mute(self, ctx: discord.ext.commands.Context, target: discord.Member, time: str=None, * reason: str):
         pass
