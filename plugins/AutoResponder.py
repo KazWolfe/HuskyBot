@@ -1,15 +1,11 @@
+import logging
+
 import discord
 from discord.ext import commands
 
 from BotCore import BOT_CONFIG
-from BotCore import LOCAL_STORAGE
-
 from WolfBot import WolfUtils
 from WolfBot.WolfEmbed import Colors
-import logging
-
-import git
-import os
 
 LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 
@@ -214,7 +210,7 @@ class AutoResponder:
     async def listResponses(self, ctx: discord.ext.commands.Context):
         responses = BOT_CONFIG.get("responses", {})
 
-        ctx.send(embed=discord.Embed(
+        await ctx.send(embed=discord.Embed(
             title="Response Manager",
             description="The following responses are available:\n```- " + "\n- ".join(responses.keys()),
             color=Colors.SUCCESS
@@ -224,6 +220,12 @@ class AutoResponder:
     @commands.has_permissions(administrator=True)
     async def purge(self, ctx: discord.ext.commands.Context):
         BOT_CONFIG.set('responses', {})
+
+        await ctx.send(embed=discord.Embed(
+            title="Response Manager",
+            description="All responses purged.",
+            color=Colors.SUCCESS
+        ))
 
         
 def setup(bot: discord.ext.commands.Bot):

@@ -1,6 +1,3 @@
-import discord
-
-
 def memberHasRole(member, role_id):
     for r in member.roles:
         if r.id == role_id:
@@ -18,6 +15,26 @@ def memberHasAnyRole(member, roles):
             return True
 
         return False
+
+
+def getFancyGameData(member):
+    fancyGame = ""
+    if member.game is not None:
+        state = {0: "Playing ", 1: "Streaming ", 2: "Listening to "}
+
+        fancyGame += "("
+        if member.game.url is not None:
+            fancyGame += "["
+
+        fancyGame += state[member.game.type]
+        fancyGame += member.game.name
+
+        if member.game.url is not None:
+            fancyGame += "](" + member.game.url + ")"
+
+        fancyGame += ")"
+
+    return fancyGame
 
 
 def tail(f, lines):

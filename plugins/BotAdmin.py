@@ -1,16 +1,15 @@
+import logging
+import os
+import sys
+
 import discord
+import git
 from discord.ext import commands
 
 from BotCore import BOT_CONFIG
 from BotCore import LOCAL_STORAGE
-
 from WolfBot import WolfUtils
 from WolfBot.WolfEmbed import Colors
-import logging
-
-import git
-import os
-import sys
 
 LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 
@@ -59,21 +58,6 @@ class BotAdmin:
             description="The bot configuration has been reloaded.",
             color = Colors.INFO
         ))
-        
-    @admin.command(name="dumpConfig", brief="Dump the bot's active configuration.")
-    async def dumpConfig(self, ctx: discord.ext.commands.Context):
-        config = str(BOT_CONFIG.dump())
-        config = config.replace(BOT_CONFIG.get('apiKey', '<WTF HOW DID 8741234723890423>'), '[EXPUNGED]')
-        
-        await ctx.send(embed=discord.Embed(
-                title="Bot Manager",
-                description="The current bot config is available below.",
-                color = Colors.INFO
-            )
-            .add_field(name="BOT_CONFIG", value="```javascript\n" + config + "```", inline=False)
-            .add_field(name="LOCAL_STORAGE", value="```javascript\n" + str(LOCAL_STORAGE.dump()) + "```", inline=False)
-        )
-        
 
     @admin.command(name="load", brief="Temporarily load a plugin into the bot.")
     async def load(self, ctx: discord.ext.commands.Context, plugin_name: str):

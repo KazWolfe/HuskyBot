@@ -1,16 +1,13 @@
-import discord
-from discord.ext import commands
-
-from BotCore import BOT_CONFIG
-from BotCore import LOCAL_STORAGE
-
-from WolfBot import WolfUtils
-from WolfBot.WolfEmbed import Colors
 import logging
-
-import git
 import os
 import sys
+import time
+
+import discord
+import git
+from discord.ext import commands
+
+from WolfBot.WolfEmbed import Colors
 
 LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 
@@ -51,6 +48,7 @@ class Updater:
         # we're clear to update. let's do it!
         LOG.info("All update sanity checks passed. Pulling...")
         await ctx.bot.change_presence(game=discord.Game(name="Updating...", type=0), status=discord.Status.idle)
+        time.sleep(5)
         remote.pull()
         newSHA = repo.head.object.hexsha
         await ctx.send(embed=discord.Embed(
