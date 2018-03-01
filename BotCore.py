@@ -85,6 +85,9 @@ if __name__ == '__main__':
 
     bot.load_extension('BotAdmin')
 
+    if BOT_CONFIG.get("developerMode", False):
+        bot.load_extension('Debug')
+
     for extension in BOT_CONFIG.get('plugins', []):
         bot.load_extension(extension)
 

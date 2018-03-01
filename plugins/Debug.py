@@ -39,6 +39,29 @@ class Debug:
                        inline=False)
         )
 
+    @debug.command(name="react", brief="Force the bot to react to a specific message.")
+    async def forceReact(self, ctx: discord.ext.commands.Context, channel: discord.TextChannel, message: int
+                         , reaction: str):
+        target_message = await channel.get_message(message)
+
+        await target_message.add_reaction(reaction)
+
+    @debug.command(name="echo", brief="Repeat the message back to the current channel.")
+    @commands.has_permissions(manage_messages=True)
+    async def echo(self, ctx: discord.ext.commands.Context, *, message: str):
+        await ctx.send(message)
+
+    @commands.command(name="secho", brief="Repeat the message back to the current channel, deleting the original.")
+    @commands.has_permissions(administrator=True)
+    async def secho(self, ctx: discord.ext.commands.Context, *, message: str):
+        await ctx.message.delete()
+        await ctx.send(message)
+
+    @commands.command(name="sendmsg", brief="Send a message to another channel.")
+    @commands.has_permissions(administrator=True)
+    async def sendmsg(self, ctx: discord.ext.commands.Context, channel: discord.TextChannel, *, message: str):
+        await channel.send(message)
+
     @commands.command(name="serverinfo", aliases=["sinfo"])
     async def serverInfo(self, ctx: discord.ext.commands.Context):
         guild = ctx.guild
