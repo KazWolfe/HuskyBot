@@ -77,7 +77,7 @@ class AutoResponder:
         new['requiredRoles'] = []
         new['allowedChannels'] = [ctx.channel.id]
 
-        responses[trigger] = new
+        responses[trigger.lower()] = new
         BOT_CONFIG.set('responses', responses)
         await ctx.send(embed=discord.Embed(
             title="Response Manager",
@@ -88,9 +88,8 @@ class AutoResponder:
 
     @responses.command(name="edit")
     @commands.has_permissions(manage_messages=True)
-    async def editResponse(self, ctx:discord.ext.commands.Context, trigger: str, param: str, action: str, value: str):
+    async def editResponse(self, ctx:discord.ext.commands.Context, trigger: str, param: str, action: str, value: str = None):
         responses = BOT_CONFIG.get("responses", {})
-        response = None
 
         try:
             response = responses[trigger.lower()]
@@ -149,7 +148,7 @@ class AutoResponder:
                     ))
                     return
 
-                if (action.lower() == "add"):
+                if action.lower() == "add":
                     response[param].append(t)
                 else:
                     response[param].remove(t)
@@ -209,6 +208,22 @@ class AutoResponder:
             description="The response named `" + trigger + "` has been deleted.",
             color=Colors.SUCCESS
         ))
+
+    @responses.command(name="list")
+    @commands.has_permissions(manage_messages=True)
+    async def listResponses(self, ctx: discord.ext.commands.Context):
+        responses = BOT_CONFIG.get("responses", {})
+
+        ctx.send(embed=discord.Embed(
+            title="Response Manager",
+            description="The following responses are available:\n```- " + "\n- ".join(responses.keys()),
+            color=Colors.SUCCESS
+        ))
+
+    @responses.command(name="deleteAll")
+    @commands.has_permissions(administrator=True)
+    async def purge(self, ctx: discord.ext.commands.Context):
+        BOT_CONFIG.set('responses', {})
 
         
 def setup(bot: discord.ext.commands.Bot):
