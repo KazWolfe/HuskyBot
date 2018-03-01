@@ -20,8 +20,7 @@ class BotAdmin:
 
     async def on_ready(self):
         LOG.info("Enabled plugin!")
-        
-    
+
     @commands.command(name="version", brief="Get version information for the bot")
     async def version_cmd(self, ctx: discord.ext.commands.Context):
         repo = git.Repo(search_parent_directories = True)

@@ -1,13 +1,26 @@
 import discord
 
+
 def memberHasRole(member, role_id):
     for r in member.roles:
         if r.id == role_id:
             return True
             
     return False
-    
-def tail( f, lines ):
+
+
+def memberHasAnyRole(member, roles):
+    if roles is None:
+        return True
+
+    for r in member.roles:
+        if r.id in roles:
+            return True
+
+        return False
+
+
+def tail(f, lines):
     total_lines_wanted = lines
 
     BLOCK_SIZE = 1024
@@ -15,8 +28,7 @@ def tail( f, lines ):
     block_end_byte = f.tell()
     lines_to_go = total_lines_wanted
     block_number = -1
-    blocks = [] # blocks of size BLOCK_SIZE, in reverse order starting
-                # from the end of the file
+    blocks = [] # blocks of size BLOCK_SIZE, in reverse order starting from the end of the file
     while lines_to_go > 0 and block_end_byte > 0:
         if (block_end_byte - BLOCK_SIZE > 0):
             # read the last block we haven't yet read
