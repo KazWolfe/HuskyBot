@@ -54,8 +54,8 @@ class Updater:
         newSHA = repo.head.object.hexsha
         await ctx.send(embed=discord.Embed(
             title="Bot Manager",
-            description="The bot's code has been updated from `" + newSHA[:8] 
-                    + "`to [`" + newSHA[:8] + "`](https://www.github.com/KazWolfe/diy_tech-bot/commit/" + currentSha 
+            description="The bot's code has been updated from `" + currentSha[:8] 
+                    + "`to [`" + newSHA[:8] + "`](https://www.github.com/KazWolfe/diy_tech-bot/commit/" + newSHA
                     + ") Please wait while the bot restarts...",
             color = Colors.SUCCESS
         ))
