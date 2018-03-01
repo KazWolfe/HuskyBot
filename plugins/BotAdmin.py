@@ -33,7 +33,7 @@ class BotAdmin:
                 color = Colors.INFO
             )
             .add_field(name="Authors", value="KazWolfe, Clover", inline=False)
-            .add_field(name="Bot Version", value=sha[-8:], inline=True)
+            .add_field(name="Bot Version", value=sha[:8], inline=True)
             .add_field(name="Library Version", value=discord.__version__, inline=True)
         )
 

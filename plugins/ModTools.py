@@ -37,7 +37,7 @@ class ModTools:
         autobans = BOT_CONFIG.get("autobans", [])
         
         if member.id in autobans:
-            member.ban(reason="User was on autoban list.")
+            await member.ban(reason="User was on autoban list.")
             autobans.remove(member.id)
             BOT_CONFIG.set("autobans", autobans)
             
