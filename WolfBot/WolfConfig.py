@@ -17,6 +17,9 @@ class WolfConfig:
 
     def __setitem__(self, key: str, value):
         self.set(key, value)
+        
+    def dump(self):
+        return self._config
 
     def isPersistent(self):
         return self._path is not None
