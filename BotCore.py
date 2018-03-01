@@ -4,6 +4,7 @@ import os
 import sys
 import logging
 import datetime
+import time
 
 import discord
 from discord.ext import commands
@@ -24,6 +25,7 @@ LOG = logging.getLogger("DiyBot.Core")
 
 @bot.event
 async def on_ready():
+    time.sleep(5)
     botPresence = BOT_CONFIG.get('presence', {"game": "DiyBot", "type": 2, "status": "dnd"})
 
     await bot.change_presence(game=discord.Game(name=botPresence['game'], type=botPresence['type']), status=discord.Status[botPresence['status']])

@@ -186,7 +186,7 @@ class AutoResponder:
 
         await ctx.send(embed=confirmation)
 
-    @responses.command(name="delete", aliases="remove")
+    @responses.command(name="delete", aliases=["remove"])
     @commands.has_permissions(manage_messages=True)
     async def deleteResponse(self, ctx:discord.ext.commands.Context, trigger: str):
         responses = BOT_CONFIG.get("responses", {})
