@@ -24,7 +24,9 @@ LOG = logging.getLogger("DiyBot.Core")
 
 @bot.event
 async def on_ready():
-    await bot.change_presence(game=discord.Game(name="DiyBot", type=2), status=discord.Status.dnd)
+    botPresence = BOT_CONFIG.get('presence', {"game": "DiyBot", "type": 2, "status": "dnd"})
+
+    await bot.change_presence(game=discord.Game(name=botPresence['game'], type=botPresence['type']), status=discord.Status[botPresence['status']])
     LOG.info("DiyBot is online, running discordpy " + discord.__version__)
     
     if not BOT_CONFIG.get("developerMode", False):

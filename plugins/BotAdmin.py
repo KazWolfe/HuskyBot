@@ -33,7 +33,7 @@ class BotAdmin:
                 color = Colors.INFO
             )
             .add_field(name="Authors", value="KazWolfe, Clover", inline=False)
-            .add_field(name="Bot Version", value=sha[:8], inline=True)
+            .add_field(name="Bot Version", value="[`" + sha[:8] + "`](https://www.github.com/KazWolfe/diy_tech-bot/commit/" + sha + ")", inline=True)
             .add_field(name="Library Version", value=discord.__version__, inline=True)
         )
 
@@ -184,6 +184,44 @@ class BotAdmin:
             description="```" + logs + "```",
             color = Colors.SECONDARY
         ))
-
+        
+    @admin.command(name="presence", brief="Set the bot's presence mode.")
+    async def presence(self, ctx: discord.ext.commands.Context, game: str, presenceType: int, status: str):
+        newStatus = None
+    
+        if status.lower() == "invisible" or status.lower() == "offline":
+            await ctx.send(embed=discord.Embed(
+                title="Bot Manager",
+                description="The bot status can not be set to invisible or offline.",
+                color = Colors.DANGER
+            ))
+            return
+            
+        if not 0 <= presenceType <= 2:
+            await ctx.send(embed=discord.Embed(
+                title="Bot Manager",
+                description="The presence type must be **`0`** (\"Playing\"), **`1`** (\"Streaming\"), or **`2`** (\"Listening to\").",
+                color = Colors.DANGER
+            ))
+            return
+            
+        try:
+            newStatus = discord.Status[status.lower()]
+        except KeyError:
+            await ctx.send(embed=discord.Embed(
+                title="Bot Manager",
+                description="Valid values for status are: **`ONLINE`**, **`IDLE`**, **`DND`**.",
+                color = Colors.DANGER
+            ))
+            return
+            
+        BOT_CONFIG.set('presence', {"game": game, "type": presenceType, "status": status})
+        await ctx.bot.change_presence(game=discord.Game(name=game, type=presenceType), status=newStatus)
+        await ctx.send(embed=discord.Embed(
+                title="Bot Manager",
+                description="The bot's presence was updated.",
+                color = Colors.SUCCESS
+            ))
+            
 def setup(bot: discord.ext.commands.Bot):
     bot.add_cog(BotAdmin(bot))
