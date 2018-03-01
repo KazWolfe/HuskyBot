@@ -29,13 +29,13 @@ class Updater:
         
         currentSha = repo.head.object.hexsha
         
-        fetch_info = remotes.fetch('master:master')[0]
-        LOG.info("Got update fetch to " + str(fetch_info)
+        fetch_info = remote.fetch()[0]
+        LOG.info("Got update fetch to " + str(fetch_info))
         
         if (fetch_info.commit.hexsha == currentSha):
             await ctx.send(embed=discord.Embed(
                 title="Bot Manager",
-                description="The bot is already up-to-date at version [`" + currentSha "`](https://www.github.com/KazWolfe/diy_tech-bot/commit/" + currentSha + ")",
+                description="The bot is already up-to-date at version [`" + currentSha[:8] + "`](https://www.github.com/KazWolfe/diy_tech-bot/commit/" + currentSha + ")",
                 color = Colors.INFO
             ))
             return
@@ -51,9 +51,12 @@ class Updater:
         # we're clear to update. let's do it!
         LOG.info("All update sanity checks passed. Pulling...")
         remote.pull()
+        newSHA = repo.head.object.hexsha
         await ctx.send(embed=discord.Embed(
             title="Bot Manager",
-            description="The bot's code has been updated! Please wait while the bot restarts...",
+            description="The bot's code has been updated from `" + newSHA[:8] 
+                    + "`to [`" + newSha[:8] + "`](https://www.github.com/KazWolfe/diy_tech-bot/commit/" + currentSha 
+                    + ") Please wait while the bot restarts...",
             color = Colors.SUCCESS
         ))
         
