@@ -2,7 +2,7 @@ import json
 
 
 class WolfConfig:
-    def __init__(self, path: str):
+    def __init__(self, path: str = None):
         self._config = {}
         self._path = path
 

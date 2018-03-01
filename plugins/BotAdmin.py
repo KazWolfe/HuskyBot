@@ -2,12 +2,16 @@ import discord
 from discord.ext import commands
 
 from BotCore import BOT_CONFIG
+from BotCore import LOCAL_STORAGE
+
+from WolfBot import WolfUtils
 from WolfBot.WolfEmbed import Colors
 import logging
 
 import git
+import os
 
-LOG = logging.getLogger("DiyBot/Plugin/" + __name__)
+LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 
 class BotAdmin:
     def __init__(self, bot: discord.ext.commands.Bot):
@@ -17,7 +21,7 @@ class BotAdmin:
         LOG.info("Enabled plugin!")
         
     
-    @commands.command(name="version")
+    @commands.command(name="version", brief="Get version information for the bot")
     async def version_cmd(self, ctx: discord.ext.commands.Context):
         repo = git.Repo(search_parent_directories = True)
         sha = repo.head.object.hexsha
@@ -33,7 +37,7 @@ class BotAdmin:
             .add_field(name="Library Version", value=discord.__version__, inline=True)
         )
 
-    @commands.group(pass_context=True)
+    @commands.group(pass_context=True, brief="Administrative bot control commands.", hidden=True)
     @commands.has_permissions(administrator=True)
     async def admin(self, ctx: discord.ext.commands.Context):
         if ctx.invoked_subcommand is None:
@@ -44,7 +48,7 @@ class BotAdmin:
             ))
             return
 
-    @admin.command(name="reloadConfig")
+    @admin.command(name="reloadConfig", brief="Reload the bot's configuration files from disk.")
     async def reloadConfig(self, ctx: discord.ext.commands.Context):
         BOT_CONFIG.load()
         LOG.info("Bot configuration reloaded.")
@@ -54,7 +58,7 @@ class BotAdmin:
             color = Colors.INFO
         ))
 
-    @admin.command(name="load")
+    @admin.command(name="load", brief="Temporarily load a plugin into the bot.")
     async def load(self, ctx: discord.ext.commands.Context, plugin_name: str):
         try:
             self.bot.load_extension(plugin_name)
@@ -72,7 +76,7 @@ class BotAdmin:
             color = Colors.INFO
         ))
 
-    @admin.command(name="unload")
+    @admin.command(name="unload", brief="Temporarily unload a plugin from the bot.")
     async def unload(self, ctx: discord.ext.commands.Context, plugin_name: str):
         if plugin_name == "BotAdmin":
             await ctx.send("ERROR: Can not unload BotAdmin! It is marked as a critical module.")
@@ -87,7 +91,7 @@ class BotAdmin:
             color = Colors.INFO
         ))
 
-    @admin.command(name="reload")
+    @admin.command(name="reload", brief="Unload and reload a plugin.")
     async def reload(self, ctx: discord.ext.commands.Context, plugin_name: str):
         self.bot.unload_extension(plugin_name)
         LOG.info("Unloaded plugin %s for reload.", plugin_name)
@@ -107,7 +111,7 @@ class BotAdmin:
             color = Colors.INFO
         ))
 
-    @admin.command(name="enable")
+    @admin.command(name="enable", brief="Enable a plugin to run now and at bot load.")
     async def enable(self, ctx: discord.ext.commands.Context, plugin_name: str):
         config = BOT_CONFIG.get('plugins', [])
 
@@ -135,7 +139,7 @@ class BotAdmin:
             color = Colors.SUCCESS
         ))
 
-    @admin.command(name="disable")
+    @admin.command(name="disable", brief="Disable a plugin from running at bot load. Also stops the plugin.")
     async def disable(self, ctx: discord.ext.commands.Context, plugin_name: str):
         if plugin_name == "BotAdmin":
             await ctx.send("ERROR: Can not disable BotAdmin! It is marked as a critical module.")
@@ -158,7 +162,28 @@ class BotAdmin:
             description="The plugin `" + plugin_name + "` has been disabled and will no longer run automatically.",
             color = Colors.WARNING
         ))
+        
+    @admin.command(name="log", aliases=["logs"], brief="See the bot's current log.")
+    async def log(self, ctx: discord.ext.commands.Context, lines: int = 10):
+        logFile = LOCAL_STORAGE.get('logPath')
+        logs = None
+        
+        if logFile is None:
+            await ctx.send(embed=discord.Embed(
+                title="Bot Manager",
+                description="A log file was expected, but was not found or configured. This suggests a *serious* problem with the bot.",
+                color = Colors.DANGER
+            ))
+            return
+            
+        with open(logFile, 'r') as diskLog:
+            logs = WolfUtils.tail(diskLog, lines)
 
+        await ctx.send(embed=discord.Embed(
+            title="Log Entries from " + logFile,
+            description="```" + logs + "```",
+            color = Colors.SECONDARY
+        ))
 
 def setup(bot: discord.ext.commands.Bot):
     bot.add_cog(BotAdmin(bot))

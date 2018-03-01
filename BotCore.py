@@ -3,6 +3,7 @@
 import os
 import sys
 import logging
+import datetime
 
 import discord
 from discord.ext import commands
@@ -11,11 +12,14 @@ from WolfBot.WolfConfig import WolfConfig
 from WolfBot.WolfEmbed import Colors
 
 BOT_CONFIG = WolfConfig("config/config.json")
+LOCAL_STORAGE = WolfConfig()
+
 bot = commands.Bot(command_prefix=BOT_CONFIG.get('prefix', '/'))
 
+LOCAL_STORAGE.set('logPath', 'logs/log-' + str(datetime.datetime.now()).split('.')[0] + ".log")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-                    datefmt="%Y-%m-%d %H:%M:%S")
-LOG = logging.getLogger("DiyBot/Core")
+                    datefmt="%Y-%m-%d %H:%M:%S", handlers=[logging.FileHandler(LOCAL_STORAGE.get('logPath')),logging.StreamHandler(sys.stdout)])
+LOG = logging.getLogger("DiyBot.Core")
 
 
 @bot.event
@@ -24,11 +28,11 @@ async def on_ready():
     LOG.info("DiyBot is online, running discordpy " + discord.__version__)
     
     if not BOT_CONFIG.get("developerMode", False):
-        if BOT_CONFIG.get("guildId"):
+        if BOT_CONFIG.get("guildId") is None:
            LOG.error("No Guild ID specified! Quitting.")
            exit(127)
 
-        for guild in client.guilds:
+        for guild in bot.guilds:
             if guild.id != BOT_CONFIG.get("guildId"):
                 guild.leave()
                
@@ -51,6 +55,14 @@ async def on_guild_join(guild):
 async def on_command_error(ctx, error):
     if isinstance(error, commands.MissingPermissions):
         return # fail silently on permission error
+        
+    if isinstance(error, commands.CommandNotFound):
+        await ctx.send(embed=discord.Embed(
+            title="Bot Error Handler",
+            description="**The command `" + ctx.message.content.split(' ')[0] + "` does not exist.** See `/help` for valid commands.",
+            color = Colors.DANGER
+        ))
+        return
         
     await ctx.send(embed=discord.Embed(
         title="Bot Error Handler",

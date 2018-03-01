@@ -4,7 +4,7 @@ from discord.ext import commands
 from BotCore import BOT_CONFIG
 import logging
 
-LOG = logging.getLogger("DiyBot/Plugin/" + __name__)
+LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 
 
 class HamRadio:

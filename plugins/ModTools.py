@@ -7,7 +7,7 @@ import WolfBot.WolfUtils as WolfUtils
 
 import logging
 
-LOG = logging.getLogger("DiyBot/Plugin/" + __name__)
+LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 
 class ModTools:
     def __init__(self, bot: discord.ext.commands.Bot):
