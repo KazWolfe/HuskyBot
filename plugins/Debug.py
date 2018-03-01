@@ -51,13 +51,14 @@ class Debug:
     async def echo(self, ctx: discord.ext.commands.Context, *, message: str):
         await ctx.send(message)
 
-    @commands.command(name="secho", brief="Repeat the message back to the current channel, deleting the original.")
+    @commands.command(name="secho", brief="Repeat the message back to the current channel, deleting the original.",
+                      hidden=True)
     @commands.has_permissions(administrator=True)
     async def secho(self, ctx: discord.ext.commands.Context, *, message: str):
         await ctx.message.delete()
         await ctx.send(message)
 
-    @commands.command(name="sendmsg", brief="Send a message to another channel.")
+    @commands.command(name="sendmsg", brief="Send a message to another channel.", hidden=True)
     @commands.has_permissions(administrator=True)
     async def sendmsg(self, ctx: discord.ext.commands.Context, channel: discord.TextChannel, *, message: str):
         await channel.send(message)
@@ -88,7 +89,7 @@ class Debug:
         await ctx.send(embed=server_details)
 
     @commands.command(name="roleinfo", aliases=["rinfo"])
-    async def roleInfo(self, ctx: discord.ext.commands.Context, role: discord.Role):
+    async def roleInfo(self, ctx: discord.ext.commands.Context, *, role: discord.Role):
         role_details = discord.Embed(
             title="Role Information for " + role.name,
             color=role.color
@@ -105,7 +106,7 @@ class Debug:
         await ctx.send(embed=role_details)
 
     @commands.command(name="userinfo", aliases=["uinfo", "memberinfo", "minfo"])
-    async def userInfo(self, ctx: discord.ext.commands.Context, member: discord.Member = None):
+    async def userInfo(self, ctx: discord.ext.commands.Context, *, member: discord.Member = None):
         member = member or ctx.author
         member_details = discord.Embed(
             title="User Information for " + member.name + "#" + member.discriminator,

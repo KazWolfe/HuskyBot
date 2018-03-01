@@ -214,7 +214,7 @@ class AutoResponder:
 
         await ctx.send(embed=discord.Embed(
             title="Response Manager",
-            description="The following responses are available:\n```- " + "\n- ".join(responses.keys()),
+            description="The following responses are available:\n```- " + "\n- ".join(responses.keys() + "```"),
             color=Colors.SUCCESS
         ))
 

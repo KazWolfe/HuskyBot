@@ -8,11 +8,14 @@ from WolfBot.WolfEmbed import Colors
 
 LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 
+# PUNISHMENTS = sqlite3.connect("config/punishments.db")
+
 
 # noinspection PyMethodMayBeStatic
 class ModTools:
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
+#       self.pCursor = PUNISHMENTS.cursor()
 
     async def on_ready(self):
         LOG.info("Enabled plugin!")
@@ -83,6 +86,16 @@ class ModTools:
             description="User `" + str(target) + "` was successfully pardoned.",
             color=Colors.SUCCESS
         ))
+
+    @commands.command(name="warn")
+    @commands.has_permissions(ban_members=True)
+    async def warn(self, ctx: discord.ext.commands.Context, target: discord.Member, *, reason: str):
+        pass
+
+    @commands.command(name="warn")
+    @commands.has_permissions(ban_members=True)
+    async def mute(self, ctx: discord.ext.commands.Context, target: discord.Member, time: str=None, * reason: str):
+        pass
 
 
 def setup(bot: discord.ext.commands.Bot):
