@@ -18,9 +18,6 @@ class Updater:
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
 
-    async def on_ready(self):
-        LOG.info("Enabled plugin!")
-
     @commands.command(name="update", brief="Pull the latest version of code from Git.", hidden=True)
     @commands.has_permissions(administrator=True)
     async def updateBot(self, ctx: discord.ext.commands.Context):
@@ -67,9 +64,10 @@ class Updater:
 
         LOG.info("Bot is going down for update restart!")
         BOT_CONFIG.set("restartNotificationChannel", ctx.channel.id)
-        await ctx.bot.logout()
+        BOT_CONFIG.set("restartReason", "update")
         os.execl(sys.executable, *([sys.executable] + sys.argv))
 
 
 def setup(bot: discord.ext.commands.Bot):
     bot.add_cog(Updater(bot))
+    LOG.info("Loaded plugin!")

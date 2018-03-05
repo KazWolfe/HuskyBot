@@ -15,9 +15,6 @@ class ReactionPromote:
         self.bot = bot
         self.roleRemovalBlacklist = []
 
-    async def on_ready(self):
-        LOG.info("Enabled plugin!")
-
     async def on_raw_reaction_add(self, emoji, message_id, channel_id, user_id):
         promotion_config = BOT_CONFIG.get('promotions', {})
 
@@ -123,3 +120,4 @@ class ReactionPromote:
 
 def setup(bot):
     bot.add_cog(ReactionPromote(bot))
+    LOG.info("Loaded plugin!")

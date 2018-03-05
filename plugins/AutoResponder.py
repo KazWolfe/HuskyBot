@@ -14,9 +14,6 @@ LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 class AutoResponder:
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
-
-    async def on_ready(self):
-        LOG.info("Enabled plugin!")
         
 #   responses: {
 #       "someString": {
@@ -235,3 +232,4 @@ class AutoResponder:
         
 def setup(bot: discord.ext.commands.Bot):
     bot.add_cog(AutoResponder(bot))
+    LOG.info("Loaded plugin!")

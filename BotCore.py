@@ -16,7 +16,17 @@ from WolfBot.WolfEmbed import Colors
 BOT_CONFIG = WolfConfig("config/config.json")
 LOCAL_STORAGE = WolfConfig()
 
-bot = commands.Bot(command_prefix=BOT_CONFIG.get('prefix', '/'))
+# Determine restart reason (pretty mode)
+restart_reason = BOT_CONFIG.get("restartReason", "start")
+start_status = discord.Status.idle
+if restart_reason == "admin":
+    start_game = discord.Game(name="Restarting...", type=0)
+elif restart_reason == "update":
+    start_game = discord.Game(name="Updating...", type=0)
+else:
+    start_game = discord.Game(name="Starting...", type=0)
+
+bot = commands.Bot(command_prefix=BOT_CONFIG.get('prefix', '/'), game=start_game, status=start_status)
 
 LOCAL_STORAGE.set('logPath', 'logs/log-' + str(datetime.datetime.now()).split('.')[0] + ".log")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
@@ -27,6 +37,9 @@ LOG = logging.getLogger("DiyBot.Core")
 
 @bot.event
 async def on_ready():
+    if restart_reason != "start":
+        BOT_CONFIG.delete("restartReason")
+
     time.sleep(5)
     bot_presence = BOT_CONFIG.get('presence', {"game": "DiyBot", "type": 2, "status": "dnd"})
 
@@ -34,6 +47,7 @@ async def on_ready():
                               status=discord.Status[bot_presence['status']])
     LOG.info("DiyBot is online, running discordpy " + discord.__version__)
 
+    # Lock the bot to a single guild
     if not BOT_CONFIG.get("developerMode", False):
         if BOT_CONFIG.get("guildId") is None:
             LOG.error("No Guild ID specified! Quitting.")
@@ -42,6 +56,27 @@ async def on_ready():
         for guild in bot.guilds:
             if guild.id != BOT_CONFIG.get("guildId"):
                 guild.leave()
+
+    # Load plugins
+    sys.path.insert(1, os.getcwd() + "/plugins/")
+
+    bot.load_extension('BotAdmin')
+
+    if BOT_CONFIG.get("developerMode", False):
+        bot.load_extension('Debug')
+
+    for extension in BOT_CONFIG.get('plugins', []):
+        bot.load_extension(extension)
+
+    # Inform on restart
+    if BOT_CONFIG.get("restartNotificationChannel") is not None:
+        channel = bot.get_channel(BOT_CONFIG.get("restartNotificationChannel"))
+        await channel.send(embed=discord.Embed(
+            title="Bot Manager",
+            description="The bot has been successfully restarted, and is now online.",
+            color=Colors.SUCCESS
+        ))
+        BOT_CONFIG.delete("restartNotificationChannel")
 
 
 @bot.event
@@ -121,14 +156,4 @@ async def on_message(message):
 
 
 if __name__ == '__main__':
-    sys.path.insert(1, os.getcwd() + "/plugins/")
-
-    bot.load_extension('BotAdmin')
-
-    if BOT_CONFIG.get("developerMode", False):
-        bot.load_extension('Debug')
-
-    for extension in BOT_CONFIG.get('plugins', []):
-        bot.load_extension(extension)
-
     bot.run(BOT_CONFIG['apiKey'])

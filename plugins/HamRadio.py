@@ -1,8 +1,9 @@
+import logging
+
 import discord
 from discord.ext import commands
 
 from BotCore import BOT_CONFIG
-import logging
 
 LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 
@@ -33,3 +34,4 @@ class HamRadio:
 
 def setup(bot: discord.ext.commands.Bot):
     bot.add_cog(HamRadio(bot))
+    LOG.info("Loaded plugin!")

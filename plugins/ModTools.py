@@ -17,9 +17,6 @@ class ModTools:
         self.bot = bot
 #       self.pCursor = PUNISHMENTS.cursor()
 
-    async def on_ready(self):
-        LOG.info("Enabled plugin!")
-
     # Prevent users from becoming bot role if they're not actually bots.
     async def on_member_update(self, before, after):
         if before.roles == after.roles:
@@ -107,3 +104,4 @@ class ModTools:
 
 def setup(bot: discord.ext.commands.Bot):
     bot.add_cog(ModTools(bot))
+    LOG.info("Loaded plugin!")

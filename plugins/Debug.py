@@ -16,9 +16,6 @@ class Debug:
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
 
-    async def on_ready(self):
-        LOG.info("Enabled plugin!")
-
     @commands.group(name="debug", hidden=True)
     @commands.has_permissions(administrator=True)
     async def debug(self, ctx: discord.ext.commands.Context):
@@ -139,3 +136,4 @@ class Debug:
 
 def setup(bot: discord.ext.commands.Bot):
     bot.add_cog(Debug(bot))
+    LOG.info("Loaded plugin!")
