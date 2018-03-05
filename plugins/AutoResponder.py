@@ -3,8 +3,8 @@ import logging
 import discord
 from discord.ext import commands
 
-from BotCore import BOT_CONFIG
 from WolfBot import WolfUtils
+from WolfBot import WolfConfig
 from WolfBot.WolfEmbed import Colors
 
 LOG = logging.getLogger("DiyBot.Plugin." + __name__)
@@ -29,7 +29,7 @@ class AutoResponder:
         if not WolfUtils.should_process_message(message):
             return
 
-        responses = BOT_CONFIG.get("responses", {})
+        responses = WolfConfig.getConfig().get("responses", {})
 
         for response in responses.keys():
             if not (message.content.lower().startswith(response.lower())):
@@ -60,7 +60,7 @@ class AutoResponder:
     @responses.command(name="add", aliases=["create"], brief="Add a new automatic response")
     @commands.has_permissions(manage_messages=True)
     async def addResponse(self, ctx: discord.ext.commands.Context, trigger: str, response: str):
-        responses = BOT_CONFIG.get("responses", {})
+        responses = WolfConfig.getConfig().get("responses", {})
 
         new = {}
 
@@ -78,7 +78,7 @@ class AutoResponder:
         new['allowedChannels'] = [ctx.channel.id]
 
         responses[trigger.lower()] = new
-        BOT_CONFIG.set('responses', responses)
+        WolfConfig.getConfig().set('responses', responses)
         await ctx.send(embed=discord.Embed(
             title="Response Manager",
             description="Your response has been created. It may be used by users with MANAGE_MESSAGES in the "
@@ -90,7 +90,7 @@ class AutoResponder:
     @commands.has_permissions(manage_messages=True)
     async def editResponse(self, ctx: discord.ext.commands.Context, trigger: str, param: str, action: str,
                            value: str = None):
-        responses = BOT_CONFIG.get("responses", {})
+        responses = WolfConfig.getConfig().get("responses", {})
 
         try:
             response = responses[trigger.lower()]
@@ -170,7 +170,7 @@ class AutoResponder:
             ))
             return
 
-        BOT_CONFIG.set('responses', responses)
+        WolfConfig.getConfig().set('responses', responses)
 
         # Done, let's inform the user
         confirmation = discord.Embed(
@@ -187,7 +187,7 @@ class AutoResponder:
     @responses.command(name="delete", aliases=["remove"], brief="Delete an existing automatic response")
     @commands.has_permissions(manage_messages=True)
     async def deleteResponse(self, ctx: discord.ext.commands.Context, trigger: str):
-        responses = BOT_CONFIG.get("responses", {})
+        responses = WolfConfig.getConfig().get("responses", {})
 
         try:
             responses[trigger.lower()]
@@ -200,7 +200,7 @@ class AutoResponder:
             return
 
         responses.pop(trigger.lower())
-        BOT_CONFIG.set('responses', responses)
+        WolfConfig.getConfig().set('responses', responses)
 
         await ctx.send(embed=discord.Embed(
             title="Response Manager",
@@ -211,7 +211,7 @@ class AutoResponder:
     @responses.command(name="list", brief="List all registered automatic responses")
     @commands.has_permissions(manage_messages=True)
     async def listResponses(self, ctx: discord.ext.commands.Context):
-        responses = BOT_CONFIG.get("responses", {})
+        responses = WolfConfig.getConfig().get("responses", {})
 
         await ctx.send(embed=discord.Embed(
             title="Response Manager",
@@ -222,7 +222,7 @@ class AutoResponder:
     @responses.command(name="deleteAll", hidden=True)
     @commands.has_permissions(administrator=True)
     async def purge(self, ctx: discord.ext.commands.Context):
-        BOT_CONFIG.set('responses', {})
+        WolfConfig.getConfig().set('responses', {})
 
         await ctx.send(embed=discord.Embed(
             title="Response Manager",

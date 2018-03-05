@@ -4,8 +4,8 @@ import re
 import discord
 from discord.ext import commands
 
-from BotCore import BOT_CONFIG
 from WolfBot import WolfUtils
+from WolfBot import WolfConfig
 from WolfBot.WolfEmbed import Colors
 
 LOG = logging.getLogger("DiyBot.Plugin." + __name__)
@@ -24,7 +24,7 @@ class Censor:
         if not WolfUtils.should_process_message(message):
             return
 
-        censor_config = BOT_CONFIG.get("censors", {})
+        censor_config = WolfConfig.getConfig().get("censors", {})
 
         censor_list = censor_config.setdefault("global", []) + censor_config.setdefault(str(message.channel.id), [])
 
@@ -46,7 +46,7 @@ class Censor:
 
     @censor.command(name="list", brief="List all Censors for a channel")
     async def listChannel(self, ctx: commands.Context, channel: discord.TextChannel = None):
-        censor_config = BOT_CONFIG.get("censors", {})
+        censor_config = WolfConfig.getConfig().get("censors", {})
 
         if channel is None:
             channel = ctx.channel
@@ -61,7 +61,7 @@ class Censor:
 
     @censor.command(name="globallist", brief="List all Censors in the global list", aliases=["glist"])
     async def listGlobal(self, ctx: commands.Context):
-        censor_config = BOT_CONFIG.get("censors", {})
+        censor_config = WolfConfig.getConfig().get("censors", {})
         censor_list = censor_config.setdefault("global", [])
 
         await ctx.send(embed=discord.Embed(
@@ -72,7 +72,7 @@ class Censor:
 
     @censor.command(name="add", brief="Add a Censor to a channel")
     async def addChannel(self, ctx: commands.Context, channel: discord.TextChannel, *, censor: str):
-        censor_config = BOT_CONFIG.get("censors", {})
+        censor_config = WolfConfig.getConfig().get("censors", {})
         censor_list = censor_config.setdefault(str(channel.id), [])
 
         if censor in censor_list:
@@ -85,7 +85,7 @@ class Censor:
 
         censor_list.append(censor)
 
-        BOT_CONFIG.set("censors", censor_config)
+        WolfConfig.getConfig().set("censors", censor_config)
 
         await ctx.send(embed=discord.Embed(
             title="Censors for " + channel.name,
@@ -95,7 +95,7 @@ class Censor:
 
     @censor.command(name="globaladd", brief="Add a Censor to the global list", aliases=["gadd"])
     async def addGlobal(self, ctx: commands.Context, *, censor: str):
-        censor_config = BOT_CONFIG.get("censors", {})
+        censor_config = WolfConfig.getConfig().get("censors", {})
         censor_list = censor_config.setdefault('global', [])
 
         if censor in censor_list:
@@ -108,7 +108,7 @@ class Censor:
 
         censor_list.append(censor)
 
-        BOT_CONFIG.set("censors", censor_config)
+        WolfConfig.getConfig().set("censors", censor_config)
 
         await ctx.send(embed=discord.Embed(
             title="Global Censors for " + ctx.guild.name,
@@ -118,7 +118,7 @@ class Censor:
 
     @censor.command(name="remove", brief="Remove a censor from a channel")
     async def removeChannel(self, ctx: commands.Context, channel: discord.TextChannel, *, censor: str):
-        censor_config = BOT_CONFIG.get("censors", {})
+        censor_config = WolfConfig.getConfig().get("censors", {})
         censor_list = censor_config.setdefault(str(channel.id), [])
 
         if censor not in censor_list:
@@ -131,7 +131,7 @@ class Censor:
 
         censor_list.remove(censor)
 
-        BOT_CONFIG.set("censors", censor_config)
+        WolfConfig.getConfig().set("censors", censor_config)
 
         await ctx.send(embed=discord.Embed(
             title="Censors for " + channel.name,
@@ -141,7 +141,7 @@ class Censor:
 
     @censor.command(name="globalremove", brief="Remove a censor from the global list", aliases=["gremove"])
     async def removeGlobal(self, ctx: commands.Context, censor: str):
-        censor_config = BOT_CONFIG.get("censors", {})
+        censor_config = WolfConfig.getConfig().get("censors", {})
         censor_list = censor_config.setdefault('global', [])
 
         if censor not in censor_list:
@@ -154,7 +154,7 @@ class Censor:
 
         censor_list.remove(censor)
 
-        BOT_CONFIG.set("censors", censor_config)
+        WolfConfig.getConfig().set("censors", censor_config)
 
         await ctx.send(embed=discord.Embed(
             title="Censors for " + ctx.guild.name,

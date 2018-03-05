@@ -3,7 +3,7 @@ import logging
 import discord
 from discord.ext import commands
 
-from BotCore import BOT_CONFIG
+from WolfBot import WolfConfig
 from WolfBot.WolfEmbed import Colors
 
 LOG = logging.getLogger("DiyBot.Plugin." + __name__)
@@ -20,7 +20,7 @@ class ModTools:
         if before.roles == after.roles:
             return
 
-        special_roles = BOT_CONFIG.get("specialRoles", {})
+        special_roles = WolfConfig.getConfig().get("specialRoles", {})
 
         if special_roles.get('bots') is None:
             return
@@ -33,17 +33,17 @@ class ModTools:
 
     # AutoBan support
     async def on_member_join(self, member):
-        autobans = BOT_CONFIG.get("autobans", [])
+        autobans = WolfConfig.getConfig().get("autobans", [])
 
         if member.id in autobans:
             await member.ban(reason="User was on autoban list.")
             autobans.remove(member.id)
-            BOT_CONFIG.set("autobans", autobans)
+            WolfConfig.getConfig().set("autobans", autobans)
 
     @commands.command(name="autoban", aliases=["hackban"], brief="Ban a non-member online (preemptive)")
     @commands.has_permissions(ban_members=True)
     async def autoban(self, ctx: discord.ext.commands.Context, target: int):
-        autobans = BOT_CONFIG.get("autobans", [])
+        autobans = WolfConfig.getConfig().get("autobans", [])
 
         if target in autobans:
             await ctx.send(embed=discord.Embed(
@@ -54,7 +54,7 @@ class ModTools:
             return
 
         autobans.append(target)
-        BOT_CONFIG.set("autobans", autobans)
+        WolfConfig.getConfig().set("autobans", autobans)
         await ctx.send(embed=discord.Embed(
             title="Autoban Utility",
             description="User `" + str(target) + "` was successfully autobanned.",
@@ -64,7 +64,7 @@ class ModTools:
     @commands.command(name="autopardon", aliases=["hackpardon"], brief="Pardon a member on the autoban list.")
     @commands.has_permissions(ban_members=True)
     async def autopardon(self, ctx: discord.ext.commands.Context, target: int):
-        autobans = BOT_CONFIG.get("autobans", [])
+        autobans = WolfConfig.getConfig().get("autobans", [])
 
         if target not in autobans:
             await ctx.send(embed=discord.Embed(
@@ -75,7 +75,7 @@ class ModTools:
             return
 
         autobans.remove(target)
-        BOT_CONFIG.set("autobans", autobans)
+        WolfConfig.getConfig().set("autobans", autobans)
         await ctx.send(embed=discord.Embed(
             title="Autoban Utility",
             description="User `" + str(target) + "` was successfully pardoned.",

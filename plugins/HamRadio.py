@@ -3,7 +3,7 @@ import logging
 import discord
 from discord.ext import commands
 
-from BotCore import BOT_CONFIG
+from WolfBot import WolfConfig
 
 LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 
@@ -21,14 +21,14 @@ class HamRadio:
 
     @ham.command(name="register")
     async def registerCallsign(self, ctx: discord.ext.commands.Context, callsign: str):
-        config = BOT_CONFIG.get('ham_radio', {})
+        config = WolfConfig.getConfig().get('ham_radio', {})
 
         if config.get('callsigns') is None:
             config['callsigns'] = {}
 
         config['callsigns'][str(ctx.author.id)] = callsign
 
-        BOT_CONFIG.set('ham_radio', config)
+        WolfConfig.getConfig().set('ham_radio', config)
 
         await ctx.send("Set your callsign to {}!".format(callsign))
 

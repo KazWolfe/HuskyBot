@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b4124e38-fe68-4fea-9f59-ec5df5804160" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" afterPath="$PROJECT_DIR$/.gitignore" />
+    <list default="true" id="b7aa0a34-d8fc-45a1-87f7-ac970a690b6f" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change beforePath="$PROJECT_DIR$/plugins/AutoResponder.py" afterPath="$PROJECT_DIR$/plugins/AutoResponder.py" />
-      <change beforePath="$PROJECT_DIR$/plugins/Debug.py" afterPath="$PROJECT_DIR$/plugins/Debug.py" />
-      <change beforePath="$PROJECT_DIR$/plugins/ModTools.py" afterPath="$PROJECT_DIR$/plugins/ModTools.py" />
+      <change beforePath="$PROJECT_DIR$/plugins/Updater.py" afterPath="$PROJECT_DIR$/plugins/Updater.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -15,83 +12,62 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="DatabaseView">
-    <option name="SHOW_INTERMEDIATE" value="true" />
-    <option name="GROUP_DATA_SOURCES" value="true" />
-    <option name="GROUP_SCHEMA" value="true" />
-    <option name="GROUP_CONTENTS" value="false" />
-    <option name="SORT_POSITIONED" value="false" />
-    <option name="SHOW_TABLE_DETAILS" value="true" />
-    <option name="SHOW_EMPTY_GROUPS" value="false" />
-    <option name="AUTO_SCROLL_FROM_SOURCE" value="false" />
-    <expand />
-    <select />
+  <component name="CoverageDataManager">
+    <SUITE FILE_PATH="coverage/diy_tech_bot$BotCore.coverage" NAME="Run Bot Coverage Results" MODIFIED="1520246455333" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="ModTools.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/plugins/ModTools.py">
+      <file leaf-file-name="BotCore.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/BotCore.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="680">
-              <caret line="20" column="35" lean-forward="false" selection-start-line="20" selection-start-column="35" selection-end-line="20" selection-end-column="35" />
+            <state relative-caret-position="833">
+              <caret line="161" column="8" lean-forward="false" selection-start-line="161" selection-start-column="8" selection-end-line="161" selection-end-column="8" />
               <folding>
-                <marker date="1519944442922" expanded="true" signature="419:3575" ph="CREATE TABLE... warnings" />
+                <element signature="e#24#39#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Debug.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/plugins/Debug.py">
+      <file leaf-file-name="BotAdmin.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/plugins/BotAdmin.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="442">
-              <caret line="21" column="46" lean-forward="true" selection-start-line="21" selection-start-column="46" selection-end-line="21" selection-end-column="46" />
-              <folding />
+            <state relative-caret-position="629">
+              <caret line="226" column="18" lean-forward="true" selection-start-line="226" selection-start-column="18" selection-end-line="226" selection-end-column="18" />
+              <folding>
+                <element signature="e#0#14#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="AutoResponder.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/plugins/AutoResponder.py">
+      <file leaf-file-name="Updater.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/plugins/Updater.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1074">
-              <caret line="216" column="109" lean-forward="false" selection-start-line="216" selection-start-column="109" selection-end-line="216" selection-end-column="109" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="WolfEmbed.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/WolfBot/WolfEmbed.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="238">
-              <caret line="7" column="0" lean-forward="false" selection-start-line="7" selection-start-column="0" selection-end-line="7" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name=".gitignore" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/.gitignore">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="238">
-              <caret line="7" column="4" lean-forward="true" selection-start-line="7" selection-start-column="4" selection-end-line="7" selection-end-column="4" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="config.json" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/config/config.json">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="68">
-              <caret line="2" column="24" lean-forward="false" selection-start-line="2" selection-start-column="24" selection-end-line="2" selection-end-column="24" />
-              <folding />
+            <state relative-caret-position="1411">
+              <caret line="68" column="28" lean-forward="false" selection-start-line="68" selection-start-column="28" selection-end-line="68" selection-end-column="28" />
+              <folding>
+                <element signature="e#0#14#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
     </leaf>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>ctx.bot.log</find>
+      <find>DND</find>
+      <find>BOT_CONFIG</find>
+    </findStrings>
+    <replaceStrings>
+      <replace />
+      <replace>WolfConfig.getConfig()</replace>
+    </replaceStrings>
+    <dirStrings>
+      <dir>$PROJECT_DIR$/plugins</dir>
+    </dirStrings>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -99,17 +75,17 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/plugins/BotAdmin.py" />
-        <option value="$PROJECT_DIR$/WolfBot/WolfUtils.py" />
-        <option value="$PROJECT_DIR$/plugins/Updater.py" />
-        <option value="$PROJECT_DIR$/plugins/ReactionPromote.py" />
-        <option value="$PROJECT_DIR$/BotCore.py" />
-        <option value="$PROJECT_DIR$/plugins/AutoResponder.py" />
-        <option value="$PROJECT_DIR$/.gitignore" />
         <option value="$PROJECT_DIR$/config/config.json" />
-        <option value="$PROJECT_DIR$/WolfBot/WolfEmbed.py" />
-        <option value="$PROJECT_DIR$/plugins/ModTools.py" />
+        <option value="$PROJECT_DIR$/WolfBot/WolfConfig.py" />
+        <option value="$PROJECT_DIR$/plugins/AutoResponder.py" />
+        <option value="$PROJECT_DIR$/plugins/Censor.py" />
         <option value="$PROJECT_DIR$/plugins/Debug.py" />
+        <option value="$PROJECT_DIR$/plugins/HamRadio.py" />
+        <option value="$PROJECT_DIR$/plugins/ModTools.py" />
+        <option value="$PROJECT_DIR$/plugins/ReactionPromote.py" />
+        <option value="$PROJECT_DIR$/plugins/BotAdmin.py" />
+        <option value="$PROJECT_DIR$/BotCore.py" />
+        <option value="$PROJECT_DIR$/plugins/Updater.py" />
       </list>
     </option>
   </component>
@@ -120,29 +96,10 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="129" />
-    <option name="y" value="13" />
-    <option name="width" value="3712" />
-    <option name="height" value="2148" />
-  </component>
-  <component name="ProjectInspectionProfilesVisibleTreeState">
-    <entry key="Project Default">
-      <profile-state>
-        <expanded-state>
-          <State>
-            <id />
-          </State>
-          <State>
-            <id>Python</id>
-          </State>
-        </expanded-state>
-        <selected-state>
-          <State>
-            <id>PyPep8NamingInspection</id>
-          </State>
-        </selected-state>
-      </profile-state>
-    </entry>
+    <option name="x" value="3826" />
+    <option name="y" value="-8" />
+    <option name="width" value="3710" />
+    <option name="height" value="2168" />
   </component>
   <component name="ProjectView">
     <navigator currentView="ProjectPane" proportions="" version="1">
@@ -159,6 +116,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -170,11 +128,6 @@
               <item name="diy_tech-bot" type="b2602c69:ProjectViewProjectNode" />
               <item name="diy_tech-bot" type="462c0819:PsiDirectoryNode" />
               <item name="config" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="diy_tech-bot" type="b2602c69:ProjectViewProjectNode" />
-              <item name="diy_tech-bot" type="462c0819:PsiDirectoryNode" />
-              <item name="logs" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="diy_tech-bot" type="b2602c69:ProjectViewProjectNode" />
@@ -191,12 +144,10 @@
         </subPane>
       </pane>
       <pane id="Scratches" />
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="com.intellij.database.dataSource.DataSourceTemplate" value="SQLite (Xerial)" />
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -210,6 +161,27 @@
       </list>
     </option>
   </component>
+  <component name="RunManager">
+    <configuration name="Run Bot" type="PythonConfigurationType" factoryName="Python">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="diy_tech-bot" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/BotCore.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+    </configuration>
+  </component>
   <component name="ShelveChangesManager" show_recycled="false">
     <option name="remove_strategy" value="false" />
   </component>
@@ -218,60 +190,46 @@
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="b4124e38-fe68-4fea-9f59-ec5df5804160" name="Default" comment="" />
-      <created>1519885207964</created>
+      <changelist id="b7aa0a34-d8fc-45a1-87f7-ac970a690b6f" name="Default" comment="" />
+      <created>1520244012861</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1519885207964</updated>
+      <updated>1520244012861</updated>
     </task>
-    <task id="LOCAL-00001" summary="Added debugger commands&#10;&#10;- Added /rinfo, /uinfo, /sinfo&#10;- Better command handling in a few places&#10;- Fixed AutoResponder bugs">
-      <created>1519889630390</created>
+    <task id="LOCAL-00001" summary="Move config over to singleton (thread-safe)&#10;&#10;- Fix restart logic and *actually* fix the playmode&#10;- Made a whole bunch of code *way* messier&#10;- Move restart logic to BotCore (restarts if a reason exists)">
+      <created>1520246560508</created>
       <option name="number" value="00001" />
       <option name="presentableId" value="LOCAL-00001" />
       <option name="project" value="LOCAL" />
-      <updated>1519889630390</updated>
+      <updated>1520246560508</updated>
     </task>
-    <task id="LOCAL-00002" summary="Code Cleanup&#10;&#10;- Didn't actually make any code changes, but made it pretty&#10;- Will you finally stop complaining, IntelliJ?&#10;- Nobody likes PEP.&#10;- This code is gonna be ugly in 45 minutes.">
-      <created>1519890820843</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1519890820843</updated>
-    </task>
-    <task id="LOCAL-00003" summary="Added more debugging utilities&#10;&#10;- Added forcereact and echo utils.">
-      <created>1519896198289</created>
-      <option name="number" value="00003" />
-      <option name="presentableId" value="LOCAL-00003" />
-      <option name="project" value="LOCAL" />
-      <updated>1519896198289</updated>
-    </task>
-    <option name="localTasksCounter" value="4" />
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="129" y="13" width="3712" height="2148" extended-state="6" />
+    <frame x="3970" y="-8" width="3710" height="2168" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.40266666" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24986523" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24986134" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24986134" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="R Packages" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Docker" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="R Graphics" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="SciView" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
     </layout>
@@ -283,85 +241,132 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Added debugger commands&#10;&#10;- Added /rinfo, /uinfo, /sinfo&#10;- Better command handling in a few places&#10;- Fixed AutoResponder bugs" />
-    <MESSAGE value="Code Cleanup&#10;&#10;- Didn't actually make any code changes, but made it pretty&#10;- Will you finally stop complaining, IntelliJ?&#10;- Nobody likes PEP.&#10;- This code is gonna be ugly in 45 minutes." />
-    <MESSAGE value="Added more debugging utilities&#10;&#10;- Added forcereact and echo utils." />
-    <MESSAGE value="Make debug commands not require &quot;quotes&quot;&#10;&#10;- Fix a bug in AutoResponder&#10;- Begin work on intelligent muting and warning system" />
-    <option name="LAST_COMMIT_MESSAGE" value="Make debug commands not require &quot;quotes&quot;&#10;&#10;- Fix a bug in AutoResponder&#10;- Begin work on intelligent muting and warning system" />
-    <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
+    <MESSAGE value="Move config over to singleton (thread-safe)&#10;&#10;- Fix restart logic and *actually* fix the playmode&#10;- Made a whole bunch of code *way* messier&#10;- Move restart logic to BotCore (restarts if a reason exists)" />
+    <option name="LAST_COMMIT_MESSAGE" value="Move config over to singleton (thread-safe)&#10;&#10;- Fix restart logic and *actually* fix the playmode&#10;- Made a whole bunch of code *way* messier&#10;- Move restart logic to BotCore (restarts if a reason exists)" />
   </component>
   <component name="XDebuggerManager">
-    <breakpoint-manager />
-    <watches-manager />
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/plugins/BotAdmin.py</url>
+          <line>246</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+      <option name="time" value="2" />
+    </breakpoint-manager>
+    <watches-manager>
+      <configuration name="PythonConfigurationType">
+        <watch expression="WolfConfig.getConfig()" language="Python" />
+      </configuration>
+    </watches-manager>
+  </component>
+  <component name="debuggerHistoryManager">
+    <expressions id="watch">
+      <expression>
+        <expression-string>WolfConfig.getConfig()</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>BOT_CONFIG</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+    </expressions>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$USER_HOME$/.local/lib/python3.5/site-packages/discord/role.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3196">
-          <caret line="100" column="27" lean-forward="true" selection-start-line="100" selection-start-column="27" selection-end-line="100" selection-end-column="27" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/.local/lib/python3.5/site-packages/discord/ext/commands/context.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="954">
-          <caret line="85" column="17" lean-forward="true" selection-start-line="85" selection-start-column="17" selection-end-line="85" selection-end-column="17" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/.local/lib/python3.5/site-packages/discord/game.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="938">
-          <caret line="62" column="13" lean-forward="false" selection-start-line="62" selection-start-column="13" selection-end-line="62" selection-end-column="13" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/plugins/BotAdmin.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="478">
-          <caret line="196" column="34" lean-forward="true" selection-start-line="196" selection-start-column="34" selection-end-line="196" selection-end-column="34" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/plugins/Updater.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1938">
-          <caret line="57" column="41" lean-forward="true" selection-start-line="57" selection-start-column="41" selection-end-line="57" selection-end-column="41" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/plugins/HamRadio.py">
+    <entry file="file://$PROJECT_DIR$/config/config.json">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#14#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/logs/log-2018-02-28 23:38:02.log">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/WolfBot/WolfUtils.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1258">
-          <caret line="37" column="0" lean-forward="true" selection-start-line="37" selection-start-column="0" selection-end-line="37" selection-end-column="0" />
+          <caret line="0" column="309" lean-forward="false" selection-start-line="0" selection-start-column="309" selection-end-line="0" selection-end-column="309" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/WolfBot/WolfConfig.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-17">
+          <caret line="38" column="17" lean-forward="false" selection-start-line="38" selection-start-column="17" selection-end-line="38" selection-end-column="17" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/plugins/AutoResponder.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2337">
+          <caret line="172" column="30" lean-forward="false" selection-start-line="172" selection-start-column="30" selection-end-line="172" selection-end-column="30" />
+          <folding>
+            <element signature="e#0#14#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/plugins/Censor.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="238">
+          <caret line="7" column="30" lean-forward="false" selection-start-line="7" selection-start-column="30" selection-end-line="7" selection-end-column="30" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/plugins/Debug.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1428">
+          <caret line="42" column="59" lean-forward="true" selection-start-line="42" selection-start-column="59" selection-end-line="42" selection-end-column="59" />
+          <folding>
+            <element signature="e#0#14#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/plugins/HamRadio.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="170">
+          <caret line="5" column="30" lean-forward="false" selection-start-line="5" selection-start-column="30" selection-end-line="5" selection-end-column="30" />
+          <folding>
+            <element signature="e#0#14#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/plugins/ModTools.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="170">
+          <caret line="5" column="30" lean-forward="false" selection-start-line="5" selection-start-column="30" selection-end-line="5" selection-end-column="30" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/plugins/ReactionPromote.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="170">
+          <caret line="5" column="30" lean-forward="false" selection-start-line="5" selection-start-column="30" selection-end-line="5" selection-end-column="30" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/plugins/ServerLog.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#14#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/WolfBot/WolfUtils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-391">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#17#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/WolfBot/WolfEmbed.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
@@ -371,75 +376,31 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/BotCore.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-95">
-          <caret line="43" column="0" lean-forward="true" selection-start-line="43" selection-start-column="0" selection-end-line="43" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/plugins/ReactionPromote.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1346">
-          <caret line="115" column="0" lean-forward="true" selection-start-line="115" selection-start-column="0" selection-end-line="115" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$APPLICATION_CONFIG_DIR$/consoles/db/bb111caf-4ae4-4c4e-901e-a621b1692f19/console.sql">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/config/config.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="68">
-          <caret line="2" column="24" lean-forward="false" selection-start-line="2" selection-start-column="24" selection-end-line="2" selection-end-column="24" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/.gitignore">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="238">
-          <caret line="7" column="4" lean-forward="true" selection-start-line="7" selection-start-column="4" selection-end-line="7" selection-end-column="4" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/WolfBot/WolfEmbed.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="238">
-          <caret line="7" column="0" lean-forward="false" selection-start-line="7" selection-start-column="0" selection-end-line="7" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/plugins/ModTools.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="680">
-          <caret line="20" column="35" lean-forward="false" selection-start-line="20" selection-start-column="35" selection-end-line="20" selection-end-column="35" />
+        <state relative-caret-position="833">
+          <caret line="161" column="8" lean-forward="false" selection-start-line="161" selection-start-column="8" selection-end-line="161" selection-end-column="8" />
           <folding>
-            <marker date="1519944442922" expanded="true" signature="419:3575" ph="CREATE TABLE... warnings" />
+            <element signature="e#24#39#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/plugins/AutoResponder.py">
+    <entry file="file://$PROJECT_DIR$/plugins/Updater.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1074">
-          <caret line="216" column="109" lean-forward="false" selection-start-line="216" selection-start-column="109" selection-end-line="216" selection-end-column="109" />
-          <folding />
+        <state relative-caret-position="1411">
+          <caret line="68" column="28" lean-forward="false" selection-start-line="68" selection-start-column="28" selection-end-line="68" selection-end-column="28" />
+          <folding>
+            <element signature="e#0#14#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/plugins/Debug.py">
+    <entry file="file://$PROJECT_DIR$/plugins/BotAdmin.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="442">
-          <caret line="21" column="46" lean-forward="true" selection-start-line="21" selection-start-column="46" selection-end-line="21" selection-end-column="46" />
-          <folding />
+        <state relative-caret-position="629">
+          <caret line="226" column="18" lean-forward="true" selection-start-line="226" selection-start-column="18" selection-end-line="226" selection-end-column="18" />
+          <folding>
+            <element signature="e#0#14#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

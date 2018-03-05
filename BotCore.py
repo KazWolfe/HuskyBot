@@ -10,11 +10,11 @@ import discord
 from discord.ext import commands
 
 from WolfBot import WolfUtils
-from WolfBot.WolfConfig import WolfConfig
+from WolfBot import WolfConfig
 from WolfBot.WolfEmbed import Colors
 
-BOT_CONFIG = WolfConfig("config/config.json")
-LOCAL_STORAGE = WolfConfig()
+BOT_CONFIG = WolfConfig.getConfig()
+LOCAL_STORAGE = WolfConfig.getSessionStore()
 
 # Determine restart reason (pretty mode)
 restart_reason = BOT_CONFIG.get("restartReason", "start")
@@ -158,3 +158,8 @@ async def on_message(message):
 
 if __name__ == '__main__':
     bot.run(BOT_CONFIG['apiKey'])
+
+    # Auto restart if a reason is present
+    if BOT_CONFIG.get("restartReason") is not None:
+        print("READY FOR RESTART!")
+        os.execl(sys.executable, *([sys.executable] + sys.argv))

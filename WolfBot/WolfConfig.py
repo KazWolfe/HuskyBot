@@ -1,45 +1,58 @@
 import json
+from threading import Lock
 
 
 class WolfConfig:
     def __init__(self, path: str = None):
         self._config = {}
         self._path = path
+        self._lock = Lock()
 
         if self._path is not None:
             self.load()
 
+        print("Conf init!")
+
     def __len__(self):
-        len(self._config)
+        with self._lock:
+            return len(self._config)
 
     def __getitem__(self, item):
-        return self._config[item]
+        with self._lock:
+            return self._config[item]
 
     def __setitem__(self, key: str, value):
-        self.set(key, value)
+        with self._lock:
+            self.set(key, value)
         
     def dump(self):
-        return self._config
+        with self._lock:
+            return self._config
 
     def isPersistent(self):
-        return self._path is not None
+        with self._lock:
+            return self._path is not None
 
     def get(self, key: str, default=None):
-        try:
-            return self._config[key]
-        except KeyError:
-            return default
+        with self._lock:
+            try:
+                return self._config[key]
+            except KeyError:
+                return default
 
     def exists(self, key: str) -> bool:
-        return not self.get(key) is None
+        with self._lock:
+            return not self.get(key) is None
 
     def set(self, key, value):
-        self._config[key] = value
-        self.save()
+        with self._lock:
+            self._config[key] = value
+            self.save()
 
     def delete(self, key: str) -> None:
-        self._config.pop(key)
-        self.save()
+        with self._lock:
+            self._config.pop(key)
+            self.save()
 
     def load(self) -> None:
         if self._path is None:
@@ -58,3 +71,15 @@ class WolfConfig:
 
         with open('config/config.json', 'w') as f:
             f.write(json.dumps(self._config, sort_keys=True))
+
+
+__BOT_CONFIG = WolfConfig("config/config.json")
+__SESSION_STORAGE = WolfConfig()
+
+
+def getConfig():
+    return __BOT_CONFIG
+
+
+def getSessionStore():
+    return __SESSION_STORAGE

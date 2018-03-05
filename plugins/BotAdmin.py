@@ -6,9 +6,8 @@ import discord
 import git
 from discord.ext import commands
 
-from BotCore import BOT_CONFIG
-from BotCore import LOCAL_STORAGE
 from WolfBot import WolfUtils
+from WolfBot import WolfConfig
 from WolfBot.WolfEmbed import Colors
 
 LOG = logging.getLogger("DiyBot.Plugin." + __name__)
@@ -55,7 +54,7 @@ class BotAdmin:
 
     @admin.command(name="reloadConfig", brief="Reload the bot's configuration files from disk.")
     async def reloadConfig(self, ctx: discord.ext.commands.Context):
-        BOT_CONFIG.load()
+        WolfConfig.getConfig().load()
         LOG.info("Bot configuration reloaded.")
         await ctx.send(embed=discord.Embed(
             title="Bot Manager",
@@ -124,7 +123,7 @@ class BotAdmin:
 
     @admin.command(name="enable", brief="Enable a plugin to run now and at bot load.")
     async def enable(self, ctx: discord.ext.commands.Context, plugin_name: str):
-        config = BOT_CONFIG.get('plugins', [])
+        config = WolfConfig.getConfig().get('plugins', [])
 
         if plugin_name in config:
             await ctx.send("Plugin {} is already enabled.".format(plugin_name))
@@ -144,7 +143,7 @@ class BotAdmin:
         LOG.info("Loaded plugin %s for enable", plugin_name)
 
         config.append(plugin_name)
-        BOT_CONFIG.set('plugins', config)
+        WolfConfig.getConfig().set('plugins', config)
         LOG.info("Enabled plugin %s", plugin_name)
         await ctx.send(embed=discord.Embed(
             title="Plugin Manager",
@@ -159,7 +158,7 @@ class BotAdmin:
             LOG.warning("The BotAdmin module was requested to be disabled.")
             return
 
-        config = BOT_CONFIG.get('plugins', [])
+        config = WolfConfig.getConfig().get('plugins', [])
 
         if plugin_name not in config:
             await ctx.send("Plugin {} is already disabled.".format(plugin_name))
@@ -169,7 +168,7 @@ class BotAdmin:
         LOG.info("Unloaded plugin %s for disable", plugin_name)
 
         config.remove(plugin_name)
-        BOT_CONFIG.set('plugins', config)
+        WolfConfig.getConfig().set('plugins', config)
         LOG.info("Disabled plugin %s", plugin_name)
         await ctx.send(embed=discord.Embed(
             title="Plugin Manager",
@@ -179,7 +178,7 @@ class BotAdmin:
 
     @admin.command(name="log", aliases=["logs"], brief="See the bot's current log.")
     async def log(self, ctx: discord.ext.commands.Context, lines: int = 10):
-        log_file = LOCAL_STORAGE.get('logPath')
+        log_file = WolfConfig.getSessionStore().get('logPath')
 
         if log_file is None:
             await ctx.send(embed=discord.Embed(
@@ -227,7 +226,7 @@ class BotAdmin:
             ))
             return
 
-        BOT_CONFIG.set('presence', {"game": game, "type": presence_type, "status": status})
+        WolfConfig.getConfig().set('presence', {"game": game, "type": presence_type, "status": status.lower()})
         await ctx.bot.change_presence(game=discord.Game(name=game, type=presence_type), status=new_status)
         await ctx.send(embed=discord.Embed(
             title="Bot Manager",
@@ -237,7 +236,7 @@ class BotAdmin:
 
     @admin.command(name="reloadpresence", brief="Reload a Presence from the config file", aliases=["rpresence"])
     async def reloadPresence(self, ctx: discord.ext.commands.Context):
-        bot_presence = BOT_CONFIG.get('presence', {"game": "DiyBot", "type": 2, "status": "dnd"})
+        bot_presence = WolfConfig.getConfig().get('presence', {"game": "DiyBot", "type": 2, "status": "dnd"})
 
         await ctx.bot.change_presence(game=discord.Game(name=bot_presence['game'], type=bot_presence['type']),
                                       status=discord.Status[bot_presence['status']])
@@ -246,10 +245,9 @@ class BotAdmin:
     async def restart(self, ctx: discord.ext.commands.Context):
         await ctx.bot.change_presence(game=discord.Game(name="Restarting...", type=0), status=discord.Status.idle)
         LOG.info("Bot is going down for admin requested restart!")
-        BOT_CONFIG.set("restartNotificationChannel", ctx.channel.id)
-        BOT_CONFIG.set("restartReason", "admin")
-        ctx.bot.logout()
-        os.execl(sys.executable, *([sys.executable] + sys.argv))
+        WolfConfig.getConfig().set("restartNotificationChannel", ctx.channel.id)
+        WolfConfig.getConfig().set("restartReason", "admin")
+        await ctx.bot.logout()
 
 
 def setup(bot: discord.ext.commands.Bot):
