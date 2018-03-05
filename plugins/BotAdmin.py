@@ -208,11 +208,11 @@ class BotAdmin:
             ))
             return
 
-        if not 0 <= presence_type <= 2:
+        if not 0 <= presence_type <= 3:
             await ctx.send(embed=discord.Embed(
                 title="Bot Manager",
                 description="The presence type must be **`0`** (\"Playing\"), **`1`** (\"Streaming\"), "
-                            + "or **`2`** (\"Listening to\").",
+                            + "**`2`** (\"Listening to\"), or **`3`** (\"Watching\").",
                 color=Colors.DANGER
             ))
             return
