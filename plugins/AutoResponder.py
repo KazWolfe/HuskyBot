@@ -4,6 +4,7 @@ import discord
 from discord.ext import commands
 
 from BotCore import BOT_CONFIG
+from BotCore import should_process_message
 from WolfBot import WolfUtils
 from WolfBot.WolfEmbed import Colors
 
@@ -28,6 +29,9 @@ class AutoResponder:
 #   }
 
     async def on_message(self, message: discord.Message):
+        if not should_process_message(message):
+            return
+
         responses = BOT_CONFIG.get("responses", {})
 
         for response in responses.keys():

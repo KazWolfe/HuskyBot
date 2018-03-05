@@ -32,7 +32,7 @@ async def on_ready():
     await bot.change_presence(game=discord.Game(name=bot_presence['game'], type=bot_presence['type']),
                               status=discord.Status[bot_presence['status']])
     LOG.info("DiyBot is online, running discordpy " + discord.__version__)
-    
+
     if not BOT_CONFIG.get("developerMode", False):
         if BOT_CONFIG.get("guildId") is None:
             LOG.error("No Guild ID specified! Quitting.")
@@ -48,37 +48,72 @@ async def on_guild_join(guild):
     if not BOT_CONFIG.get("developerMode", False):
         if guild.id != BOT_CONFIG.get("guildId"):
             guild.leave()
-              
+
 
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.MissingPermissions):
         # fail silently on permission error
         return
-        
-    if isinstance(error, commands.CommandNotFound):
+
+    if isinstance(error, commands.NoPrivateMessage):
         await ctx.send(embed=discord.Embed(
-            title="Bot Error Handler",
+            title="Command Handler",
+            description="**The command `" + ctx.message.content.split(' ')[0]
+                        + "` may not be run in a DM.** See `/help` for valid commands.",
+            color=Colors.DANGER
+        ))
+        LOG.error("Command %s may only be run in a direct message!", ctx.message.content.split(' ')[0])
+        return
+
+    if isinstance(error, commands.CommandNotFound) or isinstance(error, commands.DisabledCommand):
+        await ctx.send(embed=discord.Embed(
+            title="Command Handler",
             description="**The command `" + ctx.message.content.split(' ')[0]
                         + "` does not exist.** See `/help` for valid commands.",
             color=Colors.DANGER
         ))
+        LOG.error("Command %s does not exist to the system, or is disabled.", ctx.message.content.split(' ')[0])
         return
-        
+
+    if isinstance(error, commands.BadArgument):
+        await ctx.send(embed=discord.Embed(
+            title="Command Handler",
+            description="**The command `" + ctx.message.content.split(' ')[0]
+                        + "` could not run, because it's missing arguments.** See `/help "
+                        + ctx.message.content.split(' ')[0] + "` for the arguments required.",
+            color=Colors.DANGER
+        ).add_field(name="Missing Parameter", value="`" + str(error).split(" ")[0] + "`", inline=True))
+        LOG.error("Command %s was called with the wrong parameters.", ctx.message.content.split(' ')[0])
+        return
+
     await ctx.send(embed=discord.Embed(
         title="Bot Error Handler",
         description="The bot has encountered a fatal error running the command given. Logs are below.",
         color=Colors.DANGER
     ).add_field(name="Error Log", value="```" + str(error) + "```", inline=False))
-    
-    
+    LOG.error("Error running command %s: %s", ctx.message.content, error)
+
+
 @bot.event
 async def on_message(message):
-    if message.guild.id in BOT_CONFIG.get("ignoredGuilds", []):
+    if not should_process_message(message):
         return
 
     if message.content.startswith(bot.command_prefix):
+        LOG.info("User %s ran %s", message.author, message.content)
         await bot.process_commands(message)
+
+
+def should_process_message(message):
+    if message.guild.id in BOT_CONFIG.get("ignoredGuilds", []):
+        return False
+
+    if message.author.bot:
+        return False
+
+    return True
+
 
 if __name__ == '__main__':
     sys.path.insert(1, os.getcwd() + "/plugins/")

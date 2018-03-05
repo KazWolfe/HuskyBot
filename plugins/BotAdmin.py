@@ -87,6 +87,7 @@ class BotAdmin:
                             + "error is available:\n ```{}: {}```".format(type(e).__name__, str(e)),
                 color=Colors.DANGER
             ))
+            LOG.error("Could not load plugin %s. Error: %s", plugin_name, e)
             return
         LOG.info("Loaded plugin %s", plugin_name)
         await ctx.send(embed=discord.Embed(
@@ -124,6 +125,7 @@ class BotAdmin:
                             + "error is available:\n ```{}: {}```".format(type(e).__name__, str(e)),
                 color=Colors.DANGER
             ))
+            LOG.error("Could not reload plugin %s. Error: %s", plugin_name, e)
             return
         LOG.info("Reloaded plugin %s", plugin_name)
         await ctx.send(embed=discord.Embed(
@@ -149,6 +151,7 @@ class BotAdmin:
                             + "available:\n ```{}: {}```".format(type(e).__name__, str(e)),
                 color=Colors.DANGER
             ))
+            LOG.error("Could not enable plugin %s. Error: %s", plugin_name, e)
             return
         LOG.info("Loaded plugin %s for enable", plugin_name)
 
@@ -165,6 +168,7 @@ class BotAdmin:
     async def disable(self, ctx: discord.ext.commands.Context, plugin_name: str):
         if plugin_name == "BotAdmin":
             await ctx.send("ERROR: Can not disable BotAdmin! It is marked as a critical module.")
+            LOG.warning("The BotAdmin module was requested to be disabled.")
             return
 
         config = BOT_CONFIG.get('plugins', [])
