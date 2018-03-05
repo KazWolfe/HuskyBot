@@ -100,7 +100,8 @@ class ModTools:
     @commands.command(name="globalmute", aliases=["gmute"],
                       brief="Temporarily mute a user from the server", disabled=True)
     @commands.has_permissions(ban_members=True)
-    async def globalmute(self, ctx: discord.ext.commands.Context, target: discord.Member, time: str=None, * reason: str):
+    async def globalmute(self, ctx: discord.ext.commands.Context, target: discord.Member, time: str=None, *,
+                         reason: str):
         pass
 
 

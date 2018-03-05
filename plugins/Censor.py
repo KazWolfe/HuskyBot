@@ -5,7 +5,7 @@ import discord
 from discord.ext import commands
 
 from BotCore import BOT_CONFIG
-from BotCore import should_process_message
+from WolfBot import WolfUtils
 from WolfBot.WolfEmbed import Colors
 
 LOG = logging.getLogger("DiyBot.Plugin." + __name__)
@@ -23,13 +23,12 @@ class Censor:
         if not isinstance(message.channel, discord.TextChannel):
             return
 
-        if not should_process_message(message):
+        if not WolfUtils.should_process_message(message):
             return
 
         censor_config = BOT_CONFIG.get("censors", {})
 
-        censor_list = censor_config.setdefault("global", []) \
-                      + censor_config.setdefault(str(message.channel.id), [])
+        censor_list = censor_config.setdefault("global", []) + censor_config.setdefault(str(message.channel.id), [])
 
         if any((re.search(censor_term, message.content) is not None) for censor_term in censor_list):
             await message.delete()
@@ -38,6 +37,7 @@ class Censor:
     async def on_message(self, message):
         await self.filter_message(message)
 
+    # noinspection PyUnusedLocal
     async def on_message_edit(self, before, after):
         await self.filter_message(after, "edit")
 
@@ -45,13 +45,6 @@ class Censor:
     @commands.has_permissions(manage_messages=True)
     async def censor(self, ctx: commands.Context):
         pass
-#       await ctx.send(embed=discord.Embed(
-#           title="Censor Manager",
-#           description="There is no command named **`" + ctx.message.content.split(' ')[2] + "`** in Censor. "
-#                       + "Please see `/help censor` for more information.",
-#           color=Colors.DANGER
-#       ))
-#       return
 
     @censor.command(name="list", brief="List all Censors for a channel")
     async def listChannel(self, ctx: commands.Context, channel: discord.TextChannel = None):

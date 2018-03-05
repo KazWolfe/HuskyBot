@@ -248,6 +248,13 @@ class BotAdmin:
             color=Colors.SUCCESS
         ))
 
+    @admin.command(name="reloadpresence", brief="Reload a Presence from the config file", aliases=["rpresence"])
+    async def reloadPresence(self, ctx: discord.ext.commands.Context):
+        bot_presence = BOT_CONFIG.get('presence', {"game": "DiyBot", "type": 2, "status": "dnd"})
+
+        await ctx.bot.change_presence(game=discord.Game(name=bot_presence['game'], type=bot_presence['type']),
+                                      status=discord.Status[bot_presence['status']])
+
     @admin.command(name="restart", brief="Restart the bot.")
     async def restart(self, ctx: discord.ext.commands.Context):
         await ctx.bot.change_presence(game=discord.Game(name="Restarting...", type=0), status=discord.Status.idle)

@@ -9,6 +9,7 @@ import time
 import discord
 from discord.ext import commands
 
+from WolfBot import WolfUtils
 from WolfBot.WolfConfig import WolfConfig
 from WolfBot.WolfEmbed import Colors
 
@@ -97,22 +98,12 @@ async def on_command_error(ctx, error):
 
 @bot.event
 async def on_message(message):
-    if not should_process_message(message):
+    if not WolfUtils.should_process_message(message):
         return
 
     if message.content.startswith(bot.command_prefix):
         LOG.info("User %s ran %s", message.author, message.content)
         await bot.process_commands(message)
-
-
-def should_process_message(message):
-    if message.guild.id in BOT_CONFIG.get("ignoredGuilds", []):
-        return False
-
-    if message.author.bot:
-        return False
-
-    return True
 
 
 if __name__ == '__main__':

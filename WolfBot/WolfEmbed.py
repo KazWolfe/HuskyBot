@@ -5,3 +5,6 @@ class Colors:
     DANGER = 0xDC3545
     WARNING = 0xFFC107
     INFO = 0x17A2B8
+
+    # Shortcuts
+    ERROR = DANGER

@@ -1,3 +1,6 @@
+from BotCore import BOT_CONFIG
+
+
 def memberHasRole(member, role_id):
     for r in member.roles:
         if r.id == role_id:
@@ -62,3 +65,13 @@ def tail(f, lines):
         block_number -= 1
     all_read_text = ''.join(reversed(blocks))
     return '\n'.join(all_read_text.splitlines()[-total_lines_wanted:])
+
+
+def should_process_message(message):
+    if message.guild.id in BOT_CONFIG.get("ignoredGuilds", []):
+        return False
+
+    if message.author.bot:
+        return False
+
+    return True

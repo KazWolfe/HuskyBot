@@ -39,9 +39,10 @@ class Debug:
                        inline=False)
         )
 
+    # noinspection PyUnusedLocal
     @debug.command(name="react", brief="Force the bot to react to a specific message.")
-    async def forceReact(self, ctx: discord.ext.commands.Context, channel: discord.TextChannel, message: int
-                         , reaction: str):
+    async def forceReact(self, ctx: discord.ext.commands.Context, channel: discord.TextChannel, message: int,
+                         reaction: str):
         target_message = await channel.get_message(message)
 
         await target_message.add_reaction(reaction)
@@ -58,6 +59,7 @@ class Debug:
         await ctx.message.delete()
         await ctx.send(message)
 
+    # noinspection PyUnusedLocal
     @commands.command(name="sendmsg", brief="Send a message to another channel.", hidden=True)
     @commands.has_permissions(administrator=True)
     async def sendmsg(self, ctx: discord.ext.commands.Context, channel: discord.TextChannel, *, message: str):
