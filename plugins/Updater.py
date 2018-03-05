@@ -67,6 +67,7 @@ class Updater:
 
         LOG.info("Bot is going down for update restart!")
         BOT_CONFIG.set("restartNotificationChannel", ctx.channel.id)
+        await ctx.bot.logout()
         os.execl(sys.executable, *([sys.executable] + sys.argv))
 
 

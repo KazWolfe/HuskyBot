@@ -260,6 +260,7 @@ class BotAdmin:
         await ctx.bot.change_presence(game=discord.Game(name="Restarting...", type=0), status=discord.Status.idle)
         LOG.info("Bot is going down for admin requested restart!")
         BOT_CONFIG.set("restartNotificationChannel", ctx.channel.id)
+        await ctx.bot.logout()
         os.execl(sys.executable, *([sys.executable] + sys.argv))
 
 

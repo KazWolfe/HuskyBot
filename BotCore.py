@@ -55,6 +55,8 @@ async def on_guild_join(guild):
 async def on_command_error(ctx, error):
     if isinstance(error, commands.MissingPermissions):
         # fail silently on permission error
+        LOG.error("Encountered permission error when attempting to run command %s: %s",
+                  ctx.message.content.split(' ')[0], str(error))
         return
 
     if isinstance(error, commands.NoPrivateMessage):
@@ -77,7 +79,7 @@ async def on_command_error(ctx, error):
         LOG.error("Command %s does not exist to the system, or is disabled.", ctx.message.content.split(' ')[0])
         return
 
-    if isinstance(error, commands.BadArgument):
+    if isinstance(error, commands.MissingRequiredArgument):
         await ctx.send(embed=discord.Embed(
             title="Command Handler",
             description="**The command `" + ctx.message.content.split(' ')[0]
@@ -88,6 +90,18 @@ async def on_command_error(ctx, error):
         LOG.error("Command %s was called with the wrong parameters.", ctx.message.content.split(' ')[0])
         return
 
+    if isinstance(error, commands.BadArgument):
+        await ctx.send(embed=discord.Embed(
+            title="Command Handler",
+            description="**The command `" + ctx.message.content.split(' ')[0]
+                        + "` could not run, because it failed to parse the arguments given.** See `/help "
+                        + ctx.message.content.split(' ')[0] + "` and the error below to fix this issue.",
+            color=Colors.DANGER
+        ).add_field(name="Error Log", value="```" + str(error) + "```", inline=False))
+        LOG.error("Command %s was unable to parse arguments: %s.", ctx.message.content.split(' ')[0], str(error))
+        return
+
+    # Handle all other errors
     await ctx.send(embed=discord.Embed(
         title="Bot Error Handler",
         description="The bot has encountered a fatal error running the command given. Logs are below.",
