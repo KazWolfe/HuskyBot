@@ -11,6 +11,7 @@ LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 class HamRadio:
     def __init__(self, bot):
         self.bot = bot
+        LOG.info("Loaded plugin!")
 
     @commands.group(pass_context=True)
     async def ham(self, ctx: discord.ext.commands.Context):
@@ -34,4 +35,3 @@ class HamRadio:
 
 def setup(bot: discord.ext.commands.Bot):
     bot.add_cog(HamRadio(bot))
-    LOG.info("Loaded plugin!")

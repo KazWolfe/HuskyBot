@@ -17,14 +17,15 @@ LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 class Updater:
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
+        self.repo = git.Repo(search_parent_directories=True)
+        LOG.info("Loaded plugin!")
 
     @commands.command(name="update", brief="Pull the latest version of code from Git.", hidden=True)
     @commands.has_permissions(administrator=True)
     async def updateBot(self, ctx: discord.ext.commands.Context):
-        repo = git.Repo(search_parent_directories=True)
-        remote = repo.remotes.origin
+        remote = self.repo.remotes.origin
 
-        current_sha = repo.head.object.hexsha
+        current_sha = self.repo.head.object.hexsha
 
         fetch_info = remote.fetch()[0]
         LOG.info("Got update fetch to " + str(fetch_info))
@@ -53,7 +54,7 @@ class Updater:
         await ctx.bot.change_presence(game=discord.Game(name="Updating...", type=0), status=discord.Status.idle)
         time.sleep(5)
         remote.pull()
-        new_sha = repo.head.object.hexsha
+        new_sha = self.repo.head.object.hexsha
         await ctx.send(embed=discord.Embed(
             title="Bot Manager",
             description="The bot's code has been updated from `" + current_sha[:8]
@@ -65,9 +66,9 @@ class Updater:
         LOG.info("Bot is going down for update restart!")
         BOT_CONFIG.set("restartNotificationChannel", ctx.channel.id)
         BOT_CONFIG.set("restartReason", "update")
+        ctx.bot.logout()
         os.execl(sys.executable, *([sys.executable] + sys.argv))
 
 
 def setup(bot: discord.ext.commands.Bot):
     bot.add_cog(Updater(bot))
-    LOG.info("Loaded plugin!")

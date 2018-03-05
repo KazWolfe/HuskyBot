@@ -18,6 +18,7 @@ LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 class BotAdmin:
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
+        LOG.info("Loaded plugin!")
 
     @commands.command(name="version", brief="Get version information for the bot")
     async def version_cmd(self, ctx: discord.ext.commands.Context):
@@ -189,8 +190,7 @@ class BotAdmin:
             ))
             return
 
-        with open(log_file, 'r') as diskLog:
-            logs = WolfUtils.tail(diskLog, lines)
+        logs = WolfUtils.tail(log_file, lines)
 
         await ctx.send(embed=discord.Embed(
             title="Log Entries from " + log_file,
@@ -248,6 +248,7 @@ class BotAdmin:
         LOG.info("Bot is going down for admin requested restart!")
         BOT_CONFIG.set("restartNotificationChannel", ctx.channel.id)
         BOT_CONFIG.set("restartReason", "admin")
+        ctx.bot.logout()
         os.execl(sys.executable, *([sys.executable] + sys.argv))
 
 

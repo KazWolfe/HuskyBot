@@ -15,6 +15,7 @@ LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 class Debug:
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
+        LOG.info("Loaded plugin!")
 
     @commands.group(name="debug", hidden=True)
     @commands.has_permissions(administrator=True)
@@ -136,4 +137,3 @@ class Debug:
 
 def setup(bot: discord.ext.commands.Bot):
     bot.add_cog(Debug(bot))
-    LOG.info("Loaded plugin!")

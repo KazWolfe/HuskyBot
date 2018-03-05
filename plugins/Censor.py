@@ -15,6 +15,7 @@ LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 class Censor:
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
+        LOG.info("Loaded plugin!")
 
     async def filter_message(self, message: discord.Message, context: str = "new_message"):
         if not isinstance(message.channel, discord.TextChannel):
@@ -164,4 +165,3 @@ class Censor:
 
 def setup(bot: discord.ext.commands.Bot):
     bot.add_cog(Censor(bot))
-    LOG.info("Loaded plugin!")

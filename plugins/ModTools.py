@@ -8,14 +8,12 @@ from WolfBot.WolfEmbed import Colors
 
 LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 
-# PUNISHMENTS = sqlite3.connect("config/punishments.db")
-
 
 # noinspection PyMethodMayBeStatic
 class ModTools:
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
-#       self.pCursor = PUNISHMENTS.cursor()
+        LOG.info("Loaded plugin!")
 
     # Prevent users from becoming bot role if they're not actually bots.
     async def on_member_update(self, before, after):
@@ -104,4 +102,3 @@ class ModTools:
 
 def setup(bot: discord.ext.commands.Bot):
     bot.add_cog(ModTools(bot))
-    LOG.info("Loaded plugin!")

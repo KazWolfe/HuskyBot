@@ -14,15 +14,16 @@ LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 class AutoResponder:
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
-        
-#   responses: {
-#       "someString": {
-#           "requiredRoles": [],             // Any on the list, *or* MANAGE_MESSAGES
-#           "allowedChannels": [],           // If none, global.
-#           "isEmbed": False                 // Determine whether to treat as embed or whatever
-#           "response": "my response"
-#       }
-#   }
+        LOG.info("Loaded plugin!")
+
+    #   responses: {
+    #       "someString": {
+    #           "requiredRoles": [],             // Any on the list, *or* MANAGE_MESSAGES
+    #           "allowedChannels": [],           // If none, global.
+    #           "isEmbed": False                 // Determine whether to treat as embed or whatever
+    #           "response": "my response"
+    #       }
+    #   }
 
     async def on_message(self, message: discord.Message):
         if not WolfUtils.should_process_message(message):
@@ -232,4 +233,3 @@ class AutoResponder:
         
 def setup(bot: discord.ext.commands.Bot):
     bot.add_cog(AutoResponder(bot))
-    LOG.info("Loaded plugin!")
