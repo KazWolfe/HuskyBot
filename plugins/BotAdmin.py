@@ -88,6 +88,9 @@ class BotAdmin:
         if plugin_name == "BotAdmin":
             await ctx.send("ERROR: Can not unload BotAdmin! It is marked as a critical module.")
             return
+            
+        if plugin_name == "Anime":
+            await ctx.send("ERROR: Can not unload Anime! It's a critical part of my life, and I'd be nothing without it.")
 
         """Unloads an extension."""
         self.bot.unload_extension(plugin_name)
