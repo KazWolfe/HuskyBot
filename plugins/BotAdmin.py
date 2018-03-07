@@ -1,6 +1,7 @@
 import logging
 import os
 import sys
+import asyncio
 
 import discord
 import git
@@ -90,10 +91,14 @@ class BotAdmin:
             return
             
         if plugin_name == "Anime":
+            await ctx.channel.trigger_typing()
+            await asyncio.sleep(4)
             await ctx.send("ERROR: Can not unload Anime! It's a critical part of my life, and I'd be nothing without it.")
+            await ctx.channel.trigger_typing()
+            await asyncio.sleep(3)
             await ctx.send("And no, it's not \"just a phase,\" Dad! And yes, it's more than \"just a cartoon.\"")
             return
-
+            
         """Unloads an extension."""
         self.bot.unload_extension(plugin_name)
         LOG.info("Unloaded plugin %s", plugin_name)
@@ -161,6 +166,15 @@ class BotAdmin:
         if plugin_name == "BotAdmin":
             await ctx.send("ERROR: Can not disable BotAdmin! It is marked as a critical module.")
             LOG.warning("The BotAdmin module was requested to be disabled.")
+            return
+            
+        if plugin_name == "Anime":
+            await ctx.channel.trigger_typing()
+            await asyncio.sleep(4)
+            await ctx.send("ERROR: Can not unload Anime! It's a critical part of my life, and I'd be nothing without it.")
+            await ctx.channel.trigger_typing()
+            await asyncio.sleep(3)
+            await ctx.send("And no, it's not \"just a phase,\" Dad! And yes, it's more than \"just a cartoon.\"")
             return
 
         config = WolfConfig.getConfig().get('plugins', [])
@@ -261,3 +275,4 @@ class BotAdmin:
 
 def setup(bot: discord.ext.commands.Bot):
     bot.add_cog(BotAdmin(bot))
+

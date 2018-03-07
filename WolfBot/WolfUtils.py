@@ -19,7 +19,7 @@ def memberHasAnyRole(member, roles):
         if r.id in roles:
             return True
 
-        return False
+    return False
 
 
 def getFancyGameData(member):

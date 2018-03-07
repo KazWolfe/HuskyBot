@@ -81,8 +81,8 @@ class AutoResponder:
         WolfConfig.getConfig().set('responses', responses)
         await ctx.send(embed=discord.Embed(
             title="Response Manager",
-            description="Your response has been created. It may be used by users with MANAGE_MESSAGES in the "
-                        + "current channel. To change this, use `/responses editResponse`",
+            description="Your response has been created. It may be used by users with `MANAGE_MESSAGES` in the "
+                        + "current channel. To change this, use `/responses edit`",
             color=Colors.SUCCESS
         ))
 
@@ -176,7 +176,7 @@ class AutoResponder:
         confirmation = discord.Embed(
             title="Response Manager",
             description="The response for `" + trigger + "` has been updated.",
-            color=Colors.DANGER
+            color=Colors.SUCCESS
         )
 
         for k in response.keys():
