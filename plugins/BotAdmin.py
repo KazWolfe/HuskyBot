@@ -91,6 +91,8 @@ class BotAdmin:
             
         if plugin_name == "Anime":
             await ctx.send("ERROR: Can not unload Anime! It's a critical part of my life, and I'd be nothing without it.")
+            await ctx.send("And no, it's not \"just a phase,\" Dad! And yes, it's more than \"just a cartoon.\")
+            return
 
         """Unloads an extension."""
         self.bot.unload_extension(plugin_name)
