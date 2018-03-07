@@ -27,6 +27,9 @@ class Censor:
         censor_config = WolfConfig.getConfig().get("censors", {})
 
         censor_list = censor_config.setdefault("global", []) + censor_config.setdefault(str(message.channel.id), [])
+        
+        if (message.author.permissions_in(message.channel).manage_messages):
+            return
 
         if any((re.search(censor_term, message.content) is not None) for censor_term in censor_list):
             await message.delete()
