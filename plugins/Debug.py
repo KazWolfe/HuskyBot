@@ -68,7 +68,7 @@ class Debug:
 
         server_details = discord.Embed(
             title="Server Information for " + guild.name,
-            color=Colors.SECONDARY
+            color=guild.owner.color
         )
 
         server_details.set_thumbnail(url=guild.icon_url)

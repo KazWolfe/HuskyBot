@@ -198,7 +198,9 @@ class BotAdmin:
         ))
 
     @admin.command(name="presence", brief="Set the bot's presence mode.")
-    async def presence(self, ctx: discord.ext.commands.Context, game: str, presence_type: int, status: str):
+    async def presence(self, ctx: discord.ext.commands.Context, presence_type: str, game: str, status: str):
+        presence_map = {"playing": 0, "streaming": 1, "listening": 2, "watching": 3}
+
         if status.lower() == "invisible" or status.lower() == "offline":
             await ctx.send(embed=discord.Embed(
                 title="Bot Manager",
@@ -206,12 +208,14 @@ class BotAdmin:
                 color=Colors.DANGER
             ))
             return
-
-        if not 0 <= presence_type <= 3:
+            
+        try:
+            presence_type = presence_map[presence_type.lower()]
+        except ValueError:
             await ctx.send(embed=discord.Embed(
                 title="Bot Manager",
-                description="The presence type must be **`0`** (\"Playing\"), **`1`** (\"Streaming\"), "
-                            + "**`2`** (\"Listening to\"), or **`3`** (\"Watching\").",
+                description="The presence type must be **`playing`**, **`streaming`**, "
+                            + "**`listening`**, or **`watching`**.",
                 color=Colors.DANGER
             ))
             return
