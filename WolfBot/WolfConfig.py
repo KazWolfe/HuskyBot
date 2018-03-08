@@ -11,8 +11,6 @@ class WolfConfig:
         if self._path is not None:
             self.load()
 
-        print("Conf init!")
-
     def __len__(self):
         with self._lock:
             return len(self._config)
@@ -24,7 +22,7 @@ class WolfConfig:
     def __setitem__(self, key: str, value):
         with self._lock:
             self.set(key, value)
-        
+
     def dump(self):
         with self._lock:
             return self._config

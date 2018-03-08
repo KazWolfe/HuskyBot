@@ -26,15 +26,18 @@ class Debug:
         config = str(WolfConfig.getConfig().dump())
         config = config.replace(WolfConfig.getConfig().get('apiKey', '<WTF HOW DID 8741234723890423>'), '[EXPUNGED]')
 
-        await ctx.send(embed=discord.Embed(
-                title="Bot Manager",
-                description="The current bot config is available below.",
-                color=Colors.INFO
-            )
-            .add_field(name="WolfConfig.getConfig()", value="```javascript\n" + config + "```", inline=False)
-            .add_field(name="LOCAL_STORAGE", value="```javascript\n" + str(WolfConfig.getSessionStore().dump()) + "```",
-                       inline=False)
+        embed = discord.Embed(
+            title="Bot Manager",
+            description="The current bot config is available below.",
+            color=Colors.INFO
         )
+
+        embed.add_field(name="WolfConfig.getConfig()", value="```javascript\n" + config + "```", inline=False)
+        embed.add_field(name="LOCAL_STORAGE",
+                        value="```javascript\n" + str(WolfConfig.getSessionStore().dump()) + "```",
+                        inline=False)
+
+        await ctx.send(embed=embed)
 
     # noinspection PyUnusedLocal
     @debug.command(name="react", brief="Force the bot to react to a specific message.")
@@ -95,7 +98,12 @@ class Debug:
         )
 
         role_details.add_field(name="Role ID", value=role.id, inline=True)
-        role_details.add_field(name="Color", value=str(hex(role.color.value)).replace("0x", "#"), inline=True)
+
+        if role.color.value == 0:
+            role_details.add_field(name="Color", value="None", inline=True)
+        else:
+            role_details.add_field(name="Color", value=str(hex(role.color.value)).replace("0x", "#"), inline=True)
+
         role_details.add_field(name="Hoisted", value=role.hoist, inline=True)
         role_details.add_field(name="Position", value=role.position, inline=True)
         role_details.add_field(name="Managed Role", value=role.managed, inline=True)

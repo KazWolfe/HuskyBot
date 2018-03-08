@@ -74,7 +74,7 @@ class AutoResponder:
 
         new['isEmbed'] = False
         new['response'] = response
-        new['requiredRoles'] = [] # emptyset = MANAGE_MESSAGES only
+        new['requiredRoles'] = []  # emptyset = MANAGE_MESSAGES only
         new['allowedChannels'] = [ctx.channel.id]
 
         responses[trigger.lower()] = new
@@ -230,6 +230,6 @@ class AutoResponder:
             color=Colors.SUCCESS
         ))
 
-        
+
 def setup(bot: discord.ext.commands.Bot):
     bot.add_cog(AutoResponder(bot))

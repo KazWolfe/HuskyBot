@@ -25,7 +25,7 @@ def memberHasAnyRole(member, roles):
 def getFancyGameData(member):
     fancy_game = ""
     if member.game is not None:
-        state = {0: "Playing ", 1: "Streaming ", 2: "Listening to "}
+        state = {0: "Playing ", 1: "Streaming ", 2: "Listening to ", 3: "Watching "}
 
         fancy_game += "("
         if member.game.url is not None:
@@ -43,7 +43,7 @@ def getFancyGameData(member):
 
 
 def tail(filename, n):
-    p=subprocess.Popen(['tail', '-n', str(n), filename], stdout=subprocess.PIPE)
+    p = subprocess.Popen(['tail', '-n', str(n), filename], stdout=subprocess.PIPE)
     soutput, sinput = p.communicate()
     return soutput.decode('utf-8')
 

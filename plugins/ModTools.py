@@ -89,15 +89,29 @@ class ModTools:
 
     @commands.command(name="mute", brief="Temporarily mute a user from the current channel", disabled=True)
     @commands.has_permissions(manage_messages=True)
-    async def mute(self, ctx: discord.ext.commands.Context, target: discord.Member, time: str=None, * reason: str):
+    async def mute(self, ctx: discord.ext.commands.Context, target: discord.Member, time: str = None, *, reason: str):
         pass
 
     @commands.command(name="globalmute", aliases=["gmute"],
                       brief="Temporarily mute a user from the server", disabled=True)
     @commands.has_permissions(ban_members=True)
-    async def globalmute(self, ctx: discord.ext.commands.Context, target: discord.Member, time: str=None, *,
+    async def globalmute(self, ctx: discord.ext.commands.Context, target: discord.Member, time: str = None, *,
                          reason: str):
         pass
+
+    @commands.command(name="roleping", brief="Ping all users with a certain role")
+    @commands.has_permissions(manage_roles=True)
+    async def roleping(self, ctx: commands.Context, target: discord.Role, *, message: str):
+        is_role_mentionable = target.mentionable
+
+        if not is_role_mentionable:
+            await target.edit(reason="Role Ping requested by " + str(ctx.message.author), mentionable=True)
+
+        await ctx.send(target.mention + " <" + ctx.message.author.display_name + "> " + message)
+
+        if not is_role_mentionable:
+            await target.edit(reason="Role Ping requested by " + str(ctx.message.author)
+                                     + " completed", mentionable=False)
 
 
 def setup(bot: discord.ext.commands.Bot):

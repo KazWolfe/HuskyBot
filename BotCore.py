@@ -42,7 +42,6 @@ async def on_ready():
     if restart_reason != "start":
         BOT_CONFIG.delete("restartReason")
 
-    time.sleep(5)
     bot_presence = BOT_CONFIG.get('presence', {"game": "DiyBot", "type": 2, "status": "dnd"})
 
     await bot.change_presence(game=discord.Game(name=bot_presence['game'], type=bot_presence['type']),
@@ -93,7 +92,12 @@ async def on_command_error(ctx, error):
     command_name = ctx.message.content.split(' ')[0].replace('/', '')
 
     if isinstance(error, commands.MissingPermissions):
-        # fail silently on permission error
+        await ctx.send(embed=discord.Embed(
+            title="Command Handler",
+            description="**The command `/" + command_name
+                        + "` does not exist.** See `/help` for valid commands.",
+            color=Colors.DANGER
+        ))
         LOG.error("Encountered permission error when attempting to run command %s: %s", command_name, str(error))
         return
 

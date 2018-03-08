@@ -1,6 +1,4 @@
 import logging
-import os
-import sys
 import asyncio
 
 import discord
@@ -18,6 +16,7 @@ LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 class BotAdmin:
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
+        self._debugmode = WolfConfig.getConfig().get("developerMode", False)
         LOG.info("Loaded plugin!")
 
     @commands.command(name="version", brief="Get version information for the bot")
@@ -25,22 +24,24 @@ class BotAdmin:
         repo = git.Repo(search_parent_directories=True)
         sha = repo.head.object.hexsha
 
-        await ctx.send(embed=discord.Embed(
-            title="DiyBot",
+        embed = discord.Embed(
+            title="DiyBot" + " [DEBUG MODE]" if self._debugmode else "",
             description="This is DIYBot, a fork of the WolfBot core Discord bot platform. It is responsible for "
                         "managing and assisting the moderators on the DIY Tech subreddit.",
             color=Colors.INFO
         )
-                       .add_field(name="Authors", value="KazWolfe, Clover", inline=False)
-                       .add_field(name="Bot Version", value="[`" + sha[:8]
-                                                            + "`](https://www.github.com/KazWolfe/diy_tech-bot/commit/"
-                                                            + sha + ")", inline=True)
-                       .add_field(name="Library Version", value=discord.__version__, inline=True)
-                       .set_thumbnail(url="https://cdn.discordapp.com/avatars/" + str(ctx.bot.user.id) + "/"
-                                          + str(ctx.bot.user.avatar) + ".png")
-                       .set_footer(text="MIT License, © 2018 KazWolfe",
-                                   icon_url="https://avatars3.githubusercontent.com/u/5192145")
-                       )
+
+        embed.add_field(name="Authors", value="KazWolfe, Clover", inline=False)
+        embed.add_field(name="Bot Version", value="[`" + sha[:8]
+                                                  + "`](https://www.github.com/KazWolfe/diy_tech-bot/commit/"
+                                                  + sha + ")", inline=True)
+        embed.add_field(name="Library Version", value=discord.__version__, inline=True)
+        embed.set_thumbnail(url="https://cdn.discordapp.com/avatars/" + str(ctx.bot.user.id) + "/"
+                                + str(ctx.bot.user.avatar) + ".png")
+        embed.set_footer(text="MIT License, © 2018 KazWolfe",
+                         icon_url="https://avatars3.githubusercontent.com/u/5192145")
+
+        await ctx.send(embed=embed)
 
     @commands.group(pass_context=True, brief="Administrative bot control commands.", hidden=True)
     @commands.has_permissions(administrator=True)
@@ -65,6 +66,16 @@ class BotAdmin:
 
     @admin.command(name="load", brief="Temporarily load a plugin into the bot.")
     async def load(self, ctx: discord.ext.commands.Context, plugin_name: str):
+        if plugin_name in ctx.bot.cogs.keys():
+            await ctx.send(embed=discord.Embed(
+                title="Plugin Manager",
+                description="The plugin `" + plugin_name
+                            + "` could not be loaded, as it is already loaded.",
+                color=Colors.WARNING
+            ))
+            LOG.warning("Attempted to unload already-unloaded plugin %s", plugin_name)
+            return
+
         try:
             self.bot.load_extension(plugin_name)
         except (AttributeError, ImportError) as e:
@@ -77,6 +88,7 @@ class BotAdmin:
             ))
             LOG.error("Could not load plugin %s. Error: %s", plugin_name, e)
             return
+
         LOG.info("Loaded plugin %s", plugin_name)
         await ctx.send(embed=discord.Embed(
             title="Plugin Manager",
@@ -87,18 +99,44 @@ class BotAdmin:
     @admin.command(name="unload", brief="Temporarily unload a plugin from the bot.")
     async def unload(self, ctx: discord.ext.commands.Context, plugin_name: str):
         if plugin_name == "BotAdmin":
-            await ctx.send("ERROR: Can not unload BotAdmin! It is marked as a critical module.")
+            await ctx.send(embed=discord.Embed(
+                title="Plugin Manager",
+                description="The plugin `" + plugin_name
+                            + "` could not be unloaded, as it is a critical module. ",
+                color=Colors.DANGER
+            ))
+            LOG.warning("A request was made to unload BotAdmin. Blocked.")
             return
-            
+
+        if plugin_name == "Debug" and self._debugmode:
+            await ctx.send(embed=discord.Embed(
+                title="Plugin Manager",
+                description="The `Debug` plugin may not be unloaded while Developer Mode is enabled."
+                            "\nPlease disable Developer Mode first.",
+                color=Colors.DANGER
+            ))
+            LOG.warning("A request was made to unload Debug while in DevMode. Blocked.")
+            return
+
         if plugin_name == "Anime":
             await ctx.channel.trigger_typing()
             await asyncio.sleep(4)
-            await ctx.send("ERROR: Can not unload Anime! It's a critical part of my life, and I'd be nothing without it.")
+            await ctx.send("I can't unload Anime! It's a critical part of my life, and I'd be nothing without it.")
             await ctx.channel.trigger_typing()
             await asyncio.sleep(3)
             await ctx.send("And no, it's not \"just a phase,\" Dad! And yes, it's more than \"just a cartoon.\"")
             return
-            
+
+        if plugin_name not in ctx.bot.cogs.keys():
+            await ctx.send(embed=discord.Embed(
+                title="Plugin Manager",
+                description="The plugin `" + plugin_name
+                            + "` could not be unloaded, as it is not loaded. Plugin names are case-sensitive.",
+                color=Colors.WARNING
+            ))
+            LOG.warning("Attempted to unload already-unloaded plugin %s", plugin_name)
+            return
+
         """Unloads an extension."""
         self.bot.unload_extension(plugin_name)
         LOG.info("Unloaded plugin %s", plugin_name)
@@ -136,7 +174,12 @@ class BotAdmin:
         config = WolfConfig.getConfig().get('plugins', [])
 
         if plugin_name in config:
-            await ctx.send("Plugin {} is already enabled.".format(plugin_name))
+            await ctx.send(embed=discord.Embed(
+                title="Plugin Manager",
+                description="The plugin `" + plugin_name
+                            + "` is already enabled. If it is not loaded, use `/admin load " + plugin_name + "`.",
+                color=Colors.WARNING
+            ))
             return
 
         try:
@@ -164,17 +207,23 @@ class BotAdmin:
     @admin.command(name="disable", brief="Disable a plugin from running at bot load. Also stops the plugin.")
     async def disable(self, ctx: discord.ext.commands.Context, plugin_name: str):
         if plugin_name == "BotAdmin":
-            await ctx.send("ERROR: Can not disable BotAdmin! It is marked as a critical module.")
+            await ctx.send(embed=discord.Embed(
+                title="Plugin Manager",
+                description="The plugin `" + plugin_name
+                            + "` could not be disabled, as it is a critical module. ",
+                color=Colors.DANGER
+            ))
             LOG.warning("The BotAdmin module was requested to be disabled.")
             return
-            
-        if plugin_name == "Anime":
-            await ctx.channel.trigger_typing()
-            await asyncio.sleep(4)
-            await ctx.send("ERROR: Can not unload Anime! It's a critical part of my life, and I'd be nothing without it.")
-            await ctx.channel.trigger_typing()
-            await asyncio.sleep(3)
-            await ctx.send("And no, it's not \"just a phase,\" Dad! And yes, it's more than \"just a cartoon.\"")
+
+        if plugin_name == "Debug" and self._debugmode:
+            await ctx.send(embed=discord.Embed(
+                title="Plugin Manager",
+                description="The `Debug` plugin may not be disabled while Developer Mode is enabled."
+                            "\nPlease disable Developer Mode first.",
+                color=Colors.DANGER
+            ))
+            LOG.warning("A request was made to disable Debug while in DevMode. Blocked.")
             return
 
         config = WolfConfig.getConfig().get('plugins', [])
@@ -227,7 +276,7 @@ class BotAdmin:
                 color=Colors.DANGER
             ))
             return
-            
+
         try:
             presence_type = presence_map[presence_type.lower()]
         except ValueError:
@@ -275,4 +324,3 @@ class BotAdmin:
 
 def setup(bot: discord.ext.commands.Bot):
     bot.add_cog(BotAdmin(bot))
-

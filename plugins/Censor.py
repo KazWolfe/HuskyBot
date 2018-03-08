@@ -26,14 +26,15 @@ class Censor:
 
         censor_config = WolfConfig.getConfig().get("censors", {})
 
-        censor_list = censor_config.setdefault("global", []) + censor_config.setdefault(str(message.channel.id), [])
-        
-        if (message.author.permissions_in(message.channel).manage_messages):
+        censor_list = censor_config.get("global", []) + censor_config.get(str(message.channel.id), [])
+
+        if message.author.permissions_in(message.channel).manage_messages:
             return
 
         if any((re.search(censor_term, message.content) is not None) for censor_term in censor_list):
             await message.delete()
-            LOG.info("Deleted censored message (context %s) from %s: %s", message.author, context, message.content)
+            LOG.info("Deleted censored message (context %s, from %s in %s): %s", context, message.author,
+                     message.channel, message.content)
 
     async def on_message(self, message):
         await self.filter_message(message)
@@ -161,7 +162,7 @@ class Censor:
 
         await ctx.send(embed=discord.Embed(
             title="Censors for " + ctx.guild.name,
-            description="The word `" + censor + "` was removed to the censor list for the specified channel",
+            description="The word `" + censor + "` was removed from the global censor list",
             color=Colors.PRIMARY
         ))
 

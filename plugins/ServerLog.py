@@ -5,6 +5,7 @@ from discord.ext import commands
 
 LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 
+
 class ServerLog:
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
