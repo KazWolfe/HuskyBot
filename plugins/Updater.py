@@ -81,8 +81,8 @@ class Updater:
         )
         
         embed.add_field(name="Author", value=lastCommit.author, inline=True)
-        embed.add_field(name="Author Date", value=datetime.fromtimestamp(lastCommit.authored_date 
-                        + lastCommit.author_tz_offset).strftime('%Y-%m-%d %H:%M:%S') + " UTC", inline=True)
+        embed.add_field(name="Author Date", value=datetime
+                .fromtimestamp(lastCommit.authored_date).strftime('%Y-%m-%d %H:%M:%S') + " UTC", inline=True)
         embed.add_field(name="GitHub", value="[See Commit >](https://www.github.com/KazWolfe/" 
                                             + "diy_tech-bot/commit/" + lastCommit.hexsha + ")", inline=False)
                                             
