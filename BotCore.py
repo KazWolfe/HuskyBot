@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import datetime
-import logging
+import logging, traceback
 import os
 import sys
 import time
@@ -164,6 +164,12 @@ async def on_command_error(ctx, error):
         color=Colors.DANGER
     ).add_field(name="Error Log", value="```" + str(error) + "```", inline=False))
     LOG.error("Error running command %s: %s", ctx.message.content, error)
+
+
+@bot.event
+async def on_error(event_method, *args, **kwargs):
+    LOG.error('Ignoring exception in method %s:\n%s', event_method, traceback.format_exc())
+    
 
 
 @bot.event

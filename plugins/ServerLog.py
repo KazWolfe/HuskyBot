@@ -61,9 +61,9 @@ class ServerLog:
                 color=Colors.PRIMARY
             )
             
-            embed.set_thumbnail(member.avatar_url)
-            embed.add_field(name="Joined Server", value=member.joined_at, inline=True)
-            embed.add_field(name="Joined Discord", value=member.created_at, inline=True)
+            embed.set_thumbnail(url=member.avatar_url)
+            embed.add_field(name="Joined Server", value=str(member.joined_at).split('.')[0], inline=True)
+            embed.add_field(name="Joined Discord", value=str(member.created_at).split('.')[0], inline=True)
             embed.add_field(name="User ID", value=member.id, inline=True)
             
             await channel.send(embed=embed)
@@ -86,12 +86,28 @@ class ServerLog:
                 color=Colors.PRIMARY
             )
             
-            embed.set_thumbnail(member.avatar_url)
+            embed.set_thumbnail(url=member.avatar_url)
             
             await channel.send(embed=embed)
         
         await milestone_notifier(member)
         await general_notifier(member)
+        
+    async def on_error(event_method, *args, **kwargs):  
+        channel = self._config.get('specialChannels', {}).get('logs', None)
+        
+        if channel is None:
+            return
+            
+        channel = member.guild.get_channel(channel)
+        
+        embed = discord.Embed(
+            title="Bot Exception Handler",
+            description="Exception in method `" + event_method + "`:\n```" + traceback.format_exc() + "```",
+            color=Colors.DANGER
+        )
+        
+        await channel.send(embed=embed)
         
     @commands.group(name="logger", aliases=["logging"], brief="Control the Logging module")
     @commands.has_permissions(administrator=True)
