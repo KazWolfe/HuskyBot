@@ -82,18 +82,18 @@ class ModTools:
             color=Colors.SUCCESS
         ))
 
-    @commands.command(name="warn", brief="Issue an official warning to a user.", disabled=True)
+    @commands.command(name="warn", brief="Issue an official warning to a user.", enabled=False)
     @commands.has_permissions(ban_members=True)
     async def warn(self, ctx: discord.ext.commands.Context, target: discord.Member, *, reason: str):
         pass
 
-    @commands.command(name="mute", brief="Temporarily mute a user from the current channel", disabled=True)
+    @commands.command(name="mute", brief="Temporarily mute a user from the current channel", enabled=False)
     @commands.has_permissions(manage_messages=True)
     async def mute(self, ctx: discord.ext.commands.Context, target: discord.Member, time: str = None, *, reason: str):
         pass
 
     @commands.command(name="globalmute", aliases=["gmute"],
-                      brief="Temporarily mute a user from the server", disabled=True)
+                      brief="Temporarily mute a user from the server", enabled=False)
     @commands.has_permissions(ban_members=True)
     async def globalmute(self, ctx: discord.ext.commands.Context, target: discord.Member, time: str = None, *,
                          reason: str):

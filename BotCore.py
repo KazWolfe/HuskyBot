@@ -110,15 +110,31 @@ async def on_command_error(ctx, error):
         ))
         LOG.error("Command %s may only be run in a direct message!", command_name)
         return
+        
+    if isinstance(error, commands.DisabledCommand):
+        embed=discord.Embed(
+            title="Command Handler",
+            description="**The command `/" + command_name
+                        + "` does not exist.** See `/help` for valid commands.",
+            color=Colors.DANGER
+        )
+        
+        if ctx.message.author.guild_permissions.administrator:
+            embed.set_footer(text="E_DISABLED_COMMAND")
+            
+        await ctx.send(embed=embed)
+        
+        LOG.error("Command %s is disabled.", command_name)
+        return
 
-    if isinstance(error, commands.CommandNotFound) or isinstance(error, commands.DisabledCommand):
+    if isinstance(error, commands.CommandNotFound):
         await ctx.send(embed=discord.Embed(
             title="Command Handler",
             description="**The command `/" + command_name
                         + "` does not exist.** See `/help` for valid commands.",
             color=Colors.DANGER
         ))
-        LOG.error("Command %s does not exist to the system, or is disabled.", command_name)
+        LOG.error("Command %s does not exist to the system.", command_name)
         return
 
     if isinstance(error, commands.MissingRequiredArgument):

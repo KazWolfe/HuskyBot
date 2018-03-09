@@ -229,7 +229,11 @@ class BotAdmin:
         config = WolfConfig.getConfig().get('plugins', [])
 
         if plugin_name not in config:
-            await ctx.send("Plugin {} is already disabled.".format(plugin_name))
+            await ctx.send(embed=discord.Embed(
+                title="Plugin Manager",
+                description="The plugin `" + plugin_name + "` is already disabled.",
+                color=Colors.WARNING
+            ))
             return
 
         self.bot.unload_extension(plugin_name)
