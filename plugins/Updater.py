@@ -2,6 +2,7 @@ import logging
 import os
 import sys
 import time
+from datetime import datetime
 
 import discord
 import git
@@ -68,6 +69,28 @@ class Updater:
         WolfConfig.getConfig().set("restartReason", "update")
         await ctx.bot.logout()
 
-
+    @commands.command(name="changelog", brief="Get the changelog for the most recent bot version.")
+    @commands.has_permissions(administrator=True)
+    async def changelog(self, ctx: discord.ext.commands.Context):
+        lastCommit = self.repo.head.commit
+        
+        embed = discord.Embed(
+            title="Changlog for version `" + str(lastCommit.hexsha)[:8] + "`",
+            description="```" + lastCommit.message + "```",
+            color=Colors.PRIMARY
+        )
+        
+        embed.add_field(name="Author", value=lastCommit.author, inline=True)
+        embed.add_field(name="Author Date", value=datetime.fromtimestamp(lastCommit.authored_date 
+                        + lastCommit.author_tz_offset).strftime('%Y-%m-%d %H:%M:%S') + " UTC", inline=True)
+        embed.add_field(name="GitHub", value="[See Commit >](https://www.github.com/KazWolfe/" 
+                                            + "diy_tech-bot/commit/" + lastCommit.hexsha + ")", inline=False)
+                                            
+                                            
+        
+        
+        await ctx.send(embed=embed)
+            
+            
 def setup(bot: discord.ext.commands.Bot):
     bot.add_cog(Updater(bot))

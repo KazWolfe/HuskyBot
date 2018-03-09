@@ -53,6 +53,8 @@ class ServerLog:
             if channel is None:
                 return
                 
+            channel = member.guild.get_channel(channel)
+                
             embed = discord.Embed(
                 title="New Member!",
                 description=str(member) + " has joined the server.",
@@ -75,6 +77,8 @@ class ServerLog:
             
             if channel is None:
                 return
+                
+            channel = member.guild.get_channel(channel)
                 
             embed = discord.Embed(
                 title="New Member!",

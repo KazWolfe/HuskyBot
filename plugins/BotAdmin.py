@@ -16,7 +16,8 @@ LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 class BotAdmin:
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
-        self._debugmode = WolfConfig.getConfig().get("developerMode", False)
+        self._config = WolfConfig.getConfig()
+        self._debugmode = self._config.get("developerMode", False)
         LOG.info("Loaded plugin!")
 
     @commands.command(name="version", brief="Get version information for the bot")
@@ -56,7 +57,7 @@ class BotAdmin:
 
     @admin.command(name="reloadConfig", brief="Reload the bot's configuration files from disk.")
     async def reloadConfig(self, ctx: discord.ext.commands.Context):
-        WolfConfig.getConfig().load()
+        self._config.load()
         LOG.info("Bot configuration reloaded.")
         await ctx.send(embed=discord.Embed(
             title="Bot Manager",
@@ -171,7 +172,7 @@ class BotAdmin:
 
     @admin.command(name="enable", brief="Enable a plugin to run now and at bot load.")
     async def enable(self, ctx: discord.ext.commands.Context, plugin_name: str):
-        config = WolfConfig.getConfig().get('plugins', [])
+        config = self._config.get('plugins', [])
 
         if plugin_name in config:
             await ctx.send(embed=discord.Embed(
@@ -196,7 +197,7 @@ class BotAdmin:
         LOG.info("Loaded plugin %s for enable", plugin_name)
 
         config.append(plugin_name)
-        WolfConfig.getConfig().set('plugins', config)
+        self._config.set('plugins', config)
         LOG.info("Enabled plugin %s", plugin_name)
         await ctx.send(embed=discord.Embed(
             title="Plugin Manager",
@@ -226,7 +227,7 @@ class BotAdmin:
             LOG.warning("A request was made to disable Debug while in DevMode. Blocked.")
             return
 
-        config = WolfConfig.getConfig().get('plugins', [])
+        config = self._config.get('plugins', [])
 
         if plugin_name not in config:
             await ctx.send(embed=discord.Embed(
@@ -240,7 +241,7 @@ class BotAdmin:
         LOG.info("Unloaded plugin %s for disable", plugin_name)
 
         config.remove(plugin_name)
-        WolfConfig.getConfig().set('plugins', config)
+        self._config.set('plugins', config)
         LOG.info("Disabled plugin %s", plugin_name)
         await ctx.send(embed=discord.Embed(
             title="Plugin Manager",
@@ -302,7 +303,7 @@ class BotAdmin:
             ))
             return
 
-        WolfConfig.getConfig().set('presence', {"game": game, "type": presence_type, "status": status.lower()})
+        self._config.set('presence', {"game": game, "type": presence_type, "status": status.lower()})
         await ctx.bot.change_presence(game=discord.Game(name=game, type=presence_type), status=new_status)
         await ctx.send(embed=discord.Embed(
             title="Bot Manager",
@@ -312,7 +313,7 @@ class BotAdmin:
 
     @admin.command(name="reloadpresence", brief="Reload a Presence from the config file", aliases=["rpresence"])
     async def reloadPresence(self, ctx: discord.ext.commands.Context):
-        bot_presence = WolfConfig.getConfig().get('presence', {"game": "DiyBot", "type": 2, "status": "dnd"})
+        bot_presence = self._config.get('presence', {"game": "DiyBot", "type": 2, "status": "dnd"})
 
         await ctx.bot.change_presence(game=discord.Game(name=bot_presence['game'], type=bot_presence['type']),
                                       status=discord.Status[bot_presence['status']])
@@ -321,9 +322,64 @@ class BotAdmin:
     async def restart(self, ctx: discord.ext.commands.Context):
         await ctx.bot.change_presence(game=discord.Game(name="Restarting...", type=0), status=discord.Status.idle)
         LOG.info("Bot is going down for admin requested restart!")
-        WolfConfig.getConfig().set("restartNotificationChannel", ctx.channel.id)
-        WolfConfig.getConfig().set("restartReason", "admin")
+        self._config.set("restartNotificationChannel", ctx.channel.id)
+        self._config.set("restartReason", "admin")
         await ctx.bot.logout()
+        
+    @admin.command(name="ignoreCommand", brief="Add a command to the ignore list.")
+    async def ignore(self, ctx: commands.Context, command: str):
+        command = command.lower()
+    
+        ignoredCommands = self._config.get('ignoredCommands', [])
+    
+        if ctx.bot.get_command(command) is not None:
+            await ctx.send(embed=discord.Embed(
+                title="Bot Manager",
+                description="Real commands may not be added to the ignore list!",
+                color=Colors.DANGER
+            ))
+            return
+            
+        if command in ignoredCommands:
+            await ctx.send(embed=discord.Embed(
+                title="Bot Manager",
+                description="The command `/" + command + "` is already being ignored.",
+                color=Colors.WARNING
+            ))
+            return
+            
+        ignoredCommands.append(command)
+        self._config.set('ignoredCommands', ignoredCommands)
+        
+        
+        await ctx.send(embed=discord.Embed(
+            title="Bot Manager",
+            description="The command `/" + command + "` has been added to the ignore list.",
+            color=Colors.SUCCESS
+        ))
+        
+    @admin.command(name="unignoreCommand", brief="Remove a command from the ignore list.")
+    async def unignore(self, ctx: commands.Context, command: str):
+        command = command.lower()
+    
+        ignoredCommands = self._config.get('ignoredCommands', [])
+            
+        if command not in ignoredCommands:
+            await ctx.send(embed=discord.Embed(
+                title="Bot Manager",
+                description="The command `/" + command + "` is already being accepted.",
+                color=Colors.WARNING
+            ))
+            return
+            
+        ignoredCommands.remove(command)
+        self._config.set('ignoredCommands', ignoredCommands)
+
+        await ctx.send(embed=discord.Embed(
+            title="Bot Manager",
+            description="The command `/" + command + "` has been removed from the ignore list.",
+            color=Colors.SUCCESS
+        ))
 
 
 def setup(bot: discord.ext.commands.Bot):

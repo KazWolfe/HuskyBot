@@ -172,6 +172,10 @@ async def on_message(message):
         return
 
     if message.content.startswith(bot.command_prefix):
+        if message.content.lower().split(' ')[0].replace('/','') in BOT_CONFIG.get('ignoredCommands', []):
+            LOG.info("User %s ran an ignored command %s", message.author, message.content)
+            return
+        
         LOG.info("User %s ran %s", message.author, message.content)
         await bot.process_commands(message)
 
