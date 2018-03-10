@@ -1,9 +1,11 @@
 import logging
 
 import discord
+import traceback
+
+from datetime import datetime
 from discord.ext import commands
 
-from WolfBot import WolfUtils
 from WolfBot import WolfConfig
 from WolfBot.WolfEmbed import Colors
 
@@ -16,20 +18,22 @@ class ServerLog:
         self._config = WolfConfig.getConfig()
         
         # ToDo: Find a better way of storing valid loggers. This is hacky as all hell.
-        self._validLoggers = ["userJoin", "userJoin.milestones", "userJoin.audit"]
+        self._validLoggers = ["userJoin", "userJoin.milestones", "userJoin.audit",
+                              "userLeave",
+                              "messageDelete", "messageDelete.logIntegrity",
+                              "messageEdit"]
 
     async def on_member_ban(self, guild, user):
         pass
         
     async def on_member_join(self, member):
-    
         # Send milestones to the moderator alerts channel
-        async def milestone_notifier(member):        
+        async def milestone_notifier(notif_member):
             if "userJoin.milestones" not in self._config.get("loggers", {}).keys():
                 return
         
             milestone_channel = self._config.get('specialChannels', {}).get('modAlerts', None)
-            guild = member.guild
+            guild = notif_member.guild
             
             if milestone_channel is None:
                 return
@@ -39,12 +43,13 @@ class ServerLog:
             if guild.member_count % 250 == 0:
                 await milestone_channel.send(embed=discord.Embed(
                         title="Server Member Count Milestone!",
-                        description="The server has now reached " + str(guild.member_count) + " members! Thank you " + member.display_name + " for joining!",
+                        description="The server has now reached " + str(guild.member_count) + " members! Thank you "
+                                    + notif_member.display_name + " for joining!",
                         color=Colors.SUCCESS
                 ))
         
         # Send all joins to the logging channel
-        async def general_notifier(member):
+        async def general_notifier(notif_member):
             if "userJoin" not in self._config.get("loggers", {}).keys():
                 return
         
@@ -53,23 +58,23 @@ class ServerLog:
             if channel is None:
                 return
                 
-            channel = member.guild.get_channel(channel)
+            channel = notif_member.guild.get_channel(channel)
                 
             embed = discord.Embed(
                 title="New Member!",
-                description=str(member) + " has joined the server.",
+                description=str(notif_member) + " has joined the server.",
                 color=Colors.PRIMARY
             )
             
-            embed.set_thumbnail(url=member.avatar_url)
-            embed.add_field(name="Joined Server", value=str(member.joined_at).split('.')[0], inline=True)
-            embed.add_field(name="Joined Discord", value=str(member.created_at).split('.')[0], inline=True)
-            embed.add_field(name="User ID", value=member.id, inline=True)
+            embed.set_thumbnail(url=notif_member.avatar_url)
+            embed.add_field(name="Joined Server", value=str(notif_member.joined_at).split('.')[0], inline=True)
+            embed.add_field(name="Joined Discord", value=str(notif_member.created_at).split('.')[0], inline=True)
+            embed.add_field(name="User ID", value=notif_member.id, inline=True)
             
             await channel.send(embed=embed)
             
         # Send all joins to the auditing channel
-        async def audit_notifier(member):
+        async def audit_notifier(notif_member):
             if "userJoin.audit" not in self._config.get("loggers", {}).keys():
                 return
             
@@ -78,28 +83,116 @@ class ServerLog:
             if channel is None:
                 return
                 
-            channel = member.guild.get_channel(channel)
+            channel = notif_member.guild.get_channel(channel)
                 
             embed = discord.Embed(
                 title="New Member!",
-                description=str(member) + " has joined the server. Welcome!",
+                description=str(notif_member) + " has joined the server. Welcome!",
                 color=Colors.PRIMARY
             )
             
-            embed.set_thumbnail(url=member.avatar_url)
+            embed.set_thumbnail(url=notif_member.avatar_url)
             
             await channel.send(embed=embed)
         
         await milestone_notifier(member)
         await general_notifier(member)
-        
-    async def on_error(event_method, *args, **kwargs):  
+        await audit_notifier(member)
+
+    async def on_member_leave(self, member: discord.Member):
+        if "userLeave" not in self._config.get("loggers", {}).keys():
+            return
+
+        alert_channel = self._config.get('specialChannels', {}).get('logs', None)
+
+        if alert_channel is None:
+            return
+
+        alert_channel = member.guild.get_channel(alert_channel)
+
+        embed = discord.Embed(
+            title="Member left the server",
+            description=str(member) + " has left the server.",
+            color=Colors.PRIMARY
+        )
+
+        embed.set_thumbnail(url=member.avatar_url)
+        embed.add_field(name="User ID", value=member.id)
+        embed.add_field(name="Leave Timestamp", value=str(datetime.utcnow()).split('.')[0])
+
+        await alert_channel.send(embed=embed)
+
+    async def on_message_delete(self, message: discord.Message):
+        if "messageDelete" not in self._config.get("loggers", {}).keys():
+            return
+
+        alert_channel = self._config.get('specialChannels', {}).get('logs', None)
+
+        if alert_channel is None:
+            return
+
+        alert_channel = message.guild.get_channel(alert_channel)
+
+        # Allow event cleanups for bot users.
+        if message.channel == alert_channel and message.author.bot:
+            return
+
+        embed = discord.Embed(
+            color=Colors.WARNING
+        )
+
+        embed.set_author(name="Deleted Message in #" + str(message.channel), icon_url=message.author.avatar_url)
+        embed.add_field(name="Author", value=message.author, inline=True)
+        embed.add_field(name="Message ID", value=message.id, inline=True)
+        embed.add_field(name="Send Timestamp", value=str(message.created_at).split('.')[0], inline=True)
+        embed.add_field(name="Delete Timestamp", value=str(datetime.utcnow()).split('.')[0], inline=True)
+        embed.add_field(name="Message", value=message.content, inline=False)
+
+        await alert_channel.send(embed=embed)
+
+    async def on_message_edit(self, before: discord.Message, after: discord.Message):
+        if "messageEdit" not in self._config.get("loggers", {}).keys():
+            return
+
+        alert_channel = self._config.get('specialChannels', {}).get('logs', None)
+
+        if alert_channel is None:
+            return
+
+        alert_channel = after.guild.get_channel(alert_channel)
+
+        if after.channel == alert_channel and after.author.bot:
+            return
+
+        if before.content is None or after.content is None:
+            return
+
+        if before.content == after.content:
+            return
+
+        embed = discord.Embed(
+            color=Colors.PRIMARY
+        )
+
+        embed.set_author(name="Message edited", icon_url=after.author.avatar_url)
+        embed.add_field(name="Author", value=after.author, inline=True)
+        embed.add_field(name="Message ID", value=after.id, inline=True)
+        embed.add_field(name="Channel", value=after.channel.mention, inline=True)
+        embed.add_field(name="Send Timestamp", value=str(before.created_at).split('.')[0], inline=True)
+        embed.add_field(name="Edit Timestamp", value=str(after.edited_at).split('.')[0], inline=True)
+        embed.add_field(name="Message Before", value=before.content, inline=False)
+        embed.add_field(name="Message After", value=after.content, inline=False)
+
+        await alert_channel.send(embed=embed)
+
+    # noinspection PyUnusedLocal
+    async def on_error(self, event_method, *args, **kwargs):
         channel = self._config.get('specialChannels', {}).get('logs', None)
         
         if channel is None:
             return
             
-        channel = member.guild.get_channel(channel)
+        channel = self.bot.get_channel(channel)
         
         embed = discord.Embed(
             title="Bot Exception Handler",
