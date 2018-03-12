@@ -99,7 +99,7 @@ class ServerLog:
         await general_notifier(member)
         await audit_notifier(member)
 
-    async def on_member_leave(self, member: discord.Member):
+    async def on_member_remove(self, member: discord.Member):
         if "userLeave" not in self._config.get("loggers", {}).keys():
             return
 
