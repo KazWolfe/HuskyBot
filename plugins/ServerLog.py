@@ -230,7 +230,7 @@ class ServerLog:
         await alert_channel.send(embed=embed)
 
     # noinspection PyUnusedLocal
-    @self.bot.event
+    @bot.event
     async def on_error(self, event_method, *args, **kwargs):
         channel = self._config.get('specialChannels', {}).get('logs', None)
         
