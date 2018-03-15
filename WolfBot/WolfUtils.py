@@ -56,3 +56,15 @@ def should_process_message(message):
         return False
 
     return True
+    
+
+def trim_string(string: str, limit: int, add_ellipses: bool):
+    s = string
+    
+    if len(string) > limit:
+        s = string[:limit]
+        
+        if add_ellipses:
+            s = s[:-5] +  "\n\n..."
+        
+    return s

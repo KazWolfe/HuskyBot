@@ -168,8 +168,27 @@ async def on_command_error(ctx, error):
 
 @bot.event
 async def on_error(event_method, *args, **kwargs):
-    LOG.error('Ignoring exception in method %s:\n%s', event_method, traceback.format_exc())
+    LOG.error('Exception in method %s:\n%s', event_method, traceback.format_exc())
     
+    if event_method == "on_error":
+        LOG.critical("Well, shit. The error handler did done break. Not sending logs to Discord to prevent a potential loop.")
+        return
+    
+    channel = self._config.get('specialChannels', {}).get('logs', None)
+    
+    if channel is None:
+        LOG.warn('A logging channel is not set up! Error messages will not be forwarded to Discord.')
+        return
+        
+    channel = self.bot.get_channel(channel)
+    
+    embed = discord.Embed(
+        title="Bot Exception Handler",
+        description=WolfUtils.trim_string("Exception in method `" + event_method + "`:\n```" + traceback.format_exc() + "```", 2048),
+        color=Colors.DANGER
+    )
+    
+    await channel.send(embed=embed)
 
 
 @bot.event

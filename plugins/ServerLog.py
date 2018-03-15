@@ -229,23 +229,6 @@ class ServerLog:
 
         await alert_channel.send(embed=embed)
 
-    # noinspection PyUnusedLocal
-    async def on_error(self, event_method, *args, **kwargs):
-        channel = self._config.get('specialChannels', {}).get('logs', None)
-        
-        if channel is None:
-            return
-            
-        channel = self.bot.get_channel(channel)
-        
-        embed = discord.Embed(
-            title="Bot Exception Handler",
-            description="Exception in method `" + event_method + "`:\n```" + traceback.format_exc() + "```",
-            color=Colors.DANGER
-        )
-        
-        await channel.send(embed=embed)
-        
     @commands.group(name="logger", aliases=["logging"], brief="Control the Logging module")
     @commands.has_permissions(administrator=True)
     async def logger(self, ctx: discord.ext.commands.Context):
