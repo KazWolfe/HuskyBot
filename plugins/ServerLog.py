@@ -20,11 +20,9 @@ class ServerLog:
         # ToDo: Find a better way of storing valid loggers. This is hacky as all hell.
         self._validLoggers = ["userJoin", "userJoin.milestones", "userJoin.audit",
                               "userLeave",
+                              "userBan",
                               "messageDelete", "messageDelete.logIntegrity",
                               "messageEdit"]
-
-    async def on_member_ban(self, guild, user):
-        pass
         
     async def on_member_join(self, member):
         # Send milestones to the moderator alerts channel
@@ -232,6 +230,7 @@ class ServerLog:
         await alert_channel.send(embed=embed)
 
     # noinspection PyUnusedLocal
+    @self.bot.event
     async def on_error(self, event_method, *args, **kwargs):
         channel = self._config.get('specialChannels', {}).get('logs', None)
         
