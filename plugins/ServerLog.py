@@ -121,6 +121,52 @@ class ServerLog:
         embed.add_field(name="Leave Timestamp", value=str(datetime.utcnow()).split('.')[0])
 
         await alert_channel.send(embed=embed)
+        
+    async def on_member_ban(self, guild: discord.Guild, user: discord.User):
+        if "userBan" not in self._config.get("loggers", {}).keys():
+            return
+
+        alert_channel = self._config.get('specialChannels', {}).get('logs', None)
+
+        if alert_channel is None:
+            return
+
+        alert_channel = member.guild.get_channel(alert_channel)
+
+        embed = discord.Embed(
+            title="User banned",
+            description=str(user) + " was banned from the server.",
+            color=Colors.DANGER
+        )
+
+        embed.set_thumbnail(url=user.avatar_url)
+        embed.add_field(name="User ID", value=user.id)
+        embed.add_field(name="Ban Timestamp", value=str(datetime.utcnow()).split('.')[0])
+
+        await alert_channel.send(embed=embed)
+        
+    async def on_member_unban(self, guild: discord.Guild, user: discord.User):
+        if "userBan" not in self._config.get("loggers", {}).keys():
+            return
+
+        alert_channel = self._config.get('specialChannels', {}).get('logs', None)
+
+        if alert_channel is None:
+            return
+
+        alert_channel = member.guild.get_channel(alert_channel)
+
+        embed = discord.Embed(
+            title="User unbanned",
+            description=str(user) + " was unanned from the server.",
+            color=Colors.PRIMARY
+        )
+
+        embed.set_thumbnail(url=user.avatar_url)
+        embed.add_field(name="User ID", value=user.id)
+        embed.add_field(name="Unban Timestamp", value=str(datetime.utcnow()).split('.')[0])
+
+        await alert_channel.send(embed=embed)
 
     async def on_message_delete(self, message: discord.Message):
         if "messageDelete" not in self._config.get("loggers", {}).keys():
