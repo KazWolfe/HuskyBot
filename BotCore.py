@@ -186,8 +186,8 @@ async def on_error(event_method, *args, **kwargs):
         )
         
         await channel.send(embed=embed)
-    except Exception:
-        LOG.critical("There was an error sending an error to the error channel. Error.")
+    except Exception as e:
+        LOG.critical("There was an error sending an error to the error channel.\n " + str(e))
 
 
 @bot.event
