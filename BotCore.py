@@ -181,7 +181,7 @@ async def on_error(event_method, *args, **kwargs):
         
         embed = discord.Embed(
             title="Bot Exception Handler",
-            description=WolfUtils.trim_string("Exception in method `" + event_method + "`:\n```" + traceback.format_exc() + "```", 2048),
+            description=WolfUtils.trim_string("Exception in method `" + event_method + "`:\n```" + traceback.format_exc() + "```", 2048, True),
             color=Colors.DANGER
         )
         
