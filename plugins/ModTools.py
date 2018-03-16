@@ -42,7 +42,7 @@ class ModTools:
             color=Colors.SUCCESS
         ))
 
-    @commands.command(name="unautoban", alaises=["unhackban", "pardonautoban", "pardonhackban"], brief="Pardon a banned member not on the server")
+    @commands.command(name="unautoban", aliases=["unhackban", "pardonautoban", "pardonhackban"], brief="Pardon a banned member not on the server")
     @commands.has_permissions(ban_members=True)
     async def unhackban(self, ctx: discord.ext.commands.Context, user: int):
         await ctx.guild.unban(user, reason="Unbanned by " + str(ctx.author))
