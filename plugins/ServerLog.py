@@ -129,7 +129,7 @@ class ServerLog:
         if alert_channel is None:
             return
 
-        alert_channel = member.guild.get_channel(alert_channel)
+        alert_channel = self.bot.get_channel(alert_channel)
 
         embed = discord.Embed(
             title="User banned",
@@ -152,7 +152,7 @@ class ServerLog:
         if alert_channel is None:
             return
 
-        alert_channel = member.guild.get_channel(alert_channel)
+        alert_channel = self.bot.get_channel(alert_channel)
 
         embed = discord.Embed(
             title="User unbanned",
