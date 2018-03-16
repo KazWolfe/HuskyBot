@@ -177,7 +177,7 @@ async def on_error(event_method, *args, **kwargs):
             LOG.warn('A logging channel is not set up! Error messages will not be forwarded to Discord.')
             return
             
-        channel = self.bot.get_channel(channel)
+        channel = bot.get_channel(channel)
         
         embed = discord.Embed(
             title="Bot Exception Handler",
