@@ -38,18 +38,18 @@ class ModTools:
         
         await ctx.send(embed=discord.Embed(
             title="Mod Toolkit",
-            description="User `" + str(target) + "` was successfully banned.",
+            description="User `" + str(user) + "` was successfully banned.",
             color=Colors.SUCCESS
         ))
 
     @commands.command(name="pardon", brief="Pardon a banned member")
     @commands.has_permissions(ban_members=True)
-    async def autopardon(self, ctx: discord.ext.commands.Context, target: user):
+    async def autopardon(self, ctx: discord.ext.commands.Context, user: discord.User):
         await ctx.guild.ban(user, reason="Unbanned by " + str(ctx.author))
         
         await ctx.send(embed=discord.Embed(
             title="Mod Toolkit",
-            description="User `" + str(target) + "` was successfully pardoned.",
+            description="User `" + str(user) + "` was successfully pardoned.",
             color=Colors.SUCCESS
         ))
 
