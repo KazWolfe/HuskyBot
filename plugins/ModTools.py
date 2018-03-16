@@ -31,53 +31,24 @@ class ModTools:
             await after.remove_roles(bot_role, reason="User is not an authorized bot.")
             LOG.info("User " + after.display_name + " was granted bot role, but was not a bot. Removing.")
 
-    # AutoBan support
-    async def on_member_join(self, member):
-        autobans = WolfConfig.getConfig().get("autobans", [])
-
-        if member.id in autobans:
-            await member.ban(reason="User was on autoban list.")
-            autobans.remove(member.id)
-            WolfConfig.getConfig().set("autobans", autobans)
-
-    @commands.command(name="autoban", aliases=["hackban"], brief="Ban a non-member online (preemptive)")
+    @commands.command(name="ban", aliases=["hackban, autoban"], brief="Ban any user recognized by Discord")
     @commands.has_permissions(ban_members=True)
-    async def autoban(self, ctx: discord.ext.commands.Context, target: int):
-        autobans = WolfConfig.getConfig().get("autobans", [])
-
-        if target in autobans:
-            await ctx.send(embed=discord.Embed(
-                title="Autoban Command Error",
-                description="Could not autoban user `" + str(target) + "` as they are already autobanned.",
-                color=Colors.DANGER
-            ))
-            return
-
-        autobans.append(target)
-        WolfConfig.getConfig().set("autobans", autobans)
+    async def ban(self, ctx: discord.ext.commands.Context, target: discord.User, *, reason: str):
+        await ctx.guild.ban(user, reason="[" + str(ctx.author) + "] " + reason, delete_message_days=1)
+        
         await ctx.send(embed=discord.Embed(
-            title="Autoban Utility",
-            description="User `" + str(target) + "` was successfully autobanned.",
+            title="Mod Toolkit",
+            description="User `" + str(target) + "` was successfully banned.",
             color=Colors.SUCCESS
         ))
 
-    @commands.command(name="autopardon", aliases=["hackpardon"], brief="Pardon a member on the autoban list.")
+    @commands.command(name="pardon", brief="Pardon a banned member")
     @commands.has_permissions(ban_members=True)
-    async def autopardon(self, ctx: discord.ext.commands.Context, target: int):
-        autobans = WolfConfig.getConfig().get("autobans", [])
-
-        if target not in autobans:
-            await ctx.send(embed=discord.Embed(
-                title="Autoban Command Error",
-                description="Could not pardon user `" + str(target) + "` as they are not autobanned.",
-                color=Colors.DANGER
-            ))
-            return
-
-        autobans.remove(target)
-        WolfConfig.getConfig().set("autobans", autobans)
+    async def autopardon(self, ctx: discord.ext.commands.Context, target: user):
+        await ctx.guild.ban(user, reason="Unbanned by " + str(ctx.author))
+        
         await ctx.send(embed=discord.Embed(
-            title="Autoban Utility",
+            title="Mod Toolkit",
             description="User `" + str(target) + "` was successfully pardoned.",
             color=Colors.SUCCESS
         ))
