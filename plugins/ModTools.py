@@ -31,9 +31,9 @@ class ModTools:
             await after.remove_roles(bot_role, reason="User is not an authorized bot.")
             LOG.info("User " + after.display_name + " was granted bot role, but was not a bot. Removing.")
 
-    @commands.command(name="ban", aliases=["hackban, autoban"], brief="Ban any user recognized by Discord")
+    @commands.command(name="autoban", aliases=["hackban"], brief="Ban any user by UID")
     @commands.has_permissions(ban_members=True)
-    async def ban(self, ctx: discord.ext.commands.Context, target: discord.User, *, reason: str):
+    async def hackban(self, ctx: discord.ext.commands.Context, user: int, *, reason: str):
         await ctx.guild.ban(user, reason="[" + str(ctx.author) + "] " + reason, delete_message_days=1)
         
         await ctx.send(embed=discord.Embed(
@@ -42,10 +42,32 @@ class ModTools:
             color=Colors.SUCCESS
         ))
 
-    @commands.command(name="pardon", brief="Pardon a banned member")
+    @commands.command(name="unautoban", alaises=["unhackban", "pardonautoban", "pardonhackban"], brief="Pardon a banned member not on the server")
     @commands.has_permissions(ban_members=True)
-    async def autopardon(self, ctx: discord.ext.commands.Context, user: discord.User):
-        await ctx.guild.ban(user, reason="Unbanned by " + str(ctx.author))
+    async def unhackban(self, ctx: discord.ext.commands.Context, user: int):
+        await ctx.guild.unban(user, reason="Unbanned by " + str(ctx.author))
+        
+        await ctx.send(embed=discord.Embed(
+            title="Mod Toolkit",
+            description="User `" + str(user) + "` was successfully pardoned.",
+            color=Colors.SUCCESS
+        ))
+        
+    @commands.command(name="ban", brief="Ban an active user of the Discord")
+    @commands.has_permissions(ban_members=True)
+    async def ban(self, ctx: commands.Context, user: discord.User, *, reason: str):
+        await ctx.guild.ban(user, reason="[" + str(ctx.author) + "] " + reason, delete_message_days=1)
+        
+        await ctx.send(embed=discord.Embed(
+            title="Mod Toolkit",
+            description="User `" + str(user) + "` was successfully banned.",
+            color=Colors.SUCCESS
+        ))
+        
+    @commands.command(name="unban", alaises=["pardon"], brief="Pardon a currently banned member of the server")
+    @commands.has_permissions(ban_members=True)
+    async def unban(self, ctx: discord.ext.commands.Context, user: discord.User):
+        await ctx.guild.unban(user, reason="Unbanned by " + str(ctx.author))
         
         await ctx.send(embed=discord.Embed(
             title="Mod Toolkit",

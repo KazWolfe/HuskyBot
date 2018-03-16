@@ -156,7 +156,7 @@ class ServerLog:
 
         embed = discord.Embed(
             title="User unbanned",
-            description=str(user) + " was unanned from the server.",
+            description=str(user) + " was unbanned from the server.",
             color=Colors.PRIMARY
         )
 
