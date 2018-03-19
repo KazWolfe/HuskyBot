@@ -198,7 +198,7 @@ class ServerLog:
         if message.attachments is not None and len(message.attachments) > 1:
             embed.add_field(name="Attachments", value=WolfUtils.trim_string(str(message.attachments), 1000, True), inline=False)
         elif message.attachments is not None and len(message.attachments) == 1:
-            embed.set_image(url=message.attachments.url)
+            embed.set_image(url=message.attachments[0].url)
 
         await alert_channel.send(embed=embed)
 
