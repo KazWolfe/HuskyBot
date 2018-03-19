@@ -65,7 +65,7 @@ class AntiSpam:
         
     @asp.command(name="setBanLimit", brief="Set the number of pings required before user ban")
     @commands.has_permissions(mention_everyone=True)
-    async def setWarnLimit(self, ctx: commands.Context, new_limit: int):
+    async def setBanLimit(self, ctx: commands.Context, new_limit: int):
         if new_limit < 1:
             new_limit = None
             
