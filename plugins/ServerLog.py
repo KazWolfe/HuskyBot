@@ -191,7 +191,14 @@ class ServerLog:
         embed.add_field(name="Message ID", value=message.id, inline=True)
         embed.add_field(name="Send Timestamp", value=str(message.created_at).split('.')[0], inline=True)
         embed.add_field(name="Delete Timestamp", value=str(datetime.utcnow()).split('.')[0], inline=True)
-        embed.add_field(name="Message", value=WolfUtils.trim_string(message.content, 1000, True), inline=False)
+        
+        if message.content is not None:
+            embed.add_field(name="Message", value=WolfUtils.trim_string(message.content, 1000, True), inline=False)
+            
+        if message.attachments is not None andlen(message.attachments) > 1:
+            embed.add_field(name="Attachments", WolfUtils.trim_string(str(message.attachments), 1000, True)
+        elif message.attachments is not None andlen(message.attachments) == 0:
+            embed.set_image(url=message.attachments.url)
 
         await alert_channel.send(embed=embed)
 
@@ -225,8 +232,16 @@ class ServerLog:
         embed.add_field(name="Channel", value=after.channel.mention, inline=True)
         embed.add_field(name="Send Timestamp", value=str(before.created_at).split('.')[0], inline=True)
         embed.add_field(name="Edit Timestamp", value=str(after.edited_at).split('.')[0], inline=True)
-        embed.add_field(name="Message Before", value=WolfUtils.trim_string(before.content, 1000, True), inline=False)
-        embed.add_field(name="Message After", value=WolfUtils.trim_string(after.content, 1000, True), inline=False)
+        
+        if before.content is not None:
+            embed.add_field(name="Message Before", value=WolfUtils.trim_string(before.content, 1000, True), inline=False)
+        else:
+            embed.add_field(name="Message Before", value="`<No Content>`", inline=False)
+            
+        if after.content is not None:
+            embed.add_field(name="Message After", value=WolfUtils.trim_string(after.content, 1000, True), inline=False)
+        else:
+            embed.add_field(name="Message After", value="`<No Content>`", inline=False)
 
         await alert_channel.send(embed=embed)
 
