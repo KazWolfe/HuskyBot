@@ -31,7 +31,7 @@ class ModTools:
             await after.remove_roles(bot_role, reason="User is not an authorized bot.")
             LOG.info("User " + after.display_name + " was granted bot role, but was not a bot. Removing.")
 
-    @commands.command(name="autoban", aliases=["hackban"], brief="Ban any user by UID")
+    @commands.command(name="autoban", aliases=["hackban"], brief="Ban any user by UID", enabled=False)
     @commands.has_permissions(ban_members=True)
     async def hackban(self, ctx: discord.ext.commands.Context, user: int, *, reason: str):
         await ctx.guild.ban(user, reason="[" + str(ctx.author) + "] " + reason, delete_message_days=1)
@@ -42,7 +42,7 @@ class ModTools:
             color=Colors.SUCCESS
         ))
 
-    @commands.command(name="unautoban", aliases=["unhackban", "pardonautoban", "pardonhackban"], brief="Pardon a banned member not on the server")
+    @commands.command(name="unautoban", aliases=["unhackban", "pardonautoban", "pardonhackban"], brief="Pardon a banned member not on the server", enabled=False)
     @commands.has_permissions(ban_members=True)
     async def unhackban(self, ctx: discord.ext.commands.Context, user: int):
         await ctx.guild.unban(user, reason="Unbanned by " + str(ctx.author))
@@ -55,11 +55,28 @@ class ModTools:
         
     @commands.command(name="ban", brief="Ban an active user of the Discord")
     @commands.has_permissions(ban_members=True)
-    async def ban(self, ctx: commands.Context, user: discord.User, *, reason: str):
+    async def ban(self, ctx: commands.Context, user: discord.Member, *, reason: str):
+        if ctx.message.author == user:
+            await ctx.send(embed=discord.Embed(
+                title="Moderator Toolkit",
+                description="No matter how much you hate yourself, you can not use this command to "
+                           + "ban yourself. Try `/hackban` instead?",
+                color=Colors.DANGER
+            ))
+            return
+    
+        if user.top_role.position >= ctx.message.author.top_role.position:
+            await ctx.send(embed=discord.Embed(
+                title="Moderator Toolkit",
+                description="User `" + str(user) + "` could not be banned, as they are not below you in the role hierarchy.",
+                color=Colors.DANGER
+            ))
+            return
+    
         await ctx.guild.ban(user, reason="[" + str(ctx.author) + "] " + reason, delete_message_days=1)
         
         await ctx.send(embed=discord.Embed(
-            title="Mod Toolkit",
+            title="Ka-Ban!",
             description="User `" + str(user) + "` was successfully banned.",
             color=Colors.SUCCESS
         ))
