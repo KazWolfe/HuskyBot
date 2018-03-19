@@ -47,7 +47,7 @@ class AntiSpam:
     async def asp(self, ctx: commands.Context):
         pass 
         
-    @asp.command(name="setWarnLimit", brief="Set the number of pings required before delete/warn")
+    @asp.command(name="setPingWarnLimit", brief="Set the number of pings required before delete/warn")
     @commands.has_permissions(mention_everyone=True)
     async def setWarnLimit(self, ctx: commands.Context, new_limit: int):
         if new_limit < 1:
@@ -57,13 +57,13 @@ class AntiSpam:
         as_config['pingSoftLimit'] = new_limit
         self._config.set('antiSpam', as_config)
         
-        await message.channel.send(embed=discord.Embed(
+        await ctx.send(embed=discord.Embed(
                 title="AntiSpam Module",
                 description = "The warning limit for pings has been set to " + str(new_limit) + ".",
                 color=Colors.SUCCESS
         ))
         
-    @asp.command(name="setBanLimit", brief="Set the number of pings required before user ban")
+    @asp.command(name="setPingBanLimit", brief="Set the number of pings required before user ban")
     @commands.has_permissions(mention_everyone=True)
     async def setBanLimit(self, ctx: commands.Context, new_limit: int):
         if new_limit < 1:
@@ -73,7 +73,7 @@ class AntiSpam:
         as_config['pingHardLimit'] = new_limit
         self._config.set('antiSpam', as_config)
         
-        await message.channel.send(embed=discord.Embed(
+        await ctx.send(embed=discord.Embed(
                 title="AntiSpam Module",
                 description = "The ban limit for pings has been set to " + str(new_limit) + ".",
                 color=Colors.SUCCESS
