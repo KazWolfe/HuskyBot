@@ -32,7 +32,7 @@ class AntiSpam:
             await message.delete()
             # ToDo: Issue actual warning through Punishment (once made available)
             await message.channel.send(embed=discord.Embed(
-                    name="Mass Ping blocked",
+                    title="Mass Ping Blocked",
                     description = "A mass-ping message was blocked in the current channel.\n"
                                 + "Please reduce the number of pings in your message and try again.",
                     color=Colors.WARNING
@@ -58,7 +58,7 @@ class AntiSpam:
         self._config.set('antiSpam', as_config)
         
         await message.channel.send(embed=discord.Embed(
-                name="AntiSpam Module",
+                title="AntiSpam Module",
                 description = "The warning limit for pings has been set to " + str(new_limit) + ".",
                 color=Colors.SUCCESS
         ))
@@ -74,7 +74,7 @@ class AntiSpam:
         self._config.set('antiSpam', as_config)
         
         await message.channel.send(embed=discord.Embed(
-                name="AntiSpam Module",
+                title="AntiSpam Module",
                 description = "The ban limit for pings has been set to " + str(new_limit) + ".",
                 color=Colors.SUCCESS
         ))

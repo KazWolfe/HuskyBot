@@ -190,7 +190,7 @@ class ServerLog:
         embed.add_field(name="Message ID", value=message.id, inline=True)
         embed.add_field(name="Send Timestamp", value=str(message.created_at).split('.')[0], inline=True)
         embed.add_field(name="Delete Timestamp", value=str(datetime.utcnow()).split('.')[0], inline=True)
-        embed.add_field(name="Message", value=message.content, inline=False)
+        embed.add_field(name="Message", value=WolfUtils.trim_string(message.content, 1000, True), inline=False)
 
         await alert_channel.send(embed=embed)
 
@@ -224,8 +224,8 @@ class ServerLog:
         embed.add_field(name="Channel", value=after.channel.mention, inline=True)
         embed.add_field(name="Send Timestamp", value=str(before.created_at).split('.')[0], inline=True)
         embed.add_field(name="Edit Timestamp", value=str(after.edited_at).split('.')[0], inline=True)
-        embed.add_field(name="Message Before", value=before.content, inline=False)
-        embed.add_field(name="Message After", value=after.content, inline=False)
+        embed.add_field(name="Message Before", value=WolfUtils.trim_string(before.content, 1000, True), inline=False)
+        embed.add_field(name="Message After", value=WolfUtils.trim_string(after.content, 1000, True), inline=False)
 
         await alert_channel.send(embed=embed)
 
