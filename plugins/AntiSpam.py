@@ -34,7 +34,7 @@ class AntiSpam:
             await message.channel.send(embed=discord.Embed(
                     name="Mass Ping blocked",
                     description = "A mass-ping message was blocked in the current channel.\n"
-                                + "Please reduce the number of pings in your message and try again."
+                                + "Please reduce the number of pings in your message and try again.",
                     color=Colors.WARNING
             ))
         
@@ -44,10 +44,11 @@ class AntiSpam:
             
     @commands.group(name="antispam", brief="Manage the Antispam configuration for the bot")
     @commands.has_permissions(manage_messages=True)
-    async def as(self, ctx: commands.Context):
+    async def asp(self, ctx: commands.Context):
         pass 
         
-    @as.command(name="setWarnLimit", brief="Set the number of pings required before delete/warn")
+    @asp.command(name="setWarnLimit", brief="Set the number of pings required before delete/warn")
+    @commands.has_permissions(mention_everyone=True)
     async def setWarnLimit(self, ctx: commands.Context, new_limit: int):
         if new_limit < 1:
             new_limit = None
@@ -58,11 +59,12 @@ class AntiSpam:
         
         await message.channel.send(embed=discord.Embed(
                 name="AntiSpam Module",
-                description = "The warning limit for pings has been set to " + str(new_limit) + "."
+                description = "The warning limit for pings has been set to " + str(new_limit) + ".",
                 color=Colors.SUCCESS
         ))
         
-    @as.command(name="setBanLimit", brief="Set the number of pings required before user ban")
+    @asp.command(name="setBanLimit", brief="Set the number of pings required before user ban")
+    @commands.has_permissions(mention_everyone=True)
     async def setWarnLimit(self, ctx: commands.Context, new_limit: int):
         if new_limit < 1:
             new_limit = None
@@ -73,7 +75,7 @@ class AntiSpam:
         
         await message.channel.send(embed=discord.Embed(
                 name="AntiSpam Module",
-                description = "The ban limit for pings has been set to " + str(new_limit) + "."
+                description = "The ban limit for pings has been set to " + str(new_limit) + ".",
                 color=Colors.SUCCESS
         ))
             
