@@ -192,7 +192,7 @@ class ServerLog:
         embed.add_field(name="Send Timestamp", value=str(message.created_at).split('.')[0], inline=True)
         embed.add_field(name="Delete Timestamp", value=str(datetime.utcnow()).split('.')[0], inline=True)
         
-        if message.content is not None:
+        if message.content is not None and message.content != "":
             embed.add_field(name="Message", value=WolfUtils.trim_string(message.content, 1000, True), inline=False)
             
         if message.attachments is not None and len(message.attachments) > 1:
