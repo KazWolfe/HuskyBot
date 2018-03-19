@@ -139,7 +139,7 @@ class Censor:
 
         await ctx.send(embed=discord.Embed(
             title="Censors for " + channel.name,
-            description="The word `" + censor + "` was added to the censor list for the specified channel",
+            description="The word `" + censor + "` was removed from the censor list for the specified channel",
             color=Colors.PRIMARY
         ))
 
