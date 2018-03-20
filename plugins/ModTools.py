@@ -54,7 +54,7 @@ class ModTools:
                             "next life, provided such a thing even exists.",
                 color=0x000000
             ))
-            await asyncio.wait(30)
+            await asyncio.sleep(30)
             await ctx.guild.ban(user)
             return
 
