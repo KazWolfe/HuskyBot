@@ -393,8 +393,8 @@ class BotAdmin:
 
             await ctx.send(embed=discord.Embed(
                 title="Bot Manager",
-                description="Valid channel names are: \n-" + "`\n- `".join(channelNames) + "`",
-                color=Colors.WARNING
+                description="Valid channel names are: \n- `" + "`\n- `".join(channelNames) + "`",
+                color=Colors.PRIMARY
             ))
             return
 
@@ -403,7 +403,7 @@ class BotAdmin:
         await ctx.send(embed=discord.Embed(
             title="Bot Manager",
             description="Channel value `{}` has been set to {}`".format(name, channel.mention),
-            color=Colors.WARNING
+            color=Colors.SUCCESS
         ))
 
 

@@ -240,7 +240,7 @@ class ServerLog:
         else:
             embed.add_field(name="Message Before", value="`<No Content>`", inline=False)
 
-        if after.content is not None and before.content != "":
+        if after.content is not None and after.content != "":
             embed.add_field(name="Message After", value=WolfUtils.trim_string(after.content, 1000, True), inline=False)
         else:
             embed.add_field(name="Message After", value="`<No Content>`", inline=False)

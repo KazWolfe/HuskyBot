@@ -34,6 +34,8 @@ class ModTools:
     @commands.command(name="autoban", aliases=["hackban"], brief="Ban any user by UID", enabled=False)
     @commands.has_permissions(ban_members=True)
     async def hackban(self, ctx: discord.ext.commands.Context, user: int, *, reason: str):
+        user = ctx.bot.get_user(user)
+
         await ctx.guild.ban(user, reason="[" + str(ctx.author) + "] " + reason, delete_message_days=1)
 
         await ctx.send(embed=discord.Embed(
@@ -46,6 +48,8 @@ class ModTools:
                       brief="Pardon a banned member not on the server", enabled=False)
     @commands.has_permissions(ban_members=True)
     async def unhackban(self, ctx: discord.ext.commands.Context, user: int):
+        user = ctx.bot.get_user(user)
+
         await ctx.guild.unban(user, reason="Unbanned by " + str(ctx.author))
 
         await ctx.send(embed=discord.Embed(
@@ -80,17 +84,6 @@ class ModTools:
         await ctx.send(embed=discord.Embed(
             title="Ka-Ban!",
             description="User `" + str(user) + "` was successfully banned.",
-            color=Colors.SUCCESS
-        ))
-
-    @commands.command(name="unban", alaises=["pardon"], brief="Pardon a currently banned member of the server")
-    @commands.has_permissions(ban_members=True)
-    async def unban(self, ctx: discord.ext.commands.Context, user: discord.User):
-        await ctx.guild.unban(user, reason="Unbanned by " + str(ctx.author))
-
-        await ctx.send(embed=discord.Embed(
-            title="Mod Toolkit",
-            description="User `" + str(user) + "` was successfully pardoned.",
             color=Colors.SUCCESS
         ))
 
