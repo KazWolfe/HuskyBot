@@ -11,7 +11,7 @@ from discord.ext import commands
 
 from WolfBot import WolfUtils
 from WolfBot import WolfConfig
-from WolfBot.WolfEmbed import Colors
+from WolfBot.WolfStatics import Colors, ChannelKeys
 
 BOT_CONFIG = WolfConfig.getConfig()
 LOCAL_STORAGE = WolfConfig.getSessionStore()
@@ -110,20 +110,20 @@ async def on_command_error(ctx, error):
         ))
         LOG.error("Command %s may only be run in a direct message!", command_name)
         return
-        
+
     if isinstance(error, commands.DisabledCommand):
-        embed=discord.Embed(
+        embed = discord.Embed(
             title="Command Handler",
             description="**The command `/" + command_name
                         + "` does not exist.** See `/help` for valid commands.",
             color=Colors.DANGER
         )
-        
+
         if ctx.message.author.guild_permissions.administrator:
             embed.set_footer(text="E_DISABLED_COMMAND")
-            
+
         await ctx.send(embed=embed)
-        
+
         LOG.error("Command %s is disabled.", command_name)
         return
 
@@ -169,22 +169,23 @@ async def on_command_error(ctx, error):
 @bot.event
 async def on_error(event_method, *args, **kwargs):
     LOG.error('Exception in method %s:\n%s', event_method, traceback.format_exc())
-        
+
     try:
-        channel = BOT_CONFIG.get('specialChannels', {}).get('logs', None)
-        
+        channel = BOT_CONFIG.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG, None)
+
         if channel is None:
             LOG.warn('A logging channel is not set up! Error messages will not be forwarded to Discord.')
             return
-            
+
         channel = bot.get_channel(channel)
-        
+
         embed = discord.Embed(
             title="Bot Exception Handler",
-            description=WolfUtils.trim_string("Exception in method `" + event_method + "`:\n```" + traceback.format_exc() + "```", 2048, True),
+            description=WolfUtils.trim_string(
+                "Exception in method `" + event_method + "`:\n```" + traceback.format_exc() + "```", 2048, True),
             color=Colors.DANGER
         )
-        
+
         await channel.send(embed=embed)
     except Exception as e:
         LOG.critical("There was an error sending an error to the error channel.\n " + str(e))
@@ -196,10 +197,10 @@ async def on_message(message):
         return
 
     if message.content.startswith(bot.command_prefix):
-        if message.content.lower().split(' ')[0].replace('/','') in BOT_CONFIG.get('ignoredCommands', []):
+        if message.content.lower().split(' ')[0].replace('/', '') in BOT_CONFIG.get('ignoredCommands', []):
             LOG.info("User %s ran an ignored command %s", message.author, message.content)
             return
-        
+
         LOG.info("User %s ran %s", message.author, message.content)
         await bot.process_commands(message)
 

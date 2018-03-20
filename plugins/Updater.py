@@ -10,7 +10,7 @@ from discord.ext import commands
 
 from WolfBot import WolfConfig
 from WolfBot import WolfUtils
-from WolfBot.WolfEmbed import Colors
+from WolfBot.WolfStatics import Colors
 
 LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 
@@ -74,24 +74,21 @@ class Updater:
     @commands.has_permissions(administrator=True)
     async def changelog(self, ctx: discord.ext.commands.Context):
         lastCommit = self.repo.head.commit
-        
+
         embed = discord.Embed(
             title="Changlog for version `" + str(lastCommit.hexsha)[:8] + "`",
             description="```" + lastCommit.message + "```",
             color=Colors.PRIMARY
         )
-        
+
         embed.add_field(name="Author", value=lastCommit.author, inline=True)
         embed.add_field(name="Author Date", value=datetime
-                .fromtimestamp(lastCommit.authored_date).strftime('%Y-%m-%d %H:%M:%S') + " UTC", inline=True)
-        embed.add_field(name="GitHub", value="[See Commit >](https://www.github.com/KazWolfe/" 
-                                            + "diy_tech-bot/commit/" + lastCommit.hexsha + ")", inline=False)
-                                            
-                                            
-        
-        
+                        .fromtimestamp(lastCommit.authored_date).strftime('%Y-%m-%d %H:%M:%S') + " UTC", inline=True)
+        embed.add_field(name="GitHub", value="[See Commit >](https://www.github.com/KazWolfe/"
+                                             + "diy_tech-bot/commit/" + lastCommit.hexsha + ")", inline=False)
+
         await ctx.send(embed=embed)
-            
-            
+
+
 def setup(bot: discord.ext.commands.Bot):
     bot.add_cog(Updater(bot))

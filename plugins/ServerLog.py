@@ -8,7 +8,7 @@ from discord.ext import commands
 
 from WolfBot import WolfConfig
 from WolfBot import WolfUtils
-from WolfBot.WolfEmbed import Colors
+from WolfBot.WolfStatics import Colors, ChannelKeys
 
 LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 
@@ -17,83 +17,83 @@ class ServerLog:
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
         self._config = WolfConfig.getConfig()
-        
+
         # ToDo: Find a better way of storing valid loggers. This is hacky as all hell.
         self._validLoggers = ["userJoin", "userJoin.milestones", "userJoin.audit",
                               "userLeave",
                               "userBan",
                               "messageDelete", "messageDelete.logIntegrity",
                               "messageEdit"]
-        
+
     async def on_member_join(self, member):
         # Send milestones to the moderator alerts channel
         async def milestone_notifier(notif_member):
             if "userJoin.milestones" not in self._config.get("loggers", {}).keys():
                 return
-        
-            milestone_channel = self._config.get('specialChannels', {}).get('modAlerts', None)
+
+            milestone_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_ALERTS.value, None)
             guild = notif_member.guild
-            
+
             if milestone_channel is None:
                 return
-                
+
             milestone_channel = guild.get_channel(milestone_channel)
-                
+
             if guild.member_count % 250 == 0:
                 await milestone_channel.send(embed=discord.Embed(
-                        title="Server Member Count Milestone!",
-                        description="The server has now reached " + str(guild.member_count) + " members! Thank you "
-                                    + notif_member.display_name + " for joining!",
-                        color=Colors.SUCCESS
+                    title="Server Member Count Milestone!",
+                    description="The server has now reached " + str(guild.member_count) + " members! Thank you "
+                                + notif_member.display_name + " for joining!",
+                    color=Colors.SUCCESS
                 ))
-        
+
         # Send all joins to the logging channel
         async def general_notifier(notif_member):
             if "userJoin" not in self._config.get("loggers", {}).keys():
                 return
-        
-            channel = self._config.get('specialChannels', {}).get('logs', None)
-            
+
+            channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
+
             if channel is None:
                 return
-                
+
             channel = notif_member.guild.get_channel(channel)
-                
+
             embed = discord.Embed(
                 title="New Member!",
                 description=str(notif_member) + " has joined the server.",
                 color=Colors.PRIMARY
             )
-            
+
             embed.set_thumbnail(url=notif_member.avatar_url)
             embed.add_field(name="Joined Server", value=str(notif_member.joined_at).split('.')[0], inline=True)
             embed.add_field(name="Joined Discord", value=str(notif_member.created_at).split('.')[0], inline=True)
             embed.add_field(name="User ID", value=notif_member.id, inline=True)
-            
+
             await channel.send(embed=embed)
-            
+
         # Send all joins to the auditing channel
         async def audit_notifier(notif_member):
             if "userJoin.audit" not in self._config.get("loggers", {}).keys():
                 return
-            
-            channel = self._config.get('specialChannels', {}).get('auditing', None)
-            
+
+            channel = self._config.get('specialChannels', {}).get(ChannelKeys.PUBLIC_LOG.value, None)
+
             if channel is None:
                 return
-                
+
             channel = notif_member.guild.get_channel(channel)
-                
+
             embed = discord.Embed(
                 title="New Member!",
                 description=str(notif_member) + " has joined the server. Welcome!",
                 color=Colors.PRIMARY
             )
-            
+
             embed.set_thumbnail(url=notif_member.avatar_url)
-            
+
             await channel.send(embed=embed)
-        
+
         await milestone_notifier(member)
         await general_notifier(member)
         await audit_notifier(member)
@@ -102,7 +102,7 @@ class ServerLog:
         if "userLeave" not in self._config.get("loggers", {}).keys():
             return
 
-        alert_channel = self._config.get('specialChannels', {}).get('logs', None)
+        alert_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
 
         if alert_channel is None:
             return
@@ -120,12 +120,12 @@ class ServerLog:
         embed.add_field(name="Leave Timestamp", value=str(datetime.utcnow()).split('.')[0])
 
         await alert_channel.send(embed=embed)
-        
+
     async def on_member_ban(self, guild: discord.Guild, user: discord.User):
         if "userBan" not in self._config.get("loggers", {}).keys():
             return
 
-        alert_channel = self._config.get('specialChannels', {}).get('logs', None)
+        alert_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
 
         if alert_channel is None:
             return
@@ -143,12 +143,12 @@ class ServerLog:
         embed.add_field(name="Ban Timestamp", value=str(datetime.utcnow()).split('.')[0])
 
         await alert_channel.send(embed=embed)
-        
+
     async def on_member_unban(self, guild: discord.Guild, user: discord.User):
         if "userBan" not in self._config.get("loggers", {}).keys():
             return
 
-        alert_channel = self._config.get('specialChannels', {}).get('logs', None)
+        alert_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
 
         if alert_channel is None:
             return
@@ -171,7 +171,7 @@ class ServerLog:
         if "messageDelete" not in self._config.get("loggers", {}).keys():
             return
 
-        alert_channel = self._config.get('specialChannels', {}).get('logs', None)
+        alert_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
 
         if alert_channel is None:
             return
@@ -191,12 +191,13 @@ class ServerLog:
         embed.add_field(name="Message ID", value=message.id, inline=True)
         embed.add_field(name="Send Timestamp", value=str(message.created_at).split('.')[0], inline=True)
         embed.add_field(name="Delete Timestamp", value=str(datetime.utcnow()).split('.')[0], inline=True)
-        
+
         if message.content is not None and message.content != "":
             embed.add_field(name="Message", value=WolfUtils.trim_string(message.content, 1000, True), inline=False)
-            
+
         if message.attachments is not None and len(message.attachments) > 1:
-            embed.add_field(name="Attachments", value=WolfUtils.trim_string(str(message.attachments), 1000, True), inline=False)
+            embed.add_field(name="Attachments", value=WolfUtils.trim_string(str(message.attachments), 1000, True),
+                            inline=False)
         elif message.attachments is not None and len(message.attachments) == 1:
             embed.set_image(url=message.attachments[0].url)
 
@@ -206,7 +207,7 @@ class ServerLog:
         if "messageEdit" not in self._config.get("loggers", {}).keys():
             return
 
-        alert_channel = self._config.get('specialChannels', {}).get('logs', None)
+        alert_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
 
         if alert_channel is None:
             return
@@ -232,13 +233,14 @@ class ServerLog:
         embed.add_field(name="Channel", value=after.channel.mention, inline=True)
         embed.add_field(name="Send Timestamp", value=str(before.created_at).split('.')[0], inline=True)
         embed.add_field(name="Edit Timestamp", value=str(after.edited_at).split('.')[0], inline=True)
-        
-        if before.content is not None:
-            embed.add_field(name="Message Before", value=WolfUtils.trim_string(before.content, 1000, True), inline=False)
+
+        if before.content is not None and before.content != "":
+            embed.add_field(name="Message Before", value=WolfUtils.trim_string(before.content, 1000, True),
+                            inline=False)
         else:
             embed.add_field(name="Message Before", value="`<No Content>`", inline=False)
-            
-        if after.content is not None:
+
+        if after.content is not None and before.content != "":
             embed.add_field(name="Message After", value=WolfUtils.trim_string(after.content, 1000, True), inline=False)
         else:
             embed.add_field(name="Message After", value="`<No Content>`", inline=False)
@@ -254,62 +256,20 @@ class ServerLog:
                 description="The command you have requested is not available. Please see `/help logger`",
                 color=Colors.DANGER
             ))
-            return 
-            
-    @logger.command(name="setModChannel", brief="Set the important moderator alerts channel")
-    async def setModChannel(self, ctx: discord.ext.commands.Context, channel: discord.TextChannel):
-        channel_config = self._config.get('specialChannels', {})
-        
-        channel_config['modAlerts'] = channel.id
-        
-        self._config.set('specialChannels', channel_config)
-        
-        await ctx.send(embed=discord.Embed(
-                title="Logging Manager",
-                description="The Moderator Alerts channel has been set to " + channel.mention + ".",
-                color=Colors.SUCCESS
-            ))
-            
-    @logger.command(name="setLogChannel", brief="Set the standard log messages channel")
-    async def setLogChannel(self, ctx: commands.Context, channel: discord.TextChannel):
-        channel_config = self._config.get('specialChannels', {})
-        
-        channel_config['logs'] = channel.id
-        
-        self._config.set('specialChannels', channel_config)
-        
-        await ctx.send(embed=discord.Embed(
-                title="Logging Manager",
-                description="The logging channel has been set to " + channel.mention + ".",
-                color=Colors.SUCCESS
-            ))
-            
-    @logger.command(name="setAuditChannel", brief="Set the audit log messages channel")
-    async def setAuditChannel(self, ctx: commands.Context, channel: discord.TextChannel):
-        channel_config = self._config.get('specialChannels', {})
-        
-        channel_config['audits'] = channel.id
-        
-        self._config.set('specialChannels', channel_config)
-        
-        await ctx.send(embed=discord.Embed(
-                title="Logging Manager",
-                description="The auditing channel has been set to " + channel.mention + ".",
-                color=Colors.SUCCESS
-            ))
-            
+            return
+
     @logger.command(name="enable", brief="Enable a specified logger")
     async def enableLogger(self, ctx: commands.Context, name: str):
         enabled_loggers = self._config.get('loggers', {})
-        
+
         if name not in self._validLoggers:
             await ctx.send(embed=discord.Embed(
                 title="Logging Manager",
                 description="The logger named `" + name + "` is not recognized as a valid logger.",
                 color=Colors.DANGER
             ))
-            return  
-        
+            return
+
         if name in enabled_loggers.keys():
             await ctx.send(embed=discord.Embed(
                 title="Logging Manager",
@@ -317,29 +277,29 @@ class ServerLog:
                 color=Colors.WARNING
             ))
             return
-            
+
         enabled_loggers[name] = {}
-        
+
         self._config.set('loggers', enabled_loggers)
-        
+
         await ctx.send(embed=discord.Embed(
-                title="Logging Manager",
-                description="The logger named `" + name + "` was enabled.",
-                color=Colors.SUCCESS
+            title="Logging Manager",
+            description="The logger named `" + name + "` was enabled.",
+            color=Colors.SUCCESS
         ))
-            
+
     @logger.command(name="disable", brief="Disable a specified logger")
     async def disableLogger(self, ctx: commands.Context, name: str):
         enabled_loggers = self._config.get('loggers', {})
-        
+
         if name not in self._validLoggers:
             await ctx.send(embed=discord.Embed(
                 title="Logging Manager",
                 description="The logger named `" + name + "` is not recognized as a valid logger.",
                 color=Colors.DANGER
             ))
-            return            
-        
+            return
+
         if name not in enabled_loggers.keys():
             await ctx.send(embed=discord.Embed(
                 title="Logging Manager",
@@ -347,17 +307,17 @@ class ServerLog:
                 color=Colors.WARNING
             ))
             return
-            
+
         enabled_loggers.pop(name)
-        
+
         self._config.set('loggers', enabled_loggers)
-        
+
         await ctx.send(embed=discord.Embed(
-                title="Logging Manager",
-                description="The logger named `" + name + "` was disabled.",
-                color=Colors.SUCCESS
+            title="Logging Manager",
+            description="The logger named `" + name + "` was disabled.",
+            color=Colors.SUCCESS
         ))
-            
+
 
 def setup(bot: discord.ext.commands.Bot):
     bot.add_cog(ServerLog(bot))

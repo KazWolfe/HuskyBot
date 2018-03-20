@@ -4,7 +4,7 @@ import discord
 from discord.ext import commands
 
 from WolfBot import WolfConfig
-from WolfBot.WolfEmbed import Colors
+from WolfBot.WolfStatics import Colors
 
 LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 
@@ -35,24 +35,25 @@ class ModTools:
     @commands.has_permissions(ban_members=True)
     async def hackban(self, ctx: discord.ext.commands.Context, user: int, *, reason: str):
         await ctx.guild.ban(user, reason="[" + str(ctx.author) + "] " + reason, delete_message_days=1)
-        
+
         await ctx.send(embed=discord.Embed(
             title="Mod Toolkit",
             description="User `" + str(user) + "` was successfully banned.",
             color=Colors.SUCCESS
         ))
 
-    @commands.command(name="unautoban", aliases=["unhackban", "pardonautoban", "pardonhackban"], brief="Pardon a banned member not on the server", enabled=False)
+    @commands.command(name="unautoban", aliases=["unhackban", "pardonautoban", "pardonhackban"],
+                      brief="Pardon a banned member not on the server", enabled=False)
     @commands.has_permissions(ban_members=True)
     async def unhackban(self, ctx: discord.ext.commands.Context, user: int):
         await ctx.guild.unban(user, reason="Unbanned by " + str(ctx.author))
-        
+
         await ctx.send(embed=discord.Embed(
             title="Mod Toolkit",
             description="User `" + str(user) + "` was successfully pardoned.",
             color=Colors.SUCCESS
         ))
-        
+
     @commands.command(name="ban", brief="Ban an active user of the Discord")
     @commands.has_permissions(ban_members=True)
     async def ban(self, ctx: commands.Context, user: discord.Member, *, reason: str):
@@ -60,32 +61,33 @@ class ModTools:
             await ctx.send(embed=discord.Embed(
                 title="Moderator Toolkit",
                 description="No matter how much you hate yourself, you can not use this command to "
-                           + "ban yourself. Try `/hackban` instead?",
+                            + "ban yourself. Try `/hackban` instead?",
                 color=Colors.DANGER
             ))
             return
-    
+
         if user.top_role.position >= ctx.message.author.top_role.position:
             await ctx.send(embed=discord.Embed(
                 title="Moderator Toolkit",
-                description="User `" + str(user) + "` could not be banned, as they are not below you in the role hierarchy.",
+                description="User `" + str(
+                    user) + "` could not be banned, as they are not below you in the role hierarchy.",
                 color=Colors.DANGER
             ))
             return
-    
+
         await ctx.guild.ban(user, reason="[" + str(ctx.author) + "] " + reason, delete_message_days=1)
-        
+
         await ctx.send(embed=discord.Embed(
             title="Ka-Ban!",
             description="User `" + str(user) + "` was successfully banned.",
             color=Colors.SUCCESS
         ))
-        
+
     @commands.command(name="unban", alaises=["pardon"], brief="Pardon a currently banned member of the server")
     @commands.has_permissions(ban_members=True)
     async def unban(self, ctx: discord.ext.commands.Context, user: discord.User):
         await ctx.guild.unban(user, reason="Unbanned by " + str(ctx.author))
-        
+
         await ctx.send(embed=discord.Embed(
             title="Mod Toolkit",
             description="User `" + str(user) + "` was successfully pardoned.",

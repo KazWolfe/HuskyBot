@@ -6,7 +6,7 @@ from discord.ext import commands
 
 from WolfBot import WolfUtils
 from WolfBot import WolfConfig
-from WolfBot.WolfEmbed import Colors
+from WolfBot.WolfStatics import Colors
 
 LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 

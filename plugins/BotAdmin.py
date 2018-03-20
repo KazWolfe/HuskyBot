@@ -7,7 +7,7 @@ from discord.ext import commands
 
 from WolfBot import WolfUtils
 from WolfBot import WolfConfig
-from WolfBot.WolfEmbed import Colors
+from WolfBot.WolfStatics import Colors, ChannelKeys
 
 LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 
@@ -325,13 +325,13 @@ class BotAdmin:
         self._config.set("restartNotificationChannel", ctx.channel.id)
         self._config.set("restartReason", "admin")
         await ctx.bot.logout()
-        
+
     @admin.command(name="ignoreCommand", brief="Add a command to the ignore list.")
     async def ignore(self, ctx: commands.Context, command: str):
         command = command.lower()
-    
+
         ignoredCommands = self._config.get('ignoredCommands', [])
-    
+
         if ctx.bot.get_command(command) is not None:
             await ctx.send(embed=discord.Embed(
                 title="Bot Manager",
@@ -339,7 +339,7 @@ class BotAdmin:
                 color=Colors.DANGER
             ))
             return
-            
+
         if command in ignoredCommands:
             await ctx.send(embed=discord.Embed(
                 title="Bot Manager",
@@ -347,23 +347,22 @@ class BotAdmin:
                 color=Colors.WARNING
             ))
             return
-            
+
         ignoredCommands.append(command)
         self._config.set('ignoredCommands', ignoredCommands)
-        
-        
+
         await ctx.send(embed=discord.Embed(
             title="Bot Manager",
             description="The command `/" + command + "` has been added to the ignore list.",
             color=Colors.SUCCESS
         ))
-        
+
     @admin.command(name="unignoreCommand", brief="Remove a command from the ignore list.")
     async def unignore(self, ctx: commands.Context, command: str):
         command = command.lower()
-    
+
         ignoredCommands = self._config.get('ignoredCommands', [])
-            
+
         if command not in ignoredCommands:
             await ctx.send(embed=discord.Embed(
                 title="Bot Manager",
@@ -371,7 +370,7 @@ class BotAdmin:
                 color=Colors.WARNING
             ))
             return
-            
+
         ignoredCommands.remove(command)
         self._config.set('ignoredCommands', ignoredCommands)
 
@@ -379,6 +378,34 @@ class BotAdmin:
             title="Bot Manager",
             description="The command `/" + command + "` has been removed from the ignore list.",
             color=Colors.SUCCESS
+        ))
+
+    @admin.command(name="setChannel", brief="Configure a channel binding for the bot.")
+    async def set_channel(self, ctx: commands.Context, name: str, channel: discord.TextChannel):
+        name = name.upper()
+
+        if name not in ChannelKeys.__members__:
+            channelNames = []
+
+            for ch in ChannelKeys:
+                channelNames.append(ch.name)
+
+            await ctx.send(embed=discord.Embed(
+                title="Bot Manager",
+                description="Valid channel names are: \n-" + "`\n- `".join(channelNames) + "`",
+                color=Colors.WARNING
+            ))
+            return
+
+        channelKey = ChannelKeys[name].value
+        config = self._config.get('specialChannels', {})
+
+        config[channelKey] = channel.id
+
+        await ctx.send(embed=discord.Embed(
+            title="Bot Manager",
+            description="Channel value `{}` has been set to {}`".format(name, channel.mention),
+            color=Colors.WARNING
         ))
 
 
