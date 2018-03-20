@@ -171,7 +171,7 @@ async def on_error(event_method, *args, **kwargs):
     LOG.error('Exception in method %s:\n%s', event_method, traceback.format_exc())
 
     try:
-        channel = BOT_CONFIG.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG, None)
+        channel = BOT_CONFIG.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
 
         if channel is None:
             LOG.warn('A logging channel is not set up! Error messages will not be forwarded to Discord.')

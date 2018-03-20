@@ -383,6 +383,7 @@ class BotAdmin:
     @admin.command(name="setChannel", brief="Configure a channel binding for the bot.")
     async def set_channel(self, ctx: commands.Context, name: str, channel: discord.TextChannel):
         name = name.upper()
+        config = self._config.get('specialChannels', {})
 
         if name not in ChannelKeys.__members__:
             channelNames = []
@@ -397,10 +398,7 @@ class BotAdmin:
             ))
             return
 
-        channelKey = ChannelKeys[name].value
-        config = self._config.get('specialChannels', {})
-
-        config[channelKey] = channel.id
+        config[ChannelKeys[name].value] = channel.id
 
         await ctx.send(embed=discord.Embed(
             title="Bot Manager",
