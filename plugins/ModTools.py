@@ -1,4 +1,5 @@
 import logging
+import asyncio
 
 import discord
 from discord.ext import commands
@@ -35,6 +36,25 @@ class ModTools:
     @commands.has_permissions(ban_members=True)
     async def hackban(self, ctx: discord.ext.commands.Context, user: int, *, reason: str):
         user = ctx.bot.get_user(user)
+
+        if user == ctx.author:
+            await ctx.send("Hello darkness my old friend...")
+            await asyncio.wait(5)
+            await ctx.send("Permissions willing, you will be banned in 30 seconds. Thank you for using the WolfBot "
+                           "suicide booth. On behalf of Blacksite Technologies, we wish you the best of luck in your "
+                           "next life, provided such a thing even exists.")
+            await asyncio.wait(30)
+            await ctx.guild.ban(user)
+            return
+
+        if ctx.guild.get_member(user) is not None:
+            await ctx.send(embed=discord.Embed(
+                title="Mod Toolkit",
+                description="User `" + str(user) + "` may not be hackbanned, as they are an active member of the "
+                            "server. Use the `/ban` command instead.",
+                color=Colors.Danger
+            ))
+            return
 
         await ctx.guild.ban(user, reason="[" + str(ctx.author) + "] " + reason, delete_message_days=1)
 
