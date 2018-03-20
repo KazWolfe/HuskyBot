@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import Enum, IntEnum
 
 
-class Colors(Enum):
+class Colors(IntEnum):
     PRIMARY = 0x007BFF
     SECONDARY = 0x6C757D
     SUCCESS = 0x28A745
@@ -13,7 +13,7 @@ class Colors(Enum):
     ERROR = DANGER
 
 
-class ChannelKeys(Enum):
+class ChannelKeys(str, Enum):
     STAFF_LOG = "logs"
     STAFF_HUB = "modChannel"
     STAFF_ALERTS = "staffAlerts"
