@@ -34,25 +34,36 @@ class ModTools:
 
     @commands.command(name="autoban", aliases=["hackban"], brief="Ban any user by UID")
     @commands.has_permissions(ban_members=True)
-    async def hackban(self, ctx: discord.ext.commands.Context, user: int, *, reason: str):
-        user = ctx.bot.get_user(user)
+    async def hackban(self, ctx: discord.ext.commands.Context, user_id: int, *, reason: str):
+        user = ctx.bot.get_user(user_id)
+
+        if user is None:
+            await ctx.send(embed=discord.Embed(
+                title="Mod Toolkit",
+                description="User ID `" + str(user_id) + "` could not be hackbanned. Do they even exist?",
+                color=Colors.DANGER
+            ))
+            return
 
         if user == ctx.author:
-            await ctx.send("Hello darkness my old friend...")
-            await asyncio.wait(5)
-            await ctx.send("Permissions willing, you will be banned in 30 seconds. Thank you for using the WolfBot "
-                           "suicide booth. On behalf of Blacksite Technologies, we wish you the best of luck in your "
-                           "next life, provided such a thing even exists.")
+            await ctx.send(embed=discord.Embed(
+                title="Hello darkness my old friend...",
+                url="https://www.youtube.com/watch?v=4zLfCnGVeL4",
+                description="Permissions willing, you will be banned in 30 seconds. Thank you for using the WolfBot "
+                            "suicide booth. On behalf of the DIY Tech Discord, we wish you the best of luck in your "
+                            "next life, provided such a thing even exists.",
+                color=0x000000
+            ))
             await asyncio.wait(30)
             await ctx.guild.ban(user)
             return
 
-        if ctx.guild.get_member(user) is not None:
+        if ctx.guild.get_member(user.id) is not None:
             await ctx.send(embed=discord.Embed(
                 title="Mod Toolkit",
                 description="User `" + str(user) + "` may not be hackbanned, as they are an active member of the "
                             "server. Use the `/ban` command instead.",
-                color=Colors.Danger
+                color=Colors.DANGER
             ))
             return
 
