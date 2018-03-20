@@ -31,7 +31,7 @@ class ModTools:
             await after.remove_roles(bot_role, reason="User is not an authorized bot.")
             LOG.info("User " + after.display_name + " was granted bot role, but was not a bot. Removing.")
 
-    @commands.command(name="autoban", aliases=["hackban"], brief="Ban any user by UID", enabled=False)
+    @commands.command(name="autoban", aliases=["hackban"], brief="Ban any user by UID")
     @commands.has_permissions(ban_members=True)
     async def hackban(self, ctx: discord.ext.commands.Context, user: int, *, reason: str):
         user = ctx.bot.get_user(user)
@@ -45,7 +45,7 @@ class ModTools:
         ))
 
     @commands.command(name="unautoban", aliases=["unhackban", "pardonautoban", "pardonhackban"],
-                      brief="Pardon a banned member not on the server", enabled=False)
+                      brief="Pardon a banned member not on the server")
     @commands.has_permissions(ban_members=True)
     async def unhackban(self, ctx: discord.ext.commands.Context, user: int):
         user = ctx.bot.get_user(user)

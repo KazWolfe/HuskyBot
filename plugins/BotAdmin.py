@@ -402,7 +402,7 @@ class BotAdmin:
 
         await ctx.send(embed=discord.Embed(
             title="Bot Manager",
-            description="Channel value `{}` has been set to {}`".format(name, channel.mention),
+            description="Channel value `{}` has been set to {}".format(name, channel.mention),
             color=Colors.SUCCESS
         ))
 
