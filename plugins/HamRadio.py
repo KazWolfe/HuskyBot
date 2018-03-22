@@ -11,6 +11,7 @@ LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 class HamRadio:
     def __init__(self, bot):
         self.bot = bot
+        self._config = WolfConfig.getConfig()
         LOG.info("Loaded plugin!")
 
     @commands.group(pass_context=True)
@@ -21,14 +22,14 @@ class HamRadio:
 
     @ham.command(name="register")
     async def registerCallsign(self, ctx: discord.ext.commands.Context, callsign: str):
-        config = WolfConfig.getConfig().get('ham_radio', {})
+        config = self._config.get('ham_radio', {})
 
         if config.get('callsigns') is None:
             config['callsigns'] = {}
 
         config['callsigns'][str(ctx.author.id)] = callsign
 
-        WolfConfig.getConfig().set('ham_radio', config)
+        self._config.set('ham_radio', config)
 
         await ctx.send("Set your callsign to {}!".format(callsign))
 

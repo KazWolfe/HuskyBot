@@ -19,6 +19,7 @@ LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 class Updater:
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
+        self._config = WolfConfig.getConfig()
         self.repo = git.Repo(search_parent_directories=True)
         LOG.info("Loaded plugin!")
 
@@ -66,8 +67,8 @@ class Updater:
         ))
 
         LOG.info("Bot is going down for update restart!")
-        WolfConfig.getConfig().set("restartNotificationChannel", ctx.channel.id)
-        WolfConfig.getConfig().set("restartReason", "update")
+        self._config.set("restartNotificationChannel", ctx.channel.id)
+        self._config.set("restartReason", "update")
         await ctx.bot.logout()
 
     @commands.command(name="changelog", brief="Get the changelog for the most recent bot version.")

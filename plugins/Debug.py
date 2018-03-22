@@ -14,6 +14,8 @@ LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 class Debug:
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
+        self._config = WolfConfig.getConfig()
+        self._session_store = WolfConfig.getSessionStore()
         LOG.info("Loaded plugin!")
 
     @commands.group(name="debug", hidden=True)
@@ -23,8 +25,8 @@ class Debug:
 
     @debug.command(name="dumpConfig", brief="Dump the bot's active configuration.")
     async def dumpConfig(self, ctx: discord.ext.commands.Context):
-        config = str(WolfConfig.getConfig().dump())
-        config = config.replace(WolfConfig.getConfig().get('apiKey', '<WTF HOW DID 8741234723890423>'), '[EXPUNGED]')
+        config = str(self._config.dump())
+        config = config.replace(self._config.get('apiKey', '<WTF HOW DID 8741234723890423>'), '[EXPUNGED]')
 
         embed = discord.Embed(
             title="Bot Manager",
@@ -34,7 +36,7 @@ class Debug:
 
         embed.add_field(name="WolfConfig.getConfig()", value="```javascript\n" + config + "```", inline=False)
         embed.add_field(name="LOCAL_STORAGE",
-                        value="```javascript\n" + str(WolfConfig.getSessionStore().dump()) + "```",
+                        value="```javascript\n" + str(self._session_store.dump()) + "```",
                         inline=False)
 
         await ctx.send(embed=embed)
@@ -138,6 +140,8 @@ class Debug:
         member_details.add_field(name="Joined Server", value=str(member.joined_at).split('.')[0], inline=True)
         member_details.add_field(name="Roles", value=", ".join(roles), inline=False)
         member_details.set_thumbnail(url=member.avatar_url)
+        member_details.set_footer(text="Member #" + str(sorted(ctx.guild.members,
+                                                               key=lambda m: m.joined_at).index(member) + 1))
 
         await ctx.send(embed=member_details)
 

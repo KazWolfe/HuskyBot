@@ -17,6 +17,7 @@ class ServerLog:
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
         self._config = WolfConfig.getConfig()
+        LOG.info("Loaded plugin!")
 
         # ToDo: Find a better way of storing valid loggers. This is hacky as all hell.
         self._validLoggers = ["userJoin", "userJoin.milestones", "userJoin.audit",
@@ -321,4 +322,3 @@ class ServerLog:
 
 def setup(bot: discord.ext.commands.Bot):
     bot.add_cog(ServerLog(bot))
-    LOG.info("Loaded plugin!")

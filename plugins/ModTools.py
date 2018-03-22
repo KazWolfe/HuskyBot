@@ -14,6 +14,7 @@ LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 class ModTools:
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
+        self._config = WolfConfig.getConfig()
         LOG.info("Loaded plugin!")
 
     # Prevent users from becoming bot role if they're not actually bots.
@@ -21,7 +22,7 @@ class ModTools:
         if before.roles == after.roles:
             return
 
-        special_roles = WolfConfig.getConfig().get("specialRoles", {})
+        special_roles = self._config.get("specialRoles", {})
 
         if special_roles.get('bots') is None:
             return

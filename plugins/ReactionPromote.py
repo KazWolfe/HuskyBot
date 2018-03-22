@@ -13,11 +13,12 @@ LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 class ReactionPromote:
     def __init__(self, bot):
         self.bot = bot
+        self._config = WolfConfig.getConfig()
         self.roleRemovalBlacklist = []
         LOG.info("Loaded plugin!")
 
     async def on_raw_reaction_add(self, emoji, message_id, channel_id, user_id):
-        promotion_config = WolfConfig.getConfig().get('promotions', {})
+        promotion_config = self._config.get('promotions', {})
 
         channel = self.bot.get_channel(channel_id)
 
@@ -52,7 +53,7 @@ class ReactionPromote:
             await message.remove_reaction(emoji, user)
 
     async def on_raw_reaction_remove(self, emoji, message_id, channel_id, user_id):
-        promotion_config = WolfConfig.getConfig().get('promotions', {})
+        promotion_config = self._config.get('promotions', {})
 
         if (str(user_id) + str(message_id)) in self.roleRemovalBlacklist:
             LOG.warning("Removal throttled.")
@@ -102,14 +103,14 @@ class ReactionPromote:
     @rpromote.command(name="addPromotion", brief="Add a new promotion to the configs")
     async def addPromotion(self, ctx: discord.ext.commands.Context, channel: discord.TextChannel, message_id: int,
                            emoji: str, role: discord.Role):
-        promotion_config = WolfConfig.getConfig().get('promotions', {})
+        promotion_config = self._config.get('promotions', {})
 
         print(promotion_config)
         message_config = promotion_config.setdefault(str(channel.id), {}).setdefault(str(message_id), {})
 
         print(promotion_config)
         message_config[emoji] = role.id
-        WolfConfig.getConfig().set('promotions', promotion_config)
+        self._config.set('promotions', promotion_config)
         print(promotion_config)
 
         await ctx.send(embed=discord.Embed(

@@ -17,6 +17,7 @@ class BotAdmin:
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
         self._config = WolfConfig.getConfig()
+        self._session_store = WolfConfig.getSessionStore()
         self._debugmode = self._config.get("developerMode", False)
         LOG.info("Loaded plugin!")
 
@@ -251,7 +252,7 @@ class BotAdmin:
 
     @admin.command(name="log", aliases=["logs"], brief="See the bot's current log.")
     async def log(self, ctx: discord.ext.commands.Context, lines: int = 10):
-        log_file = WolfConfig.getSessionStore().get('logPath')
+        log_file = self._session_store.get('logPath')
 
         if log_file is None:
             await ctx.send(embed=discord.Embed(
