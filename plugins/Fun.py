@@ -20,26 +20,29 @@ class Fun:
         LOG.info("Loaded plugin!")
 
     @commands.command(name="slap", brief="Slap a user!")
-    def slap(self, ctx: commands.Context, user: discord.Member = None):
+    async def slap(self, ctx: commands.Context, user: discord.Member = None):
         if user is None:
-            ctx.send("**{}** tried to slap someone with a large trout, but missed and hit themselves!"
-                     .format(ctx.author.mention))
+            await ctx.send("***{}*** *tried to slap someone with a large trout, but missed and hit themselves!*"
+                           .format(ctx.author.mention))
             return
 
         slap = random.randint(1, 40)
 
         if slap == 40:
-            ctx.send("***{}*** *slaps* ***{}*** *around with a rainbow trout!*".format(ctx.author.mention, user.mention))
+            await ctx.send("***{}*** *slaps* ***{}*** *around with a rainbow trout!*"
+                           .format(ctx.author.mention, user.mention))
         elif slap > 30:
-            ctx.send("***{}*** *slaps* ***{}*** *around with a rather large trout!*"
-                     .format(ctx.author.mention, user.mention))
+            await ctx.send("***{}*** *slaps* ***{}*** *around with a rather large trout!*"
+                           .format(ctx.author.mention, user.mention))
         elif slap > 20:
-            ctx.send("***{}*** *slaps* ***{}*** *around with a large trout!*".format(ctx.author.mention, user.mention))
+            await ctx.send("***{}*** *slaps* ***{}*** *around with a large trout!*"
+                           .format(ctx.author.mention, user.mention))
         elif slap > 10:
-            ctx.send("***{}*** *slaps* ***{}*** *around with a trout!*".format(ctx.author.mention, user.mention))
+            await ctx.send("***{}*** *slaps* ***{}*** *around with a trout!*"
+                           .format(ctx.author.mention, user.mention))
         else:
-            ctx.send("***{}*** *slaps* ***{}*** *around with a rather small trout!*"
-                     .format(ctx.author.mention, user.mention))
+            await ctx.send("***{}*** *slaps* ***{}*** *around with a rather small trout!*"
+                           .format(ctx.author.mention, user.mention))
 
 
 def setup(bot: discord.ext.commands.Bot):
