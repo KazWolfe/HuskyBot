@@ -53,7 +53,7 @@ class Fun:
                            .format(ctx.author.mention, victim))
 
     @commands.command(name="hug", brief="Get a hug from the bot, or give a hug!")
-    async def hug(self, ctx: commands.Context, target: discord.Member):
+    async def hug(self, ctx: commands.Context, target: discord.Member = None):
         if target is None:
             target = ctx.author
 
