@@ -76,6 +76,7 @@ class Fun:
                 description="You are not permitted to hug this user.",
                 color=Colors.DANGER
             ))
+            return
 
         await ctx.send("*{} gives {} a hug. Aww!*".format(ctx.author.mention, target.mention))
 
