@@ -55,7 +55,7 @@ class ModTools:
                 color=0x000000
             ))
             await asyncio.sleep(30)
-            await ctx.guild.ban(user)
+            await ctx.guild.ban(user, reason="User requested self-ban through /hackban")
             return
 
         if ctx.guild.get_member(user.id) is not None:
@@ -67,7 +67,7 @@ class ModTools:
             ))
             return
 
-        await ctx.guild.ban(user, reason="[" + str(ctx.author) + "] " + reason, delete_message_days=1)
+        await ctx.guild.ban(user, reason="[By " + str(ctx.author) + " - HACKBAN] " + reason, delete_message_days=1)
 
         await ctx.send(embed=discord.Embed(
             title="Mod Toolkit",
@@ -75,7 +75,7 @@ class ModTools:
             color=Colors.SUCCESS
         ))
 
-    @commands.command(name="unautoban", aliases=["unhackban", "pardonautoban", "pardonhackban"],
+    @commands.command(name="unautoban", aliases=["pardon", "unban", "unhackban", "pardonautoban", "pardonhackban"],
                       brief="Pardon a banned member not on the server")
     @commands.has_permissions(ban_members=True)
     async def unhackban(self, ctx: discord.ext.commands.Context, user: int):
@@ -110,7 +110,7 @@ class ModTools:
             ))
             return
 
-        await ctx.guild.ban(user, reason="[" + str(ctx.author) + "] " + reason, delete_message_days=1)
+        await ctx.guild.ban(user, reason="[By " + str(ctx.author) + "] " + reason, delete_message_days=1)
 
         await ctx.send(embed=discord.Embed(
             title="Ka-Ban!",

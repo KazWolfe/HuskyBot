@@ -18,6 +18,9 @@ class AntiSpam:
         LOG.info("Loaded plugin!")
 
     async def on_message(self, message):
+        if not WolfUtils.should_process_message(message):
+            return
+
         await self.multi_ping_check(message)
 
     async def multi_ping_check(self, message):
@@ -38,7 +41,8 @@ class AntiSpam:
             ))
 
         if PING_BAN_LIMIT is not None and len(message.mentions) >= PING_BAN_LIMIT:
-            await message.author.ban(delete_message_days=1, reason="Multipinged over server ban limit.")
+            await message.author.ban(delete_message_days=1, reason="[AUTOMATIC BAN - AntiSpam Module] "
+                                                                   "Multi-pinged over server ban limit.")
             # ToDo: Integrate with ServerLog to send custom ban message to staff logs.
 
     @commands.group(name="antispam", brief="Manage the Antispam configuration for the bot")
