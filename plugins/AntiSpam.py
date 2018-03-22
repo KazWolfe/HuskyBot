@@ -50,7 +50,7 @@ class AntiSpam:
     async def prevent_discord_invites(self, message):
         ALLOWED_INVITES = self._config.get('antiSpam', {}).get('allowedInvites', ['diytech'])
 
-        regex_matches = re.findall('discord\.gg/\w+', message.content, re.IGNORECASE)
+        regex_matches = re.findall('discord\.gg/\w+', message.content, flags=re.IGNORECASE)
 
         if message.author.permissions_in(message.channel).manage_messages:
             return
@@ -60,7 +60,7 @@ class AntiSpam:
             return
 
         for regex_match in regex_matches:
-            fragment = re.split("discord\.gg/", regex_match, re.IGNORECASE)[1]
+            fragment = re.split("discord\.gg/", regex_match, flags=re.IGNORECASE)[1]
 
             if fragment in ALLOWED_INVITES:
                 # Permitted fragment
