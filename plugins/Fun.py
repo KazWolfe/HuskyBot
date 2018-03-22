@@ -2,6 +2,7 @@ import logging
 
 import discord
 import random
+import asyncio
 
 from datetime import datetime
 from discord.ext import commands
@@ -58,8 +59,9 @@ class Fun:
             target = ctx.author
 
         if target == ctx.author:
-            await ctx.send("*I give {} a hug... please wait for hug completion.*".format(target.mention))
+            await ctx.send("*I give {} a hug. Please wait for hug completion...*".format(target.mention))
             await ctx.trigger_typing()
+            await asyncio.sleep(5)
             await ctx.send(embed=discord.Embed(
                 title="Bot Error Handler",
                 description="The bot has encountered a fatal error running the command given. Logs are below.",
@@ -67,6 +69,13 @@ class Fun:
             ).add_field(name="Error Log", value="```Command raised an exception: SentienceError: Bot does not have the "
                                                 "required emotional capability to give hugs.```", inline=False))
             return
+
+        if target.id == 336301511942340608 and ctx.author.id == 323365398546481154:
+            await ctx.send(embed=discord.Embed(
+                title="Hug Manager",
+                description="You are not permitted to hug this user.",
+                color=Colors.DANGER
+            ))
 
         await ctx.send("*{} gives {} a hug. Aww!*".format(ctx.author.mention, target.mention))
 
