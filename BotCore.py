@@ -39,11 +39,13 @@ LOG = logging.getLogger("DiyBot.Core")
 
 @bot.event
 async def on_ready():
+    global restart_reason
+
     # Delete temporary restart configs
     if restart_reason != "start":
         BOT_CONFIG.delete("restartReason")
-        del restart_reason
         del start_game
+        restart_reason = "start"
 
     bot_presence = BOT_CONFIG.get('presence', {"game": "DiyBot", "type": 2, "status": "dnd"})
 
