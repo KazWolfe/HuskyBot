@@ -70,7 +70,8 @@ class Fun:
                                                 "required emotional capability to give hugs.```", inline=False))
             return
 
-        if target.id == 336301511942340608 and ctx.author.id == 323365398546481154:
+        if target.id == 336301511942340608 and ctx.author.id == 323365398546481154 \
+                or target.id == 142494680158961664:                                   # Anyone hugging kaz
             await ctx.send(embed=discord.Embed(
                 title="Hug Manager",
                 description="You are not permitted to hug this user.",

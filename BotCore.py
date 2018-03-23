@@ -1,22 +1,22 @@
 #!/usr/bin/env python3
 
 import datetime
-import logging, traceback
+import logging
 import os
 import sys
-import time
+import traceback
 
 import discord
 from discord.ext import commands
 
-from WolfBot import WolfUtils
 from WolfBot import WolfConfig
+from WolfBot import WolfUtils
 from WolfBot.WolfStatics import Colors, ChannelKeys
 
 BOT_CONFIG = WolfConfig.getConfig()
 LOCAL_STORAGE = WolfConfig.getSessionStore()
 
-# Determine restart reason (pretty mode)
+# Determine restart reason (pretty mode) - HACK FOR BOT INIT
 restart_reason = BOT_CONFIG.get("restartReason", "start")
 start_status = discord.Status.idle
 if restart_reason == "admin":
@@ -39,8 +39,11 @@ LOG = logging.getLogger("DiyBot.Core")
 
 @bot.event
 async def on_ready():
+    # Delete temporary restart configs
     if restart_reason != "start":
         BOT_CONFIG.delete("restartReason")
+        del restart_reason
+        del start_game
 
     bot_presence = BOT_CONFIG.get('presence', {"game": "DiyBot", "type": 2, "status": "dnd"})
 

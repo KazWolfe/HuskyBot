@@ -27,6 +27,10 @@ class AntiSpam:
         if not WolfUtils.should_process_message(message):
             return
 
+        # AS can't do anything in DMs, so just ignore em.
+        if message.guild is None:
+            return
+
         await self.multi_ping_check(message)
         await self.prevent_discord_invites(message)
 

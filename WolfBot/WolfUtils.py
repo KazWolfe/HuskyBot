@@ -1,7 +1,6 @@
 import subprocess
 
-from BotCore import BOT_CONFIG
-
+import WolfBot.WolfConfig
 
 def memberHasRole(member, role_id):
     for r in member.roles:
@@ -49,7 +48,7 @@ def tail(filename, n):
 
 
 def should_process_message(message):
-    if message.guild.id in BOT_CONFIG.get("ignoredGuilds", []):
+    if message.guild.id in WolfBot.WolfConfig.getConfig().get("ignoredGuilds", []):
         return False
 
     if message.author.bot:
