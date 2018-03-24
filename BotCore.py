@@ -16,6 +16,8 @@ from WolfBot.WolfStatics import Colors, ChannelKeys
 BOT_CONFIG = WolfConfig.getConfig()
 LOCAL_STORAGE = WolfConfig.getSessionStore()
 
+initialized = False
+
 # Determine restart reason (pretty mode) - HACK FOR BOT INIT
 restart_reason = BOT_CONFIG.get("restartReason", "start")
 start_status = discord.Status.idle
@@ -37,9 +39,9 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(na
 LOG = logging.getLogger("DiyBot.Core")
 
 
-@bot.event
-async def on_ready():
+async def initialize():
     global restart_reason
+    global initialized
 
     # Delete temporary restart configs
     if restart_reason != "start":
@@ -47,10 +49,6 @@ async def on_ready():
         del start_game
         restart_reason = "start"
 
-    bot_presence = BOT_CONFIG.get('presence', {"game": "DiyBot", "type": 2, "status": "dnd"})
-
-    await bot.change_presence(game=discord.Game(name=bot_presence['game'], type=bot_presence['type']),
-                              status=discord.Status[bot_presence['status']])
     LOG.info("DiyBot is online, running discordpy " + discord.__version__)
 
     # Lock the bot to a single guild
@@ -83,6 +81,19 @@ async def on_ready():
             color=Colors.SUCCESS
         ))
         BOT_CONFIG.delete("restartNotificationChannel")
+
+    initialized = True
+
+
+@bot.event
+async def on_ready():
+    if not initialized:
+        await initialize()
+
+    bot_presence = BOT_CONFIG.get('presence', {"game": "DiyBot", "type": 2, "status": "dnd"})
+
+    await bot.change_presence(game=discord.Game(name=bot_presence['game'], type=bot_presence['type']),
+                              status=discord.Status[bot_presence['status']])
 
 
 @bot.event
