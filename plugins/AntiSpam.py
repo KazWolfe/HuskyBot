@@ -156,11 +156,11 @@ class AntiSpam:
 
             await log_channel.send(embed=invite_embed)
 
-            # If the user is over the offense limit, we're going to ban their ass. In this case, this means that on
-            # their sixth invalid invite, we ban 'em.
-            if cooldownRecord['offenseCount'] > 5:
-                await message.author.ban(reason="[AUTOMATIC BAN - AntiSpam Module] User sent over 5 unauthorized "
-                                                "invites in a 30 minute period.", delete_message_days=0)
+            # If the user is at the offense limit, we're going to ban their ass. In this case, this means that on
+            # their fifth invalid invite, we ban 'em.
+            if cooldownRecord['offenseCount'] >= 5:
+                await message.author.ban(reason="[AUTOMATIC BAN - AntiSpam Module] User sent 5 unauthorized invites in "
+                                                "a 30 minute period.", delete_message_days=0)
                 del self.INVITE_COOLDOWNS[message.author.id]
 
             break

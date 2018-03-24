@@ -106,7 +106,7 @@ async def on_guild_join(guild):
 
 @bot.event
 async def on_command_error(ctx, error):
-    command_name = ctx.message.content.split(' ')[0].replace('/', '')
+    command_name = ctx.message.content.split(' ')[0][1:]
 
     if isinstance(error, commands.MissingPermissions):
         await ctx.send(embed=discord.Embed(
@@ -214,8 +214,12 @@ async def on_message(message):
         return
 
     if message.content.startswith(bot.command_prefix):
-        if message.content.lower().split(' ')[0].replace('/', '') in BOT_CONFIG.get('ignoredCommands', []):
+        if message.content.lower().split(' ')[0][1:] in BOT_CONFIG.get('ignoredCommands', []):
             LOG.info("User %s ran an ignored command %s", message.author, message.content)
+            return
+
+        if message.content.lower().split(' ')[0].startswith('/r/'):
+            LOG.info("User %s linked to subreddit %s, ignoring command", message.author, message.content)
             return
 
         LOG.info("User %s ran %s", message.author, message.content)
