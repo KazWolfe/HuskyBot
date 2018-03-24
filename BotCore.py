@@ -41,6 +41,7 @@ LOG = logging.getLogger("DiyBot.Core")
 
 async def initialize():
     global restart_reason
+    global start_game
     global initialized
 
     # Delete temporary restart configs
