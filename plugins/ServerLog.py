@@ -169,6 +169,9 @@ class ServerLog:
         await alert_channel.send(embed=embed)
 
     async def on_message_delete(self, message: discord.Message):
+        if message.guild is None:
+            return
+
         if "messageDelete" not in self._config.get("loggers", {}).keys():
             return
 
@@ -205,6 +208,9 @@ class ServerLog:
         await alert_channel.send(embed=embed)
 
     async def on_message_edit(self, before: discord.Message, after: discord.Message):
+        if after.guild is None:
+            return
+
         if "messageEdit" not in self._config.get("loggers", {}).keys():
             return
 
