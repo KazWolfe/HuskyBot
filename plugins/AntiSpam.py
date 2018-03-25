@@ -85,7 +85,8 @@ class AntiSpam:
 
             # Attempt to validate the invite, deleting invalid ones
             try:
-                invite_data = await self.bot.get_invite("https://discord.gg/{}".format(fragment))
+                invite_data = await self.bot.http.get_invite(fragment)
+                invite_guild = discord.Guild(state=self.bot, data=invite_data['guild'])
             except discord.errors.NotFound:
                 await message.delete()
 
@@ -102,7 +103,7 @@ class AntiSpam:
                 break
 
             # This guild is allowed to have invites on this server, so we can ignore them.
-            if invite_data.guild.id in ALLOWED_INVITES:
+            if invite_guild.id in ALLOWED_INVITES:
                 continue
 
             # We have an invite from a non-whitelisted server. Delete it.
@@ -142,17 +143,19 @@ class AntiSpam:
             invite_embed.set_author(name="Invite from {} intercepted!".format(str(message.author)),
                                     icon_url=message.author.avatar_url)
 
-            invite_embed.add_field(name="Invited Guild Name", value=invite_data.guild.name, inline=True)
-            invite_embed.add_field(name="Invited Channel Name", value="#" + invite_data.channel.name, inline=True)
-            invite_embed.add_field(name="Invited Guild ID", value=invite_data.guild.id, inline=True)
+            invite_embed.add_field(name="Invited Guild Name", value=invite_guild.name, inline=True)
+            invite_embed.add_field(name="Invited Channel Name", value="#" + invite_data['channel']['name'], inline=True)
+            invite_embed.add_field(name="Invited Guild ID", value=invite_guild.id, inline=True)
 
             invite_embed.add_field(name="Invited Guild Creation Date",
-                                   value=str(invite_data.guild.created_at).split('.')[0],
+                                   value=str(invite_guild.created_at).split('.')[0],
                                    inline=True)
 
             invite_embed.set_footer(text="Strike {} of 5, resets {}"
                                     .format(cooldownRecord['offenseCount'],
                                             str(cooldownRecord['cooldownExpiry']).split('.')[0]))
+
+            invite_embed.set_thumbnail(url=invite_guild.icon_url)
 
             await log_channel.send(embed=invite_embed)
 
@@ -172,7 +175,7 @@ class AntiSpam:
 
     @asp.command(name="setPingWarnLimit", brief="Set the number of pings required before delete/warn")
     @commands.has_permissions(mention_everyone=True)
-    async def setWarnLimit(self, ctx: commands.Context, new_limit: int):
+    async def set_ping_warn_limit(self, ctx: commands.Context, new_limit: int):
         if new_limit < 1:
             new_limit = None
 
@@ -188,7 +191,7 @@ class AntiSpam:
 
     @asp.command(name="setPingBanLimit", brief="Set the number of pings required before user ban")
     @commands.has_permissions(mention_everyone=True)
-    async def setBanLimit(self, ctx: commands.Context, new_limit: int):
+    async def set_ping_ban_limit(self, ctx: commands.Context, new_limit: int):
         if new_limit < 1:
             new_limit = None
 
@@ -221,7 +224,7 @@ class AntiSpam:
         await ctx.send(embed=discord.Embed(
             title="AntiSpam Module",
             description="The invite to guild `{}` has been added to the whitelist."
-                .format(guild),
+                        .format(guild),
             color=Colors.SUCCESS
         ))
         return
@@ -253,7 +256,7 @@ class AntiSpam:
         await ctx.send(embed=discord.Embed(
             title="AntiSpam Module",
             description="The guild with ID `{}` has been removed from the whitelist."
-                .format(guild),
+                        .format(guild),
             color=Colors.SUCCESS
         ))
         return

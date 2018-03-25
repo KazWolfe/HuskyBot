@@ -3,13 +3,13 @@ from threading import Lock
 
 
 class WolfConfig:
-    def __init__(self, path: str = None):
+    def __init__(self, path: str = None, create_if_nonexistent: bool = False):
         self._config = {}
         self._path = path
         self._lock = Lock()
 
         if self._path is not None:
-            self.load()
+            self.load(create_if_nonexistent)
 
     def __len__(self):
         with self._lock:
@@ -52,7 +52,7 @@ class WolfConfig:
             self._config.pop(key)
             self.save()
 
-    def load(self) -> None:
+    def load(self, create_if_nonexistent: bool = False) -> None:
         if self._path is None:
             return
 
@@ -60,14 +60,16 @@ class WolfConfig:
             with open(self._path, 'r') as f:
                 self._config = json.loads(f.read())
         except IOError:
-            print("Could not load config from specified path " + self._path)
-            exit(1)
+            if not create_if_nonexistent:
+                raise
+
+            self.save()
 
     def save(self):
         if self._path is None:
             return
 
-        with open('config/config.json', 'w') as f:
+        with open(self._path, 'w') as f:
             f.write(json.dumps(self._config, sort_keys=True))
 
 

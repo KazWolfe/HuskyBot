@@ -15,6 +15,7 @@ class ModTools:
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
         self._config = WolfConfig.getConfig()
+        self._mutes = WolfConfig.WolfConfig('config/mutes.json', create_if_nonexistent=True)
         LOG.info("Loaded plugin!")
 
     # Prevent users from becoming bot role if they're not actually bots.
@@ -33,12 +34,15 @@ class ModTools:
             await after.remove_roles(bot_role, reason="User is not an authorized bot.")
             LOG.info("User " + after.display_name + " was granted bot role, but was not a bot. Removing.")
 
-    @commands.command(name="autoban", aliases=["hackban"], brief="Ban any user by UID")
+    async def load_mute_tasks(self):
+        mutes = self._mutes.get('mutes', [])
+
+    @commands.command(name="autoban", aliases=["hackban"], brief="Ban a user (by ID) currently not in the guild")
     @commands.has_permissions(ban_members=True)
     async def hackban(self, ctx: discord.ext.commands.Context, user_id: int, *, reason: str):
-        user = ctx.bot.get_user(user_id)
-
-        if user is None:
+        try:
+            user = self.bot.get_user_info(user_id)
+        except discord.NotFound:
             await ctx.send(embed=discord.Embed(
                 title="Mod Toolkit",
                 description="User ID `" + str(user_id) + "` could not be hackbanned. Do they even exist?",
@@ -46,6 +50,7 @@ class ModTools:
             ))
             return
 
+        # If the user to be banned is the user calling the ban, let them have it.
         if user == ctx.author:
             await ctx.send(embed=discord.Embed(
                 title="Hello darkness my old friend...",
@@ -59,6 +64,7 @@ class ModTools:
             await ctx.guild.ban(user, reason="User requested self-ban through /hackban")
             return
 
+        # Make sure we don't ban an existing member of the Discord.
         if ctx.guild.get_member(user.id) is not None:
             await ctx.send(embed=discord.Embed(
                 title="Mod Toolkit",
@@ -68,6 +74,7 @@ class ModTools:
             ))
             return
 
+        # Finally, ban the (in-cache) user, and inform the context of the ban.
         await ctx.guild.ban(user, reason="[By " + str(ctx.author) + " - HACKBAN] " + reason, delete_message_days=1)
 
         await ctx.send(embed=discord.Embed(
@@ -126,13 +133,14 @@ class ModTools:
 
     @commands.command(name="mute", brief="Temporarily mute a user from the current channel", enabled=False)
     @commands.has_permissions(manage_messages=True)
-    async def mute(self, ctx: discord.ext.commands.Context, target: discord.Member, time: str = None, *, reason: str):
+    async def mute(self, ctx: discord.ext.commands.Context, target: discord.Member, *, reason: str):
+        # ToDo: Implement database, and better logging.
         pass
 
     @commands.command(name="globalmute", aliases=["gmute"],
                       brief="Temporarily mute a user from the server", enabled=False)
     @commands.has_permissions(ban_members=True)
-    async def globalmute(self, ctx: discord.ext.commands.Context, target: discord.Member, time: str = None, *,
+    async def globalmute(self, ctx: discord.ext.commands.Context, target: discord.Member, *,
                          reason: str):
         pass
 
