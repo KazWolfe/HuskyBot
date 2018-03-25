@@ -140,8 +140,8 @@ class Debug:
         member_details.add_field(name="Joined Server", value=str(member.joined_at).split('.')[0], inline=True)
         member_details.add_field(name="Roles", value=", ".join(roles), inline=False)
         member_details.set_thumbnail(url=member.avatar_url)
-        member_details.set_footer(text="Member #" + str(sorted(ctx.guild.members,
-                                                               key=lambda m: m.joined_at).index(member) + 1))
+        member_details.set_footer(text="Member #{} on the server"
+                                  .format(str(sorted(ctx.guild.members, key=lambda m: m.joined_at).index(member) + 1)))
 
         await ctx.send(embed=member_details)
 

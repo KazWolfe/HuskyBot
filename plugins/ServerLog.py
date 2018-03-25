@@ -70,6 +70,8 @@ class ServerLog:
             embed.add_field(name="Joined Server", value=str(notif_member.joined_at).split('.')[0], inline=True)
             embed.add_field(name="Joined Discord", value=str(notif_member.created_at).split('.')[0], inline=True)
             embed.add_field(name="User ID", value=notif_member.id, inline=True)
+            embed.set_footer(text="Member #{} on the server".format(
+                str(sorted(notif_member.guild.members, key=lambda m: m.joined_at).index(member) + 1)))
 
             await channel.send(embed=embed)
 
