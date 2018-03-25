@@ -20,6 +20,7 @@ class AntiSpam:
 
         # Statics
         self.INVITE_COOLDOWNS = {}
+        self.ATTACHMENT_COOLDOWNS = {}
 
         LOG.info("Loaded plugin!")
 
@@ -33,6 +34,7 @@ class AntiSpam:
 
         await self.multi_ping_check(message)
         await self.prevent_discord_invites(message)
+        await self.attachment_cooldown(message)
 
     async def multi_ping_check(self, message):
         PING_WARN_LIMIT = self._config.get('antiSpam', {}).get('pingSoftLimit', 6)
@@ -167,6 +169,70 @@ class AntiSpam:
                 del self.INVITE_COOLDOWNS[message.author.id]
 
             break
+
+    async def attachment_cooldown(self, message: discord.Message):
+        # Prepare the logger
+        log_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
+        if log_channel is None:
+            return
+        log_channel = message.guild.get_channel(log_channel)
+
+        # Clear
+        if message.author.id in self.ATTACHMENT_COOLDOWNS \
+                and self.ATTACHMENT_COOLDOWNS[message.author.id]['cooldownExpiry'] < datetime.datetime.now():
+            del self.ATTACHMENT_COOLDOWNS[message.author.id]
+
+        # Users with MANAGE_MESSAGES are allowed to bypass attachment rate limits.
+        if message.author.permissions_in(message.channel).manage_messages:
+            return
+
+        if len(message.attachments) > 0:
+            # User posted an attachment, and is not in the cache. Let's add them, on strike 0.
+            if message.author.id not in self.ATTACHMENT_COOLDOWNS.keys():
+                self.ATTACHMENT_COOLDOWNS[message.author.id] = {
+                    'cooldownExpiry': datetime.datetime.now() + datetime.timedelta(seconds=15),
+                    'offenseCount': 0
+                }
+
+            cooldownRecord = self.ATTACHMENT_COOLDOWNS[message.author.id]
+
+            # And we increment the offense counter here.
+            cooldownRecord['offenseCount'] += 1
+
+            # Give them a fair warning on attachment #3
+            if cooldownRecord['offenseCount'] == 3:
+                await message.channel.send(embed=discord.Embed(
+                    title="\uD83D\uDED1 Whoa there, pardner!",
+                    description="Hey there {}! You're sending files awfully fast. Please help us keep this chat clean "
+                                "and readable by not sending lots of files so quickly. Thanks!"
+                                .format(message.author.mention),
+                    color=Colors.WARNING
+                ), delete_after=90.0)
+                await log_channel.send(embed=discord.Embed(
+                    description="User {} has sent 3 attachments in a 15-second period in channel {}."
+                                .format(message.author, message.channel),
+                    color=Colors.WARNING
+                ).set_author(name="Possible Attachment Spam", icon_url=message.author.avatar_url))
+                return
+
+            # And ban their sorry ass at #5.
+            if cooldownRecord['offenseCount'] >= 5:
+                await message.author.ban(reason="[AUTOMATIC BAN - AntiSpam Module] User sent 5 attachments in a 15 "
+                                                "second period.",
+                                         delete_message_days=1)
+                await log_channel.send(embed=discord.Embed(
+                    description="User {} has ignored our warnings and decided to keep spamming files. They have been "
+                                "banned.".format(message.author, message.channel),
+                    color=Colors.WARNING
+                ).set_author(name="Yep, definitely attachment spam", icon_url=message.author.avatar_url))
+                del self.ATTACHMENT_COOLDOWNS[message.author.id]
+
+        else:
+            # They sent a message containing text. Clear their cooldown.
+            if message.author.id in self.ATTACHMENT_COOLDOWNS:
+                LOG.info("User {} previously on file cooldown warning list has sent a file-less message. Deleting "
+                         "cooldown entry.".format(message.author))
+                del self.ATTACHMENT_COOLDOWNS[message.author.id]
 
     @commands.group(name="antispam", aliases=['as'], brief="Manage the Antispam configuration for the bot")
     @commands.has_permissions(manage_messages=True)

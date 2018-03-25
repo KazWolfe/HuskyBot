@@ -41,7 +41,7 @@ class ModTools:
     @commands.has_permissions(ban_members=True)
     async def hackban(self, ctx: discord.ext.commands.Context, user_id: int, *, reason: str):
         try:
-            user = self.bot.get_user_info(user_id)
+            user = await self.bot.get_user_info(user_id)
         except discord.NotFound:
             await ctx.send(embed=discord.Embed(
                 title="Mod Toolkit",
