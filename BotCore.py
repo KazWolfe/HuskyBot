@@ -22,13 +22,13 @@ initialized = False
 restart_reason = BOT_CONFIG.get("restartReason", "start")
 start_status = discord.Status.idle
 if restart_reason == "admin":
-    start_game = discord.Activity(name="Restarting...", type=discord.ActivityType.playing)
+    start_activity = discord.Activity(name="Restarting...", type=discord.ActivityType.playing)
 elif restart_reason == "update":
-    start_game = discord.Game(name="Updating...", type=discord.ActivityType.playing)
+    start_activity = discord.Activity(name="Updating...", type=discord.ActivityType.playing)
 else:
-    start_game = discord.Game(name="Starting...", type=discord.ActivityType.playing)
+    start_activity = discord.Activity(name="Starting...", type=discord.ActivityType.playing)
 
-bot = commands.Bot(command_prefix=BOT_CONFIG.get('prefix', '/'))
+bot = commands.Bot(command_prefix=BOT_CONFIG.get('prefix', '/'), activity=start_activity)
 
 # LOCAL_STORAGE.set('logPath', 'logs/log-' + str(datetime.datetime.now()).split('.')[0] + ".log")
 LOCAL_STORAGE.set('logPath', 'logs/wolfbot-' + str(datetime.datetime.now()).split(' ')[0] + '.log')
@@ -41,13 +41,13 @@ LOG = logging.getLogger("DiyBot.Core")
 
 async def initialize():
     global restart_reason
-    global start_game
+    global start_activity
     global initialized
 
     # Delete temporary restart configs
     if restart_reason != "start":
         BOT_CONFIG.delete("restartReason")
-        del start_game
+        del start_activity
         restart_reason = "start"
 
     LOG.info("DiyBot is online, running discordpy " + discord.__version__)
