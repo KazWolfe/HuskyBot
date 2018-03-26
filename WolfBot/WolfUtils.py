@@ -48,7 +48,7 @@ def tail(filename, n):
 
 
 def should_process_message(message):
-    if message.guild.id in WolfBot.WolfConfig.getConfig().get("ignoredGuilds", []):
+    if message.guild is not None and message.guild.id in WolfBot.WolfConfig.getConfig().get("ignoredGuilds", []):
         return False
 
     if message.author.bot:

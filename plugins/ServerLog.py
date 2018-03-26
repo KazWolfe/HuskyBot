@@ -1,14 +1,13 @@
 import logging
 
 import discord
-import traceback
 
 from datetime import datetime
 from discord.ext import commands
 
 from WolfBot import WolfConfig
 from WolfBot import WolfUtils
-from WolfBot.WolfStatics import Colors, ChannelKeys
+from WolfBot.WolfStatics import *
 
 LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 
@@ -40,9 +39,9 @@ class ServerLog:
 
             milestone_channel = guild.get_channel(milestone_channel)
 
-            if guild.member_count % 250 == 0:
+            if guild.member_count % 500 == 0:
                 await milestone_channel.send(embed=discord.Embed(
-                    title="Server Member Count Milestone!",
+                    title=Emojis.PARTY + "Server Member Count Milestone!",
                     description="The server has now reached " + str(guild.member_count) + " members! Thank you "
                                 + notif_member.display_name + " for joining!",
                     color=Colors.SUCCESS
@@ -61,7 +60,7 @@ class ServerLog:
             channel = notif_member.guild.get_channel(channel)
 
             embed = discord.Embed(
-                title="New Member!",
+                title= Emojis.SUNRISE + " New Member!",
                 description=str(notif_member) + " has joined the server.",
                 color=Colors.PRIMARY
             )
@@ -75,31 +74,8 @@ class ServerLog:
 
             await channel.send(embed=embed)
 
-        # Send all joins to the auditing channel
-        async def audit_notifier(notif_member):
-            if "userJoin.audit" not in self._config.get("loggers", {}).keys():
-                return
-
-            channel = self._config.get('specialChannels', {}).get(ChannelKeys.PUBLIC_LOG.value, None)
-
-            if channel is None:
-                return
-
-            channel = notif_member.guild.get_channel(channel)
-
-            embed = discord.Embed(
-                title="New Member!",
-                description=str(notif_member) + " has joined the server. Welcome!",
-                color=Colors.PRIMARY
-            )
-
-            embed.set_thumbnail(url=notif_member.avatar_url)
-
-            await channel.send(embed=embed)
-
         await milestone_notifier(member)
         await general_notifier(member)
-        await audit_notifier(member)
 
     async def on_member_remove(self, member: discord.Member):
         if "userLeave" not in self._config.get("loggers", {}).keys():
@@ -113,7 +89,7 @@ class ServerLog:
         alert_channel = member.guild.get_channel(alert_channel)
 
         embed = discord.Embed(
-            title="Member left the server",
+            title=Emojis.DOOR + " Member left the server",
             description=str(member) + " has left the server.",
             color=Colors.PRIMARY
         )
@@ -128,6 +104,9 @@ class ServerLog:
         if "userBan" not in self._config.get("loggers", {}).keys():
             return
 
+        # Get timestamp as soon as the event is fired,
+        timestamp = datetime.utcnow()
+
         alert_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
 
         if alert_channel is None:
@@ -136,14 +115,25 @@ class ServerLog:
         alert_channel = self.bot.get_channel(alert_channel)
 
         embed = discord.Embed(
-            title="User banned",
+            title=Emojis.BAN + " User banned",
             description=str(user) + " was banned from the server.",
             color=Colors.DANGER
         )
 
+        ban_entry = discord.utils.get(await guild.bans(), user=user)
+
+        if ban_entry is None:
+            raise ValueError("A ban record for user {} was expected, but no entry was found".format(user.id))
+
+        ban_reason = ban_entry.reason
+
+        if ban_reason is None:
+            ban_reason = "<No ban reason provided>"
+
         embed.set_thumbnail(url=user.avatar_url)
-        embed.add_field(name="User ID", value=user.id)
-        embed.add_field(name="Ban Timestamp", value=str(datetime.utcnow()).split('.')[0])
+        embed.add_field(name="User ID", value=user.id, inline=True)
+        embed.add_field(name="Ban Timestamp", value=str(timestamp).split('.')[0], inline=True)
+        embed.add_field(name="Ban Reason", value=ban_reason, inline=False)
 
         await alert_channel.send(embed=embed)
 
@@ -159,7 +149,7 @@ class ServerLog:
         alert_channel = self.bot.get_channel(alert_channel)
 
         embed = discord.Embed(
-            title="User unbanned",
+            title=Emojis.UNBAN + "User unbanned",
             description=str(user) + " was unbanned from the server.",
             color=Colors.PRIMARY
         )
@@ -256,7 +246,7 @@ class ServerLog:
 
         await alert_channel.send(embed=embed)
 
-    @commands.group(name="logger", aliases=["logging"], brief="Control the Logging module")
+    @commands.group(name="logger", aliases=["logging"], brief="Parent command to manage the ServerLog module")
     @commands.has_permissions(administrator=True)
     async def logger(self, ctx: discord.ext.commands.Context):
         if ctx.invoked_subcommand is None:
@@ -268,7 +258,7 @@ class ServerLog:
             return
 
     @logger.command(name="enable", brief="Enable a specified logger")
-    async def enableLogger(self, ctx: commands.Context, name: str):
+    async def enable_logger(self, ctx: commands.Context, name: str):
         enabled_loggers = self._config.get('loggers', {})
 
         if name not in self._validLoggers:
@@ -298,7 +288,7 @@ class ServerLog:
         ))
 
     @logger.command(name="disable", brief="Disable a specified logger")
-    async def disableLogger(self, ctx: commands.Context, name: str):
+    async def disable_logger(self, ctx: commands.Context, name: str):
         enabled_loggers = self._config.get('loggers', {})
 
         if name not in self._validLoggers:

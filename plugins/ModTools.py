@@ -86,10 +86,26 @@ class ModTools:
     @commands.command(name="unautoban", aliases=["pardon", "unban", "unhackban", "pardonautoban", "pardonhackban"],
                       brief="Pardon a banned member not on the server")
     @commands.has_permissions(ban_members=True)
-    async def unhackban(self, ctx: discord.ext.commands.Context, user: int):
-        user = ctx.bot.get_user(user)
+    async def unhackban(self, ctx: discord.ext.commands.Context, user_id: int):
+        try:
+            user = await self.bot.get_user_info(user_id)
+        except discord.NotFound:
+            await ctx.send(embed=discord.Embed(
+                title="Mod Toolkit",
+                description="User ID `" + str(user_id) + "` could not be hackbanned. Do they even exist?",
+                color=Colors.DANGER
+            ))
+            return
 
-        await ctx.guild.unban(user, reason="Unbanned by " + str(ctx.author))
+        try:
+            await ctx.guild.unban(user, reason="Unbanned by " + str(ctx.author))
+        except discord.NotFound:
+            await ctx.send(embed=discord.Embed(
+                title="Mod Toolkit",
+                description="User `" + str(user) + "` is not banned on this server, so they can not be unbanned.",
+                color=Colors.WARNING
+            ))
+            return
 
         await ctx.send(embed=discord.Embed(
             title="Mod Toolkit",

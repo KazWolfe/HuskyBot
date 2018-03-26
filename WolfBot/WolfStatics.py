@@ -18,3 +18,22 @@ class ChannelKeys(str, Enum):
     STAFF_HUB = "modChannel"
     STAFF_ALERTS = "staffAlerts"
     PUBLIC_LOG = "audit"
+
+
+class Emojis:
+    # Mod actions
+
+    NO_ENTRY = "\uD83D\uDEAB"
+    TRIANGLE = "\u26A0\uFE0F"
+    DOOR = "\uD83D\uDEAA"
+    SUNRISE = "\uD83C\uDF04"
+    WOLF = "\uD83D\uDC3A"
+    PARTY = "\uD83C\uDF89"
+    BOMB = "\uD83D\uDCA3"
+    UNLOCK = "\uD83D\uDD13"
+
+    # Mod shortcuts
+    BAN = NO_ENTRY
+    WARNING = TRIANGLE
+    UNBAN = UNLOCK
+

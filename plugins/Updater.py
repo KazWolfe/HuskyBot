@@ -23,7 +23,7 @@ class Updater:
         self.repo = git.Repo(search_parent_directories=True)
         LOG.info("Loaded plugin!")
 
-    @commands.command(name="update", brief="Pull the latest version of code from Git.", hidden=True)
+    @commands.command(name="update", brief="Pull the latest version of code from Git")
     @commands.has_permissions(administrator=True)
     async def updateBot(self, ctx: discord.ext.commands.Context):
         remote = self.repo.remotes.origin
@@ -54,7 +54,7 @@ class Updater:
 
         # we're clear to update. let's do it!
         LOG.info("All update sanity checks passed. Pulling...")
-        await ctx.bot.change_presence(game=discord.Game(name="Updating...", type=0), status=discord.Status.idle)
+        await ctx.bot.change_presence(activity=discord.Activity(name="Updating...", type=0), status=discord.Status.idle)
         time.sleep(5)
         remote.pull()
         new_sha = self.repo.head.object.hexsha
@@ -71,7 +71,7 @@ class Updater:
         self._config.set("restartReason", "update")
         await ctx.bot.logout()
 
-    @commands.command(name="changelog", brief="Get the changelog for the most recent bot version.")
+    @commands.command(name="changelog", brief="Get the Git changelog for the bot's current version")
     @commands.has_permissions(administrator=True)
     async def changelog(self, ctx: discord.ext.commands.Context):
         lastCommit = self.repo.head.commit

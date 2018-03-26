@@ -22,13 +22,13 @@ initialized = False
 restart_reason = BOT_CONFIG.get("restartReason", "start")
 start_status = discord.Status.idle
 if restart_reason == "admin":
-    start_game = discord.Game(name="Restarting...", type=0)
+    start_game = discord.Activity(name="Restarting...", type=discord.ActivityType.playing)
 elif restart_reason == "update":
-    start_game = discord.Game(name="Updating...", type=0)
+    start_game = discord.Game(name="Updating...", type=discord.ActivityType.playing)
 else:
-    start_game = discord.Game(name="Starting...", type=0)
+    start_game = discord.Game(name="Starting...", type=discord.ActivityType.playing)
 
-bot = commands.Bot(command_prefix=BOT_CONFIG.get('prefix', '/'), game=start_game, status=start_status)
+bot = commands.Bot(command_prefix=BOT_CONFIG.get('prefix', '/'))
 
 # LOCAL_STORAGE.set('logPath', 'logs/log-' + str(datetime.datetime.now()).split('.')[0] + ".log")
 LOCAL_STORAGE.set('logPath', 'logs/wolfbot-' + str(datetime.datetime.now()).split(' ')[0] + '.log')
@@ -93,7 +93,7 @@ async def on_ready():
 
     bot_presence = BOT_CONFIG.get('presence', {"game": "DiyBot", "type": 2, "status": "dnd"})
 
-    await bot.change_presence(game=discord.Game(name=bot_presence['game'], type=bot_presence['type']),
+    await bot.change_presence(activity=discord.Activity(name=bot_presence['game'], type=bot_presence['type']),
                               status=discord.Status[bot_presence['status']])
 
 
@@ -125,7 +125,7 @@ async def on_command_error(ctx, error):
                         + "See `/help` for valid commands.",
             color=Colors.DANGER
         ))
-        LOG.error("Command %s may only be run in a direct message!", command_name)
+        LOG.error("Command %s may not be run in a direct message!", command_name)
         return
 
     if isinstance(error, commands.DisabledCommand):

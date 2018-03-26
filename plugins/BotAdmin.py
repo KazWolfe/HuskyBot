@@ -21,8 +21,8 @@ class BotAdmin:
         self._debugmode = self._config.get("developerMode", False)
         LOG.info("Loaded plugin!")
 
-    @commands.command(name="version", brief="Get version information for the bot")
-    async def version_cmd(self, ctx: discord.ext.commands.Context):
+    @commands.command(name="about", aliases=["version"], brief="Get basic information about the bot.")
+    async def about(self, ctx: discord.ext.commands.Context):
         repo = git.Repo(search_parent_directories=True)
         sha = repo.head.object.hexsha
 
@@ -267,13 +267,13 @@ class BotAdmin:
 
         await ctx.send(embed=discord.Embed(
             title="Log Entries from " + log_file,
-            description="```" + logs + "```",
+            description="```" + WolfUtils.trim_string(logs, 2042, True) + "```",
             color=Colors.SECONDARY
         ))
 
     @admin.command(name="presence", brief="Set the bot's presence mode.")
     async def presence(self, ctx: discord.ext.commands.Context, presence_type: str, game: str, status: str):
-        presence_map = {"playing": 0, "streaming": 1, "listening": 2, "watching": 3}
+        presence_map = {"playing": 0, "listening": 2, "watching": 3}
 
         if status.lower() == "invisible" or status.lower() == "offline":
             await ctx.send(embed=discord.Embed(
@@ -285,11 +285,10 @@ class BotAdmin:
 
         try:
             presence_type = presence_map[presence_type.lower()]
-        except ValueError:
+        except KeyError:
             await ctx.send(embed=discord.Embed(
                 title="Bot Manager",
-                description="The presence type must be **`playing`**, **`streaming`**, "
-                            + "**`listening`**, or **`watching`**.",
+                description="The presence type must be **`PLAYING`**, **`LISTENING`**, or **`WATCHING`**.",
                 color=Colors.DANGER
             ))
             return
@@ -305,7 +304,7 @@ class BotAdmin:
             return
 
         self._config.set('presence', {"game": game, "type": presence_type, "status": status.lower()})
-        await ctx.bot.change_presence(game=discord.Game(name=game, type=presence_type), status=new_status)
+        await ctx.bot.change_presence(activity=discord.Activity(name=game, type=presence_type), status=new_status)
         await ctx.send(embed=discord.Embed(
             title="Bot Manager",
             description="The bot's presence was updated.",
@@ -316,12 +315,13 @@ class BotAdmin:
     async def reloadPresence(self, ctx: discord.ext.commands.Context):
         bot_presence = self._config.get('presence', {"game": "DiyBot", "type": 2, "status": "dnd"})
 
-        await ctx.bot.change_presence(game=discord.Game(name=bot_presence['game'], type=bot_presence['type']),
+        await ctx.bot.change_presence(activity=discord.Activity(name=bot_presence['game'], type=bot_presence['type']),
                                       status=discord.Status[bot_presence['status']])
 
     @admin.command(name="restart", brief="Restart the bot.")
     async def restart(self, ctx: discord.ext.commands.Context):
-        await ctx.bot.change_presence(game=discord.Game(name="Restarting...", type=0), status=discord.Status.idle)
+        await ctx.bot.change_presence(activity=discord.Activity(name="Restarting...", type=0),
+                                      status=discord.Status.idle)
         LOG.info("Bot is going down for admin requested restart!")
         self._config.set("restartNotificationChannel", ctx.channel.id)
         self._config.set("restartReason", "admin")

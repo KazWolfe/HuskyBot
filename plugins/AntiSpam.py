@@ -41,6 +41,10 @@ class AntiSpam:
         PING_WARN_LIMIT = self._config.get('antiSpam', {}).get('pingSoftLimit', 6)
         PING_BAN_LIMIT = self._config.get('antiSpam', {}).get('pingHardLimit', 15)
 
+        log_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
+        if log_channel is not None:
+            log_channel = message.guild.get_channel(log_channel)
+
         if message.author.permissions_in(message.channel).mention_everyone:
             return
 
@@ -54,19 +58,25 @@ class AntiSpam:
                 color=Colors.WARNING
             ))
 
+            if log_channel is not None:
+                await log_channel.send(embed=discord.Embed(
+                    description="User {} has pinged {} users in a single in channel {}."
+                        .format(message.author, str(len(message.mentions)), message.channel),
+                    color=Colors.WARNING
+                ).set_author(name="Mass Ping Alert", icon_url=message.author.avatar_url))
+                return
+
         if PING_BAN_LIMIT is not None and len(message.mentions) >= PING_BAN_LIMIT:
             await message.author.ban(delete_message_days=0, reason="[AUTOMATIC BAN - AntiSpam Module] "
                                                                    "Multi-pinged over server ban limit.")
-            # ToDo: Integrate with ServerLog to send custom ban message to staff logs.
 
     async def prevent_discord_invites(self, message):
         ALLOWED_INVITES = self._config.get('antiSpam', {}).get('allowedInvites', [message.guild.id])
 
         # Prepare the logger
         log_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
-        if log_channel is None:
-            return
-        log_channel = message.guild.get_channel(log_channel)
+        if log_channel is not None:
+            log_channel = message.guild.get_channel(log_channel)
 
         # Prevent memory abuse by deleting expired cooldown records
         if message.author.id in self.INVITE_COOLDOWNS \
@@ -139,38 +149,39 @@ class AntiSpam:
             # And we increment the offense counter here.
             cooldownRecord['offenseCount'] += 1
 
-            # We've a valid invite, so let's log that with invite data.
-            log_embed = discord.Embed(
-                description="An invite with key `{}` by user {} (ID `{}`) was caught and filtered. Invite information "
-                            "below.".format(fragment, str(message.author), str(message.author.id)),
-                color=Colors.INFO
-            )
-            log_embed.set_author(name="Invite from {} intercepted!".format(str(message.author)),
-                                 icon_url=message.author.avatar_url)
+            if log_channel is not None:
+                # We've a valid invite, so let's log that with invite data.
+                log_embed = discord.Embed(
+                    description="An invite with key `{}` by user {} (ID `{}`) was caught and filtered. Invite "
+                                "information below.".format(fragment, str(message.author), str(message.author.id)),
+                    color=Colors.INFO
+                )
+                log_embed.set_author(name="Invite from {} intercepted!".format(str(message.author)),
+                                     icon_url=message.author.avatar_url)
 
-            log_embed.add_field(name="Invited Guild Name", value=invite_guild.name, inline=True)
+                log_embed.add_field(name="Invited Guild Name", value=invite_guild.name, inline=True)
 
-            ch_type = {0: "#", 2: "[VC] ", 4: "[CAT] "}
-            log_embed.add_field(name="Invited Channel Name", value=ch_type[invite_data['channel']['type']]
-                                                                   + invite_data['channel']['name'], inline=True)
-            log_embed.add_field(name="Invited Guild ID", value=invite_guild.id, inline=True)
+                ch_type = {0: "#", 2: "[VC] ", 4: "[CAT] "}
+                log_embed.add_field(name="Invited Channel Name", value=ch_type[invite_data['channel']['type']]
+                                                                       + invite_data['channel']['name'], inline=True)
+                log_embed.add_field(name="Invited Guild ID", value=invite_guild.id, inline=True)
 
-            log_embed.add_field(name="Invited Guild Creation Date",
-                                value=str(invite_guild.created_at).split('.')[0],
-                                inline=True)
+                log_embed.add_field(name="Invited Guild Creation Date",
+                                    value=str(invite_guild.created_at).split('.')[0],
+                                    inline=True)
 
-            if invite_data.get('approximate_member_count', -1) != -1:
-                log_embed.add_field(name="Invited Guild User Count",
-                                    value="{} ({} online)".format(invite_data.get('approximate_member_count', -1),
-                                                                  invite_data.get('approximate_presence_count', -1)))
+                if invite_data.get('approximate_member_count', -1) != -1:
+                    log_embed.add_field(name="Invited Guild User Count",
+                                        value="{} ({} online)".format(invite_data.get('approximate_member_count', -1),
+                                                                      invite_data.get('approximate_presence_count', -1)))
 
-            log_embed.set_footer(text="Strike {} of 5, resets {}"
-                                 .format(cooldownRecord['offenseCount'],
-                                         str(cooldownRecord['cooldownExpiry']).split('.')[0]))
+                log_embed.set_footer(text="Strike {} of 5, resets {}"
+                                     .format(cooldownRecord['offenseCount'],
+                                             str(cooldownRecord['cooldownExpiry']).split('.')[0]))
 
-            log_embed.set_thumbnail(url=invite_guild.icon_url)
+                log_embed.set_thumbnail(url=invite_guild.icon_url)
 
-            await log_channel.send(embed=log_embed)
+                await log_channel.send(embed=log_embed)
 
             # If the user is at the offense limit, we're going to ban their ass. In this case, this means that on
             # their fifth invalid invite, we ban 'em.
@@ -184,9 +195,8 @@ class AntiSpam:
     async def attachment_cooldown(self, message: discord.Message):
         # Prepare the logger
         log_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
-        if log_channel is None:
-            return
-        log_channel = message.guild.get_channel(log_channel)
+        if log_channel is not None:
+            log_channel = message.guild.get_channel(log_channel)
 
         # Clear
         if message.author.id in self.ATTACHMENT_COOLDOWNS \
@@ -219,23 +229,19 @@ class AntiSpam:
                         .format(message.author.mention),
                     color=Colors.WARNING
                 ), delete_after=90.0)
-                await log_channel.send(embed=discord.Embed(
-                    description="User {} has sent 3 attachments in a 15-second period in channel {}."
-                        .format(message.author, message.channel),
-                    color=Colors.WARNING
-                ).set_author(name="Possible Attachment Spam", icon_url=message.author.avatar_url))
-                return
+                if log_channel is not None:
+                    await log_channel.send(embed=discord.Embed(
+                        description="User {} has sent 3 attachments in a 15-second period in channel {}."
+                            .format(message.author, message.channel),
+                        color=Colors.WARNING
+                    ).set_author(name="Possible Attachment Spam", icon_url=message.author.avatar_url))
+                    return
 
             # And ban their sorry ass at #5.
             if cooldownRecord['offenseCount'] >= 5:
                 await message.author.ban(reason="[AUTOMATIC BAN - AntiSpam Module] User sent 5 attachments in a 15 "
                                                 "second period.",
                                          delete_message_days=1)
-                await log_channel.send(embed=discord.Embed(
-                    description="User {} has ignored our warnings and decided to keep spamming files. They have been "
-                                "banned.".format(message.author, message.channel),
-                    color=Colors.WARNING
-                ).set_author(name="Yep, definitely attachment spam", icon_url=message.author.avatar_url))
                 del self.ATTACHMENT_COOLDOWNS[message.author.id]
 
         else:
