@@ -67,11 +67,16 @@ async def initialize():
 
     bot.load_extension('BotAdmin')
 
-    if BOT_CONFIG.get("developerMode", False):
-        bot.load_extension('Debug')
+    plugin_list = BOT_CONFIG.get('plugins', [])
 
-    for extension in BOT_CONFIG.get('plugins', []):
-        bot.load_extension(extension)
+    if BOT_CONFIG.get("developerMode", False):
+        plugin_list = ["Debug"] + plugin_list
+
+    for plugin in plugin_list:
+        try:
+            bot.load_extension(plugin)
+        except:  # This is a very hacky way to do this, but we need to persist module loading through a failure
+            await on_error('initialize/load_plugin/' + plugin)
 
     # Inform on restart
     if BOT_CONFIG.get("restartNotificationChannel") is not None:
@@ -191,7 +196,7 @@ async def on_error(event_method, *args, **kwargs):
         channel = BOT_CONFIG.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
 
         if channel is None:
-            LOG.warn('A logging channel is not set up! Error messages will not be forwarded to Discord.')
+            LOG.warning('A logging channel is not set up! Error messages will not be forwarded to Discord.')
             return
 
         channel = bot.get_channel(channel)
