@@ -3,7 +3,9 @@ import logging
 import discord
 from discord.ext import commands
 
+from WolfBot import WolfUtils
 from WolfBot import WolfConfig
+from WolfBot.WolfStatics import *
 
 LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 
@@ -91,6 +93,7 @@ class Intelligence:
                                   .format(str(sorted(ctx.guild.members, key=lambda m: m.joined_at).index(member) + 1)))
 
         await ctx.send(embed=member_details)
+
 
 def setup(bot: discord.ext.commands.Bot):
     bot.add_cog(Intelligence(bot))
