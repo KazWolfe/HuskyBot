@@ -28,7 +28,7 @@ elif restart_reason == "update":
 else:
     start_activity = discord.Activity(name="Starting...", type=discord.ActivityType.playing)
 
-bot = commands.Bot(command_prefix=BOT_CONFIG.get('prefix', '/'), activity=start_activity)
+bot = commands.Bot(command_prefix=BOT_CONFIG.get('prefix', '/'), activity=start_activity, status=start_status)
 
 # LOCAL_STORAGE.set('logPath', 'logs/log-' + str(datetime.datetime.now()).split('.')[0] + ".log")
 LOCAL_STORAGE.set('logPath', 'logs/wolfbot-' + str(datetime.datetime.now()).split(' ')[0] + '.log')
@@ -114,12 +114,14 @@ async def on_command_error(ctx, error):
     command_name = ctx.message.content.split(' ')[0][1:]
 
     if isinstance(error, commands.MissingPermissions):
-        await ctx.send(embed=discord.Embed(
-            title="Command Handler",
-            description="**The command `/" + command_name
-                        + "` does not exist.** See `/help` for valid commands.",
-            color=Colors.DANGER
-        ))
+        if BOT_CONFIG.get("developmentMode", False):
+            await ctx.send(embed=discord.Embed(
+                title="Command Handler",
+                description="**The command `/" + command_name
+                            + "` does not exist.** See `/help` for valid commands.",
+                color=Colors.DANGER
+            ))
+
         LOG.error("Encountered permission error when attempting to run command %s: %s", command_name, str(error))
         return
 
@@ -130,32 +132,36 @@ async def on_command_error(ctx, error):
                         + "See `/help` for valid commands.",
             color=Colors.DANGER
         ))
+
         LOG.error("Command %s may not be run in a direct message!", command_name)
         return
 
     if isinstance(error, commands.DisabledCommand):
-        embed = discord.Embed(
-            title="Command Handler",
-            description="**The command `/" + command_name
-                        + "` does not exist.** See `/help` for valid commands.",
-            color=Colors.DANGER
-        )
+        if BOT_CONFIG.get("developmentMode", False):
+            embed = discord.Embed(
+                title="Command Handler",
+                description="**The command `/" + command_name
+                            + "` does not exist.** See `/help` for valid commands.",
+                color=Colors.DANGER
+            )
 
-        if ctx.message.author.guild_permissions.administrator:
-            embed.set_footer(text="E_DISABLED_COMMAND")
+            if ctx.message.author.guild_permissions.administrator:
+                embed.set_footer(text="E_DISABLED_COMMAND")
 
-        await ctx.send(embed=embed)
+            await ctx.send(embed=embed)
 
         LOG.error("Command %s is disabled.", command_name)
         return
 
     if isinstance(error, commands.CommandNotFound):
-        await ctx.send(embed=discord.Embed(
-            title="Command Handler",
-            description="**The command `/" + command_name
-                        + "` does not exist.** See `/help` for valid commands.",
-            color=Colors.DANGER
-        ))
+        if BOT_CONFIG.get("developmentMode", False):
+            await ctx.send(embed=discord.Embed(
+                title="Command Handler",
+                description="**The command `/" + command_name
+                            + "` does not exist.** See `/help` for valid commands.",
+                color=Colors.DANGER
+            ))
+
         LOG.error("Command %s does not exist to the system.", command_name)
         return
 
