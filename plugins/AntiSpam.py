@@ -4,6 +4,7 @@ import datetime
 
 import discord
 from discord.ext import commands
+from discord.http import Route
 
 from WolfBot import WolfUtils
 from WolfBot import WolfConfig
@@ -87,7 +88,9 @@ class AntiSpam:
 
             # Attempt to validate the invite, deleting invalid ones
             try:
-                invite_data = await self.bot.http.get_invite(fragment)
+                # invite_data = await self.bot.http.get_invite(fragment)
+                invite_data = await self.bot.http.request(
+                    Route('GET', '/invite/{invite_id}?with_counts=true', invite_id=fragment))
                 invite_guild = discord.Guild(state=self.bot, data=invite_data['guild'])
             except discord.errors.NotFound:
                 await message.delete()
@@ -137,29 +140,37 @@ class AntiSpam:
             cooldownRecord['offenseCount'] += 1
 
             # We've a valid invite, so let's log that with invite data.
-            invite_embed = discord.Embed(
+            log_embed = discord.Embed(
                 description="An invite with key `{}` by user {} (ID `{}`) was caught and filtered. Invite information "
                             "below.".format(fragment, str(message.author), str(message.author.id)),
                 color=Colors.INFO
             )
-            invite_embed.set_author(name="Invite from {} intercepted!".format(str(message.author)),
-                                    icon_url=message.author.avatar_url)
+            log_embed.set_author(name="Invite from {} intercepted!".format(str(message.author)),
+                                 icon_url=message.author.avatar_url)
 
-            invite_embed.add_field(name="Invited Guild Name", value=invite_guild.name, inline=True)
-            invite_embed.add_field(name="Invited Channel Name", value="#" + invite_data['channel']['name'], inline=True)
-            invite_embed.add_field(name="Invited Guild ID", value=invite_guild.id, inline=True)
+            log_embed.add_field(name="Invited Guild Name", value=invite_guild.name, inline=True)
 
-            invite_embed.add_field(name="Invited Guild Creation Date",
-                                   value=str(invite_guild.created_at).split('.')[0],
-                                   inline=True)
+            ch_type = {0: "#", 2: "[VC] ", 4: "[CAT] "}
+            log_embed.add_field(name="Invited Channel Name", value=ch_type[invite_data['channel']['type']]
+                                                                   + invite_data['channel']['name'], inline=True)
+            log_embed.add_field(name="Invited Guild ID", value=invite_guild.id, inline=True)
 
-            invite_embed.set_footer(text="Strike {} of 5, resets {}"
-                                    .format(cooldownRecord['offenseCount'],
-                                            str(cooldownRecord['cooldownExpiry']).split('.')[0]))
+            log_embed.add_field(name="Invited Guild Creation Date",
+                                value=str(invite_guild.created_at).split('.')[0],
+                                inline=True)
 
-            invite_embed.set_thumbnail(url=invite_guild.icon_url)
+            if invite_data.get('approximate_member_count', -1) != -1:
+                log_embed.add_field(name="Invited Guild User Count",
+                                    value="{} ({} online)".format(invite_data.get('approximate_member_count', -1),
+                                                                  invite_data.get('approximate_presence_count', -1)))
 
-            await log_channel.send(embed=invite_embed)
+            log_embed.set_footer(text="Strike {} of 5, resets {}"
+                                 .format(cooldownRecord['offenseCount'],
+                                         str(cooldownRecord['cooldownExpiry']).split('.')[0]))
+
+            log_embed.set_thumbnail(url=invite_guild.icon_url)
+
+            await log_channel.send(embed=log_embed)
 
             # If the user is at the offense limit, we're going to ban their ass. In this case, this means that on
             # their fifth invalid invite, we ban 'em.
@@ -205,12 +216,12 @@ class AntiSpam:
                     title="\uD83D\uDED1 Whoa there, pardner!",
                     description="Hey there {}! You're sending files awfully fast. Please help us keep this chat clean "
                                 "and readable by not sending lots of files so quickly. Thanks!"
-                                .format(message.author.mention),
+                        .format(message.author.mention),
                     color=Colors.WARNING
                 ), delete_after=90.0)
                 await log_channel.send(embed=discord.Embed(
                     description="User {} has sent 3 attachments in a 15-second period in channel {}."
-                                .format(message.author, message.channel),
+                        .format(message.author, message.channel),
                     color=Colors.WARNING
                 ).set_author(name="Possible Attachment Spam", icon_url=message.author.avatar_url))
                 return
@@ -290,7 +301,7 @@ class AntiSpam:
         await ctx.send(embed=discord.Embed(
             title="AntiSpam Module",
             description="The invite to guild `{}` has been added to the whitelist."
-                        .format(guild),
+                .format(guild),
             color=Colors.SUCCESS
         ))
         return
@@ -322,7 +333,7 @@ class AntiSpam:
         await ctx.send(embed=discord.Embed(
             title="AntiSpam Module",
             description="The guild with ID `{}` has been removed from the whitelist."
-                        .format(guild),
+                .format(guild),
             color=Colors.SUCCESS
         ))
         return
