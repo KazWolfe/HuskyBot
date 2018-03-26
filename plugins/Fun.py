@@ -71,7 +71,7 @@ class Fun:
             return
 
         if target.id == 336301511942340608 and ctx.author.id == 323365398546481154 \
-                or target.id == 142494680158961664:                                   # Anyone hugging kaz
+                or target.id == 142494680158961664,84374504964358144:                                   # Anyone hugging kaz or clover
             await ctx.send(embed=discord.Embed(
                 title="Hug Manager",
                 description="You are not permitted to hug this user.",
