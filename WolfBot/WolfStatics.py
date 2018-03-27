@@ -21,8 +21,6 @@ class ChannelKeys(str, Enum):
 
 
 class Emojis:
-    # Mod actions
-
     NO_ENTRY = "\uD83D\uDEAB"
     TRIANGLE = "\u26A0\uFE0F"
     DOOR = "\uD83D\uDEAA"

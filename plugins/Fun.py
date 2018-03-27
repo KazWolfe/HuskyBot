@@ -9,7 +9,7 @@ from discord.ext import commands
 
 from WolfBot import WolfConfig
 from WolfBot import WolfUtils
-from WolfBot.WolfStatics import Colors, ChannelKeys
+from WolfBot.WolfStatics import *
 
 LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 
@@ -25,6 +25,11 @@ class Fun:
         if user is None:
             await ctx.send("\uD83D\uDC1F  ***{}*** *tried to slap someone with a large trout, but missed and hit "
                            "themselves!*".format(ctx.author.mention))
+            return
+
+        if user == self.bot.user:
+            await(ctx.send(Emojis.WOLF + " *I slap {} around with a wolf!*"
+                           .format(ctx.author.mention)))
             return
 
         victim = user.mention
@@ -77,6 +82,10 @@ class Fun:
                 description="You are not permitted to hug this user.",
                 color=Colors.DANGER
             ))
+            return
+
+        if target == self.bot.user:
+            await ctx.send("Sorry, I don't like hugs. Perhaps ear scritches instead?")
             return
 
         await ctx.send("*{} gives {} a hug. Aww!*".format(ctx.author.mention, target.mention))
