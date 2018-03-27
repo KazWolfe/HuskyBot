@@ -74,7 +74,7 @@ class Fun:
             return
 
         if target.id == 336301511942340608 and ctx.author.id == 323365398546481154 \
-                or target.id in [142494680158961664, 84374504964358144]:                                  # Anyone hugging kaz or clover
+                or target.id in [142494680158961664, 84374504964358144]:  # Anyone hugging kaz or clover
             await ctx.send(embed=discord.Embed(
                 title="Hug Manager",
                 description="You are not permitted to hug this user.",
@@ -97,7 +97,6 @@ class Fun:
         def get_value(user_value: int, imin: int, imax: int, dev: float):
             rng = random.Random(user_value - seed)
 
-            # Attractiveness is the base (1-10) + modifier
             result = round(rng.randint(imin, imax) + master_rng.gauss(0, dev), 2)
 
             if result > 10:
@@ -111,17 +110,17 @@ class Fun:
         attractiveness = 0.25
 
         if member.avatar is not None:
-            attractiveness = get_value(int(member.avatar[2:], 16) % seed, 4, 10, 0.2575)
+            attractiveness = get_value(int(member.avatar[2:], 16) % seed, 1, 10, 0.2575)
 
-        craziness = get_value(int(member.discriminator), 1, 6, 0.2575)
-        intelligence = get_value(member.id % seed, 5, 10, 0.2575)
+        craziness = get_value(int(member.discriminator), 1, 10, 0.2575)
+        intelligence = get_value(member.id % seed, 1, 10, 0.2575)
 
         average_score = round((attractiveness + (10.0 - craziness) + intelligence) / 3, 2)
 
         if member == self.bot.user:
             attractiveness = 11.27
-            craziness = -5.31
-            intelligence = "INTEGER_OVERFLOW"
+            craziness = 0
+            intelligence = 16
             average_score = "HAWT AF"
 
         embed = discord.Embed(
@@ -130,9 +129,12 @@ class Fun:
             color=Colors.INFO
         )
 
-        embed.add_field(name="Attractiveness", value=attractiveness, inline=True)
-        embed.add_field(name="Craziness", value=craziness, inline=True)
-        embed.add_field(name="Intelligence", value=intelligence, inline=True)
+        embed.add_field(name="Attractiveness", value=str(Emojis.FIRE * round(attractiveness / 2))
+                                                     + " ({})".format(attractiveness), inline=False)
+        embed.add_field(name="Craziness", value=str(Emojis.SKULL * round(craziness / 2))
+                                                + " ({})".format(craziness), inline=False)
+        embed.add_field(name="Intelligence", value=str(Emojis.BOOK * round(intelligence / 2))
+                                                   + " ({})".format(intelligence), inline=False)
 
         embed.set_thumbnail(url=member.avatar_url)
 

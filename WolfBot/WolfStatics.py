@@ -31,6 +31,9 @@ class Emojis:
     PARTY = "\uD83C\uDF89"
     BOMB = "\uD83D\uDCA3"
     UNLOCK = "\uD83D\uDD13"
+    FIRE = "\uD83D\uDD25"
+    SKULL = "\uD83D\uDC80"
+    BOOK = "\uD83D\uDCDA"
 
     # Mod shortcuts
     BAN = NO_ENTRY
