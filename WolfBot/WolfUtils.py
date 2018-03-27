@@ -23,17 +23,17 @@ def memberHasAnyRole(member, roles):
 
 def getFancyGameData(member):
     fancy_game = ""
-    if member.game is not None:
+    if member.activity is not None:
         state = {0: "Playing ", 1: "Streaming ", 2: "Listening to ", 3: "Watching "}
 
         fancy_game += "("
-        if member.game.url is not None:
+        if member.activity.url is not None:
             fancy_game += "["
 
-        fancy_game += state[member.game.type]
-        fancy_game += member.game.name
+        fancy_game += state[member.activity.type]
+        fancy_game += member.activity.name
 
-        if member.game.url is not None:
+        if member.activity.url is not None:
             fancy_game += "](" + member.game.url + ")"
 
         fancy_game += ")"
