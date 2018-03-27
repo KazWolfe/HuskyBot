@@ -89,7 +89,7 @@ class Fun:
         await ctx.send("*{} gives {} a hug. Aww!*".format(ctx.author.mention, target.mention))
 
     @commands.command(name="rate", brief="Rate another user based on attractiveness, craziness, and intelligence")
-    @commands.has_permissions(manage_users=True)
+    @commands.has_permissions(view_audit_log=True)
     async def rate_user(self, ctx: commands.Context, member: discord.User):
         seed = 736580  # A certain wolfgirl...
         master_rng = random.Random((member.id + seed + datetime.utcnow().toordinal()) % 450000)
