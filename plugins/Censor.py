@@ -145,7 +145,7 @@ class Censor:
         ))
 
     @censor.command(name="globalremove", brief="Remove a censor from the global list", aliases=["gremove"])
-    async def removeGlobal(self, ctx: commands.Context, censor: str):
+    async def removeGlobal(self, ctx: commands.Context, *, censor: str):
         censor_config = self._config.get("censors", {})
         censor_list = censor_config.setdefault('global', [])
 

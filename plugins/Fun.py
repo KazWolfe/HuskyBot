@@ -59,7 +59,7 @@ class Fun:
             target = ctx.author
 
         if target == ctx.author:
-            await ctx.send("*I give {} a hug. Please wait for hug completion...*".format(target.mention))
+            await ctx.send("*Attempting to upload hug to {}. Please wait...*".format(target.mention))
             await ctx.trigger_typing()
             await asyncio.sleep(5)
             await ctx.send(embed=discord.Embed(
