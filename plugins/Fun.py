@@ -123,10 +123,6 @@ class Fun:
 
         average_score = round((attractiveness + (10.0 - craziness) + intelligence) / 3, 2)
 
-        LOG.info("AttrScore: user_id: {}, avatar_id: {}, attr: {}, craz: {}, int: {}, mrng: {}",
-                 member.id % 450000, int(member.avatar[2:], 16) % 450000, attractiveness, craziness, intelligence,
-                 (seed + datetime.utcnow().toordinal()) % 450000)
-
         if member == self.bot.user:
             attractiveness = 11.27
             craziness = -5.31
