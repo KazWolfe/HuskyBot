@@ -3,8 +3,8 @@ import logging
 import discord
 from discord.ext import commands
 
-from WolfBot import WolfUtils
 from WolfBot import WolfConfig
+from WolfBot import WolfUtils
 from WolfBot.WolfStatics import *
 
 LOG = logging.getLogger("DiyBot.Plugin." + __name__)
@@ -16,30 +16,30 @@ class Intelligence:
         self._config = WolfConfig.getConfig()
         LOG.info("Loaded plugin!")
 
-    @commands.command(name="serverinfo", aliases=["sinfo"], brief="Get information about the current server")
-    async def server_info(self, ctx: discord.ext.commands.Context):
+    @commands.command(name="guildinfo", aliases=["sinfo", "ginfo"], brief="Get information about the current guild")
+    async def guild_info(self, ctx: discord.ext.commands.Context):
         guild = ctx.guild
 
-        server_details = discord.Embed(
-            title="Server Information for " + guild.name,
+        guild_details = discord.Embed(
+            title="Guild Information for " + guild.name,
             color=guild.owner.color
         )
 
-        server_details.set_thumbnail(url=guild.icon_url)
-        server_details.add_field(name="Guild ID", value=guild.id, inline=True)
-        server_details.add_field(name="Owner", value=guild.owner.display_name + "#" + guild.owner.discriminator,
+        guild_details.set_thumbnail(url=guild.icon_url)
+        guild_details.add_field(name="Guild ID", value=guild.id, inline=True)
+        guild_details.add_field(name="Owner", value=guild.owner.display_name + "#" + guild.owner.discriminator,
                                  inline=True)
-        server_details.add_field(name="Members", value=str(len(guild.members)) + " users", inline=True)
-        server_details.add_field(name="Text Channels", value=str(len(guild.text_channels)) + " channels", inline=True)
-        server_details.add_field(name="Roles", value=str(len(guild.roles)) + " roles", inline=True)
-        server_details.add_field(name="Voice Channels", value=str(len(guild.voice_channels)) + " channels", inline=True)
-        server_details.add_field(name="Created At", value=str(guild.created_at).split('.')[0], inline=True)
-        server_details.add_field(name="Region", value=guild.region, inline=True)
+        guild_details.add_field(name="Members", value=str(len(guild.members)) + " users", inline=True)
+        guild_details.add_field(name="Text Channels", value=str(len(guild.text_channels)) + " channels", inline=True)
+        guild_details.add_field(name="Roles", value=str(len(guild.roles)) + " roles", inline=True)
+        guild_details.add_field(name="Voice Channels", value=str(len(guild.voice_channels)) + " channels", inline=True)
+        guild_details.add_field(name="Created At", value=guild.created_at.strftime(DATETIME_FORMAT), inline=True)
+        guild_details.add_field(name="Region", value=guild.region, inline=True)
 
         if len(guild.features) > 0:
-            server_details.add_field(name="Features", value=", ".join(guild.features))
+            guild_details.add_field(name="Features", value=", ".join(guild.features))
 
-        await ctx.send(embed=server_details)
+        await ctx.send(embed=guild_details)
 
     @commands.command(name="roleinfo", aliases=["rinfo"], brief="Get information about a specified role.")
     async def role_info(self, ctx: discord.ext.commands.Context, *, role: discord.Role):
@@ -85,11 +85,11 @@ class Intelligence:
 
         member_details.add_field(name="User ID", value=member.id, inline=True)
         member_details.add_field(name="Display Name", value=member.display_name, inline=True)
-        member_details.add_field(name="Joined Discord", value=str(member.created_at).split('.')[0], inline=True)
-        member_details.add_field(name="Joined Server", value=str(member.joined_at).split('.')[0], inline=True)
+        member_details.add_field(name="Joined Discord", value=member.created_at.strftime(DATETIME_FORMAT), inline=True)
+        member_details.add_field(name="Joined Guild", value=member.joined_at.strftime(DATETIME_FORMAT), inline=True)
         member_details.add_field(name="Roles", value=", ".join(roles), inline=False)
         member_details.set_thumbnail(url=member.avatar_url)
-        member_details.set_footer(text="Member #{} on the server"
+        member_details.set_footer(text="Member #{} on the guild"
                                   .format(str(sorted(ctx.guild.members, key=lambda m: m.joined_at).index(member) + 1)))
 
         await ctx.send(embed=member_details)

@@ -4,8 +4,8 @@ import re
 import discord
 from discord.ext import commands
 
-from WolfBot import WolfUtils
 from WolfBot import WolfConfig
+from WolfBot import WolfUtils
 from WolfBot.WolfStatics import Colors
 
 LOG = logging.getLogger("DiyBot.Plugin." + __name__)
@@ -44,7 +44,7 @@ class Censor:
     async def on_message_edit(self, before, after):
         await self.filter_message(after, "edit")
 
-    @commands.group(name="censor", brief="Manage the Censor list for the server")
+    @commands.group(name="censor", brief="Manage the Censor list for the guild")
     @commands.has_permissions(manage_messages=True)
     async def censor(self, ctx: commands.Context):
         pass
@@ -71,7 +71,7 @@ class Censor:
 
         await ctx.send(embed=discord.Embed(
             title="Global Censors for " + ctx.guild.name,
-            description="The following words are censored in this server:\n\n" + ", ".join(censor_list),
+            description="The following words are censored in this guild:\n\n" + ", ".join(censor_list),
             color=Colors.PRIMARY
         ))
 

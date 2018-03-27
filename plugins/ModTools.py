@@ -1,5 +1,5 @@
-import logging
 import asyncio
+import logging
 
 import discord
 from discord.ext import commands
@@ -10,7 +10,7 @@ from WolfBot.WolfStatics import Colors
 LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 
 
-# noinspection PyMethodMayBeStatic
+# noinspection PyMethodMayBeStatic,PyUnresolvedReferences
 class ModTools:
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
@@ -69,7 +69,7 @@ class ModTools:
             await ctx.send(embed=discord.Embed(
                 title="Mod Toolkit",
                 description="User `" + str(user) + "` may not be hackbanned, as they are an active member of the "
-                            "server. Use the `/ban` command instead.",
+                                                   "guild. Use the `/ban` command instead.",
                 color=Colors.DANGER
             ))
             return
@@ -84,7 +84,7 @@ class ModTools:
         ))
 
     @commands.command(name="unautoban", aliases=["pardon", "unban", "unhackban", "pardonautoban", "pardonhackban"],
-                      brief="Pardon a banned member not on the server")
+                      brief="Pardon a banned member not on the guild")
     @commands.has_permissions(ban_members=True)
     async def unhackban(self, ctx: discord.ext.commands.Context, user_id: int):
         try:
@@ -102,7 +102,7 @@ class ModTools:
         except discord.NotFound:
             await ctx.send(embed=discord.Embed(
                 title="Mod Toolkit",
-                description="User `" + str(user) + "` is not banned on this server, so they can not be unbanned.",
+                description="User `" + str(user) + "` is not banned on this guild, so they can not be unbanned.",
                 color=Colors.WARNING
             ))
             return
@@ -154,7 +154,7 @@ class ModTools:
         pass
 
     @commands.command(name="globalmute", aliases=["gmute"],
-                      brief="Temporarily mute a user from the server", enabled=False)
+                      brief="Temporarily mute a user from the guild", enabled=False)
     @commands.has_permissions(ban_members=True)
     async def globalmute(self, ctx: discord.ext.commands.Context, target: discord.Member, *,
                          reason: str):

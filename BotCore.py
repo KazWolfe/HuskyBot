@@ -21,6 +21,7 @@ initialized = False
 # Determine restart reason (pretty mode) - HACK FOR BOT INIT
 restart_reason = BOT_CONFIG.get("restartReason", "start")
 start_status = discord.Status.idle
+
 if restart_reason == "admin":
     start_activity = discord.Activity(name="Restarting...", type=discord.ActivityType.playing)
 elif restart_reason == "update":
@@ -30,8 +31,7 @@ else:
 
 bot = commands.Bot(command_prefix=BOT_CONFIG.get('prefix', '/'), activity=start_activity, status=start_status)
 
-# LOCAL_STORAGE.set('logPath', 'logs/log-' + str(datetime.datetime.now()).split('.')[0] + ".log")
-LOCAL_STORAGE.set('logPath', 'logs/wolfbot-' + str(datetime.datetime.now()).split(' ')[0] + '.log')
+LOCAL_STORAGE.set('logPath', 'logs/wolfbot-' + str(datetime.datetime.utcnow()).split(' ')[0] + '.log')
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
                     datefmt="%Y-%m-%d %H:%M:%S",
                     handlers=[logging.FileHandler(LOCAL_STORAGE.get('logPath'), 'a'),

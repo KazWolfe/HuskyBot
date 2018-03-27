@@ -1,14 +1,14 @@
+import datetime
 import logging
 import re
-import datetime
 
 import discord
 from discord.ext import commands
 from discord.http import Route
 
-from WolfBot import WolfUtils
 from WolfBot import WolfConfig
-from WolfBot.WolfStatics import Colors, ChannelKeys
+from WolfBot import WolfUtils
+from WolfBot.WolfStatics import *
 
 LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 
@@ -68,7 +68,7 @@ class AntiSpam:
 
         if PING_BAN_LIMIT is not None and len(message.mentions) >= PING_BAN_LIMIT:
             await message.author.ban(delete_message_days=0, reason="[AUTOMATIC BAN - AntiSpam Module] "
-                                                                   "Multi-pinged over server ban limit.")
+                                                                   "Multi-pinged over guild ban limit.")
 
     async def prevent_discord_invites(self, message):
         ALLOWED_INVITES = self._config.get('antiSpam', {}).get('allowedInvites', [message.guild.id])
@@ -80,7 +80,7 @@ class AntiSpam:
 
         # Prevent memory abuse by deleting expired cooldown records
         if message.author.id in self.INVITE_COOLDOWNS \
-                and self.INVITE_COOLDOWNS[message.author.id]['cooldownExpiry'] < datetime.datetime.now():
+                and self.INVITE_COOLDOWNS[message.author.id]['cooldownExpiry'] < datetime.datetime.utcnow():
             del self.INVITE_COOLDOWNS[message.author.id]
 
         # Users with MANAGE_MESSAGES are allowed to send unauthorized invites.
@@ -117,18 +117,18 @@ class AntiSpam:
                 await log_channel.send(embed=invalid_embed)
                 break
 
-            # This guild is allowed to have invites on this server, so we can ignore them.
+            # This guild is allowed to have invites on our guild, so we can ignore them.
             if invite_guild.id in ALLOWED_INVITES:
                 continue
 
-            # We have an invite from a non-whitelisted server. Delete it.
+            # We have an invite from a non-whitelisted guild. Delete it.
             await message.delete()
 
             # Add the user to the cooldowns table - we're going to use this to prevent DIYBot's spam and to ban the user
             # if they go over 5 deleted invites in a 30 minute period.
             if message.author.id not in self.INVITE_COOLDOWNS.keys():
                 self.INVITE_COOLDOWNS[message.author.id] = {
-                    'cooldownExpiry': datetime.datetime.now() + datetime.timedelta(minutes=30),
+                    'cooldownExpiry': datetime.datetime.utcnow() + datetime.timedelta(minutes=30),
                     'offenseCount': 0
                 }
 
@@ -167,7 +167,7 @@ class AntiSpam:
                 log_embed.add_field(name="Invited Guild ID", value=invite_guild.id, inline=True)
 
                 log_embed.add_field(name="Invited Guild Creation Date",
-                                    value=str(invite_guild.created_at).split('.')[0],
+                                    value=invite_guild.created_at.strftime(DATETIME_FORMAT),
                                     inline=True)
 
                 if invite_data.get('approximate_member_count', -1) != -1:
@@ -177,7 +177,7 @@ class AntiSpam:
 
                 log_embed.set_footer(text="Strike {} of 5, resets {}"
                                      .format(cooldownRecord['offenseCount'],
-                                             str(cooldownRecord['cooldownExpiry']).split('.')[0]))
+                                             cooldownRecord['cooldownExpiry'].strftime(DATETIME_FORMAT)))
 
                 log_embed.set_thumbnail(url=invite_guild.icon_url)
 
@@ -200,7 +200,7 @@ class AntiSpam:
 
         # Clear
         if message.author.id in self.ATTACHMENT_COOLDOWNS \
-                and self.ATTACHMENT_COOLDOWNS[message.author.id]['cooldownExpiry'] < datetime.datetime.now():
+                and self.ATTACHMENT_COOLDOWNS[message.author.id]['cooldownExpiry'] < datetime.datetime.utcnow():
             del self.ATTACHMENT_COOLDOWNS[message.author.id]
 
         # Users with MANAGE_MESSAGES are allowed to bypass attachment rate limits.
@@ -211,7 +211,7 @@ class AntiSpam:
             # User posted an attachment, and is not in the cache. Let's add them, on strike 0.
             if message.author.id not in self.ATTACHMENT_COOLDOWNS.keys():
                 self.ATTACHMENT_COOLDOWNS[message.author.id] = {
-                    'cooldownExpiry': datetime.datetime.now() + datetime.timedelta(seconds=15),
+                    'cooldownExpiry': datetime.datetime.utcnow() + datetime.timedelta(seconds=15),
                     'offenseCount': 0
                 }
 
@@ -288,7 +288,7 @@ class AntiSpam:
             color=Colors.SUCCESS
         ))
 
-    @asp.command(name="allowInvite", brief="Allow an invite from the server ID given")
+    @asp.command(name="allowInvite", brief="Allow an invite from the guild ID given")
     @commands.has_permissions(manage_guild=True)
     async def allow_invite(self, ctx: commands.Context, guild: int):
         as_config = self._config.get('antiSpam', {})

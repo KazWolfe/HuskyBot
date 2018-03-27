@@ -1,6 +1,3 @@
-import datetime
-
-
 class Mute:
     id = 0
     timestamp = None
@@ -8,13 +5,13 @@ class Mute:
     user_id = 0
     reason = ""
 
-    # None for serverwide, ID for a channel
+    # None for guildwide, ID for a channel
     channel = None
 
     # Expiry of None is permanent.
     expiry = None
 
-    def load_dict(self, data: dict) -> Mute:
+    def load_dict(self, data: dict):
         mute = Mute()
 
         mute.id = data.get('id')

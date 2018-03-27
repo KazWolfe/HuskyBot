@@ -1,8 +1,6 @@
 import logging
 
 import discord
-
-from datetime import datetime
 from discord.ext import commands
 
 from WolfBot import WolfConfig
@@ -41,8 +39,8 @@ class ServerLog:
 
             if guild.member_count % 500 == 0:
                 await milestone_channel.send(embed=discord.Embed(
-                    title=Emojis.PARTY + "Server Member Count Milestone!",
-                    description="The server has now reached " + str(guild.member_count) + " members! Thank you "
+                    title=Emojis.PARTY + "Guild Member Count Milestone!",
+                    description="The guild has now reached " + str(guild.member_count) + " members! Thank you "
                                 + notif_member.display_name + " for joining!",
                     color=Colors.SUCCESS
                 ))
@@ -61,15 +59,15 @@ class ServerLog:
 
             embed = discord.Embed(
                 title= Emojis.SUNRISE + " New Member!",
-                description=str(notif_member) + " has joined the server.",
+                description=str(notif_member) + " has joined the guild.",
                 color=Colors.PRIMARY
             )
 
             embed.set_thumbnail(url=notif_member.avatar_url)
-            embed.add_field(name="Joined Server", value=str(notif_member.joined_at).split('.')[0], inline=True)
-            embed.add_field(name="Joined Discord", value=str(notif_member.created_at).split('.')[0], inline=True)
+            embed.add_field(name="Joined Guild", value=notif_member.joined_at.strftime(DATETIME_FORMAT), inline=True)
+            embed.add_field(name="Joined Discord", value=notif_member.created_at.strftime(DATETIME_FORMAT), inline=True)
             embed.add_field(name="User ID", value=notif_member.id, inline=True)
-            embed.set_footer(text="Member #{} on the server".format(
+            embed.set_footer(text="Member #{} on the guild".format(
                 str(sorted(notif_member.guild.members, key=lambda m: m.joined_at).index(member) + 1)))
 
             await channel.send(embed=embed)
@@ -89,14 +87,14 @@ class ServerLog:
         alert_channel = member.guild.get_channel(alert_channel)
 
         embed = discord.Embed(
-            title=Emojis.DOOR + " Member left the server",
-            description=str(member) + " has left the server.",
+            title=Emojis.DOOR + " Member left the guild",
+            description=str(member) + " has left the guild.",
             color=Colors.PRIMARY
         )
 
         embed.set_thumbnail(url=member.avatar_url)
         embed.add_field(name="User ID", value=member.id)
-        embed.add_field(name="Leave Timestamp", value=str(datetime.utcnow()).split('.')[0])
+        embed.add_field(name="Leave Timestamp", value=WolfUtils.get_timestamp())
 
         await alert_channel.send(embed=embed)
 
@@ -104,8 +102,8 @@ class ServerLog:
         if "userBan" not in self._config.get("loggers", {}).keys():
             return
 
-        # Get timestamp as soon as the event is fired,
-        timestamp = datetime.utcnow()
+        # Get timestamp as soon as the event is fired, because waiting for bans may take a while.
+        timestamp = WolfUtils.get_timestamp()
 
         alert_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
 
@@ -116,7 +114,7 @@ class ServerLog:
 
         embed = discord.Embed(
             title=Emojis.BAN + " User banned",
-            description=str(user) + " was banned from the server.",
+            description=str(user) + " was banned from the guild.",
             color=Colors.DANGER
         )
 
@@ -132,7 +130,7 @@ class ServerLog:
 
         embed.set_thumbnail(url=user.avatar_url)
         embed.add_field(name="User ID", value=user.id, inline=True)
-        embed.add_field(name="Ban Timestamp", value=str(timestamp).split('.')[0], inline=True)
+        embed.add_field(name="Ban Timestamp", value=timestamp, inline=True)
         embed.add_field(name="Ban Reason", value=ban_reason, inline=False)
 
         await alert_channel.send(embed=embed)
@@ -150,13 +148,13 @@ class ServerLog:
 
         embed = discord.Embed(
             title=Emojis.UNBAN + "User unbanned",
-            description=str(user) + " was unbanned from the server.",
+            description=str(user) + " was unbanned from the guild.",
             color=Colors.PRIMARY
         )
 
         embed.set_thumbnail(url=user.avatar_url)
         embed.add_field(name="User ID", value=user.id)
-        embed.add_field(name="Unban Timestamp", value=str(datetime.utcnow()).split('.')[0])
+        embed.add_field(name="Unban Timestamp", value=WolfUtils.get_timestamp())
 
         await alert_channel.send(embed=embed)
 
@@ -185,8 +183,8 @@ class ServerLog:
         embed.set_author(name="Deleted Message in #" + str(message.channel), icon_url=message.author.avatar_url)
         embed.add_field(name="Author", value=message.author, inline=True)
         embed.add_field(name="Message ID", value=message.id, inline=True)
-        embed.add_field(name="Send Timestamp", value=str(message.created_at).split('.')[0], inline=True)
-        embed.add_field(name="Delete Timestamp", value=str(datetime.utcnow()).split('.')[0], inline=True)
+        embed.add_field(name="Send Timestamp", value=message.created_at.strftime(DATETIME_FORMAT), inline=True)
+        embed.add_field(name="Delete Timestamp", value=WolfUtils.get_timestamp(), inline=True)
 
         if message.content is not None and message.content != "":
             embed.add_field(name="Message", value=WolfUtils.trim_string(message.content, 1000, True), inline=False)
@@ -230,8 +228,8 @@ class ServerLog:
         embed.add_field(name="Author", value=after.author, inline=True)
         embed.add_field(name="Message ID", value=after.id, inline=True)
         embed.add_field(name="Channel", value=after.channel.mention, inline=True)
-        embed.add_field(name="Send Timestamp", value=str(before.created_at).split('.')[0], inline=True)
-        embed.add_field(name="Edit Timestamp", value=str(after.edited_at).split('.')[0], inline=True)
+        embed.add_field(name="Send Timestamp", value=before.created_at.strftime(DATETIME_FORMAT), inline=True)
+        embed.add_field(name="Edit Timestamp", value=after.edited_at.strftime(DATETIME_FORMAT), inline=True)
 
         if before.content is not None and before.content != "":
             embed.add_field(name="Message Before", value=WolfUtils.trim_string(before.content, 1000, True),

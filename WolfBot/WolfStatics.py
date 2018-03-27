@@ -1,5 +1,7 @@
 from enum import Enum, IntEnum
 
+DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
+
 
 class Colors(IntEnum):
     PRIMARY = 0x007BFF

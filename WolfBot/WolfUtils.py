@@ -1,6 +1,9 @@
+import datetime
 import subprocess
 
 import WolfBot.WolfConfig
+from WolfBot import WolfStatics
+
 
 def memberHasRole(member, role_id):
     for r in member.roles:
@@ -67,3 +70,11 @@ def trim_string(string: str, limit: int, add_ellipses: bool):
             s = s[:-5] + "\n\n..."
 
     return s
+
+
+def get_timestamp():
+    """
+    Get the UTC timestamp in YYYY-MM-DD HH:MM:SS format (Bot Standard)
+    """
+
+    return datetime.datetime.utcnow().strftime(WolfStatics.DATETIME_FORMAT)
