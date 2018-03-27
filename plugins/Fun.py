@@ -94,11 +94,11 @@ class Fun:
         seed = 736580  # A certain wolfgirl...
         master_rng = random.Random((member.id + seed + datetime.utcnow().toordinal()) % seed)
 
-        def get_value(user_value: int):
+        def get_value(user_value: int, imin: int, imax: int, dev: float):
             rng = random.Random(user_value - seed)
 
             # Attractiveness is the base (1-10) + modifier
-            result = round(rng.randint(5, 10) + master_rng.gauss(0, 0.2575), 2)
+            result = round(rng.randint(imin, imax) + master_rng.gauss(0, dev), 2)
 
             if result > 10:
                 return 10.00
@@ -111,10 +111,10 @@ class Fun:
         attractiveness = 0.25
 
         if member.avatar is not None:
-            attractiveness = get_value(int(member.avatar[2:], 16) % seed)
+            attractiveness = get_value(int(member.avatar[2:], 16) % seed, 4, 10, 0.2575)
 
-        craziness = get_value(int(member.discriminator))
-        intelligence = get_value(member.id % seed)
+        craziness = get_value(int(member.discriminator), 1, 6, 0.2575)
+        intelligence = get_value(member.id % seed, 5, 10, 0.2575)
 
         average_score = round((attractiveness + (10.0 - craziness) + intelligence) / 3, 2)
 
