@@ -1,14 +1,12 @@
+import asyncio
 import logging
+import random
+from datetime import datetime
 
 import discord
-import random
-import asyncio
-
-from datetime import datetime
 from discord.ext import commands
 
 from WolfBot import WolfConfig
-from WolfBot import WolfUtils
 from WolfBot.WolfStatics import *
 
 LOG = logging.getLogger("DiyBot.Plugin." + __name__)
@@ -89,6 +87,65 @@ class Fun:
             return
 
         await ctx.send("*{} gives {} a hug. Aww!*".format(ctx.author.mention, target.mention))
+
+    @commands.command(name="rate", brief="Rate another user based on attractiveness, craziness, and intelligence")
+    @commands.has_permissions(manage_users=True)
+    async def rate_user(self, ctx: commands.Context, member: discord.User):
+        seed = 736580  # A certain wolfgirl...
+        master_rng = random.Random((member.id + seed + datetime.utcnow().toordinal()) % 450000)
+
+        def get_value(user_value: int, subtract_master: bool):
+            mySeed = seed
+
+            if subtract_master:
+                mySeed = -1 * seed
+
+            rng = random.Random(user_value + mySeed)
+
+            # Attractiveness is the base (1-10) + modifier
+            result = round(rng.randint(4, 10) + master_rng.gauss(0, 0.2575), 2)
+
+            if result > 10:
+                return 10.00
+
+            if result < 0:
+                return 0.00
+
+            return result
+
+        attractiveness = 0.25
+
+        if member.avatar is not None:
+            attractiveness = get_value(int(member.avatar[2:], 16) % 450000, False)
+
+        craziness = get_value(member.id % 450000, True)
+        intelligence = get_value(member.id % 450000, False)
+
+        average_score = round((attractiveness + (10.0 - craziness) + intelligence) / 3, 2)
+
+        LOG.info("AttrScore: user_id: {}, avatar_id: {}, attr: {}, craz: {}, int: {}, mrng: {}",
+                 member.id % 450000, int(member.avatar[2:], 16) % 450000, attractiveness, craziness, intelligence,
+                 (seed + datetime.utcnow().toordinal()) % 450000)
+
+        if member == self.bot.user:
+            attractiveness = 11.27
+            craziness = -5.31
+            intelligence = "INTEGER_OVERFLOW"
+            average_score = "HAWT AF"
+
+        embed = discord.Embed(
+            title="{} has an overall rating of {}!".format(member.display_name, average_score),
+            description="The rating for for {} is ready!".format(member.mention),
+            color=Colors.INFO
+        )
+
+        embed.add_field(name="Attractiveness", value=attractiveness, inline=True)
+        embed.add_field(name="Craziness", value=craziness, inline=True)
+        embed.add_field(name="Intelligence", value=intelligence, inline=True)
+
+        embed.set_thumbnail(url=member.avatar_url)
+
+        await ctx.send(embed=embed)
 
 
 def setup(bot: discord.ext.commands.Bot):

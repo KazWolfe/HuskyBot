@@ -1,6 +1,4 @@
 import logging
-import os
-import sys
 import time
 from datetime import datetime
 
@@ -9,8 +7,7 @@ import git
 from discord.ext import commands
 
 from WolfBot import WolfConfig
-from WolfBot import WolfUtils
-from WolfBot.WolfStatics import Colors
+from WolfBot.WolfStatics import *
 
 LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 
@@ -84,7 +81,7 @@ class Updater:
 
         embed.add_field(name="Author", value=lastCommit.author, inline=True)
         embed.add_field(name="Author Date", value=datetime
-                        .fromtimestamp(lastCommit.authored_date).strftime('%Y-%m-%d %H:%M:%S') + " UTC", inline=True)
+                        .fromtimestamp(lastCommit.authored_date).strftime(DATETIME_FORMAT) + " UTC", inline=True)
         embed.add_field(name="GitHub", value="[See Commit >](https://www.github.com/KazWolfe/"
                                              + "diy_tech-bot/commit/" + lastCommit.hexsha + ")", inline=False)
 
