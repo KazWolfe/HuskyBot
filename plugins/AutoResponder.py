@@ -3,8 +3,8 @@ import logging
 import discord
 from discord.ext import commands
 
-from WolfBot import WolfUtils
 from WolfBot import WolfConfig
+from WolfBot import WolfUtils
 from WolfBot.WolfStatics import Colors
 
 LOG = logging.getLogger("DiyBot.Plugin." + __name__)
@@ -147,6 +147,9 @@ class AutoResponder:
                         color=Colors.DANGER
                     ))
                     return
+
+                if response[param] is None:
+                    response[param] = []
 
                 if action.lower() == "add":
                     response[param].append(val)

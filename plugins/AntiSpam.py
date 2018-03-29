@@ -71,7 +71,10 @@ class AntiSpam:
                                                                    "Multi-pinged over guild ban limit.")
 
     async def prevent_discord_invites(self, message):
-        ALLOWED_INVITES = self._config.get('antiSpam', {}).get('allowedInvites', [message.guild.id])
+        ANTISPAM_CONFIG = self._config.get('antiSpam', {})
+
+        ALLOWED_INVITES = ANTISPAM_CONFIG.get('allowedInvites', [message.guild.id])
+        COOLDOWN_SETTINGS = ANTISPAM_CONFIG.get('cooldowns', {}).get('invites', {'minutes': 30, 'banLimit': 5})
 
         # Prepare the logger
         log_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
@@ -98,7 +101,7 @@ class AntiSpam:
 
             # Attempt to validate the invite, deleting invalid ones
             try:
-                # invite_data = await self.bot.http.get_invite(fragment)
+                # discordpy doesn't let us do this natively, so let's do it ourselves!
                 invite_data = await self.bot.http.request(
                     Route('GET', '/invite/{invite_id}?with_counts=true', invite_id=fragment))
                 invite_guild = discord.Guild(state=self.bot, data=invite_data['guild'])
@@ -121,14 +124,15 @@ class AntiSpam:
             if invite_guild.id in ALLOWED_INVITES:
                 continue
 
-            # We have an invite from a non-whitelisted guild. Delete it.
+            # If we reached here, we have an invite from a non-whitelisted guild. Delete it.
             await message.delete()
 
             # Add the user to the cooldowns table - we're going to use this to prevent DIYBot's spam and to ban the user
-            # if they go over 5 deleted invites in a 30 minute period.
+            # if they go over a defined number of invites in a period
             if message.author.id not in self.INVITE_COOLDOWNS.keys():
                 self.INVITE_COOLDOWNS[message.author.id] = {
-                    'cooldownExpiry': datetime.datetime.utcnow() + datetime.timedelta(minutes=30),
+                    'cooldownExpiry': datetime.datetime.utcnow() + datetime.timedelta(
+                        minutes=COOLDOWN_SETTINGS['minutes']),
                     'offenseCount': 0
                 }
 
@@ -173,10 +177,12 @@ class AntiSpam:
                 if invite_data.get('approximate_member_count', -1) != -1:
                     log_embed.add_field(name="Invited Guild User Count",
                                         value="{} ({} online)".format(invite_data.get('approximate_member_count', -1),
-                                                                      invite_data.get('approximate_presence_count', -1)))
+                                                                      invite_data.get('approximate_presence_count',
+                                                                                      -1)))
 
-                log_embed.set_footer(text="Strike {} of 5, resets {}"
+                log_embed.set_footer(text="Strike {} of {}, resets {}"
                                      .format(cooldownRecord['offenseCount'],
+                                             COOLDOWN_SETTINGS['banLimit'],
                                              cooldownRecord['cooldownExpiry'].strftime(DATETIME_FORMAT)))
 
                 log_embed.set_thumbnail(url=invite_guild.icon_url)
@@ -185,14 +191,21 @@ class AntiSpam:
 
             # If the user is at the offense limit, we're going to ban their ass. In this case, this means that on
             # their fifth invalid invite, we ban 'em.
-            if cooldownRecord['offenseCount'] >= 5:
-                await message.author.ban(reason="[AUTOMATIC BAN - AntiSpam Module] User sent 5 unauthorized invites in "
-                                                "a 30 minute period.", delete_message_days=0)
+            if cooldownRecord['offenseCount'] >= COOLDOWN_SETTINGS['banLimit']:
+                await message.author.ban(reason="[AUTOMATIC BAN - AntiSpam Module] User sent {} unauthorized invites "
+                                                "in a {} minute period.".format(COOLDOWN_SETTINGS['banLimit'],
+                                                                                COOLDOWN_SETTINGS['minutes']),
+                                         delete_message_days=0)
                 del self.INVITE_COOLDOWNS[message.author.id]
 
             break
 
     async def attachment_cooldown(self, message: discord.Message):
+        ANTISPAM_CONFIG = self._config.get('antiSpam', {})
+        COOLDOWN_CONFIG = ANTISPAM_CONFIG.get('cooldowns', {}).get('attach', {'seconds': 15,
+                                                                              'warnLimit': 3,
+                                                                              'banLimit': 5})
+
         # Prepare the logger
         log_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
         if log_channel is not None:
@@ -211,7 +224,8 @@ class AntiSpam:
             # User posted an attachment, and is not in the cache. Let's add them, on strike 0.
             if message.author.id not in self.ATTACHMENT_COOLDOWNS.keys():
                 self.ATTACHMENT_COOLDOWNS[message.author.id] = {
-                    'cooldownExpiry': datetime.datetime.utcnow() + datetime.timedelta(seconds=15),
+                    'cooldownExpiry': datetime.datetime.utcnow() + datetime.timedelta(
+                        seconds=COOLDOWN_CONFIG['seconds']),
                     'offenseCount': 0
                 }
 
@@ -221,7 +235,7 @@ class AntiSpam:
             cooldownRecord['offenseCount'] += 1
 
             # Give them a fair warning on attachment #3
-            if cooldownRecord['offenseCount'] == 3:
+            if COOLDOWN_CONFIG['warnLimit'] != 0 and cooldownRecord['offenseCount'] == COOLDOWN_CONFIG['warnLimit']:
                 await message.channel.send(embed=discord.Embed(
                     title="\uD83D\uDED1 Whoa there, pardner!",
                     description="Hey there {}! You're sending files awfully fast. Please help us keep this chat clean "
@@ -231,16 +245,18 @@ class AntiSpam:
                 ), delete_after=90.0)
                 if log_channel is not None:
                     await log_channel.send(embed=discord.Embed(
-                        description="User {} has sent 3 attachments in a 15-second period in channel {}."
-                            .format(message.author, message.channel),
+                        description="User {} has sent {} attachments in a {}-second period in channel {}."
+                            .format(message.author, cooldownRecord['offenseCount'], COOLDOWN_CONFIG['seconds'],
+                                    message.channel),
                         color=Colors.WARNING
                     ).set_author(name="Possible Attachment Spam", icon_url=message.author.avatar_url))
                     return
 
             # And ban their sorry ass at #5.
-            if cooldownRecord['offenseCount'] >= 5:
-                await message.author.ban(reason="[AUTOMATIC BAN - AntiSpam Module] User sent 5 attachments in a 15 "
-                                                "second period.",
+            if cooldownRecord['offenseCount'] >= COOLDOWN_CONFIG['banLimit']:
+                await message.author.ban(reason="[AUTOMATIC BAN - AntiSpam Module] User sent {} attachments in a {} "
+                                                "second period.".format(cooldownRecord['offenseCount'],
+                                                                        COOLDOWN_CONFIG['banLimit']),
                                          delete_message_days=1)
                 del self.ATTACHMENT_COOLDOWNS[message.author.id]
 
@@ -267,7 +283,7 @@ class AntiSpam:
         self._config.set('antiSpam', as_config)
 
         await ctx.send(embed=discord.Embed(
-            title="AntiSpam Module",
+            title="AntiSpam Plugin",
             description="The warning limit for pings has been set to " + str(new_limit) + ".",
             color=Colors.SUCCESS
         ))
@@ -283,7 +299,7 @@ class AntiSpam:
         self._config.set('antiSpam', as_config)
 
         await ctx.send(embed=discord.Embed(
-            title="AntiSpam Module",
+            title="AntiSpam Plugin",
             description="The ban limit for pings has been set to " + str(new_limit) + ".",
             color=Colors.SUCCESS
         ))
@@ -296,7 +312,7 @@ class AntiSpam:
 
         if guild in allowed_invites:
             await ctx.send(embed=discord.Embed(
-                title="AntiSpam Module",
+                title="AntiSpam Plugin",
                 description="The guild with ID `{}` is already whitelisted!".format(guild),
                 color=Colors.WARNING
             ))
@@ -305,7 +321,7 @@ class AntiSpam:
         allowed_invites.append(guild)
         self._config.set("antiSpam", as_config)
         await ctx.send(embed=discord.Embed(
-            title="AntiSpam Module",
+            title="AntiSpam Plugin",
             description="The invite to guild `{}` has been added to the whitelist."
                 .format(guild),
             color=Colors.SUCCESS
@@ -320,7 +336,7 @@ class AntiSpam:
 
         if guild == ctx.guild.id:
             await ctx.send(embed=discord.Embed(
-                title="AntiSpam Module",
+                title="AntiSpam Plugin",
                 description="This guild may not be removed from the whitelist!".format(guild),
                 color=Colors.WARNING
             ))
@@ -328,7 +344,7 @@ class AntiSpam:
 
         if guild not in allowed_invites:
             await ctx.send(embed=discord.Embed(
-                title="AntiSpam Module",
+                title="AntiSpam Plugin",
                 description="The guild `{}` is not whitelisted!".format(guild),
                 color=Colors.WARNING
             ))
@@ -337,12 +353,50 @@ class AntiSpam:
         allowed_invites.pop(guild)
         self._config.set("antiSpam", as_config)
         await ctx.send(embed=discord.Embed(
-            title="AntiSpam Module",
+            title="AntiSpam Plugin",
             description="The guild with ID `{}` has been removed from the whitelist."
                 .format(guild),
             color=Colors.SUCCESS
         ))
-        return
+
+    @asp.command(name="inviteCooldown", brief="Set invite cooldown and ban limits")
+    @commands.has_permissions(manage_guild=True)
+    async def set_invite_cooldown(self, ctx: commands.Context, cooldown_minutes: int, ban_limit: int):
+        as_config = self._config.get('antiSpam', {})
+        invite_cooldown = as_config.setdefault('cooldowns', {}).setdefault('invites', {'minutes': 30, 'banLimit': 5})
+
+        invite_cooldown['minutes'] = cooldown_minutes
+        invite_cooldown['banLimit'] = ban_limit
+
+        self._config.set('antiSpam', as_config)
+
+        await ctx.send(embed=discord.Embed(
+            title="AntiSpam Plugin",
+            description="The invite module of AntiSpam has been set to allow a max of **`{}`** unauthorized invites "
+                        "in a **`{}` minute** period.".format(ban_limit, cooldown_minutes),
+            color=Colors.SUCCESS
+        ))
+
+    @asp.command(name="attachmentCooldown", brief="Set attachment cooldown and ban limits")
+    @commands.has_permissions(manage_guild=True)
+    async def set_attach_cooldown(self, ctx: commands.Context, cooldown_seconds: int, warn_limit: int, ban_limit: int):
+        as_config = self._config.get('antiSpam', {})
+        attach_config = as_config.setdefault('cooldowns', {}).setdefault('attach', {'seconds': 15,
+                                                                                    'warnLimit': 3, 'banLimit': 5})
+
+        attach_config['seconds'] = cooldown_seconds
+        attach_config['warnLimit'] = warn_limit
+        attach_config['banLimit'] = ban_limit
+
+        self._config.set('antiSpam', as_config)
+
+        await ctx.send(embed=discord.Embed(
+            title="AntiSpam Plugin",
+            description="The attachments module of AntiSpam has been set to allow a max of **`{}`** attachments in a "
+                        "**`{}` second** period, warning after **`{}`** attachments"
+                .format(ban_limit, cooldown_seconds, warn_limit),
+            color=Colors.SUCCESS
+        ))
 
 
 def setup(bot: discord.ext.commands.Bot):
