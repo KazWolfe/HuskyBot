@@ -94,6 +94,21 @@ class Intelligence:
 
         await ctx.send(embed=member_details)
 
+    @commands.command(name="avatar", brief="Get a link/high-resolution version of a user's avatar")
+    async def avatar(self, ctx: commands.Context, user: discord.User):
+        user = user or ctx.author
+
+        embed = discord.Embed(
+            title="Avatar for {}".format(user),
+            color=Colors.INFO
+        )
+
+        embed.add_field(name="Avatar ID", value=user.avatar)
+        embed.add_field(name="Avatar URL", value="[Go >]({})".format(user.avatar_url))
+        embed.set_image(url=user.avatar_url)
+
+        await ctx.send(embed=embed)
+
 
 def setup(bot: discord.ext.commands.Bot):
     bot.add_cog(Intelligence(bot))

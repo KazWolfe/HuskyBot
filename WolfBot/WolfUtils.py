@@ -37,7 +37,7 @@ def getFancyGameData(member):
         fancy_game += member.activity.name
 
         if member.activity.url is not None:
-            fancy_game += "](" + member.game.url + ")"
+            fancy_game += "](" + member.activity.url + ")"
 
         fancy_game += ")"
 
