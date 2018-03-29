@@ -95,7 +95,7 @@ class Intelligence:
         await ctx.send(embed=member_details)
 
     @commands.command(name="avatar", brief="Get a link/high-resolution version of a user's avatar")
-    async def avatar(self, ctx: commands.Context, user: discord.User):
+    async def avatar(self, ctx: commands.Context, user: discord.User = None):
         user = user or ctx.author
 
         embed = discord.Embed(
@@ -103,8 +103,8 @@ class Intelligence:
             color=Colors.INFO
         )
 
-        embed.add_field(name="Avatar ID", value=user.avatar)
-        embed.add_field(name="Avatar URL", value="[Go >]({})".format(user.avatar_url))
+        embed.add_field(name="Avatar ID", value="`{}`".format(user.avatar), inline=False)
+        embed.add_field(name="Avatar URL", value="[Open In Browser >]({})".format(user.avatar_url), inline=False)
         embed.set_image(url=user.avatar_url)
 
         await ctx.send(embed=embed)

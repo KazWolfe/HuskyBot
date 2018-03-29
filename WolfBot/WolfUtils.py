@@ -1,6 +1,8 @@
 import datetime
 import subprocess
 
+import discord
+
 import WolfBot.WolfConfig
 from WolfBot import WolfStatics
 
@@ -25,23 +27,15 @@ def memberHasAnyRole(member, roles):
 
 
 def getFancyGameData(member):
-    fancy_game = ""
     if member.activity is not None:
         state = {0: "Playing ", 1: "Streaming ", 2: "Listening to ", 3: "Watching "}
 
-        fancy_game += "("
-        if member.activity.url is not None:
-            fancy_game += "["
+        if not isinstance(member.activity, discord.Game) and member.activity.url is not None:
+            return "([{}]({}))".format(state[member.activity.type] + member.activity.name, member.activity.url)
+        else:
+            return "({})".format(state[member.activity.type] + member.activity.name)
 
-        fancy_game += state[member.activity.type]
-        fancy_game += member.activity.name
-
-        if member.activity.url is not None:
-            fancy_game += "](" + member.activity.url + ")"
-
-        fancy_game += ")"
-
-    return fancy_game
+    return ""
 
 
 def tail(filename, n):
