@@ -5,6 +5,7 @@ import discord
 from discord.ext import commands
 
 from WolfBot import WolfConfig
+from WolfBot import WolfUtils
 from WolfBot.WolfStatics import Colors
 
 LOG = logging.getLogger("DiyBot.Plugin." + __name__)
@@ -173,6 +174,71 @@ class ModTools:
         if not is_role_mentionable:
             await target.edit(reason="Role Ping requested by " + str(ctx.message.author)
                                      + " completed", mentionable=False)
+
+    @commands.command(name="cleanup", aliases=["mcu", "bulkdelete"], brief="Clean up many messages quickly")
+    @commands.has_permissions(manage_messages=True)
+    async def cleanup(self, ctx: commands.Context, lookback: int, *, filter: str = None):
+        """
+        Quickly and easily delete multiple messages.
+
+        This supports an advanced filtering system, currently supporting the following flags:
+
+        - --[user|member|author] <user reference> : Filter by a specific user
+        - --[regex] <regex>                       : Filter by a regular expression
+
+        If multiple filters of the same type are used, *any* will match to delete the message. For example, running
+        "/cleanup 100 --user 123 --user 456" will delete all messages posted by users 123 and 456 that it finds in the
+        last 100 messages.
+
+        If differing filters are used, *both* must match. That is, "/cleanup 10 --user 123 --regex cat" will delete all
+        messages from user 123 that match the regex `cat`.
+
+        These can be combined, so "/cleanup 100 --user 123 --user 456 --regex cat" will delete any mention of regex
+        `cat` by users 123 or 456 in the last 100 messages.
+
+        The "lookback" value is the number of messages to search for messages that match the defined filters. If no
+        filters are defined, then *all* messages match, and lookback will be the total number of messages to delete.
+        """
+
+        # BE VERY CAREFUL TOUCHING THIS METHOD!
+        def generate_cleanup_filter(ctx: commands.Context, filter_def: str):
+            if filter_def is None:
+                return None
+
+            content_list = filter_def.split('--')
+
+            # Filter types
+            regex_list = []
+            user_list = []
+
+            for filter_candidate in content_list:
+                if filter_candidate is None or filter_candidate == '':
+                    continue
+
+                filter_candidate = filter_candidate.strip()
+                filter_candidate = filter_candidate.split(" ", 1)
+
+                if filter_candidate[0] in ["user", "author", "member"]:
+                    user_id = WolfUtils.get_user_id_from_arbitrary_str(ctx.guild, filter_candidate[1])
+                    user_list.append(user_id)
+                elif filter_candidate[0] in ["regex"]:
+                    regex_list.append(filter_candidate[1])
+                else:
+                    raise KeyError("Filter {} is not valid!".format(filter_candidate[0]))
+
+            def dynamic_check(message: discord.Message):
+                if len(user_list) > 0 and message.author.id not in user_list:
+                    return False
+
+                for regex in regex_list:
+                    if len(regex_list) > 0 and re.search(regex, message.content) is None:
+                        return False
+
+                return True
+
+            return dynamic_check
+
+        await ctx.channel.purge(limit=lookback + 1, check=generate_cleanup_filter(ctx, filter), bulk=True)
 
 
 def setup(bot: discord.ext.commands.Bot):

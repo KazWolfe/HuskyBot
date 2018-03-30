@@ -191,7 +191,7 @@ async def on_command_error(ctx, error):
         description="The bot has encountered a fatal error running the command given. Logs are below.",
         color=Colors.DANGER
     ).add_field(name="Error Log", value="```" + str(error) + "```", inline=False))
-    LOG.error("Error running command %s: %s", ctx.message.content, error)
+    LOG.error("Error running command %s: %s\n%s", ctx.message.content, error, traceback.format_exc())
 
 
 @bot.event

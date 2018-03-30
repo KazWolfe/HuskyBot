@@ -72,3 +72,22 @@ def get_timestamp():
     """
 
     return datetime.datetime.utcnow().strftime(WolfStatics.DATETIME_FORMAT)
+
+
+def get_user_id_from_arbitrary_str(guild: discord.Guild, string: str):
+    if string.isnumeric():
+        potential_uid = int(string)
+    elif string.startswith("<@") and string.endswith(">"):
+        potential_uid = int(string.replace("<@", "").replace(">", "").replace("!", ""))
+    else:
+        potential_user = guild.get_member_named(string)
+
+        if potential_user is None:
+            raise discord.NotFound(None, "No member by the name of {} was found.".format(string))
+
+        potential_uid = potential_user.id
+
+    if guild.get_member(potential_uid) is None:
+        raise discord.NotFound(None, "Member ID {} (translated from {}) was not found.".format(potential_uid, string))
+
+    return potential_uid
