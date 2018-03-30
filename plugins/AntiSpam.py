@@ -98,6 +98,7 @@ class AntiSpam:
 
         for regex_match in regex_matches:
             fragment = re.split("discord\.gg/", regex_match, flags=re.IGNORECASE)[1]
+            fragment = re.split('[^0-9A-Za-z\-]', fragment, maxsplit=0)[0]
 
             # Attempt to validate the invite, deleting invalid ones
             try:
