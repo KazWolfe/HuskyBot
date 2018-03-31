@@ -90,15 +90,14 @@ class AntiSpam:
         if message.author.permissions_in(message.channel).manage_messages:
             return
 
-        regex_matches = re.findall('discord\.gg/.+', message.content, flags=re.IGNORECASE)
+        regex_matches = re.findall('discord\.gg/[0-9a-z\-]+', message.content, flags=re.IGNORECASE)
 
         # Handle messages without any invites in them (by ignoring them)
         if regex_matches is None or regex_matches == []:
             return
 
         for regex_match in regex_matches:
-            fragment = re.split("discord\.gg/", regex_match, flags=re.IGNORECASE)[1]
-            fragment = re.split('[^0-9A-Za-z\-]', fragment, maxsplit=0)[0]
+            fragment = regex_match.split('/', maxsplit=1)[1]
 
             # Attempt to validate the invite, deleting invalid ones
             try:
