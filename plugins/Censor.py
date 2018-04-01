@@ -4,6 +4,7 @@ import re
 import discord
 from discord.ext import commands
 
+from WolfBot import WolfChecks
 from WolfBot import WolfConfig
 from WolfBot import WolfUtils
 from WolfBot.WolfStatics import Colors
@@ -89,6 +90,7 @@ class Censor:
         ))
 
     @censor.command(name="add", brief="Add a Censor to a channel")
+    @WolfChecks.has_server_permissions(manage_messages=True)
     async def addChannel(self, ctx: commands.Context, channel: discord.TextChannel, *, censor: str):
         censor_config = self._config.get("censors", {})
         censor_list = censor_config.setdefault(str(channel.id), [])
@@ -112,6 +114,7 @@ class Censor:
         ))
 
     @censor.command(name="globaladd", brief="Add a Censor to the global list", aliases=["gadd"])
+    @WolfChecks.has_server_permissions(manage_messages=True)
     async def addGlobal(self, ctx: commands.Context, *, censor: str):
         censor_config = self._config.get("censors", {})
         censor_list = censor_config.setdefault('global', [])
@@ -135,6 +138,7 @@ class Censor:
         ))
 
     @censor.command(name="remove", brief="Remove a censor from a channel")
+    @WolfChecks.has_server_permissions(manage_messages=True)
     async def removeChannel(self, ctx: commands.Context, channel: discord.TextChannel, *, censor: str):
         censor_config = self._config.get("censors", {})
         censor_list = censor_config.setdefault(str(channel.id), [])

@@ -1,10 +1,12 @@
 import asyncio
 import logging
+import re
 
 import discord
 from discord.ext import commands
 
 from WolfBot import WolfConfig
+from WolfBot import WolfConverters
 from WolfBot import WolfUtils
 from WolfBot.WolfStatics import Colors
 
@@ -35,69 +37,9 @@ class ModTools:
             await after.remove_roles(bot_role, reason="User is not an authorized bot.")
             LOG.info("User " + after.display_name + " was granted bot role, but was not a bot. Removing.")
 
-    async def load_mute_tasks(self):
-        mutes = self._mutes.get('mutes', [])
-
-    @commands.command(name="autoban", aliases=["hackban"], brief="Ban a user (by ID) currently not in the guild")
+    @commands.command(name="pardon", aliases=["unban"], brief="Pardon a banned member from their ban")
     @commands.has_permissions(ban_members=True)
-    async def hackban(self, ctx: discord.ext.commands.Context, user_id: int, *, reason: str):
-        try:
-            user = await self.bot.get_user_info(user_id)
-        except discord.NotFound:
-            await ctx.send(embed=discord.Embed(
-                title="Mod Toolkit",
-                description="User ID `" + str(user_id) + "` could not be hackbanned. Do they even exist?",
-                color=Colors.DANGER
-            ))
-            return
-
-        # If the user to be banned is the user calling the ban, let them have it.
-        if user == ctx.author:
-            await ctx.send(embed=discord.Embed(
-                title="Hello darkness my old friend...",
-                url="https://www.youtube.com/watch?v=4zLfCnGVeL4",
-                description="Permissions willing, you will be banned in 30 seconds. Thank you for using the WolfBot "
-                            "suicide booth. On behalf of the DIY Tech Discord, we wish you the best of luck in your "
-                            "next life, provided such a thing even exists.",
-                color=0x000000
-            ))
-            await asyncio.sleep(30)
-            await ctx.guild.ban(user, reason="User requested self-ban through /hackban")
-            return
-
-        # Make sure we don't ban an existing member of the Discord.
-        if ctx.guild.get_member(user.id) is not None:
-            await ctx.send(embed=discord.Embed(
-                title="Mod Toolkit",
-                description="User `" + str(user) + "` may not be hackbanned, as they are an active member of the "
-                                                   "guild. Use the `/ban` command instead.",
-                color=Colors.DANGER
-            ))
-            return
-
-        # Finally, ban the (in-cache) user, and inform the context of the ban.
-        await ctx.guild.ban(user, reason="[By " + str(ctx.author) + " - HACKBAN] " + reason, delete_message_days=1)
-
-        await ctx.send(embed=discord.Embed(
-            title="Mod Toolkit",
-            description="User `" + str(user) + "` was successfully banned.",
-            color=Colors.SUCCESS
-        ))
-
-    @commands.command(name="unautoban", aliases=["pardon", "unban", "unhackban", "pardonautoban", "pardonhackban"],
-                      brief="Pardon a banned member not on the guild")
-    @commands.has_permissions(ban_members=True)
-    async def unhackban(self, ctx: discord.ext.commands.Context, user_id: int):
-        try:
-            user = await self.bot.get_user_info(user_id)
-        except discord.NotFound:
-            await ctx.send(embed=discord.Embed(
-                title="Mod Toolkit",
-                description="User ID `" + str(user_id) + "` could not be hackbanned. Do they even exist?",
-                color=Colors.DANGER
-            ))
-            return
-
+    async def pardon(self, ctx: discord.ext.commands.Context, user: WolfConverters.OfflineUserConverter):
         try:
             await ctx.guild.unban(user, reason="Unbanned by " + str(ctx.author))
         except discord.NotFound:
@@ -116,30 +58,57 @@ class ModTools:
 
     @commands.command(name="ban", brief="Ban an active user of the Discord")
     @commands.has_permissions(ban_members=True)
-    async def ban(self, ctx: commands.Context, user: discord.Member, *, reason: str):
-        if ctx.message.author == user:
+    async def ban(self, ctx: commands.Context, user: WolfConverters.OfflineMemberConverter, *, reason: str):
+        """
+        Ban a user from the guild.
+
+        The ban command will target and remove a user immediately from the guild, regardless of their server state.
+
+        Users with ban privileges may not ban users at or above themselves in the role hierarchy. Offline users are not
+        restricted by this, as they have no roles assigned to them.
+
+        To ban an online user, any identifiable key may be used. For example, a user ID, a username, a Name#Discrim, a
+        username, or (in rare cases) a nickname. If the username has spaces in it, the username must be surrounded with
+        "quotes" to be properly parsed.
+
+        To ban an offline user, either a user ID (or a direct ping in form <@user_id>) will be necessary.
+
+        A reason is always mandatory, and is just an arbitrary string.
+
+        In the audit log, the bot will be credited with the ban, but a note will be added including the username of the
+        responsible moderator.
+        """
+        if user == ctx.author:
+            await ctx.send(embed=discord.Embed(
+                title="Hello darkness my old friend...",
+                url="https://www.youtube.com/watch?v=4zLfCnGVeL4",
+                description="Permissions willing, you will be banned in 30 seconds. Thank you for using the WolfBot "
+                            "suicide booth. On behalf of the DIY Tech Discord, we wish you the best of luck in your "
+                            "next life, provided such a thing even exists.",
+                color=0x000000
+            ))
+            await asyncio.sleep(30)
+            await ctx.guild.ban(user, reason="User requested self-ban.")
+            return
+
+        in_server = True
+        if not isinstance(user, discord.Member):
+            in_server = False
+        elif user.top_role.position >= ctx.message.author.top_role.position:
             await ctx.send(embed=discord.Embed(
                 title="Moderator Toolkit",
-                description="No matter how much you hate yourself, you can not use this command to "
-                            + "ban yourself. Try `/hackban` instead?",
+                description="User `{}` could not be banned, as they are not below you in the role hierarchy."
+                    .format(user),
                 color=Colors.DANGER
             ))
             return
 
-        if user.top_role.position >= ctx.message.author.top_role.position:
-            await ctx.send(embed=discord.Embed(
-                title="Moderator Toolkit",
-                description="User `" + str(
-                    user) + "` could not be banned, as they are not below you in the role hierarchy.",
-                color=Colors.DANGER
-            ))
-            return
-
-        await ctx.guild.ban(user, reason="[By " + str(ctx.author) + "] " + reason, delete_message_days=1)
+        await ctx.guild.ban(user, reason="[{}By {}] {}".format("HACKBAN | " if not in_server else "",
+                                                               ctx.author, reason), delete_message_days=1)
 
         await ctx.send(embed=discord.Embed(
             title="Ka-Ban!",
-            description="User `" + str(user) + "` was successfully banned.",
+            description="User `{}` was successfully banned.".format(user),
             color=Colors.SUCCESS
         ))
 
