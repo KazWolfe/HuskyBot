@@ -20,6 +20,7 @@ class ServerLog:
         self._validLoggers = ["userJoin", "userJoin.milestones", "userJoin.audit",
                               "userLeave",
                               "userBan",
+                              "userRename",
                               "messageDelete", "messageDelete.logIntegrity",
                               "messageEdit"]
 
@@ -155,6 +156,43 @@ class ServerLog:
         embed.set_thumbnail(url=user.avatar_url)
         embed.add_field(name="User ID", value=user.id)
         embed.add_field(name="Unban Timestamp", value=WolfUtils.get_timestamp())
+
+        await alert_channel.send(embed=embed)
+
+    async def on_member_update(self, before: discord.Member, after: discord.Member):
+        if "userRename" not in self._config.get("loggers", {}).keys():
+            return
+
+        alert_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
+
+        if alert_channel is None:
+            return
+
+        alert_channel = self.bot.get_channel(alert_channel)
+
+        if before.nick == after.nick and before.name == after.name:
+            return
+
+        if before.nick != after.nick:
+            update_type = 'nickname'
+            old_val = before.nick
+            new_val = after.nick
+        elif before.name != after.name:
+            update_type = 'username'
+            old_val = before.name
+            new_val = after.name
+        else:
+            return
+
+        embed = discord.Embed(
+            description="User has changed their {}! Their display name is now `{}`.".format(update_type,
+                                                                                            after.display_name),
+            color=Colors.INFO
+        )
+
+        embed.add_field(name="Old {}".format(update_type.capitalize()), value=old_val, inline=True)
+        embed.add_field(name="New {}".format(update_type.capitalize()), value=new_val, inline=True)
+        embed.set_author(name="{} has changed their {}!".format(after, update_type), icon_url=after.avatar_url)
 
         await alert_channel.send(embed=embed)
 

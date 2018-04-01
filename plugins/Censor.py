@@ -16,6 +16,12 @@ class Censor:
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
         self._config = WolfConfig.getConfig()
+
+        # Universal Ban List of phrases used by the bot. Any phrases here will trigger an instant ban.
+        self._ubl_phrases = [
+            "\u5350"  # Swastika unicode
+        ]
+
         LOG.info("Loaded plugin!")
 
     async def filter_message(self, message: discord.Message, context: str = "new_message"):
@@ -31,6 +37,13 @@ class Censor:
 
         if message.author.permissions_in(message.channel).manage_messages:
             return
+
+        for ubl_term in self._ubl_phrases:
+            if ubl_term.lower() in message.content.lower():
+                await message.author.ban(reason="[AUTOMATIC BAN - Censor Module] User used UBL'd keyword `{}`"
+                                         .format(ubl_term), delete_message_days=5)
+                LOG.info("Banned UBL triggering user (context %s, keyword %s, from %s in %s): %s", context,
+                         message.author, ubl_term, message.channel, message.content)
 
         if any((re.search(censor_term, message.content) is not None) for censor_term in censor_list):
             await message.delete()
