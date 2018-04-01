@@ -146,7 +146,7 @@ class ModTools:
 
     @commands.command(name="cleanup", aliases=["mcu", "bulkdelete"], brief="Clean up many messages quickly")
     @commands.has_permissions(manage_messages=True)
-    async def cleanup(self, ctx: commands.Context, lookback: int, *, filter: str = None):
+    async def cleanup(self, ctx: commands.Context, lookback: int, *, filter_def: str = None):
         """
         Quickly and easily delete multiple messages.
 
@@ -170,7 +170,7 @@ class ModTools:
         """
 
         # BE VERY CAREFUL TOUCHING THIS METHOD!
-        def generate_cleanup_filter(ctx: commands.Context, filter_def: str):
+        def generate_cleanup_filter():
             if filter_def is None:
                 return None
 
@@ -207,7 +207,7 @@ class ModTools:
 
             return dynamic_check
 
-        await ctx.channel.purge(limit=lookback + 1, check=generate_cleanup_filter(ctx, filter), bulk=True)
+        await ctx.channel.purge(limit=lookback + 1, check=generate_cleanup_filter(), bulk=True)
 
 
 def setup(bot: discord.ext.commands.Bot):

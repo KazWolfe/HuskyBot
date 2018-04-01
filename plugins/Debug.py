@@ -1,10 +1,8 @@
-import json
 import logging
 
 import discord
 from discord.ext import commands
 
-import WolfBot.WolfUtils as WolfUtils
 from WolfBot import WolfConfig
 from WolfBot.WolfStatics import Colors
 
@@ -51,9 +49,12 @@ class Debug:
         await target_message.add_reaction(reaction)
 
     @debug.command(name="echo", brief="Repeat the message back to the current channel.")
-    @commands.has_permissions(manage_messages=True)
     async def echo(self, ctx: discord.ext.commands.Context, *, message: str):
         await ctx.send(message)
+
+    @debug.command(name="forceExcept", brief="Force an exception (useful for testing purposes)")
+    async def forceExcept(self, ctx: discord.ext.commands.Context):
+        raise Exception("Random exception that was requested!")
 
     @commands.command(name="secho", brief="Repeat the message back to the current channel, deleting the original.",
                       hidden=True)

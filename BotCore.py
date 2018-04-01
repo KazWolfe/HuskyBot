@@ -110,7 +110,7 @@ async def on_guild_join(guild):
 
 
 @bot.event
-async def on_command_error(ctx, error):
+async def on_command_error(ctx, error: commands.CommandError):
     command_name = ctx.message.content.split(' ')[0][1:]
 
     if isinstance(error, commands.MissingPermissions):
@@ -182,7 +182,7 @@ async def on_command_error(ctx, error):
                         + "See `/help " + command_name + "` and the error below to fix this issue.",
             color=Colors.DANGER
         ).add_field(name="Error Log", value="```" + str(error) + "```", inline=False))
-        LOG.error("Command %s was unable to parse arguments: %s.", command_name, str(error))
+        LOG.error("Command %s was unable to parse arguments: %s.", command_name, )
         return
 
     # Handle all other errors
@@ -191,7 +191,8 @@ async def on_command_error(ctx, error):
         description="The bot has encountered a fatal error running the command given. Logs are below.",
         color=Colors.DANGER
     ).add_field(name="Error Log", value="```" + str(error) + "```", inline=False))
-    LOG.error("Error running command %s: %s\n%s", ctx.message.content, error, traceback.format_exc())
+    LOG.error("Error running command %s. See below for trace.\n%s",
+              ctx.message.content, ''.join(traceback.format_exception(type(error), error, error.__traceback__)))
 
 
 @bot.event
