@@ -84,12 +84,12 @@ def get_user_id_from_arbitrary_str(guild: discord.Guild, string: str):
         potential_user = guild.get_member_named(string)
 
         if potential_user is None:
-            raise discord.NotFound(None, "No member by the name of {} was found.".format(string))
+            raise ValueError("No member by the name of {} was found.".format(string))
 
-        potential_uid = potential_user.id
+        return potential_user.id
 
-    if guild.get_member(potential_uid) is None:
-        raise discord.NotFound(None, "Member ID {} (translated from {}) was not found.".format(potential_uid, string))
+    # if guild.get_member(potential_uid) is None:
+    #    raise ValueError("Member ID {} (translated from {}) was not found. ".format(potential_uid, string))
 
     return potential_uid
 

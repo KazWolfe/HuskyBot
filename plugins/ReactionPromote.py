@@ -40,7 +40,7 @@ class ReactionPromote:
             LOG.info("Added user " + user.display_name + " to role " + str(group_to_add))
         except KeyError:
             if promotion_config.get(str(channel_id)) is None:
-                LOG.warning("Not configured for this channel. Ignoring.")
+                # LOG.warning("Not configured for this channel. Ignoring.")
                 return
 
             if promotion_config.get(str(channel_id)).get(str(message_id)) is None \
@@ -80,7 +80,7 @@ class ReactionPromote:
             LOG.info("Removed user " + user.display_name + " from role " + str(group_to_remove))
         except KeyError:
             if promotion_config.get(str(channel_id)) is None:
-                LOG.warning("Not configured for this channel. Ignoring.")
+                # LOG.warning("Not configured for this channel. Ignoring.")
                 return
 
             if promotion_config.get(str(channel_id)).get(str(message_id)) is None:
