@@ -1,4 +1,5 @@
 import datetime
+import re
 import subprocess
 
 import discord
@@ -91,3 +92,17 @@ def get_user_id_from_arbitrary_str(guild: discord.Guild, string: str):
         raise discord.NotFound(None, "Member ID {} (translated from {}) was not found.".format(potential_uid, string))
 
     return potential_uid
+
+
+def get_timedelta_from_string(timestring: str):
+    regex = re.compile(r'((?P<hours>\d+?)h)?((?P<minutes>\d+?)m)?((?P<seconds>\d+?)s)?')
+
+    parts = regex.match(timestring)
+    if not parts:
+        return
+    parts = parts.groupdict()
+    time_params = {}
+    for (name, param) in parts.items():
+        if param:
+            time_params[name] = int(param)
+    return datetime.timedelta(**time_params)

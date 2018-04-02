@@ -2,6 +2,13 @@ import json
 from threading import Lock
 
 
+def override_dumper(obj):
+    if hasattr(obj, "toJSON"):
+        return obj.toJSON()
+    else:
+        return obj.__dict__
+
+
 class WolfConfig:
     def __init__(self, path: str = None, create_if_nonexistent: bool = False):
         self._config = {}
@@ -70,7 +77,7 @@ class WolfConfig:
             return
 
         with open(self._path, 'w') as f:
-            f.write(json.dumps(self._config, sort_keys=True))
+            f.write(json.dumps(self._config, sort_keys=True, default=override_dumper))
 
 
 __BOT_CONFIG = WolfConfig("config/config.json")

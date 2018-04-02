@@ -22,6 +22,11 @@ class ChannelKeys(str, Enum):
     PUBLIC_LOG = "audit"
 
 
+class SpecialRoleKeys(str, Enum):
+    BOTS = "bots"
+    MUTED = "muted"
+
+
 class Emojis:
     NO_ENTRY = "\uD83D\uDEAB"
     TRIANGLE = "\u26A0\uFE0F"
@@ -34,9 +39,12 @@ class Emojis:
     FIRE = "\uD83D\uDD25"
     SKULL = "\uD83D\uDC80"
     BOOK = "\uD83D\uDCDA"
+    MUTED_SPEAKER = "\uD83D\uDD07"
+    LOUD_SPEAKER = "\uD83D\uDD0A"
 
     # Mod shortcuts
     BAN = NO_ENTRY
     WARNING = TRIANGLE
     UNBAN = UNLOCK
-
+    MUTE = MUTED_SPEAKER
+    UNMUTE = LOUD_SPEAKER

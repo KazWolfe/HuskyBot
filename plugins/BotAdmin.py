@@ -1,13 +1,13 @@
-import logging
 import asyncio
+import logging
 
 import discord
 import git
 from discord.ext import commands
 
-from WolfBot import WolfUtils
 from WolfBot import WolfConfig
-from WolfBot.WolfStatics import Colors, ChannelKeys
+from WolfBot import WolfUtils
+from WolfBot.WolfStatics import *
 
 LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 
@@ -401,11 +401,41 @@ class BotAdmin:
 
         config[ChannelKeys[name].value] = channel.id
 
+        self._config.set('specialChannels', config)
+
         await ctx.send(embed=discord.Embed(
             title="Bot Manager",
             description="Channel value `{}` has been set to {}".format(name, channel.mention),
             color=Colors.SUCCESS
         ))
+
+    @admin.command(name="setRole", brief="Configure a role binding for the bot.")
+    async def set_role(self, ctx: commands.Context, name: str, role: discord.Role):
+        name = name.upper()
+        config = self._config.get('specialRoles', {})
+
+        if name not in SpecialRoleKeys.__members__:
+            specialRoles = []
+
+            for r in SpecialRoleKeys:
+                specialRoles.append(r.name)
+
+            await ctx.send(embed=discord.Embed(
+                title="Bot Manager",
+                description="Valid role names are: \n- `" + "`\n- `".join(specialRoles) + "`",
+                color=Colors.PRIMARY
+            ))
+            return
+
+        config[SpecialRoleKeys[name].value] = role.id
+
+        await ctx.send(embed=discord.Embed(
+            title="Bot Manager",
+            description="Role value `{}` has been set to {}".format(name, role.mention),
+            color=Colors.SUCCESS
+        ))
+
+        self._config.set('specialRoles', config)
 
 
 def setup(bot: discord.ext.commands.Bot):
