@@ -3,6 +3,8 @@ import re
 import discord
 from discord.ext import commands
 
+from WolfBot import WolfUtils
+
 
 class OfflineUserConverter(commands.UserConverter):
     """
@@ -51,3 +53,14 @@ class OfflineMemberConverter(commands.MemberConverter):
             raise commands.BadArgument('User "{}" not found'.format(argument))
 
         return result
+
+
+class DateDiffConverter(commands.Converter):
+    async def convert(self, ctx: commands.Context, argument: str):
+        if argument in ["0", "perm", "permanent", "inf", "infinite", "-"]:
+            return None
+
+        try:
+            return WolfUtils.get_timedelta_from_string(argument)
+        except ValueError as e:
+            raise commands.BadArgument(str(e))

@@ -128,7 +128,8 @@ class ModTools:
 
     @commands.command(name="mute", brief="Temporarily mute a user from the current channel")
     @commands.has_permissions(manage_messages=True)
-    async def mute(self, ctx: discord.ext.commands.Context, target: discord.Member, time: str, *, reason: str):
+    async def mute(self, ctx: discord.ext.commands.Context, target: discord.Member,
+                   time: WolfConverters.DateDiffConverter, *, reason: str):
         """
         Mute a user from the current channel.
 
@@ -158,11 +159,11 @@ class ModTools:
             ))
             return
 
-        if time.lower() in ["permanent", "perm", "0", "-"]:
+        if time is None:
             mute_until = None
             pretty_string = ""
         else:
-            mute_until = datetime.datetime.utcnow() + WolfUtils.get_timedelta_from_string(time)
+            mute_until = datetime.datetime.utcnow() + time
             pretty_string = "\nTheir mute will expire at {} UTC".format(mute_until.strftime(DATETIME_FORMAT))
             mute_until = int(mute_until.timestamp())
 
@@ -190,7 +191,8 @@ class ModTools:
     @commands.command(name="globalmute", aliases=["gmute"],
                       brief="Temporarily mute a user from the guild")
     @commands.has_permissions(ban_members=True)
-    async def globalmute(self, ctx: discord.ext.commands.Context, target: discord.Member, time: str, *, reason: str):
+    async def globalmute(self, ctx: discord.ext.commands.Context, target: discord.Member,
+                         time: WolfConverters.DateDiffConverter, *, reason: str):
         """
         Mute a user from talking anywhere in the guild.
 
@@ -255,6 +257,14 @@ class ModTools:
         # Try to find a mute from this user
         mute = await self._mute_manager.find_user_mute_record(target, ctx.channel)
 
+        if mute is None:
+            await ctx.send(embed=discord.Embed(
+                title="{} is not muted in {}.".format(target, "#" + str(ctx.channel)),
+                description="The user you have tried to mute has no existing mute records for this channel.",
+                color=Colors.WARNING
+            ))
+            return
+
         await self._mute_manager.unmute_user(mute, ctx.author.mention)
 
         await ctx.send(embed=discord.Embed(
@@ -279,6 +289,14 @@ class ModTools:
         """
         # Try to find a mute from this user
         mute = await self._mute_manager.find_user_mute_record(target, None)
+
+        if mute is None:
+            await ctx.send(embed=discord.Embed(
+                title="{} is not muted in the guild.".format(target),
+                description="The user you have tried to mute has no existing mute records for the guild.",
+                color=Colors.WARNING
+            ))
+            return
 
         await self._mute_manager.unmute_user(mute, ctx.author.mention)
         await ctx.send(embed=discord.Embed(
@@ -479,7 +497,7 @@ class MuteHandler:
         mute_obj.expiry = expiry
         mute_obj.set_cached_override(current_perms)
 
-        await self.mute_user_by_object(mute_obj, str(staff_member))
+        await self.mute_user_by_object(mute_obj, staff_member.mention)
 
     async def unmute_user(self, mute: WolfData.Mute, staff_member: str):
         if staff_member is not None:

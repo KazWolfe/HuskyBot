@@ -95,7 +95,7 @@ def get_user_id_from_arbitrary_str(guild: discord.Guild, string: str):
 
 
 def get_timedelta_from_string(timestring: str):
-    regex = re.compile(r'((?P<hours>\d+?)h)?((?P<minutes>\d+?)m)?((?P<seconds>\d+?)s)?')
+    regex = re.compile(r'((?P<days>\d+?)d)?((?P<hours>\d+?)h)?((?P<minutes>\d+?)m)?((?P<seconds>\d+?)s)?')
 
     parts = regex.match(timestring)
     if not parts:
@@ -105,4 +105,6 @@ def get_timedelta_from_string(timestring: str):
     for (name, param) in parts.items():
         if param:
             time_params[name] = int(param)
+    if time_params == {}:
+        raise ValueError("Invalid time string! Must be in form #d#h#m#s.")
     return datetime.timedelta(**time_params)
