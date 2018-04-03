@@ -16,6 +16,8 @@ from WolfBot.WolfStatics import Colors, ChannelKeys
 BOT_CONFIG = WolfConfig.getConfig()
 LOCAL_STORAGE = WolfConfig.getSessionStore()
 
+PERSON_TO_YELL_AT = "<@142494680158961664>"
+
 initialized = False
 
 # Determine restart reason (pretty mode) - HACK FOR BOT INIT
@@ -194,6 +196,9 @@ async def on_command_error(ctx, error: commands.CommandError):
     LOG.error("Error running command %s. See below for trace.\n%s",
               ctx.message.content, ''.join(traceback.format_exception(type(error), error, error.__traceback__)))
 
+    # Send it over to the main error logger as well.
+    raise error
+
 
 @bot.event
 async def on_error(event_method, *args, **kwargs):
@@ -215,7 +220,8 @@ async def on_error(event_method, *args, **kwargs):
             color=Colors.DANGER
         )
 
-        await channel.send(embed=embed)
+        await channel.send("{}, an error has occurred with the bot. See attached embed.".format(PERSON_TO_YELL_AT),
+                           embed=embed)
     except Exception as e:
         LOG.critical("There was an error sending an error to the error channel.\n " + str(e))
 
