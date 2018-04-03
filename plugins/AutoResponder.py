@@ -1,3 +1,4 @@
+import json
 import logging
 
 import discord
@@ -89,7 +90,7 @@ class AutoResponder:
 
     @responses.command(name="edit", brief="Alter an existing automatic response")
     @commands.has_permissions(manage_messages=True)
-    async def editResponse(self, ctx: discord.ext.commands.Context, trigger: str, param: str, action: str,
+    async def editResponse(self, ctx: discord.ext.commands.Context, trigger: str, param: str, action: str, *,
                            value: str = None):
         responses = self._config.get("responses", {})
 
@@ -113,11 +114,18 @@ class AutoResponder:
                 return
 
             if action.lower() == 'set':
+                response['isEmbed'] = False
                 response['response'] = value
+            elif action.lower() == 'json':
+                json_obj = json.loads(value)
+
+                response['response'] = json_obj
+                response['isEmbed'] = True
+
             else:
                 await ctx.send(embed=discord.Embed(
                     title="Response Manager",
-                    description="Valid actions for `response` are: **`set`**.",
+                    description="Valid actions for `response` are: **`set`**, **`json`**.",
                     color=Colors.DANGER
                 ))
                 return

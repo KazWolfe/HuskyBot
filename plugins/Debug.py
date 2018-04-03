@@ -1,3 +1,5 @@
+import inspect
+import json
 import logging
 
 import discord
@@ -52,6 +54,14 @@ class Debug:
     async def echo(self, ctx: discord.ext.commands.Context, *, message: str):
         await ctx.send(message)
 
+    @debug.command(name="richEcho", brief="Echo text in a rich embed")
+    async def rich_echo(self, ctx: commands.Context, *, message: str):
+        obj = json.loads(message)
+
+        embed = discord.Embed.from_data(obj)
+
+        await ctx.send(embed=embed)
+
     @debug.command(name="forceExcept", brief="Force an exception (useful for testing purposes)")
     async def forceExcept(self, ctx: discord.ext.commands.Context):
         raise Exception("Random exception that was requested!")
@@ -69,7 +79,40 @@ class Debug:
     async def sendmsg(self, ctx: discord.ext.commands.Context, channel: discord.TextChannel, *, message: str):
         await channel.send(message)
 
+    @commands.command(name="eval", brief="Execute an eval() statement on the server", hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def evalcmd(self, ctx: discord.ext.commands.Context, *, expr: str):
+        # Block *everyone* except Kaz from running eval
+        if ctx.author.id != 142494680158961664:
+            ctx.send(embed=discord.Embed(
+                title="Access denied!",
+                description="Due to the danger of this command, access to it has been blocked for this account.",
+                color=Colors.DANGER
+            ))
+            return
 
+        code = expr.strip('` ')
+
+        env = {
+            'bot': self.bot,
+            'ctx': ctx,
+            'message': ctx.message,
+            'guild': ctx.message.guild,
+            'channel': ctx.message.channel,
+            'author': ctx.message.author
+        }
+
+        env.update(globals())
+
+        result = eval(code, env)
+        if inspect.isawaitable(result):
+            result = await result
+
+        await ctx.send(embed=discord.Embed(
+            title="Evaluation Result",
+            description="```python\n>>> {}\n\n{}```".format(code, result),
+            color=Colors.SECONDARY
+        ))
 
 
 def setup(bot: discord.ext.commands.Bot):
