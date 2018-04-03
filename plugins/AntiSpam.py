@@ -125,7 +125,11 @@ class AntiSpam:
                 continue
 
             # If we reached here, we have an invite from a non-whitelisted guild. Delete it.
-            await message.delete()
+            try:
+                await message.delete()
+            except discord.NotFound:
+                # Message not found, let's log this
+                LOG.warning("Message was caught and already deleted before AS could handle it. Censor?")
 
             # Add the user to the cooldowns table - we're going to use this to prevent DIYBot's spam and to ban the user
             # if they go over a defined number of invites in a period
