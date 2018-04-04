@@ -174,7 +174,7 @@ class Community:
         rules_list = self._config.get("guildRules", [])
 
         try:
-            rules_list.remove(index - 1)
+            rules_list.pop(index - 1)
         except KeyError:
             await ctx.send(embed=discord.Embed(
                 title="Guild Rule Removal Failed",
