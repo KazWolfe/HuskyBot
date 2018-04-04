@@ -15,7 +15,7 @@ from WolfBot.managers.MuteManager import MuteManager
 LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 
 
-# noinspection PyMethodMayBeStatic,PyUnresolvedReferences
+# noinspection PyMethodMayBeStatic
 class ModTools:
     """
     ModTools is a plugin that provides a set of core moderator tools to guilds running WolfBot.
@@ -221,7 +221,7 @@ class ModTools:
             await ctx.send(embed=discord.Embed(
                 title="Moderator Toolkit",
                 description="User `{}` could not be muted, as they are not below you in the role "
-                            "hierarchy.".format(user),
+                            "hierarchy.".format(target),
                 color=Colors.DANGER
             ))
             return
