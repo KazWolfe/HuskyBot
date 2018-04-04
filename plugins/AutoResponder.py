@@ -6,7 +6,7 @@ from discord.ext import commands
 
 from WolfBot import WolfConfig
 from WolfBot import WolfUtils
-from WolfBot.WolfStatics import Colors, __developers__
+from WolfBot.WolfStatics import Colors
 
 LOG = logging.getLogger("DakotaBot.Plugin." + __name__)
 
@@ -27,6 +27,7 @@ class AutoResponder:
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
         self._config = WolfConfig.get_config()
+        self._session_store = WolfConfig.get_session_store()
         LOG.info("Loaded plugin!")
 
     #   responses: {
@@ -45,7 +46,7 @@ class AutoResponder:
         if message.author.id in self._config.get('userBlacklist', []):
             return
 
-        if self._config.get('lockdown', False) and (message.author.id not in __developers__):
+        if self._session_store.get('lockdown', False):
             return
 
         responses = self._config.get("responses", {})

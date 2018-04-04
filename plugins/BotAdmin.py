@@ -692,7 +692,7 @@ class BotAdmin:
         no state to toggle.
         """
 
-        lockdown_state = self._config.get('lockdown', False)
+        lockdown_state = self._session_store.get('lockdown', False)
 
         if state is None:
             lockdown_state = not lockdown_state
@@ -704,7 +704,7 @@ class BotAdmin:
         else:
             st = "enabled"
 
-        self._config.set('lockdown', lockdown_state)
+        self._session_store.set('lockdown', lockdown_state)
 
         await ctx.send("**Bot Lockdown State:** `{}`".format(st))
 
