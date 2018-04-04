@@ -27,10 +27,14 @@ class OfflineUserConverter(commands.UserConverter):
             match = super()._get_id_match(argument) or re.match(r'<@!?([0-9]+)>$', argument)
 
             if match is not None:
-                result = await ctx.bot.get_user_info(int(match.group(1)))
+                try:
+                    result = await ctx.bot.get_user_info(int(match.group(1)))
+                except discord.NotFound:
+                    result = None
 
         if result is None:
-            LOG.error("Couldn't find offline user matching ID %s. They may have been banned system-wide.", argument)
+            LOG.error("Couldn't find offline user matching ID %s. They may have been banned system-wide or"
+                      "their ID was typed wrong.", argument)
             raise commands.BadArgument('User "{}" could not be found. Do they exist?'.format(argument))
 
         return result
@@ -52,10 +56,14 @@ class OfflineMemberConverter(commands.MemberConverter):
             match = super()._get_id_match(argument) or re.match(r'<@!?([0-9]+)>$', argument)
 
             if match is not None:
-                result = await ctx.bot.get_user_info(int(match.group(1)))
+                try:
+                    result = await ctx.bot.get_user_info(int(match.group(1)))
+                except discord.NotFound:
+                    result = None
 
         if result is None:
-            LOG.error("Couldn't find offline user matching ID %s. They may have been banned system-wide.", argument)
+            LOG.error("Couldn't find offline user matching ID %s. They may have been banned system-wide or"
+                      "their ID was typed wrong.", argument)
             raise commands.BadArgument('User "{}" could not be found. Do they exist?'.format(argument))
 
         return result
