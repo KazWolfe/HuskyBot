@@ -239,7 +239,7 @@ class Intelligence:
                 search_channels.append(await converter.convert(ctx, context))
 
             for channel in search_channels:
-                if not channel.permissions_for(self.bot.user).read_message_history:
+                if not channel.permissions_for(ctx.me).read_message_history:
                     LOG.info("I don't have permission to get information for channel %s", channel)
                     continue
 
