@@ -32,7 +32,8 @@ class Leaderboards:
         async with ctx.typing():
             banned_members = [bo.user.id for bo in await ctx.guild.bans()]
 
-            async for entry in ctx.guild.audit_logs(action=discord.AuditLogAction.ban):  # type: discord.AuditLogEntry
+            async for entry in ctx.guild.audit_logs(action=discord.AuditLogAction.ban,
+                                                    limit=None):  # type: discord.AuditLogEntry
                 banned_user = entry.target  # discord.User
 
                 # Only count users still banned.
@@ -47,9 +48,14 @@ class Leaderboards:
                     reason = entry.reason  # type: str
 
                     if not re.match(r'\[.*By .*] .*', reason):
-                        bans = cache.setdefault("Unknown User", 0)
+                        username = "Unknown"
+
+                        if ("AUTOMATIC BAN" in reason) or ("AutoBan" in reason):
+                            username = "DakotaBot AutoBan"
+
+                        bans = cache.setdefault(username, 0)
                         bans += 1
-                        cache["Unknown User"] = bans
+                        cache[username] = bans
                     else:
                         ruser = reason.split("By ", 1)[1].split("] ", 1)[0]
 
@@ -66,7 +72,7 @@ class Leaderboards:
                 lc += " - `{}` with **{} bans**\n".format(record[0], record[1])
 
             embed = discord.Embed(
-                title="Top 10 Banningest Mods",
+                title="Top 10 Mods (By Bans)",
                 description="The mods with the top bans are: \n{}".format(lc),
                 color=Colors.INFO
             )
