@@ -40,8 +40,8 @@ class BotAdmin:
         sha = repo.head.object.hexsha
 
         embed = discord.Embed(
-            title="DiyBot" + " [DEBUG MODE]" if self._debugmode else "",
-            description="This is DIYBot, a fork of the WolfBot core Discord bot platform. It is responsible for "
+            title="DakotaBot" + " [DEBUG MODE]" if self._debugmode else "",
+            description="This is DakotaBot, a fork of the WolfBot core Discord bot platform. It is responsible for "
                         "managing and assisting the moderators on the DIY Tech subreddit.",
             color=Colors.INFO
         )
@@ -54,7 +54,7 @@ class BotAdmin:
         embed.add_field(name="Current Host", value="`{}`".format(socket.gethostname()), inline=True)
         embed.set_thumbnail(url="https://cdn.discordapp.com/avatars/" + str(ctx.bot.user.id) + "/"
                                 + str(ctx.bot.user.avatar) + ".png")
-        embed.set_footer(text="MIT License, © 2018 KazWolfe",
+        embed.set_footer(text="<3 Dakota, roooooo",
                          icon_url="https://avatars3.githubusercontent.com/u/5192145")
 
         await ctx.send(embed=embed)
@@ -433,7 +433,7 @@ class BotAdmin:
         """
         Debug commands have no help. If you need help running a debug command, just don't.
         """
-        bot_presence = self._config.get('presence', {"game": "DiyBot", "type": 2, "status": "dnd"})
+        bot_presence = self._config.get('presence', {"game": "DakotaBot", "type": 2, "status": "dnd"})
 
         await ctx.bot.change_presence(activity=discord.Activity(name=bot_presence['game'], type=bot_presence['type']),
                                       status=discord.Status[bot_presence['status']])

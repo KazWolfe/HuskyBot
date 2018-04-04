@@ -54,7 +54,7 @@ async def initialize():
         del start_activity
         restart_reason = "start"
 
-    LOG.info("DiyBot is online, running discord.py " + discord.__version__)
+    LOG.info("DakotaBot is online, running discord.py " + discord.__version__)
 
     # Lock the bot to a single guild
     if not BOT_CONFIG.get("developerMode", False):
@@ -101,7 +101,7 @@ async def on_ready():
     if not initialized:
         await initialize()
 
-    bot_presence = BOT_CONFIG.get('presence', {"game": "DiyBot", "type": 2, "status": "dnd"})
+    bot_presence = BOT_CONFIG.get('presence', {"game": "DakotaBot", "type": 2, "status": "dnd"})
 
     await bot.change_presence(activity=discord.Activity(name=bot_presence['game'], type=bot_presence['type']),
                               status=discord.Status[bot_presence['status']])
