@@ -1,4 +1,3 @@
-import asyncio
 import datetime
 import logging
 import re
@@ -108,12 +107,11 @@ class ModTools:
         """
         if user == ctx.author:
             await ctx.send(embed=discord.Embed(
-                title="Self-Ban Requested",
-                description="Your self-ban request will be fulfilled in 30 seconds.",
-                color=0x000000
+                title="Moderator Toolkit",
+                description="You do not have permission to ban yourself from this guild. Please ask a staff member"
+                            "with a higher rank than you for assistance.",
+                color=Colors.DANGER
             ))
-            await asyncio.sleep(30)
-            await ctx.guild.ban(user, reason="User requested self-ban.")
             return
 
         in_guild = True
