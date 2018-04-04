@@ -288,6 +288,10 @@ async def on_message(message):
             LOG.info("User %s linked to subreddit %s, ignoring command", message.author, message.content)
             return
 
+        if BOT_CONFIG.get('lockdown', False) and (message.author.id not in WolfStatics.__developers__):
+            LOG.info("Lockdown mode is enabled for the bot. Command blocked.")
+            return
+
         LOG.info("User %s ran %s", message.author, message.content)
 
         await bot.process_commands(message)

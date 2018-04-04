@@ -6,7 +6,7 @@ from discord.ext import commands
 
 from WolfBot import WolfConfig
 from WolfBot import WolfUtils
-from WolfBot.WolfStatics import Colors
+from WolfBot.WolfStatics import Colors, __developers__
 
 LOG = logging.getLogger("DakotaBot.Plugin." + __name__)
 
@@ -43,6 +43,9 @@ class AutoResponder:
             return
 
         if message.author.id in self._config.get('userBlacklist', []):
+            return
+
+        if self._config.get('lockdown', False) and (message.author.id not in __developers__):
             return
 
         responses = self._config.get("responses", {})

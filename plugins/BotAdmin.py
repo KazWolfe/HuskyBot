@@ -6,6 +6,7 @@ import git
 from discord.ext import commands
 
 from BotCore import get_developers
+from WolfBot import WolfChecks
 from WolfBot import WolfConfig
 from WolfBot import WolfConverters
 from WolfBot import WolfUtils
@@ -677,6 +678,35 @@ class BotAdmin:
             description="The user `{}` has been removed from the blacklist.".format(user),
             color=Colors.SUCCESS
         ))
+
+    @admin.command(name="lockdown", brief="Toggle the bot's LOCKDOWN mode.")
+    @WolfChecks.is_developer()
+    async def lockdown(self, ctx: commands.Context, state: bool = None):
+        """
+        Control bot lockdown state.
+
+        When the bot is in lockdown mode, no users outside of developers are permitted to execute any commands, nor
+        will certain modules (like AutoResponder, if enabled) react to users.
+
+        This command takes an optional argument, state. It may either be `true` or `false` to set a state manually, or
+        no state to toggle.
+        """
+
+        lockdown_state = self._config.get('lockdown', False)
+
+        if state is None:
+            lockdown_state = not lockdown_state
+        else:
+            lockdown_state = state
+
+        if lockdown_state is False:
+            st = "disabled"
+        else:
+            st = "enabled"
+
+        self._config.set('lockdown', lockdown_state)
+
+        await ctx.send("**Bot Lockdown State:** `{}`".format(st))
 
 
 def setup(bot: commands.Bot):
