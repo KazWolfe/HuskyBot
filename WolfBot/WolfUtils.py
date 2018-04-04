@@ -31,7 +31,17 @@ def getFancyGameData(member):
     if member.activity is not None:
         state = {0: "Playing ", 1: "Streaming ", 2: "Listening to ", 3: "Watching "}
 
-        if not isinstance(member.activity, discord.Game) and member.activity.url is not None:
+        if isinstance(member.activity, discord.Spotify):
+            m = "(Listening to Spotify)"
+
+            if member.activity.title is not None and member.activity.artist is not None:
+                track_url = "https://open.spotify.com/track/{}"
+
+                m += "\n\n**Now Playing:** [{} by {}]({})".format(member.activity.title, member.activity.artist,
+                                                                  track_url.format(member.activity.track_id))
+
+            return m
+        elif not isinstance(member.activity, discord.Game) and member.activity.url is not None:
             return "([{}]({}))".format(state[member.activity.type] + member.activity.name, member.activity.url)
         else:
             return "({})".format(state[member.activity.type] + member.activity.name)
