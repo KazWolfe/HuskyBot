@@ -108,8 +108,10 @@ class ModTools:
         if user == ctx.author:
             await ctx.send(embed=discord.Embed(
                 title="Moderator Toolkit",
-                description="You do not have permission to ban yourself from this guild. Please ask a staff member"
-                            "with a higher rank than you for assistance.",
+                description="You do not have permission to ban yourself from this guild. Please ask a staff member "
+                            "with a higher rank than you for assistance.\n\nYou may also right-click the guild icon "
+                            "and select **Leave Guild**. Note that leaving this guild will forfeit your staff "
+                            "privileges.",
                 color=Colors.DANGER
             ))
             return
