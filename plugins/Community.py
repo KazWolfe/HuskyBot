@@ -22,6 +22,7 @@ class Community:
         LOG.info("Loaded plugin!")
 
     @commands.command(name="staff", aliases=["stafflist"], brief="Get an up-to-date list of all staff on the guild")
+    @commands.guild_only()
     async def stafflist(self, ctx: commands.Context):
         """
         Get an up-to-date list of staff members on the guild.
@@ -69,6 +70,7 @@ class Community:
         await ctx.send(embed=embed)
 
     @commands.group(name="rules", brief="Get a copy of the guild rules")
+    @commands.guild_only()
     async def rules(self, ctx: commands.Context):
         """
         Retrieve the current rules list for the Discord guild.
@@ -261,6 +263,7 @@ class Community:
         ))
 
     @commands.group(name="invite", brief="Get this guild's invite link")
+    @commands.guild_only()
     async def get_invite(self, ctx: commands.Context):
         """
         See the current guild invite link.

@@ -25,6 +25,7 @@ class Fun:
         LOG.info("Loaded plugin!")
 
     @commands.command(name="slap", brief="Slap a user silly!")
+    @commands.guild_only()
     async def slap(self, ctx: commands.Context, user: discord.Member = None):
         """
         Give a user a hearty slap with a trout (?)
@@ -72,6 +73,7 @@ class Fun:
                            .format(ctx.author.mention, victim))
 
     @commands.command(name="hug", brief="Get a hug from the bot, or give a hug!")
+    @commands.guild_only()
     async def hug(self, ctx: commands.Context, target: discord.Member = None):
         """
         Hug a user in need of a hug.
@@ -175,6 +177,33 @@ class Fun:
         embed.set_thumbnail(url=member.avatar_url)
 
         await ctx.send(embed=embed)
+
+    # noinspection PyUnusedLocal
+    @commands.command(name="sendmsg", brief="Send a message to another channel.", hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def sendmsg(self, ctx: discord.ext.commands.Context, channel: discord.TextChannel, *, message: str):
+        """
+        Send a raw message to another channel, with no backing text.
+
+        This command takes two arguments, a Channel (ID, mention, or name) and a message to send.
+
+        The targeted channel will receive a message from WolfBot containing exactly the text as entered in the message.
+        """
+
+        await channel.send(message)
+
+    @commands.command(name="secho", brief="Echo a message, deleting the command.", hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def secho(self, ctx: discord.ext.commands.Context, *, message: str):
+        """
+        Send a raw message to your current channel, but delete the command.
+
+        This can be used to make the bot look like it's "talking" by itself. However, quick-eyed users may see the
+        command, so be careful!
+        """
+
+        await ctx.message.delete()
+        await ctx.send(message)
 
 
 def setup(bot: discord.ext.commands.Bot):

@@ -101,13 +101,13 @@ class Debug:
         ping_in_ms = round(self.bot.latency * 1000, 2)
 
         if 0 < ping_in_ms < 50:
-            color = 0x4D8B3F
+            color = 0x368C23
         elif ping_in_ms < 100:
-            color = 0x86BA55
+            color = 0x9BBF30
         elif ping_in_ms < 150:
-            color = 0xD7DE40
+            color = 0xD7DE38
         elif ping_in_ms < 200:
-            color = 0xF4D540
+            color = 0xF4D43C
         elif ping_in_ms < 250:
             color = 0xD8732E
         elif ping_in_ms > 250:
@@ -120,27 +120,6 @@ class Debug:
             description="The latency to Discord's servers is currently **{} ms**.".format(ping_in_ms),
             color=color
         ))
-
-    @commands.command(name="secho", brief="Repeat the message back to the current channel, deleting the original.",
-                      hidden=True)
-    @commands.has_permissions(administrator=True)
-    async def secho(self, ctx: discord.ext.commands.Context, *, message: str):
-        """
-        Debug commands have no help. If you need help running a debug command, just don't.
-        """
-
-        await ctx.message.delete()
-        await ctx.send(message)
-
-    # noinspection PyUnusedLocal
-    @commands.command(name="sendmsg", brief="Send a message to another channel.", hidden=True)
-    @commands.has_permissions(administrator=True)
-    async def sendmsg(self, ctx: discord.ext.commands.Context, channel: discord.TextChannel, *, message: str):
-        """
-        Debug commands have no help. If you need help running a debug command, just don't.
-        """
-
-        await channel.send(message)
 
     @commands.command(name="eval", brief="Execute an eval() statement on the guild", hidden=True)
     @WolfChecks.is_developer()

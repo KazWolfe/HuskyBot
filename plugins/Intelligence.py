@@ -29,6 +29,7 @@ class Intelligence:
         LOG.info("Loaded plugin!")
 
     @commands.command(name="guildinfo", aliases=["sinfo", "ginfo"], brief="Get information about the current guild")
+    @commands.guild_only()
     async def guild_info(self, ctx: discord.ext.commands.Context):
         """
         Get an information dump for the current guild.
@@ -62,6 +63,7 @@ class Intelligence:
         await ctx.send(embed=guild_details)
 
     @commands.command(name="roleinfo", aliases=["rinfo"], brief="Get information about a specified role.")
+    @commands.guild_only()
     async def role_info(self, ctx: discord.ext.commands.Context, *, role: discord.Role):
         """
         Get basic information about a specific role in this guild.
@@ -94,7 +96,8 @@ class Intelligence:
 
     @commands.command(name="userinfo", aliases=["uinfo", "memberinfo", "minfo"],
                       brief="Get information about self or specified user")
-    async def user_info(self, ctx: discord.ext.commands.Context, *, member: discord.Member = None):
+    async def user_info(self, ctx: discord.ext.commands.Context, *,
+                        member: WolfConverters.OfflineMemberConverter = None):
         """
         Get basic information about a calling user.
 
@@ -108,28 +111,36 @@ class Intelligence:
         member = member or ctx.author
         member_details = discord.Embed(
             title="User Information for " + member.name + "#" + member.discriminator,
-            color=member.color,
+            color=member.color if member.color is not None else Colors.INFO,
             description="Currently in **" + str(member.status) + "** mode " + WolfUtils.getFancyGameData(member)
         )
 
         roles = []
-        for r in member.roles:
-            if r.name == "@everyone":
-                continue
+        if ctx.guild is not None:
+            for r in member.roles:
+                if r.name == "@everyone":
+                    continue
 
-            roles.append(r.name)
+                roles.append(r.name)
 
-        if len(roles) == 0:
-            roles.append("None")
+            if len(roles) == 0:
+                roles.append("None")
 
         member_details.add_field(name="User ID", value=member.id, inline=True)
-        member_details.add_field(name="Display Name", value=member.display_name, inline=True)
+
+        if ctx.guild is not None:
+            member_details.add_field(name="Display Name", value=member.display_name, inline=True)
+
         member_details.add_field(name="Joined Discord", value=member.created_at.strftime(DATETIME_FORMAT), inline=True)
-        member_details.add_field(name="Joined Guild", value=member.joined_at.strftime(DATETIME_FORMAT), inline=True)
-        member_details.add_field(name="Roles", value=", ".join(roles), inline=False)
         member_details.set_thumbnail(url=member.avatar_url)
-        member_details.set_footer(text="Member #{} on the guild"
-                                  .format(str(sorted(ctx.guild.members, key=lambda m: m.joined_at).index(member) + 1)))
+
+        if ctx.guild is not None:
+            member_details.add_field(name="Joined Guild", value=member.joined_at.strftime(DATETIME_FORMAT), inline=True)
+            member_details.add_field(name="Roles", value=", ".join(roles), inline=False)
+
+            member_details.set_footer(text="Member #{} on the guild"
+                                      .format(str(sorted(ctx.guild.members,
+                                                         key=lambda m: m.joined_at).index(member) + 1)))
 
         await ctx.send(embed=member_details)
 
