@@ -126,13 +126,25 @@ class Fun:
         Please note that this algorithm is very complicated and results may not be 100% accurate.
         """
 
+        hardcoded_users = {
+            250356727814291456: {"a": 8.74, "c": 3.53, "i": 8.52, "otp": "<@341343404887900162>"},  # Skag
+            341343404887900162: {"a": 8.21, "c": 3.31, "i": 9.38, "otp": "<@250356727814291456>"},  # Chris
+            142494680158961664: {"a": 4.26, "c": 3.17, "i": 6.95, "otp": "his hand"}  # Kaz
+        }
+
         seed = 736793  # Chris and Skag
         master_rng = random.Random((member.id + seed + datetime.utcnow().toordinal()) % seed)
 
-        def get_value(user_value: int, imin: int, imax: int, dev: float):
+        def get_value(mode: str, user_value: int, imin: int, imax: int, dev: float):
             rng = random.Random(user_value - seed)
 
-            result = round(rng.randint(imin, imax) + master_rng.gauss(0, dev), 2)
+            if member.id in hardcoded_users.keys():
+                base = hardcoded_users[member.id][mode]
+
+            else:
+                base = rng.randint(imin, imax)
+
+            result = round(base + master_rng.gauss(0, dev), 2)
 
             if result > 10:
                 return 10.00
@@ -145,10 +157,10 @@ class Fun:
         attractiveness = 0.25
 
         if member.avatar is not None:
-            attractiveness = get_value(int(member.avatar[2:], 16) % seed, 1, 10, 0.2575)
+            attractiveness = get_value('a', int(member.avatar[2:], 16) % seed, 1, 10, 0.2575)
 
-        craziness = get_value(int(member.discriminator), 1, 10, 0.2575)
-        intelligence = get_value(member.id % seed, 1, 10, 0.2575)
+        craziness = get_value('c', int(member.discriminator), 1, 10, 0.2575)
+        intelligence = get_value('i', member.id % seed, 1, 10, 0.2575)
 
         average_score = round((attractiveness + (10.0 - craziness) + intelligence) / 3, 2)
 
@@ -173,6 +185,12 @@ class Fun:
         embed.add_field(name="Intelligence",
                         value=str(Emojis.BOOK * round(intelligence / 2)) + " ({})".format(intelligence),
                         inline=False)
+
+        if member.id in hardcoded_users.keys():
+            embed.add_field(name="Detected OTP",
+                            value="User is shipped with ***{}***".format(hardcoded_users[member.id]['otp']),
+                            inline=False
+                            )
 
         embed.set_thumbnail(url=member.avatar_url)
 
