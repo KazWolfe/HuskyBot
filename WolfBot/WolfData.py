@@ -7,6 +7,18 @@ class Mute:
     def __getitem__(self, item):
         return getattr(self, item)
 
+    def __eq__(self, other):
+        return (self.expiry == other.expiry) \
+               and (self.guild == other.guild) \
+               and (self.channel == other.channel) \
+               and (self.user_id == other.user_id)
+
+    def __lt__(self, other):
+        return (self.expiry is not None) and (self.expiry < other.expiry)
+
+    def __gt__(self, other):
+        return (self.expiry is None) or (self.expiry > other.expiry)
+
     user_id = 0
     reason = ""
 
@@ -86,6 +98,19 @@ class Mute:
 class GiveawayObject:
     def __getitem__(self, item):
         return getattr(self, item)
+
+    def __eq__(self, other):
+        return (self.end_time == other.end_time) \
+               and (self.name == other.name) \
+               and (self.register_channel_id == other.register_channel_id) \
+               and (self.register_message_id == other.register_message_id) \
+               and (self.winner_count == other.winner_count)
+
+    def __lt__(self, other):
+        return (self.end_time is not None) and (self.end_time < other.end_time)
+
+    def __gt__(self, other):
+        return (self.end_time is None) or (self.end_time > other.end_time)
 
     name = ""
 

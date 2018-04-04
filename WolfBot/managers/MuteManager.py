@@ -18,9 +18,9 @@ class MuteManager:
         self._mute_config = WolfConfig.WolfConfig('config/mutes.json')
         self.__cache__ = []
 
-        self._bot.loop.create_task(self.initialize_mutes())
+        self.read_mutes_from_file()
 
-        self.__task__ = None
+        self.__task__ = self._bot.loop.create_task(self.check_mutes())
 
         LOG.info("Loaded mute submodule!")
 
@@ -37,31 +37,18 @@ class MuteManager:
 
     async def check_mutes(self):
         while not self._bot.is_closed():
-            try:
-                next_queued = self.__cache__[0]
-            except IndexError:
-                await asyncio.sleep(0.5)
-                continue
+            for mute in self.__cache__:
+                if mute.is_expired():
+                    LOG.info("Found a scheduled unmute - [{}, {}]. Triggering...".format(mute.user_id,
+                                                                                         mute.channel))
+                    await self.unmute_user(mute, "System - Scheduled")
 
-            # Check if the mute in-cache is expired.
-            if next_queued.is_expired():
-                LOG.info("Found a scheduled unmute - [{}, {}]. Triggering...".format(next_queued.user_id,
-                                                                                     next_queued.channel))
-                await self.unmute_user(next_queued, "System - Scheduled")
+                # Because mutes are sorted by expiry, we can just exit the loop if we encounter a mute that's not yet
+                # over.
+                else:
+                    break
 
             await asyncio.sleep(0.5)
-
-    async def initialize_mutes(self):
-        self.read_mutes_from_file()
-
-        # Run through all mutes and find any missed
-        for mute in self.__cache__:
-            if mute.is_expired():
-                LOG.info("Found a missed scheduled unmute - [{}, {}]. Triggering...".format(mute.user_id,
-                                                                                            mute.channel))
-                await self.unmute_user(mute, "System - Scheduled")
-
-        self.__task__ = self._bot.loop.create_task(self.check_mutes())
 
     async def mute_user_by_object(self, mute: WolfData.Mute, staff_member: str = "System"):
         guild = self._bot.get_guild(mute.guild)
@@ -93,8 +80,8 @@ class MuteManager:
 
         if mute not in self.__cache__:
             pos = WolfUtils.get_sort_index(self.__cache__, mute, 'expiry')
-
             self.__cache__.insert(pos, mute)
+            self.__cache__.sort(key=lambda m: m.count if m.count else 10 * 100)
             self._mute_config.set("mutes", self.__cache__)
 
             # Inform the guild logs
@@ -241,6 +228,7 @@ class MuteManager:
         # Update cache and disk
         pos = WolfUtils.get_sort_index(self.__cache__, mute, 'expiry')
         self.__cache__.insert(pos, mute)
+        self.__cache__.sort(key=lambda m: m.count if m.count else 10 * 100)
         self._mute_config.set("mutes", self.__cache__)
 
     async def cleanup(self):

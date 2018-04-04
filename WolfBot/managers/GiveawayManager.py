@@ -21,9 +21,9 @@ class GiveawayManager:
 
         self.__cache__ = []
 
-        self.bot.loop.create_task(self.initialize_giveaways())
+        self.load_giveaways_from_file()
 
-        self.__task__ = None
+        self.__task__ = self.bot.loop.create_task(self.process_giveaways())
 
         LOG.info("Loaded GiveawayManager!")
 
@@ -38,29 +38,18 @@ class GiveawayManager:
 
     async def process_giveaways(self):
         while not self.bot.is_closed():
-            try:
-                nextQueued = self.__cache__[0]
-            except IndexError:
-                await asyncio.sleep(0.5)
-                continue
+            for giveaway in self.__cache__:
+                if giveaway.is_over():
+                    LOG.info("Found a scheduled giveaway for {} ending. Triggering...".format(giveaway.name))
+                    await self.finish_giveaway(giveaway)
 
-            # Check if the giveaway in cache has finished
-            if nextQueued.is_over():
-                LOG.info("Found a scheduled giveaway for {} ending. Triggering...".format(nextQueued.name))
-                await self.finish_giveaway(nextQueued)
+                # Because giveaways are sorted by finish date, if we encounter a giveaway that *isn't* over, we can
+                # assume there's nothing more to do, so we can exit the for loop entirely.
+                else:
+                    break
 
             # Check again every half second
             await asyncio.sleep(0.5)
-
-    async def initialize_giveaways(self):
-        self.load_giveaways_from_file()
-
-        for g in self.__cache__:
-            if g.is_over():
-                LOG.info("Found a late scheduled giveaway for {} ending. Triggering...".format(g.name))
-                await self.finish_giveaway(g)
-
-        self.__task__ = self.bot.loop.create_task(self.process_giveaways())
 
     async def finish_giveaway(self, giveaway: WolfData.GiveawayObject):
         wcl = "\n\nWinners will be contacted shortly."
@@ -137,6 +126,7 @@ class GiveawayManager:
         pos = WolfUtils.get_sort_index(self.__cache__, giveaway, 'end_time')
 
         self.__cache__.insert(pos, giveaway)
+        self.__cache__.sort(key=lambda g: g.count if g.count else 10 * 100)
         self._giveaway_config.set(GIVEAWAY_CONFIG_KEY, self.__cache__)
 
     def get_giveaways(self):
