@@ -147,7 +147,7 @@ class Intelligence:
                     search_channels.append(channel)
 
             elif context.lower() == "public":
-                if not ctx.guild.default_role:
+                if not ctx.guild.default_role.permissions.read_messages:
                     await ctx.send(embed=discord.Embed(
                         title="Intelligence Toolkit Error",
                         description="There do not appear to be any public channels in this server.",
@@ -156,7 +156,7 @@ class Intelligence:
                     return
 
                 for channel in ctx.guild.text_channels:
-                    if not channel.overwrites_for(ctx.guild.default_role).read_messages:
+                    if channel.overwrites_for(ctx.guild.default_role).read_messages is False:
                         continue
 
                     search_channels.append(channel)
@@ -165,6 +165,7 @@ class Intelligence:
                 search_channels.append(await converter.convert(ctx, context))
 
             for channel in search_channels:
+                LOG.info("Getting history for %s", channel)
                 hist = channel.history(limit=None, after=search_start)
 
                 async for m in hist:
