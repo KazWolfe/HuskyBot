@@ -81,7 +81,7 @@ class MuteManager:
         if mute not in self.__cache__:
             pos = WolfUtils.get_sort_index(self.__cache__, mute, 'expiry')
             self.__cache__.insert(pos, mute)
-            self.__cache__.sort(key=lambda m: m.count if m.count else 10 * 100)
+            self.__cache__.sort(key=lambda m: m.expiry if m.expiry else 10 * 100)
             self._mute_config.set("mutes", self.__cache__)
 
             # Inform the guild logs
@@ -228,7 +228,7 @@ class MuteManager:
         # Update cache and disk
         pos = WolfUtils.get_sort_index(self.__cache__, mute, 'expiry')
         self.__cache__.insert(pos, mute)
-        self.__cache__.sort(key=lambda m: m.count if m.count else 10 * 100)
+        self.__cache__.sort(key=lambda m: m.expiry if m.expiry else 10 * 100)
         self._mute_config.set("mutes", self.__cache__)
 
     async def cleanup(self):

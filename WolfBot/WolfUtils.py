@@ -128,8 +128,6 @@ def get_sort_index(target_list: list, new_object, attribute: str):
         return len(target_list)
 
     for i in range(0, len(target_list)):
-        index = i
-
         item = target_list[i]
 
         if comparator < item[attribute]:

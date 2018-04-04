@@ -109,7 +109,7 @@ class GiveawayManager:
             title="{} New Giveaway: {}!".format(Emojis.GIVEAWAY, title),
             description="A giveaway has been started for **{}**!\n\nAnyone may enter, and up to {} will be selected "
                         "for the final prize. React with the {} emoji to enter.\n\nThis giveaway will end at "
-                        "{} UTC.".format(title, winner_str, Emojis.GIVEAWAY, end_time.strftime(DATETIME_FORMAT)),
+                        "{} UTC".format(title, winner_str, Emojis.GIVEAWAY, end_time.strftime(DATETIME_FORMAT)),
             color=Colors.INFO
         )
 
@@ -126,7 +126,7 @@ class GiveawayManager:
         pos = WolfUtils.get_sort_index(self.__cache__, giveaway, 'end_time')
 
         self.__cache__.insert(pos, giveaway)
-        self.__cache__.sort(key=lambda g: g.count if g.count else 10 * 100)
+        self.__cache__.sort(key=lambda g: g.end_time if g.end_time else 10 * 100)
         self._giveaway_config.set(GIVEAWAY_CONFIG_KEY, self.__cache__)
 
     def get_giveaways(self):
