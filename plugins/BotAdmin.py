@@ -664,7 +664,7 @@ class BotAdmin:
         if user.id not in config:
             await ctx.send(embed=discord.Embed(
                 title="Bot Manager",
-                description="The user `{}` is not on the block list..".format(user),
+                description="The user `{}` is not on the block list.".format(user),
                 color=Colors.WARNING
             ))
             return

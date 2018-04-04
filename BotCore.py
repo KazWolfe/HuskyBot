@@ -272,11 +272,12 @@ async def on_error(event_method, *args, **kwargs):
 
 @bot.event
 async def on_message(message):
+    author = message.author
     if not WolfUtils.should_process_message(message):
         return
 
     if message.content.startswith(bot.command_prefix):
-        if message.author.id in BOT_CONFIG.get('userBlacklist', []):
+        if (author.id in BOT_CONFIG.get('userBlacklist', [])) and (author.id not in WolfStatics.__developers__):
             LOG.info("Blacklisted user %s attempted to run command %s", message.author, message.content)
             return
 
@@ -288,11 +289,11 @@ async def on_message(message):
             LOG.info("User %s linked to subreddit %s, ignoring command", message.author, message.content)
             return
 
-        if LOCAL_STORAGE.get('lockdown', False) and (message.author.id not in WolfStatics.__developers__):
+        if LOCAL_STORAGE.get('lockdown', False) and (author.id not in WolfStatics.__developers__):
             LOG.info("Lockdown mode is enabled for the bot. Command blocked.")
             return
 
-        LOG.info("User %s ran %s", message.author, message.content)
+        LOG.info("User %s ran %s", author, message.content)
 
         await bot.process_commands(message)
 
