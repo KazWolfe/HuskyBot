@@ -527,7 +527,7 @@ class MuteHandler:
         mute_obj.expiry = expiry
         mute_obj.set_cached_override(current_perms)
 
-        await self.mute_user_by_object(mute_obj, staff_member.mention)
+        await self.mute_user_by_object(mute_obj, str(staff_member))
 
     async def unmute_user(self, mute: WolfData.Mute, staff_member: str):
         if staff_member is not None:
@@ -579,7 +579,7 @@ class MuteHandler:
         alert_channel = member.guild.get_channel(alert_channel)
 
         embed = discord.Embed(
-            description="User {} was unmuted from #{}.".format(mute.user_id, unmute_context),
+            description="User ID `{}` was unmuted from {}.".format(mute.user_id, unmute_context),
             color=Colors.INFO
         )
 
