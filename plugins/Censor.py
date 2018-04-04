@@ -15,8 +15,8 @@ LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 # noinspection PyMethodMayBeStatic
 class Censor:
     """
-    The Censor plugin allows moderators to lighten their workload and allow the bot to take care of menial and
-    repetitive moderation actions.
+    The Censor plugin allows moderators to lighten their workload and allow the bot to take care of automatic message
+    deletion according to regular expressions.
 
     Message filtering is done relatively early in the event chain, so messages tend to be deleted fairly quickly.
 

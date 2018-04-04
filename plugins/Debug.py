@@ -15,12 +15,7 @@ LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 # noinspection PyMethodMayBeStatic
 class Debug:
     """
-    This is the debug module. It's used to debug the bot. It's meant for developers only. If you're not a developer,
-    don't touch this. You will break things and you will get yelled at.
-
-    If you do not know how to use this plugin, you have no place using it. Seriously, this isn't an insult to your
-    intelligence or anything. There are just *no* checks for any of these commands, no safeties. It is dangerously
-    easy to completely and possibly permanently cripple the bot with these commands.
+    Help documentation is not available for this plugin.
     """
 
     def __init__(self, bot: discord.ext.commands.Bot):
@@ -32,12 +27,16 @@ class Debug:
     @commands.group(name="debug", hidden=True)
     @commands.has_permissions(administrator=True)
     async def debug(self, ctx: discord.ext.commands.Context):
+        """
+        Help documentation is not available for this plugin.
+        """
+
         pass
 
     @debug.command(name="dumpConfig", brief="Dump the bot's active configuration.")
     async def dump_config(self, ctx: discord.ext.commands.Context):
         """
-        Debug commands have no help. If you need help running a debug command, just don't.
+        Help documentation is not available for this plugin.
         """
 
         config = str(self._config.dump())
@@ -61,7 +60,7 @@ class Debug:
     async def force_react(self, ctx: discord.ext.commands.Context, channel: discord.TextChannel, message: int,
                           reaction: str):
         """
-        Debug commands have no help. If you need help running a debug command, just don't.
+        Help documentation is not available for this plugin.
         """
 
         target_message = await channel.get_message(message)
@@ -71,7 +70,7 @@ class Debug:
     @debug.command(name="echo", brief="Repeat the message back to the current channel.")
     async def echo(self, ctx: discord.ext.commands.Context, *, message: str):
         """
-        Debug commands have no help. If you need help running a debug command, just don't.
+        Help documentation is not available for this plugin.
         """
 
         await ctx.send(message)
@@ -79,7 +78,7 @@ class Debug:
     @debug.command(name="richEcho", brief="Echo text in a rich embed")
     async def rich_echo(self, ctx: commands.Context, *, message: str):
         """
-        Debug commands have no help. If you need help running a debug command, just don't.
+        Help documentation is not available for this plugin.
         """
 
         obj = json.loads(message)
@@ -91,13 +90,17 @@ class Debug:
     @debug.command(name="forceExcept", brief="Force an exception (useful for testing purposes)")
     async def force_except(self, ctx: discord.ext.commands.Context):
         """
-        Debug commands have no help. If you need help running a debug command, just don't.
+        Help documentation is not available for this plugin.
         """
 
         raise Exception("Random exception that was requested!")
 
     @debug.command(name="ping", brief="Get the latency (in ms) to the Discord servers")
     async def ping(self, ctx: commands.Context):
+        """
+        Help documentation is not available for this plugin.
+        """
+
         ping_in_ms = round(self.bot.latency * 1000, 2)
 
         if 0 < ping_in_ms < 50:
@@ -124,7 +127,7 @@ class Debug:
     @debug.command(name="repost", brief="Copy a specified message to the current channel")
     async def repost(self, ctx: commands.Context, channel: discord.TextChannel, message_id: int):
         """
-        Debug commands have no help. If you need help running a debug command, just don't.
+        Help documentation is not available for this plugin.
         """
 
         message = await channel.get_message(message_id)
@@ -139,7 +142,7 @@ class Debug:
     @WolfChecks.is_developer()
     async def evalcmd(self, ctx: discord.ext.commands.Context, *, expr: str):
         """
-        Debug commands have no help. If you need help running a debug command, just don't.
+        Help documentation is not available for this plugin.
         """
 
         # Block *everyone* except Kaz from running eval

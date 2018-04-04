@@ -11,8 +11,6 @@ LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 # noinspection PyMethodMayBeStatic
 class UniversalBanList:
     """
-    The Universal Ban List is a very extreme solution to a problem.
-
     The UBL is a read-only module intentionally gimped on features. If a user sends a message, changes their username,
     or joins with a username containing a string found in the UBL, the user is immediately and automatically banned.
 

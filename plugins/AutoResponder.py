@@ -100,6 +100,14 @@ class AutoResponder:
             ))
             return
 
+        if trigger.startswith(self.bot.command_prefix):
+            await ctx.send(embed=discord.Embed(
+                title="Response Manager",
+                description="Responses may not start with the command prefix (`{}`)!".format(self.bot.command_prefix),
+                color=Colors.DANGER
+            ))
+            return
+
         new['isEmbed'] = False
         new['response'] = response
         new['requiredRoles'] = []  # emptyset = MANAGE_MESSAGES only

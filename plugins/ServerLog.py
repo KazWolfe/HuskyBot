@@ -14,12 +14,13 @@ class ServerLog:
     """
     The ServerLog plugin exists to provide a clean and transparent method of tracking server activity on the bot.
     """
+
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
         self._config = WolfConfig.get_config()
         LOG.info("Loaded plugin!")
 
-        # ToDo: Find a better way of storing valid loggers. This is hacky as all hell.
+        # ToDo: Find a better way of storing valid loggers.
         self._validLoggers = ["userJoin", "userJoin.milestones", "userJoin.audit",
                               "userLeave",
                               "userBan",
@@ -41,7 +42,7 @@ class ServerLog:
 
             milestone_channel = guild.get_channel(milestone_channel)
 
-            if guild.member_count % 500 == 0:
+            if guild.member_count % 1000 == 0:
                 await milestone_channel.send(embed=discord.Embed(
                     title=Emojis.PARTY + "Guild Member Count Milestone!",
                     description="The guild has now reached " + str(guild.member_count) + " members! Thank you "
@@ -189,14 +190,14 @@ class ServerLog:
             return
 
         embed = discord.Embed(
-            description="User has changed their {}! Their display name is now `{}`.".format(update_type,
-                                                                                            after.display_name),
+            description="User's {} has changed! Their display name in this guild is now "
+                        "`{}`.".format(update_type, after.display_name),
             color=Colors.INFO
         )
 
         embed.add_field(name="Old {}".format(update_type.capitalize()), value=old_val, inline=True)
         embed.add_field(name="New {}".format(update_type.capitalize()), value=new_val, inline=True)
-        embed.set_author(name="{} has changed their {}!".format(after, update_type), icon_url=after.avatar_url)
+        embed.set_author(name="{}'s {} has changed!".format(after, update_type), icon_url=after.avatar_url)
 
         await alert_channel.send(embed=embed)
 
@@ -292,7 +293,7 @@ class ServerLog:
         """
         General parent command for logging management.
 
-        This command itself does nothing, but is instead a parent command to other actually useful commands.
+        This command itself does nothing, but is instead a parent command.
         """
         if ctx.invoked_subcommand is None:
             await ctx.send(embed=discord.Embed(

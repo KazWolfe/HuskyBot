@@ -12,8 +12,6 @@ LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 # noinspection PyMethodMayBeStatic
 class ReactionPromote:
     """
-    The original reason DIY Bot was created.
-
     Give users a role based on their reaction to a message in a channel. If the user removes their reaction to the
     message, the bot should also remove the role from that user.
     """

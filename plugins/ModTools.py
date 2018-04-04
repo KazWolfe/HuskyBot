@@ -108,11 +108,8 @@ class ModTools:
         """
         if user == ctx.author:
             await ctx.send(embed=discord.Embed(
-                title="Hello darkness my old friend...",
-                url="https://www.youtube.com/watch?v=4zLfCnGVeL4",
-                description="Permissions willing, you will be banned in 30 seconds. Thank you for using the WolfBot "
-                            "suicide booth. On behalf of the DIY Tech Discord, we wish you the best of luck in your "
-                            "next life, provided such a thing even exists.",
+                title="Self-Ban Requested",
+                description="Your self-ban request will be fulfilled in 30 seconds.",
                 color=0x000000
             ))
             await asyncio.sleep(30)
@@ -135,8 +132,8 @@ class ModTools:
                                                                ctx.author, reason), delete_message_days=1)
 
         await ctx.send(embed=discord.Embed(
-            title="Ka-Ban!",
-            description="User `{}` was successfully banned.".format(user),
+            title="User banned.",
+            description="User `{}` was successfully banned from the guild.".format(user),
             color=Colors.SUCCESS
         ))
 
@@ -158,7 +155,7 @@ class ModTools:
 
         `target` must be any identifiable user string (mention, user ID, username, etc).
 
-        `time` is a timedelta in the form of #h#m#s. To make a mute permanent, set this value to 0, perm, or -.
+        `time` is a timedelta in the form of #d#h#m#s. To make a mute permanent, set this value to 0, perm, or -.
 
         `reason` is a mandatory explanation field logging why the mute was given.
 

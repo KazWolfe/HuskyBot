@@ -42,9 +42,8 @@ class Updater:
 
         This command also does *no checks* of the code to ensure it's runnable. This must be done client-side before
         pushing.
-
-        DO NOT RUN THIS COMMAND WITHOUT BEING ABLE TO RESTART THE BOT MANUALLY (unless you like living on the edge)!
         """
+
         remote = self.repo.remotes.origin
 
         current_sha = self.repo.head.object.hexsha

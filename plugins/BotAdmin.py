@@ -1,4 +1,3 @@
-import asyncio
 import logging
 import socket
 
@@ -170,15 +169,6 @@ class BotAdmin:
                 color=Colors.DANGER
             ))
             LOG.warning("A request was made to unload Debug while in DevMode. Blocked.")
-            return
-
-        if plugin_name == "Anime":
-            await ctx.channel.trigger_typing()
-            await asyncio.sleep(4)
-            await ctx.send("I can't unload Anime! It's a critical part of my life, and I'd be nothing without it.")
-            await ctx.channel.trigger_typing()
-            await asyncio.sleep(3)
-            await ctx.send("And no, it's not \"just a phase,\" Dad! And yes, it's more than \"just a cartoon.\"")
             return
 
         if plugin_name not in ctx.bot.cogs.keys():
