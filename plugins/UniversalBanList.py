@@ -27,6 +27,11 @@ class UniversalBanList:
             "\u5350"  # Swastika unicode
         ]
 
+        # UBL list of phrases to target *just usernames*.
+        self._ubl_usernames = [
+            "hitler"
+        ]
+
         LOG.info("Loaded plugin!")
 
     async def filter_message(self, message: discord.Message, context: str = "new_message"):
@@ -57,7 +62,9 @@ class UniversalBanList:
         if member.guild_permissions.manage_guild:
             return
 
-        for ubl_term in self._ubl_phrases:
+        blacklist = self._ubl_phrases + self._ubl_usernames
+
+        for ubl_term in blacklist:
             if ubl_term.lower() in member.display_name.lower():
                 await member.ban(reason="[AutoBan - UBL Module] New user's name contains UBL keyword `{}`"
                                  .format(ubl_term),
@@ -71,7 +78,9 @@ class UniversalBanList:
         if before.nick == after.nick and before.name == after.name:
             return
 
-        for ubl_term in self._ubl_phrases:
+        blacklist = self._ubl_phrases + self._ubl_usernames
+
+        for ubl_term in blacklist:
             if after.nick is not None and ubl_term.lower() in after.nick.lower():
                 u_type = 'nickname'
             elif after.name is not None and ubl_term.lower() in after.name.lower():
