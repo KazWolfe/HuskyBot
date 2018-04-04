@@ -65,6 +65,8 @@ class DirtyHacks:
             if (width > 5000) and (height > 5000) and os.path.getsize(image_name) < 1000000:
                 await message.delete()
 
+            os.remove(image_name)
+
     @commands.command(name="disableHacks", brief="Disable DirtyHacks")
     @commands.has_permissions(manage_messages=True)
     async def disableHacks(self, ctx: commands.Context):
