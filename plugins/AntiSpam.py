@@ -1,3 +1,4 @@
+import asyncio
 import datetime
 import logging
 import math
@@ -12,6 +13,8 @@ from WolfBot import WolfUtils
 from WolfBot.WolfStatics import *
 
 LOG = logging.getLogger("DakotaBot.Plugin." + __name__)
+
+EXPIRY_FIELD_NAME = "cooldownExpiry"
 
 
 # noinspection PyMethodMayBeStatic
@@ -32,7 +35,27 @@ class AntiSpam:
         self.ATTACHMENT_COOLDOWNS = {}
         self.LINK_COOLDOWNS = {}
 
+        # Tasks
+        self.__cleanup_task__ = self.bot.loop.create_task(self.cleanup_expired_cooldowns())
+
         LOG.info("Loaded plugin!")
+
+    def __unload(self):
+        self.__cleanup_task__.cancel()
+
+    async def cleanup_expired_cooldowns(self):
+        """
+        This is ugly as fuck, but it iterates through each field every four hours to check for expired cooldowns.
+        :return:
+        """
+        while not self.bot.is_closed():
+            for d in [self.INVITE_COOLDOWNS, self.LINK_COOLDOWNS, self.ATTACHMENT_COOLDOWNS]:
+                for user_id in d.keys():
+                    if d[user_id][EXPIRY_FIELD_NAME] < datetime.datetime.utcnow():
+                        del d[user_id]
+
+            await asyncio.sleep(60 * 60 * 4)  # sleep for four hours
+
 
     async def on_message(self, message):
         if not WolfUtils.should_process_message(message):
@@ -75,7 +98,7 @@ class AntiSpam:
             await message.author.ban(delete_message_days=0, reason="[AUTOMATIC BAN - AntiSpam Module] "
                                                                    "Multi-pinged over guild ban limit.")
 
-    async def prevent_discord_invites(self, message):
+    async def prevent_discord_invites(self, message: discord.Message):
         ANTISPAM_CONFIG = self._config.get('antiSpam', {})
 
         ALLOWED_INVITES = ANTISPAM_CONFIG.get('allowedInvites', [message.guild.id])
@@ -86,9 +109,9 @@ class AntiSpam:
         if log_channel is not None:
             log_channel = message.guild.get_channel(log_channel)
 
-        # Prevent memory abuse by deleting expired cooldown records
+        # Prevent memory abuse by deleting expired cooldown records for this member
         if message.author.id in self.INVITE_COOLDOWNS \
-                and self.INVITE_COOLDOWNS[message.author.id]['cooldownExpiry'] < datetime.datetime.utcnow():
+                and self.INVITE_COOLDOWNS[message.author.id][EXPIRY_FIELD_NAME] < datetime.datetime.utcnow():
             del self.INVITE_COOLDOWNS[message.author.id]
 
         # Users with MANAGE_MESSAGES are allowed to send unauthorized invites.
@@ -141,11 +164,11 @@ class AntiSpam:
                 # Message not found, let's log this
                 LOG.warning("Message was caught and already deleted before AS could handle it.")
 
-            # Add the user to the cooldowns table - we're going to use this to prevent DakotaBot's spam and to ban the user
-            # if they go over a defined number of invites in a period
+            # Add the user to the cooldowns table - we're going to use this to prevent DakotaBot's spam and to ban
+            # the user if they go over a defined number of invites in a period
             if message.author.id not in self.INVITE_COOLDOWNS.keys():
                 self.INVITE_COOLDOWNS[message.author.id] = {
-                    'cooldownExpiry': datetime.datetime.utcnow() + datetime.timedelta(
+                    EXPIRY_FIELD_NAME: datetime.datetime.utcnow() + datetime.timedelta(
                         minutes=COOLDOWN_SETTINGS['minutes']),
                     'offenseCount': 0
                 }
@@ -167,7 +190,16 @@ class AntiSpam:
             # And we increment the offense counter here.
             cooldownRecord['offenseCount'] += 1
 
-            if log_channel is not None and cooldownRecord['offenseCount'] <= COOLDOWN_SETTINGS['banLimit']:
+            # Keep track if we're planning on removing this user.
+            was_kicked = False
+
+            if cooldownRecord['offenseCount'] == COOLDOWN_SETTINGS['banLimit']:
+                was_kicked = True
+            elif message.author.joined_at > datetime.datetime.utcnow() - datetime.timedelta(seconds=60):
+                await message.author.kick(reason="New user (less than 60 seconds old) posted invite.")
+                was_kicked = True
+
+            if log_channel is not None:
                 # We've a valid invite, so let's log that with invite data.
                 log_embed = discord.Embed(
                     description="An invite with key `{}` by user {} (ID `{}`) was caught and filtered. Invite "
@@ -195,10 +227,11 @@ class AntiSpam:
                                                                       invite_data.get('approximate_presence_count',
                                                                                       -1)))
 
-                log_embed.set_footer(text="Strike {} of {}, resets {}"
+                log_embed.set_footer(text="Strike {} of {}, resets {} {}"
                                      .format(cooldownRecord['offenseCount'],
                                              COOLDOWN_SETTINGS['banLimit'],
-                                             cooldownRecord['cooldownExpiry'].strftime(DATETIME_FORMAT)))
+                                             cooldownRecord[EXPIRY_FIELD_NAME].strftime(DATETIME_FORMAT),
+                                             "| User Removed" if was_kicked else ""))
 
                 log_embed.set_thumbnail(url=invite_guild.icon_url)
 
@@ -234,7 +267,7 @@ class AntiSpam:
 
         # Clear
         if message.author.id in self.ATTACHMENT_COOLDOWNS \
-                and self.ATTACHMENT_COOLDOWNS[message.author.id]['cooldownExpiry'] < datetime.datetime.utcnow():
+                and self.ATTACHMENT_COOLDOWNS[message.author.id][EXPIRY_FIELD_NAME] < datetime.datetime.utcnow():
             del self.ATTACHMENT_COOLDOWNS[message.author.id]
 
         # Users with MANAGE_MESSAGES are allowed to bypass attachment rate limits.
@@ -245,7 +278,7 @@ class AntiSpam:
             # User posted an attachment, and is not in the cache. Let's add them, on strike 0.
             if message.author.id not in self.ATTACHMENT_COOLDOWNS.keys():
                 self.ATTACHMENT_COOLDOWNS[message.author.id] = {
-                    'cooldownExpiry': datetime.datetime.utcnow() + datetime.timedelta(
+                    EXPIRY_FIELD_NAME: datetime.datetime.utcnow() + datetime.timedelta(
                         seconds=COOLDOWN_CONFIG['seconds']),
                     'offenseCount': 0
                 }
@@ -328,7 +361,7 @@ class AntiSpam:
 
         # We can lazily delete link cooldowns on messages, instead of checking.
         if message.author.id in self.LINK_COOLDOWNS \
-                and self.LINK_COOLDOWNS[message.author.id]['cooldownExpiry'] < datetime.datetime.utcnow():
+                and self.LINK_COOLDOWNS[message.author.id][EXPIRY_FIELD_NAME] < datetime.datetime.utcnow():
             del self.LINK_COOLDOWNS[message.author.id]
 
         # Users with MANAGE_MESSAGES are allowed to send as many links as they want.
@@ -343,7 +376,7 @@ class AntiSpam:
 
         # We have at least one link now, make the cooldown record.
         cooldown_record = self.LINK_COOLDOWNS.setdefault(message.author.id, {
-            'cooldownExpiry': datetime.datetime.utcnow() + datetime.timedelta(minutes=COOLDOWN_CONFIG['minutes']),
+            EXPIRY_FIELD_NAME: datetime.datetime.utcnow() + datetime.timedelta(minutes=COOLDOWN_CONFIG['minutes']),
             'offenseCount': 0,
             'totalLinks': 0
         })
@@ -369,7 +402,7 @@ class AntiSpam:
                     )
 
                     embed.set_footer(text="Cooldown resets {}"
-                                     .format(cooldown_record['cooldownExpiry'].strftime(DATETIME_FORMAT)))
+                                     .format(cooldown_record[EXPIRY_FIELD_NAME].strftime(DATETIME_FORMAT)))
 
                     embed.set_author(name="Link spam from {} detected!".format(str(message.author)),
                                      icon_url=message.author.avatar_url)
@@ -418,7 +451,7 @@ class AntiSpam:
                 embed.set_footer(text="Strike {} of {}, resets {}"
                                  .format(cooldown_record['offenseCount'],
                                          COOLDOWN_CONFIG['banLimit'],
-                                         cooldown_record['cooldownExpiry'].strftime(DATETIME_FORMAT)))
+                                         cooldown_record[EXPIRY_FIELD_NAME].strftime(DATETIME_FORMAT)))
 
                 embed.set_author(name="Link spam from {} blocked.".format(str(message.author)),
                                  icon_url=message.author.avatar_url)
