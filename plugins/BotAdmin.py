@@ -72,7 +72,7 @@ class BotAdmin:
         pass
 
     @admin.command(name="reloadConfig", brief="Reload the bot's configuration files from disk.")
-    async def reloadConfig(self, ctx: discord.ext.commands.Context):
+    async def reload_config(self, ctx: discord.ext.commands.Context):
         """
         Dump the bot's existing in-memory configuration and reload the config from the disk.
 
@@ -439,7 +439,7 @@ class BotAdmin:
         ))
 
     @admin.command(name="reloadpresence", brief="Reload a Presence from the config file", aliases=["rpresence"])
-    async def reloadPresence(self, ctx: discord.ext.commands.Context):
+    async def reload_presence(self, ctx: discord.ext.commands.Context):
         """
         Debug commands have no help. If you need help running a debug command, just don't.
         """

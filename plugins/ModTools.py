@@ -125,8 +125,8 @@ class ModTools:
         elif user.top_role.position >= ctx.message.author.top_role.position:
             await ctx.send(embed=discord.Embed(
                 title="Moderator Toolkit",
-                description="User `{}` could not be banned, as they are not below you in the role hierarchy."
-                    .format(user),
+                description="User `{}` could not be banned, as they are not below you in the role "
+                            "hierarchy.".format(user),
                 color=Colors.DANGER
             ))
             return
@@ -172,8 +172,8 @@ class ModTools:
         if target.top_role.position >= ctx.message.author.top_role.position:
             await ctx.send(embed=discord.Embed(
                 title="Moderator Toolkit",
-                description="User `{}` could not be muted, as they are not below you in the role hierarchy."
-                    .format(target),
+                description="User `{}` could not be muted, as they are not below you in the role "
+                            "hierarchy.".format(target),
                 color=Colors.DANGER
             ))
             return
@@ -223,17 +223,17 @@ class ModTools:
         if target.top_role.position >= ctx.message.author.top_role.position:
             await ctx.send(embed=discord.Embed(
                 title="Moderator Toolkit",
-                description="User `{}` could not be muted, as they are not below you in the role hierarchy."
-                    .format(user),
+                description="User `{}` could not be muted, as they are not below you in the role "
+                            "hierarchy.".format(user),
                 color=Colors.DANGER
             ))
             return
 
-        if time.lower() in ["permanent", "perm", "0", "-"]:
+        if time is None:
             mute_until = None
             pretty_string = ""
         else:
-            mute_until = datetime.datetime.utcnow() + WolfUtils.get_timedelta_from_string(time)
+            mute_until = datetime.datetime.utcnow() + time
             pretty_string = "\nTheir mute will expire at {} UTC".format(mute_until.strftime(DATETIME_FORMAT))
             mute_until = int(mute_until.timestamp())
 

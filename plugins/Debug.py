@@ -35,7 +35,7 @@ class Debug:
         pass
 
     @debug.command(name="dumpConfig", brief="Dump the bot's active configuration.")
-    async def dumpConfig(self, ctx: discord.ext.commands.Context):
+    async def dump_config(self, ctx: discord.ext.commands.Context):
         """
         Debug commands have no help. If you need help running a debug command, just don't.
         """
@@ -58,8 +58,8 @@ class Debug:
 
     # noinspection PyUnusedLocal
     @debug.command(name="react", brief="Force the bot to react to a specific message.")
-    async def forceReact(self, ctx: discord.ext.commands.Context, channel: discord.TextChannel, message: int,
-                         reaction: str):
+    async def force_react(self, ctx: discord.ext.commands.Context, channel: discord.TextChannel, message: int,
+                          reaction: str):
         """
         Debug commands have no help. If you need help running a debug command, just don't.
         """
@@ -89,7 +89,7 @@ class Debug:
         await ctx.send(embed=embed)
 
     @debug.command(name="forceExcept", brief="Force an exception (useful for testing purposes)")
-    async def forceExcept(self, ctx: discord.ext.commands.Context):
+    async def force_except(self, ctx: discord.ext.commands.Context):
         """
         Debug commands have no help. If you need help running a debug command, just don't.
         """
@@ -120,6 +120,20 @@ class Debug:
             description="The latency to Discord's servers is currently **{} ms**.".format(ping_in_ms),
             color=color
         ))
+
+    @debug.command(name="repost", brief="Copy a specified message to the current channel")
+    async def repost(self, ctx: commands.Context, channel: discord.TextChannel, message_id: int):
+        """
+        Debug commands have no help. If you need help running a debug command, just don't.
+        """
+
+        message = await channel.get_message(message_id)
+
+        await ctx.channel.send(
+            content=message.content,
+            embed=message.embeds[0],
+            files=message.attachments
+        )
 
     @commands.command(name="eval", brief="Execute an eval() statement on the guild", hidden=True)
     @WolfChecks.is_developer()

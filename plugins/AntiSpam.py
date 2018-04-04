@@ -66,8 +66,8 @@ class AntiSpam:
 
             if log_channel is not None:
                 await log_channel.send(embed=discord.Embed(
-                    description="User {} has pinged {} users in a single in channel {}."
-                        .format(message.author, str(len(message.mentions)), message.channel),
+                    description="User {} has pinged {} users in a single in channel "
+                                "{}.".format(message.author, str(len(message.mentions)), message.channel),
                     color=Colors.WARNING
                 ).set_author(name="Mass Ping Alert", icon_url=message.author.avatar_url))
                 return
@@ -119,8 +119,8 @@ class AntiSpam:
                     LOG.warning("Invalid message was caught and already deleted before AS could handle it.")
 
                 invalid_embed = discord.Embed(
-                    description="An invalid invite with key `{}` by user {} (ID `{}`) was caught and filtered."
-                        .format(fragment, str(message.author), str(message.author.id)),
+                    description="An invalid invite with key `{}` by user {} (ID `{}`) was caught and "
+                                "filtered.".format(fragment, str(message.author), str(message.author.id)),
                     color=Colors.INFO
                 )
                 invalid_embed.set_author(name="Invite from {} intercepted in {}!"
@@ -254,15 +254,15 @@ class AntiSpam:
                 await message.channel.send(embed=discord.Embed(
                     title="\uD83D\uDED1 Whoa there, pardner!",
                     description="Hey there {}! You're sending files awfully fast. Please help us keep this chat clean "
-                                "and readable by not sending lots of files so quickly. Thanks!"
-                        .format(message.author.mention),
+                                "and readable by not sending lots of files so quickly. "
+                                "Thanks!".format(message.author.mention),
                     color=Colors.WARNING
                 ), delete_after=90.0)
                 if log_channel is not None:
                     await log_channel.send(embed=discord.Embed(
-                        description="User {} has sent {} attachments in a {}-second period in channel {}."
-                            .format(message.author, cooldownRecord['offenseCount'], COOLDOWN_CONFIG['seconds'],
-                                    message.channel),
+                        description="User {} has sent {} attachments in a {}-second period in channel "
+                                    "{}.".format(message.author, cooldownRecord['offenseCount'],
+                                                 COOLDOWN_CONFIG['seconds'], message.channel),
                         color=Colors.WARNING
                     ).set_author(name="Possible Attachment Spam", icon_url=message.author.avatar_url))
                     return
@@ -326,8 +326,8 @@ class AntiSpam:
 
         await ctx.send(embed=discord.Embed(
             title="AntiSpam Plugin",
-            description="Ping limits have been successfully updated. Warn in `{}` pings, ban in `{}`."
-                .format(warn_limit, ban_limit),
+            description="Ping limits have been successfully updated. Warn in `{}` pings, ban in "
+                        "`{}`.".format(warn_limit, ban_limit),
             color=Colors.SUCCESS
         ))
 
@@ -413,8 +413,7 @@ class AntiSpam:
         self._config.set("antiSpam", as_config)
         await ctx.send(embed=discord.Embed(
             title="AntiSpam Plugin",
-            description="The guild with ID `{}` has been removed from the whitelist."
-                .format(guild),
+            description="The guild with ID `{}` has been removed from the whitelist.".format(guild),
             color=Colors.SUCCESS
         ))
 
@@ -480,8 +479,8 @@ class AntiSpam:
         await ctx.send(embed=discord.Embed(
             title="AntiSpam Plugin",
             description="The attachments module of AntiSpam has been set to allow a max of **`{}`** attachments in a "
-                        "**`{}` second** period, warning after **`{}`** attachments"
-                .format(ban_limit, cooldown_seconds, warn_limit),
+                        "**`{}` second** period, warning after **`{}`** "
+                        "attachments".format(ban_limit, cooldown_seconds, warn_limit),
             color=Colors.SUCCESS
         ))
 

@@ -21,7 +21,7 @@ class HamRadio:
             return
 
     @ham.command(name="register")
-    async def registerCallsign(self, ctx: discord.ext.commands.Context, callsign: str):
+    async def register_callsign(self, ctx: discord.ext.commands.Context, callsign: str):
         config = self._config.get('ham_radio', {})
 
         if config.get('callsigns') is None:

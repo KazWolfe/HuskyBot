@@ -111,8 +111,8 @@ class ReactionPromote:
             return
 
     @rpromote.command(name="addPromotion", brief="Add a new promotion to the configs")
-    async def addPromotion(self, ctx: discord.ext.commands.Context, channel: discord.TextChannel, message_id: int,
-                           emoji: str, role: discord.Role):
+    async def add_promotion(self, ctx: discord.ext.commands.Context, channel: discord.TextChannel, message_id: int,
+                            emoji: str, role: discord.Role):
         """
         Add a new Promotion to the Reaction Promotion configuration.
 

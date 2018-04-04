@@ -49,7 +49,7 @@ class Intelligence:
         guild_details.set_thumbnail(url=guild.icon_url)
         guild_details.add_field(name="Guild ID", value=guild.id, inline=True)
         guild_details.add_field(name="Owner", value=guild.owner.display_name + "#" + guild.owner.discriminator,
-                                 inline=True)
+                                inline=True)
         guild_details.add_field(name="Members", value=str(len(guild.members)) + " users", inline=True)
         guild_details.add_field(name="Text Channels", value=str(len(guild.text_channels)) + " channels", inline=True)
         guild_details.add_field(name="Roles", value=str(len(guild.roles)) + " roles", inline=True)
@@ -242,13 +242,13 @@ class Intelligence:
                 LOG.info("Getting history for %s", channel)
                 hist = channel.history(limit=None, after=search_start)
 
-                async for m in hist:
+                async for _ in hist:
                     message_count += 1
 
             await ctx.send(embed=discord.Embed(
                 title="Message Count Report",
-                description="Since **`{} UTC`**, the channel context **`{}`** has seen about **`{}`** messages."
-                    .format(search_start.strftime(DATETIME_FORMAT), context, message_count),
+                description="Since **`{} UTC`**, the channel context **`{}`** has seen about **`{}`**"
+                            " messages.".format(search_start.strftime(DATETIME_FORMAT), context, message_count),
                 color=Colors.INFO
             ))
 

@@ -62,7 +62,7 @@ class ServerLog:
             channel = notif_member.guild.get_channel(channel)
 
             embed = discord.Embed(
-                title= Emojis.SUNRISE + " New Member!",
+                title=Emojis.SUNRISE + " New Member!",
                 description=str(notif_member) + " has joined the guild.",
                 color=Colors.PRIMARY
             )
@@ -139,6 +139,7 @@ class ServerLog:
 
         await alert_channel.send(embed=embed)
 
+    # noinspection PyUnusedLocal
     async def on_member_unban(self, guild: discord.Guild, user: discord.User):
         if "userBan" not in self._config.get("loggers", {}).keys():
             return

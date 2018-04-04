@@ -29,11 +29,6 @@ class Censor:
         self.bot = bot
         self._config = WolfConfig.getConfig()
 
-        # Universal Ban List of phrases used by the bot. Any phrases here will trigger an instant ban.
-        self._ubl_phrases = [
-            "\u5350"  # Swastika unicode
-        ]
-
         LOG.info("Loaded plugin!")
 
     async def filter_message(self, message: discord.Message, context: str = "new_message"):
@@ -50,14 +45,7 @@ class Censor:
         if message.author.permissions_in(message.channel).manage_messages:
             return
 
-        for ubl_term in self._ubl_phrases:
-            if ubl_term.lower() in message.content.lower():
-                await message.author.ban(reason="[AUTOMATIC BAN - Censor Module] User used UBL'd keyword `{}`"
-                                         .format(ubl_term), delete_message_days=5)
-                LOG.info("Banned UBL triggering user (context %s, keyword %s, from %s in %s): %s", context,
-                         message.author, ubl_term, message.channel, message.content)
-
-        if any((re.search(censor_term, message.content) is not None) for censor_term in censor_list):
+        if any((re.search(censor_term, message.content, re.IGNORECASE) is not None) for censor_term in censor_list):
             await message.delete()
             LOG.info("Deleted censored message (context %s, from %s in %s): %s", context, message.author,
                      message.channel, message.content)
@@ -80,7 +68,7 @@ class Censor:
         pass
 
     @censor.command(name="list", brief="List all Censors for a channel")
-    async def listChannel(self, ctx: commands.Context, channel: discord.TextChannel = None):
+    async def list_channel(self, ctx: commands.Context, channel: discord.TextChannel = None):
         """
         List the censor terms in a given channel.
 
@@ -104,7 +92,7 @@ class Censor:
         ))
 
     @censor.command(name="globallist", brief="List all Censors in the global list", aliases=["glist"])
-    async def listGlobal(self, ctx: commands.Context):
+    async def list_global(self, ctx: commands.Context):
         """
         List the censor terms in the global list.
 
@@ -122,7 +110,7 @@ class Censor:
 
     @censor.command(name="add", brief="Add a Censor to a channel")
     @WolfChecks.has_guild_permissions(manage_messages=True)
-    async def addChannel(self, ctx: commands.Context, channel: discord.TextChannel, *, censor: str):
+    async def add_channel(self, ctx: commands.Context, channel: discord.TextChannel, *, censor: str):
         """
         Add a censor to the channel list.
 
@@ -153,7 +141,7 @@ class Censor:
 
     @censor.command(name="globaladd", brief="Add a Censor to the global list", aliases=["gadd"])
     @WolfChecks.has_guild_permissions(manage_messages=True)
-    async def addGlobal(self, ctx: commands.Context, *, censor: str):
+    async def add_global(self, ctx: commands.Context, *, censor: str):
         """
         Add a censor to the global list
 
@@ -184,7 +172,7 @@ class Censor:
 
     @censor.command(name="remove", brief="Remove a censor from a channel")
     @WolfChecks.has_guild_permissions(manage_messages=True)
-    async def removeChannel(self, ctx: commands.Context, channel: discord.TextChannel, *, censor: str):
+    async def remove_channel(self, ctx: commands.Context, channel: discord.TextChannel, *, censor: str):
         """
         Remove a censor from a channel list.
 
@@ -214,7 +202,7 @@ class Censor:
         ))
 
     @censor.command(name="globalremove", brief="Remove a censor from the global list", aliases=["gremove"])
-    async def removeGlobal(self, ctx: commands.Context, *, censor: str):
+    async def remove_global(self, ctx: commands.Context, *, censor: str):
         """
         Remove a censor from a the global list.
 

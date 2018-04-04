@@ -17,14 +17,14 @@ class Colors(IntEnum):
     ERROR = DANGER
 
 
-class ChannelKeys(str, Enum):
+class ChannelKeys(Enum):
     STAFF_LOG = "logs"
     STAFF_HUB = "modChannel"
     STAFF_ALERTS = "staffAlerts"
     PUBLIC_LOG = "audit"
 
 
-class SpecialRoleKeys(str, Enum):
+class SpecialRoleKeys(Enum):
     BOTS = "bots"
     MUTED = "muted"
     MODS = "moderators"
