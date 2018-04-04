@@ -25,6 +25,7 @@ class Censor:
 
     Censors can take either plain text (that is, a single word) or regular expressions.
     """
+
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
         self._config = WolfConfig.get_config()
@@ -40,7 +41,8 @@ class Censor:
 
         censor_config = self._config.get("censors", {})
 
-        censor_list = censor_config.get("global", []) + censor_config.get(str(message.channel.id), [])
+        censor_list = censor_config.get("global", []) + censor_config.get(str(message.channel.id), []) \
+                      + censor_config.get("user-" + str(message.author.id), [])
 
         if message.author.permissions_in(message.channel).manage_messages:
             return
@@ -228,6 +230,122 @@ class Censor:
         await ctx.send(embed=discord.Embed(
             title="Censors for " + ctx.guild.name,
             description="The word `" + censor + "` was removed from the global censor list",
+            color=Colors.PRIMARY
+        ))
+
+    @censor.command(name="useradd", brief="Add a censor for a specific user", aliases=["uadd"])
+    async def add_user(self, ctx: commands.Context, user: discord.Member, *, censor: str):
+        """
+        Add a censor for a specific user.
+
+        This command allows moderators to define censors for a specific user. This applies to all channels and all
+        messages from this user. Users may not create or edit censors for users not below them in the role hierarchy.
+
+        This command takes two arguments: a user identifier (either a username, @mention, user id, etc.) and a regex
+        censor to parse on.
+
+        See also:
+            /censor userremove - Remove a censor entry from a specific user
+            /censor userlist   - List all censor entries for a specific user
+        """
+
+        if user.top_role.position >= ctx.message.author.top_role.position:
+            await ctx.send(embed=discord.Embed(
+                title="Censor Toolkit",
+                description="You may not edit censors for `{}`, as they are not below you in the role "
+                            "hierarchy.".format(user),
+                color=Colors.DANGER
+            ))
+            return
+
+        censor_config = self._config.get("censors", {})
+        censor_list = censor_config.setdefault("user-" + str(user.id), [])
+
+        if censor in censor_list:
+            await ctx.send(embed=discord.Embed(
+                title="Censors for {}".format(user),
+                description="The word `" + censor + "` was already in the censor list.",
+                color=Colors.PRIMARY
+            ))
+            return
+
+        censor_list.append(censor)
+
+        self._config.set("censors", censor_config)
+
+        await ctx.send(embed=discord.Embed(
+            title="Censors for " + str(user),
+            description="The word `" + censor + "` was added to the censor list for the specified user",
+            color=Colors.PRIMARY
+        ))
+
+    @censor.command(name="userremove", brief="Remove a censor for a specific user", aliases=["uremove"])
+    async def remove_user(self, ctx: commands.Context, user: discord.Member, *, censor: str):
+        """
+        Remove a censor from the specific user.
+
+        This command allows moderators to define censors for a specific user. This applies to all channels and all
+        messages from this user. Users may not create or edit censors for users not below them in the role hierarchy.
+
+        This command takes two arguments: a user identifier (either a username, @mention, user id, etc.) and a regex
+        censor to parse on. If the regex censor does not exist, this command will throw an error.
+
+        See also:
+            /censor useradd  - Add a new censor entry for a specific user
+            /censor userlist - List all censor entries for a specific user
+        """
+
+        if user.top_role.position >= ctx.message.author.top_role.position:
+            await ctx.send(embed=discord.Embed(
+                title="Censor Toolkit",
+                description="You may not edit censors for `{}`, as they are not below you in the role "
+                            "hierarchy.".format(user),
+                color=Colors.DANGER
+            ))
+            return
+
+        censor_config = self._config.get("censors", {})
+        censor_list = censor_config.setdefault("user-" + str(user.id), [])
+
+        if censor not in censor_list:
+            await ctx.send(embed=discord.Embed(
+                title="Censors for {}".format(user),
+                description="The word `" + censor + "` was not in the censor list, so not removed.",
+                color=Colors.DANGER
+            ))
+            return
+
+        censor_list.remove(censor)
+
+        self._config.set("censors", censor_config)
+
+        await ctx.send(embed=discord.Embed(
+            title="Censors for {}".format(user),
+            description="The word `" + censor + "` was removed from the censor list for the specified channel",
+            color=Colors.PRIMARY
+        ))
+
+    @censor.command(name="userlist", brief="List the censors for a specific user", aliases=["ulist"])
+    async def list_user(self, ctx: commands.Context, user: discord.Member):
+        """
+        List all censors for a specific user.
+
+        This command will find and return all censors for a specific user, as defined in the server configuration.
+
+        It takes a single argument, namely a user identifier (user ID, mention, nickname, etc.).
+
+        See also:
+            /censor useradd  - Add a new censor entry for a specific user
+            /censor userremove - Remove a censor entry from a specific user
+        """
+
+        censor_config = self._config.get("censors", {})
+
+        censor_list = censor_config.get("user-" + str(user.id), [])
+
+        await ctx.send(embed=discord.Embed(
+            title="Censors for {}".format(user),
+            description="The following words are censored in the requested channel:\n\n" + ", ".join(censor_list),
             color=Colors.PRIMARY
         ))
 
