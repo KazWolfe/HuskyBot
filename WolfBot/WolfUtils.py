@@ -57,13 +57,20 @@ def tail(filename, n):
     return soutput.decode('utf-8')
 
 
-def should_process_message(message):
-    if message.guild is not None and message.guild.id in WolfBot.WolfConfig.get_config().get("ignoredGuilds", []):
+def should_process_message(message: discord.Message):
+    # Don't process direct messages
+    if not isinstance(message.channel, discord.TextChannel):
         return False
 
+    # Don't process messages from ignored guilds (developer mode)
+    if message.guild.id in WolfBot.WolfConfig.get_config().get("ignoredGuilds", []):
+        return False
+
+    # Don't process messages from other bots.
     if message.author.bot:
         return False
 
+    # Otherwise, process.
     return True
 
 
