@@ -100,6 +100,7 @@ class AntiSpam:
             return
 
         regex_matches = re.findall('discord\.gg/[0-9a-z\-]+', message.content, flags=re.IGNORECASE)
+        regex_matches += re.findall('discordapp\.com/invite/[0-9a-z\-]+', message.content, flags=re.IGNORECASE)
 
         # Handle messages without any invites in them (by ignoring them)
         if regex_matches is None or regex_matches == []:

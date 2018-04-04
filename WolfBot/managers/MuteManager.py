@@ -228,6 +228,6 @@ class MuteManager:
         self.__cache__.sort(key=lambda m: m.expiry if m.expiry else 10 * 100)
         self._mute_config.set("mutes", self.__cache__)
 
-    async def cleanup(self):
+    def cleanup(self):
         if self.__task__ is not None:
             self.__task__.cancel()

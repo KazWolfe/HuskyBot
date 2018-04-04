@@ -87,10 +87,11 @@ class Intelligence:
         else:
             role_details.add_field(name="Color", value=str(hex(role.color.value)).replace("0x", "#"), inline=True)
 
+        role_details.add_field(name="Mention Preview", value=role.mention, inline=True)
         role_details.add_field(name="Hoisted", value=role.hoist, inline=True)
-        role_details.add_field(name="Position", value=role.position, inline=True)
         role_details.add_field(name="Managed Role", value=role.managed, inline=True)
         role_details.add_field(name="Mentionable", value=role.mentionable, inline=True)
+        role_details.add_field(name="Position", value=role.position, inline=True)
         role_details.add_field(name="Member Count", value=str(len(role.members)), inline=True)
 
         await ctx.send(embed=role_details)
@@ -132,7 +133,7 @@ class Intelligence:
                 if r.name == "@everyone":
                     continue
 
-                roles.append(r.name)
+                roles.append(r.mention)
 
             if len(roles) == 0:
                 roles.append("None")
