@@ -87,27 +87,25 @@ class MuteManager:
             # Inform the guild logs
             alert_channel = self._bot_config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
 
-            if alert_channel is None:
-                return
+            if alert_channel is not None:
+                alert_channel = member.guild.get_channel(alert_channel)
 
-            alert_channel = member.guild.get_channel(alert_channel)
+                embed = discord.Embed(
+                    description="User ID `{}` was muted from {}.".format(member.id, mute_context),
+                    color=Colors.WARNING
+                )
 
-            embed = discord.Embed(
-                description="User ID `{}` was muted from {}.".format(member.id, mute_context),
-                color=Colors.WARNING
-            )
+                embed.set_author(name="{} was muted from {}!".format(member,
+                                                                     "the guild" if mute.channel is None else
+                                                                     "#" + str(channel)),
+                                 icon_url=member.avatar_url)
+                embed.add_field(name="Responsible User", value=str(staff_member), inline=True)
+                embed.add_field(name="Timestamp", value=WolfUtils.get_timestamp(), inline=True)
+                embed.add_field(name="Expires At", value=datetime.datetime.fromtimestamp(mute.expiry)
+                                .strftime(DATETIME_FORMAT) if mute.expiry is not None else "Never", inline=True)
+                embed.add_field(name="Reason", value=mute.reason, inline=False)
 
-            embed.set_author(name="{} was muted from {}!".format(member,
-                                                                 "the guild" if mute.channel is None else
-                                                                 "#" + str(channel)),
-                             icon_url=member.avatar_url)
-            embed.add_field(name="Responsible User", value=str(staff_member), inline=True)
-            embed.add_field(name="Timestamp", value=WolfUtils.get_timestamp(), inline=True)
-            embed.add_field(name="Expires At", value=datetime.datetime.fromtimestamp(mute.expiry)
-                            .strftime(DATETIME_FORMAT) if mute.expiry is not None else "Never", inline=True)
-            embed.add_field(name="Reason", value=mute.reason, inline=False)
-
-            await alert_channel.send(embed=embed)
+                await alert_channel.send(embed=embed)
 
     async def mute_user(self, ctx: commands.Context, member: discord.Member, channel,
                         reason: str, expiry: int, staff_member: discord.Member):
@@ -173,22 +171,21 @@ class MuteManager:
         # Inform the guild logs
         alert_channel = self._bot_config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
 
-        if alert_channel is None:
-            return
+        if alert_channel is not None:
+            alert_channel = member.guild.get_channel(alert_channel)
 
-        alert_channel = member.guild.get_channel(alert_channel)
+            embed = discord.Embed(
+                description="User ID `{}` was unmuted from {}.".format(mute.user_id, unmute_context),
+                color=Colors.INFO
+            )
 
-        embed = discord.Embed(
-            description="User ID `{}` was unmuted from {}.".format(mute.user_id, unmute_context),
-            color=Colors.INFO
-        )
+            embed.set_author(
+                name="{} was unmuted from {}!".format(member,
+                                                      "the guild" if mute.channel is None else "#" + str(channel)),
+                icon_url=member.avatar_url),
+            embed.add_field(name="Responsible User", value=str(staff_member), inline=True)
 
-        embed.set_author(
-            name="{} was unmuted from {}!".format(member, "the guild" if mute.channel is None else "#" + str(channel)),
-            icon_url=member.avatar_url),
-        embed.add_field(name="Responsible User", value=str(staff_member), inline=True)
-
-        await alert_channel.send(embed=embed)
+            await alert_channel.send(embed=embed)
 
     async def restore_user_mute(self, member: discord.Member):
         for mute in self.__cache__:
