@@ -54,7 +54,7 @@ async def initialize():
         del start_activity
         restart_reason = "start"
 
-    LOG.info("DiyBot is online, running discordpy " + discord.__version__)
+    LOG.info("DiyBot is online, running discord.py " + discord.__version__)
 
     # Lock the bot to a single guild
     if not BOT_CONFIG.get("developerMode", False):

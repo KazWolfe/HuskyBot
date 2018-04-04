@@ -34,7 +34,7 @@ class Giveaway:
 
     # noinspection PyUnresolvedReferences
     def __unload(self):
-        super.__cleanup()
+        # super.__cleanup()
         self.giveaway_manager.cleanup()
 
     @commands.group(name="giveaways", brief="Control the giveaway plugin", aliases=["giveaway", "ga"])
@@ -169,7 +169,7 @@ class Giveaway:
         await ctx.send(embed=discord.Embed(
             title="Giveaway forcefully killed!",
             description="A Giveaway with ID `{}` (named `{}`) has been forcefully stopped.\n\n"
-                        "**NOTE THAT THERE MAY BESOME UNCLEAN DATA, OR THE GIVEAWAY MAY STILL RUN IF STOPPED "
+                        "**NOTE THAT THERE MAY BE SOME UNCLEAN DATA, OR THE GIVEAWAY MAY STILL RUN IF STOPPED "
                         "TOO LATE.**".format(giveaway_id, giveaway.name),
             color=Colors.WARNING
         ))

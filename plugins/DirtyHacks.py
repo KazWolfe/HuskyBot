@@ -29,6 +29,7 @@ class DirtyHacks:
         LOG.info("Loaded plugin!")
 
     async def on_message(self, message: discord.Message):
+        # noinspection PyBroadException
         try:
             await self.kill_crashing_gifs(message)
         except:
@@ -69,7 +70,7 @@ class DirtyHacks:
 
     @commands.command(name="disableHacks", brief="Disable DirtyHacks")
     @commands.has_permissions(manage_messages=True)
-    async def disableHacks(self, ctx: commands.Context):
+    async def disable_hacks(self, ctx: commands.Context):
         config = self._config.get('plugins', [])  # type: list
 
         if "DirtyHacks" in config:
@@ -82,7 +83,7 @@ class DirtyHacks:
 
     @commands.command(name="testHacks", brief="Test DirtyHacks")
     @commands.has_permissions(manage_messages=True)
-    async def testHacks(self, ctx: commands.Context):
+    async def test_hacks(self, ctx: commands.Context):
         await ctx.send("DirtyHacks is running.")
 
 

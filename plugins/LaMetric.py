@@ -184,7 +184,7 @@ class LaMetric:
         """
         List all registered LaMetric devices.
 
-        This command takes no arugments.
+        This command takes no arguments.
         """
         lametric_conf = self._config.get('lametric', {})
         devices = lametric_conf.setdefault('devices', {})

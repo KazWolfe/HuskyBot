@@ -172,7 +172,7 @@ def get_image_size(fname):
                 # We are at a SOFn block
                 fhandle.seek(1, 1)  # Skip `precision' byte.
                 height, width = struct.unpack('>HH', fhandle.read(4))
-            except Exception:  # IGNORE:W0703
+            except IOError:
                 return
         else:
             return

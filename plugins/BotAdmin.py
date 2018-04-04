@@ -617,6 +617,10 @@ class BotAdmin:
         See also:
             /help admin unblockUser - Unblock a user blocked by this command.
         """
+
+        # hack for pycharm to stop complaining (duck-typing)
+        user = user  # type: discord.User
+
         config = self._config.get('userBlacklist', [])
 
         if user.id in config:
@@ -652,6 +656,10 @@ class BotAdmin:
 
         See /help admin blockUser for more information about this command.
         """
+
+        # hack for pycharm to stop complaining (duck typing)
+        user = user  # type: discord.User
+
         config = self._config.get('userBlacklist', [])
 
         if user.id not in config:

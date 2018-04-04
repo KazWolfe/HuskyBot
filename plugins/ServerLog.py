@@ -69,8 +69,8 @@ class ServerLog:
             )
 
             embed.set_thumbnail(url=notif_member.avatar_url)
-            embed.add_field(name="Joined Guild", value=notif_member.joined_at.strftime(DATETIME_FORMAT), inline=True)
             embed.add_field(name="Joined Discord", value=notif_member.created_at.strftime(DATETIME_FORMAT), inline=True)
+            embed.add_field(name="Joined Guild", value=notif_member.joined_at.strftime(DATETIME_FORMAT), inline=True)
             embed.add_field(name="User ID", value=notif_member.id, inline=True)
             embed.set_footer(text="Member #{} on the guild".format(
                 str(sorted(notif_member.guild.members, key=lambda m: m.joined_at).index(member) + 1)))
@@ -195,9 +195,9 @@ class ServerLog:
             color=Colors.INFO
         )
 
-        embed.add_field(name="User ID", value=after.id, inline=False)
         embed.add_field(name="Old {}".format(update_type.capitalize()), value=old_val, inline=True)
         embed.add_field(name="New {}".format(update_type.capitalize()), value=new_val, inline=True)
+        embed.add_field(name="User ID", value=after.id, inline=False)
         embed.set_author(name="{}'s {} has changed!".format(after, update_type), icon_url=after.avatar_url)
 
         await alert_channel.send(embed=embed)

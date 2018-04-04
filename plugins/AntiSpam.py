@@ -64,7 +64,7 @@ class AntiSpam:
             await message.channel.send(embed=discord.Embed(
                 title="Mass Ping Blocked",
                 description="A mass-ping message was blocked in the current channel.\n"
-                            + "Please reduce thek number of pings in your message and try again.",
+                            + "Please reduce the number of pings in your message and try again.",
                 color=Colors.WARNING
             ))
 
@@ -110,7 +110,7 @@ class AntiSpam:
 
             # Attempt to validate the invite, deleting invalid ones
             try:
-                # discordpy doesn't let us do this natively, so let's do it ourselves!
+                # discord py doesn't let us do this natively, so let's do it ourselves!
                 invite_data = await self.bot.http.request(
                     Route('GET', '/invite/{invite_id}?with_counts=true', invite_id=fragment))
                 invite_guild = discord.Guild(state=self.bot, data=invite_data['guild'])

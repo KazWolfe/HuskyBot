@@ -32,7 +32,7 @@ class ModTools:
         LOG.info("Loaded plugin!")
 
     def __unload(self):
-        super.__unload()
+        # super.__unload()
         self._mute_manager.cleanup()
 
     # Prevent users from becoming bot role if they're not actually bots.
@@ -105,6 +105,10 @@ class ModTools:
         In the audit log, the bot will be credited with the ban, but a note will be added including the username of the
         responsible moderator.
         """
+
+        # hack for pycharm (duck typing)
+        user = user  # type: discord.Member
+
         if user == ctx.author:
             await ctx.send(embed=discord.Embed(
                 title="Moderator Toolkit",
