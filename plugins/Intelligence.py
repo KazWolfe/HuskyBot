@@ -292,6 +292,19 @@ class Intelligence:
             color=Colors.INFO
         ))
 
+    @commands.command(name="usercount", brief="Get a count of users on the guild", aliases=["uc"])
+    async def user_count(self, ctx: commands.Context):
+        """
+        Get a count of users on the guild.
+
+        This is a lighter version of /ginfo. It takes no commands.
+        """
+        await ctx.send(embed=discord.Embed(
+            title="User Count Report",
+            description="This guild currently has **{} total users**.".format(len(ctx.guild.members)),
+            color=Colors.INFO
+        ))
+
 
 def setup(bot: commands.Bot):
     bot.add_cog(Intelligence(bot))
