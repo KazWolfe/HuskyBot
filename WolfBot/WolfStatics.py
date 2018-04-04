@@ -11,6 +11,8 @@ class Colors(IntEnum):
     WARNING = 0xFFC107
     INFO = 0x17A2B8
 
+    SERVER_COLOR = 0x3AC4FF
+
     # Shortcuts
     ERROR = DANGER
 
@@ -25,6 +27,8 @@ class ChannelKeys(str, Enum):
 class SpecialRoleKeys(str, Enum):
     BOTS = "bots"
     MUTED = "muted"
+    MODS = "moderators"
+    ADMINS = "administrators"
 
 
 class Emojis:
@@ -41,6 +45,7 @@ class Emojis:
     BOOK = "\uD83D\uDCDA"
     MUTED_SPEAKER = "\uD83D\uDD07"
     LOUD_SPEAKER = "\uD83D\uDD0A"
+    SHIELD = "\uD83D\uDEE1"
 
     # Mod shortcuts
     BAN = NO_ENTRY
