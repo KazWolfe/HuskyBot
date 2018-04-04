@@ -69,21 +69,51 @@ class Community:
 
         await ctx.send(embed=embed)
 
-    @commands.group(name="rules", brief="Get a copy of the guild rules")
+    @commands.group(name="rules", brief="Get a copy of the guild rules", usage="[number|subcommand]")
     @commands.guild_only()
     async def rules(self, ctx: commands.Context):
         """
         Retrieve the current rules list for the Discord guild.
 
-        By default, this command willy simply return the existing rules in an easy-to-parse embed. If a user is an
+        By default, this command will simply return the existing rules in an easy-to-parse embed. If a user is an
         administrator, additional commands exist that allow setting/altering rules.
+
+        This command takes an optional rule number as an argument. If this is specified, the bot will return only that
+        rule.
         """
         if ctx.invoked_subcommand is not None:
             return
 
-        rules_list = self._config.get("guildRules", [])
+        try:
+            raw_message = ctx.message.content
+            rule_num = int(raw_message.split(' ')[1])
+        except IndexError:
+            rule_num = None
+        except ValueError:
+            rule_num = None
 
-        if len(rules_list) == 0:
+        rule_list = self._config.get("guildRules", [])
+
+        if rule_num is not None:
+            try:
+                rule = rule_list[rule_num]
+            except IndexError:
+                await ctx.send(embed=discord.Embed(
+                    title="Guild Rules",
+                    description="A rule number {} does not exist. Please make sure you're referencing an existing "
+                                "rule.".format(rule_num),
+                    color=Colors.DANGER
+                ))
+                return
+
+            await ctx.send(embed=discord.Embed(
+                title=Emojis.BOOKMARK2 + " Rule {}: {}".format(rule_num, rule['title']),
+                description=rule['description'],
+                color=Colors.INFO
+            ))
+            return
+
+        if len(rule_list) == 0:
             await ctx.send(embed=discord.Embed(
                 title="Guild Rules",
                 description="No guild rules have been defined! Administrators can use `/rules add` to create new "
@@ -99,8 +129,8 @@ class Community:
             color=Colors.INFO
         )
 
-        for i in range(len(rules_list)):
-            rule = rules_list[i]
+        for i in range(len(rule_list)):
+            rule = rule_list[i]
 
             rule_embed.add_field(name="{}. {}".format(i + 1, rule['title']), value=rule['description'], inline=False)
 
