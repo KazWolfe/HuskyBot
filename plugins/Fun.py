@@ -18,6 +18,7 @@ class Fun:
 
     // ToDo: Delete this.
     """
+
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
         self._config = WolfConfig.getConfig()
@@ -161,12 +162,15 @@ class Fun:
             color=Colors.INFO
         )
 
-        embed.add_field(name="Attractiveness", value=str(Emojis.FIRE * round(attractiveness / 2))
-                                                     + " ({})".format(attractiveness), inline=False)
-        embed.add_field(name="Craziness", value=str(Emojis.SKULL * round(craziness / 2))
-                                                + " ({})".format(craziness), inline=False)
-        embed.add_field(name="Intelligence", value=str(Emojis.BOOK * round(intelligence / 2))
-                                                   + " ({})".format(intelligence), inline=False)
+        embed.add_field(name="Attractiveness",
+                        value=str(Emojis.FIRE * round(attractiveness / 2)) + " ({})".format(attractiveness),
+                        inline=False)
+        embed.add_field(name="Craziness",
+                        value=str(Emojis.SKULL * round(craziness / 2)) + " ({})".format(craziness),
+                        inline=False)
+        embed.add_field(name="Intelligence",
+                        value=str(Emojis.BOOK * round(intelligence / 2)) + " ({})".format(intelligence),
+                        inline=False)
 
         embed.set_thumbnail(url=member.avatar_url)
 

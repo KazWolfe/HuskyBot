@@ -382,7 +382,22 @@ class BotAdmin:
         ))
 
     @admin.command(name="presence", brief="Set the bot's presence mode.")
-    async def presence(self, ctx: discord.ext.commands.Context, presence_type: str, game: str, status: str):
+    async def presence(self, ctx: discord.ext.commands.Context, presence_type: str, name: str, status: str):
+        """
+        Set a new Presence for the bot.
+
+        The bot has a user-definable presence used to provide status messages or other information. This may be
+        configured on-the-fly using this command.
+
+        This command takes three arguments: the Presence Type, the Name, and a Status.
+
+        Presence Type must be a string containing either PLAYING, LISTENING, or WATCHING. No other arguments are
+        permitted at this time.
+
+        The Name may be any (short) string that will be displayed after the presence type.
+
+        Status must be a strong containing either ONLINE, IDLE, or DND. No other arguments are permitted.
+        """
         presence_map = {"playing": 0, "listening": 2, "watching": 3}
 
         if status.lower() == "invisible" or status.lower() == "offline":
@@ -413,8 +428,8 @@ class BotAdmin:
             ))
             return
 
-        self._config.set('presence', {"game": game, "type": presence_type, "status": status.lower()})
-        await ctx.bot.change_presence(activity=discord.Activity(name=game, type=presence_type), status=new_status)
+        self._config.set('presence', {"game": name, "type": presence_type, "status": status.lower()})
+        await ctx.bot.change_presence(activity=discord.Activity(name=name, type=presence_type), status=new_status)
         await ctx.send(embed=discord.Embed(
             title="Bot Manager",
             description="The bot's presence was updated.",
@@ -423,6 +438,9 @@ class BotAdmin:
 
     @admin.command(name="reloadpresence", brief="Reload a Presence from the config file", aliases=["rpresence"])
     async def reloadPresence(self, ctx: discord.ext.commands.Context):
+        """
+        Debug commands have no help. If you need help running a debug command, just don't.
+        """
         bot_presence = self._config.get('presence', {"game": "DiyBot", "type": 2, "status": "dnd"})
 
         await ctx.bot.change_presence(activity=discord.Activity(name=bot_presence['game'], type=bot_presence['type']),
@@ -430,15 +448,31 @@ class BotAdmin:
 
     @admin.command(name="restart", brief="Restart the bot.")
     async def restart(self, ctx: discord.ext.commands.Context):
+        """
+        Trigger a manual restart of the bot.
+
+        This command triggers an immediate restart of the bot. This will attempt to gracefully kill the bot and then
+        shut down. The bot will inform the channel upon restart.
+        """
         await ctx.bot.change_presence(activity=discord.Activity(name="Restarting...", type=0),
                                       status=discord.Status.idle)
         LOG.info("Bot is going down for admin requested restart!")
         self._config.set("restartNotificationChannel", ctx.channel.id)
         self._config.set("restartReason", "admin")
+        await ctx.trigger_typing()
         await ctx.bot.logout()
 
-    @admin.command(name="ignoreCommand", brief="Add a command to the ignore list.")
+    @admin.command(name="ignoreCommand", brief="Add a command to the ignore list.", enabled=False)
     async def ignore(self, ctx: commands.Context, command: str):
+        """
+        [DEPRECATED COMMAND] Add a new command to the ignore list.
+
+        This command will allow administrators to add commands that are silently ignored by the bot. This command takes
+        only a single string as an argument. Do not include a slash when specifying a command name to ignore.
+
+        See also:
+            /help admin unignoreCommand - Remove a command from the ignore list
+        """
         command = command.lower()
 
         ignoredCommands = self._config.get('ignoredCommands', [])
@@ -468,8 +502,19 @@ class BotAdmin:
             color=Colors.SUCCESS
         ))
 
-    @admin.command(name="unignoreCommand", brief="Remove a command from the ignore list.")
+    @admin.command(name="unignoreCommand", brief="Remove a command from the ignore list.", enabled=False)
     async def unignore(self, ctx: commands.Context, command: str):
+        """
+        [DEPRECATED COMMAND] Remove a command from the ignore list.
+
+        If a command was previously ignored by /admin ignoreCommand, this command will allow the command to be watched
+        again.
+
+        See /help admin ignoreCommand for information about the arguments for this command.
+
+        See also:
+            /help admin ignoreCommand - Add a command to the ignore list
+        """
         command = command.lower()
 
         ignoredCommands = self._config.get('ignoredCommands', [])
@@ -493,6 +538,17 @@ class BotAdmin:
 
     @admin.command(name="setChannel", brief="Configure a channel binding for the bot.")
     async def set_channel(self, ctx: commands.Context, name: str, channel: discord.TextChannel):
+        """
+        Set a channel binding for the bot.
+
+        This command allows administrators to set a new channel binding for the bot. Multiple "critical" channels are
+        stored in the bot configuration, including log and alert channels. This command allows them to be changed at
+        runtime.
+
+        To get a list of valid binding names, specify a junk binding (like ?) for the name parameter.
+
+        The NAME parameter must be a valid channel binding, and the CHANNEL parameter must be a valid channel name/ID.
+        """
         name = name.upper()
         config = self._config.get('specialChannels', {})
 
@@ -521,6 +577,16 @@ class BotAdmin:
 
     @admin.command(name="setRole", brief="Configure a role binding for the bot.")
     async def set_role(self, ctx: commands.Context, name: str, role: discord.Role):
+        """
+        Set a role binding for the bot.
+
+        In order to track certain critical states, the bot requires an internal list of roles that must be maintained.
+        This command allows these roles to be altered at runtime.
+
+        To get a list of valid binding names, specify a junk binding (like ?) for the name parameter.
+
+        The NAME parameter must be a valid role binding, and the ROLE parameter must be a valid role name/ID.
+        """
         name = name.upper()
         config = self._config.get('specialRoles', {})
 

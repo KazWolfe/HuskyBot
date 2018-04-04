@@ -292,8 +292,6 @@ class ServerLog:
         General parent command for logging management.
 
         This command itself does nothing, but is instead a parent command to other actually useful commands.
-        :param ctx:
-        :return:
         """
         if ctx.invoked_subcommand is None:
             await ctx.send(embed=discord.Embed(

@@ -15,6 +15,12 @@ LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 
 # noinspection PyMethodMayBeStatic
 class AntiSpam:
+    """
+    The AntiSpam plugin is responsible for maintaining and running advanced logic-based moderation tasks on behalf of
+    the moderator team.
+
+    It, alongside Censor, ModTools, and the UBL help form the moderative backbone and power of the bot platform.
+    """
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
         self._config = WolfConfig.getConfig()
@@ -170,8 +176,9 @@ class AntiSpam:
                 log_embed.add_field(name="Invited Guild Name", value=invite_guild.name, inline=True)
 
                 ch_type = {0: "#", 2: "[VC] ", 4: "[CAT] "}
-                log_embed.add_field(name="Invited Channel Name", value=ch_type[invite_data['channel']['type']]
-                                                                       + invite_data['channel']['name'], inline=True)
+                log_embed.add_field(name="Invited Channel Name",
+                                    value=ch_type[invite_data['channel']['type']] + invite_data['channel']['name'],
+                                    inline=True)
                 log_embed.add_field(name="Invited Guild ID", value=invite_guild.id, inline=True)
 
                 log_embed.add_field(name="Invited Guild Creation Date",
@@ -274,43 +281,71 @@ class AntiSpam:
     @commands.group(name="antispam", aliases=['as'], brief="Manage the Antispam configuration for the bot")
     @commands.has_permissions(manage_messages=True)
     async def asp(self, ctx: commands.Context):
+        """
+        This is the parent command for the AntiSpam module.
+
+        It does nothing on its own, but it does grant the ability for administrators to change spam filter settings on
+        the fly.
+        """
         pass
 
-    @asp.command(name="setPingWarnLimit", brief="Set the number of pings required before delete/warn")
+    @asp.command(name="setPingLimit", brief="Set the number of pings required before AntiSpam takes action")
     @commands.has_permissions(mention_everyone=True)
-    async def set_ping_warn_limit(self, ctx: commands.Context, new_limit: int):
-        if new_limit < 1:
-            new_limit = None
+    async def set_ping_limit(self, ctx: commands.Context, warn_limit: int, ban_limit: int):
+        """
+        Set the warning and ban limits for the maximum number of pings permitted in a single message.
+
+        This command takes two arguments - warn_limit and ban_limit. Both of these are integers.
+
+        Once a user exceeds the warning limit of pings in a single message, their message will be automatically deleted
+        and a warning will be issued to the user.
+
+        If a user surpasses the ban limit of pings in a single message, the message will be deleted and the user will
+        be immediately banned.
+
+        Setting a value to zero or any negative number will disable that specific limit.
+
+        Example commands:
+            /as setPingLimit 6 15 - Set warn limit to 6, ban limit to 15
+            /as setPingLimit 6 0  - Set warn limit to 6, remove the ban limit
+        """
+        if warn_limit < 1:
+            warn_limit = None
+
+        if ban_limit < 1:
+            ban_limit = None
 
         as_config = self._config.get('antiSpam', {})
-        as_config['pingSoftLimit'] = new_limit
+        as_config['pingSoftLimit'] = warn_limit
+        as_config['pingHardLimit'] = ban_limit
         self._config.set('antiSpam', as_config)
 
         await ctx.send(embed=discord.Embed(
             title="AntiSpam Plugin",
-            description="The warning limit for pings has been set to " + str(new_limit) + ".",
-            color=Colors.SUCCESS
-        ))
-
-    @asp.command(name="setPingBanLimit", brief="Set the number of pings required before user ban")
-    @commands.has_permissions(mention_everyone=True)
-    async def set_ping_ban_limit(self, ctx: commands.Context, new_limit: int):
-        if new_limit < 1:
-            new_limit = None
-
-        as_config = self._config.get('antiSpam', {})
-        as_config['pingHardLimit'] = new_limit
-        self._config.set('antiSpam', as_config)
-
-        await ctx.send(embed=discord.Embed(
-            title="AntiSpam Plugin",
-            description="The ban limit for pings has been set to " + str(new_limit) + ".",
+            description="Ping limits have been successfully updated. Warn in `{}` pings, ban in `{}`."
+                .format(warn_limit, ban_limit),
             color=Colors.SUCCESS
         ))
 
     @asp.command(name="allowInvite", brief="Allow an invite from the guild ID given")
     @commands.has_permissions(manage_guild=True)
     async def allow_invite(self, ctx: commands.Context, guild: int):
+        """
+        Add a server to the AntiSpam Invite Whitelist.
+
+        By default, AntiSpam will block all guild invites not posted by authorized members (or invites that are not to
+        this server). This may be overridden on a case-by-case basis using this command. Once a guild is added to the
+        whitelist, their invites will not be touched on this server.
+
+        This command expects a single argument - a guild ID.
+
+        Example commands:
+            /as allowInvite 11223344 - Allow invites from guild ID 11223344
+
+        See also:
+            /help as blockInvite    - Remove a guild from the invite whitelist
+            /help as inviteCooldown - Edit cooldown settings for the invite limiter.
+        """
         as_config = self._config.get('antiSpam', {})
         allowed_invites = as_config.setdefault('allowedInvites', [ctx.guild.id])
 
@@ -326,8 +361,7 @@ class AntiSpam:
         self._config.set("antiSpam", as_config)
         await ctx.send(embed=discord.Embed(
             title="AntiSpam Plugin",
-            description="The invite to guild `{}` has been added to the whitelist."
-                .format(guild),
+            description="The invite to guild `{}` has been added to the whitelist.".format(guild),
             color=Colors.SUCCESS
         ))
         return
@@ -335,6 +369,23 @@ class AntiSpam:
     @asp.command(name="blockInvite", brief="Remove an invite from the whitelist.")
     @commands.has_permissions(manage_guild=True)
     async def block_invite(self, ctx: commands.Context, guild: int):
+        """
+        Remove a server from the AntiSpam Invite Whitelist.
+
+        If a guild was added to the AntiSpam whitelist, this command may be used to remove the whitelist entry. See
+        /help antispam allowInvite for more information on this command.
+
+        This command expects a single argument - a guild ID.
+
+        This command will return an error if a guild not on the whitelist is removed.
+
+        Example Commands:
+            /as blockInvite 11223344 - No longer allow invites from guild ID 11223344
+
+        See also:
+            /help as allowInvite    - Add a guild to the invite whitelist
+            /help as inviteCooldown - Edit cooldown settings for the invite limiter.
+        """
         as_config = self._config.get('antiSpam', {})
         allowed_invites = as_config.setdefault('allowedInvites', [ctx.guild.id])
 
@@ -366,6 +417,21 @@ class AntiSpam:
     @asp.command(name="inviteCooldown", brief="Set invite cooldown and ban limits")
     @commands.has_permissions(manage_guild=True)
     async def set_invite_cooldown(self, ctx: commands.Context, cooldown_minutes: int, ban_limit: int):
+        """
+        Set cooldowns/ban thresholds for guild invite spam.
+
+        The bot will automatically ban a user after posting a certain number of invites in a defined time period. This
+        command allows those limits to be altered.
+
+        The command takes two arguments: cooldown_minutes, and ban_limit.
+
+        If a user posts `ban_limit` or more guild invites in the span of `cooldown_minutes` minutes, they will be
+        automatically banned from the server.
+
+        See also:
+            /help as blockInvite    - Remove a guild from the invite whitelist
+            /help as blockInvite    - Add a guild to the invite whitelist
+        """
         as_config = self._config.get('antiSpam', {})
         invite_cooldown = as_config.setdefault('cooldowns', {}).setdefault('invites', {'minutes': 30, 'banLimit': 5})
 
@@ -384,6 +450,19 @@ class AntiSpam:
     @asp.command(name="attachmentCooldown", brief="Set attachment cooldown and ban limits")
     @commands.has_permissions(manage_guild=True)
     async def set_attach_cooldown(self, ctx: commands.Context, cooldown_seconds: int, warn_limit: int, ban_limit: int):
+        """
+        Set cooldowns/ban thresholds on attachment spam.
+
+        AntiSpam will log and ban users that go over a set amount of attachments in a second. This command allows those
+        limits to be altered on the fly.
+
+        If a user sends `warn_limit` announcements in a `cooldown_seconds` second period, they will be issued a warning
+        message to cool on the spam. If they persist to `ban_limit` attachments in the same period, they will be
+        automatically banned from the server.
+
+        A message not containing attachments will reset the cooldown period.
+        """
+
         as_config = self._config.get('antiSpam', {})
         attach_config = as_config.setdefault('cooldowns', {}).setdefault('attach', {'seconds': 15,
                                                                                     'warnLimit': 3, 'banLimit': 5})

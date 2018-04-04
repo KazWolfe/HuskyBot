@@ -13,6 +13,17 @@ LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 
 # noinspection PyMethodMayBeStatic
 class AutoResponder:
+    """
+    The AutoResponder plugin allows staff members to generate simple non-interactive commands quickly, easily, and
+    without code changes.
+
+    The AutoResponder plugin watches all messages sent across all channels, and checks if a sent message begins with a
+    string of defined characters. If so, it will load the appropriate response and then reply in the same context.
+
+    Responses can be restricted to use by only certain roles, or only in certain channels. Multiple roles may be
+    permitted to use an auto response. If *any* role matches, the bot will respond. Likewise, the bot may also be
+    configured to only reply to certain channels. If both roles and channels are defined, both checks must be satisfied.
+    """
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
         self._config = WolfConfig.getConfig()
@@ -49,19 +60,31 @@ class AutoResponder:
                 else:
                     await message.channel.send(content=responses[response]['response'])
 
-    @commands.group(name="responses", brief="Manage the AutoResponder plugin")
+    @commands.group(name="responses", aliases=["response"], brief="Manage the AutoResponder plugin")
     async def responses(self, ctx: discord.ext.commands.Context):
-        if ctx.invoked_subcommand is None:
-            await ctx.send(embed=discord.Embed(
-                title="Response Manager",
-                description="The command you have requested is not available.",
-                color=Colors.DANGER
-            ))
-            return
+        """
+        This is the parent command for the AutoResponder plugin.
+
+        It by default does nothing, but simply exists as a container for the other commands. See the below command list
+        for valid commands to pass to the plugin.
+        """
+
+        pass
 
     @responses.command(name="add", aliases=["create"], brief="Add a new automatic response")
     @commands.has_permissions(manage_messages=True)
     async def addResponse(self, ctx: discord.ext.commands.Context, trigger: str, response: str):
+        """
+        Add a new response to the configuration.
+
+        By default, this will create a new response (with trigger `trigger`) that spits back `response` as plaintext.
+        This will only be usable in the current channel by users with the MANAGE_MESSAGES permission (that is, can pin
+        or delete messages). These settings allow the creation/use of a "stage" to ensure the response works as
+        intended.
+
+        If you would like to alter the configuration of a created response, please use the /responses edit command.
+        """
+
         responses = self._config.get("responses", {})
 
         new = {}
@@ -92,6 +115,32 @@ class AutoResponder:
     @commands.has_permissions(manage_messages=True)
     async def editResponse(self, ctx: discord.ext.commands.Context, trigger: str, param: str, action: str, *,
                            value: str = None):
+        """
+        Advanced editor for responses.
+
+        This command is a utility command, meaning it has some rather interesting subcommands. The format of the command
+        is described above. "Actions" are a subset of "Params". The mapping is available below:
+
+        | PARAMETER       | ACTION         | DESCRIPTION                                                  |
+        |-----------------|----------------|--------------------------------------------------------------|
+        | response        | set            | Set a new plain-text response for the specified trigger.     |
+         --               | json           | Set a new JSON embed for the specified trigger.              |
+                          |                |                                                              |
+        | requiredRoles   | set            | Set a new comma-separated list of required roles.            |
+         --               | add            | Add a new required role to use the specified trigger.        |
+         --               | remove         | Remove a required role from the trigger permission set.      |
+         --               | clear          | Clear the list of required roles for this trigger.           |
+                          |                |                                                              |
+        | allowedChannels | set            | Set a new comma-separated list of channels for this trigger. |
+         --               | add            | Add a new channel allowed to use this trigger.               |
+         --               | remove         | Remove a channel from the allowed list for this trigger.     |
+         --               | clear          | Clear the allowed channels list for this trigger             |
+
+        To set a response as usable everywhere by everyone, simply run these commands:
+            /responses edit !myTrigger allowedChannels clear
+            /responses edit !myTrigger requiredRoles clear
+        """
+
         responses = self._config.get("responses", {})
 
         try:
@@ -199,6 +248,12 @@ class AutoResponder:
     @responses.command(name="delete", aliases=["remove"], brief="Delete an existing automatic response")
     @commands.has_permissions(manage_messages=True)
     async def deleteResponse(self, ctx: discord.ext.commands.Context, trigger: str):
+        """
+        Delete a response from the database.
+
+        Given a trigger (of type string), remove it and its configuration from the server.
+        """
+
         responses = self._config.get("responses", {})
 
         try:
@@ -223,6 +278,12 @@ class AutoResponder:
     @responses.command(name="list", brief="List all registered automatic responses")
     @commands.has_permissions(manage_messages=True)
     async def listResponses(self, ctx: discord.ext.commands.Context):
+        """
+        List all available responses.
+
+        This command will list all responses allowed on the guild as a whole. It takes no arguments.
+        """
+
         responses = self._config.get("responses", {})
 
         await ctx.send(embed=discord.Embed(
@@ -234,6 +295,10 @@ class AutoResponder:
     @responses.command(name="deleteAll", hidden=True)
     @commands.has_permissions(administrator=True)
     async def purge(self, ctx: discord.ext.commands.Context):
+        """
+        Debug commands have no help. If you need help running a debug command, just don't.
+        """
+
         self._config.set('responses', {})
 
         await ctx.send(embed=discord.Embed(
