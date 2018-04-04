@@ -25,6 +25,7 @@ class Leaderboards:
 
     @leaderboard.command(name="bans", brief="Get banningest moderators")
     @commands.has_permissions(ban_members=True)
+    @commands.cooldown(1, 120, commands.BucketType.guild)
     async def ban_leaderboard(self, ctx: commands.Context):
         # "username": banCount
         cache = {}
@@ -102,7 +103,7 @@ class Leaderboards:
                 color=Colors.INFO
             )
 
-            embed.set_footer(text="Σ={} | listed={}".format(sum(cache.values()), len(banned_uids)))
+            embed.set_footer(text="Σ={} | total bans={}".format(sum(cache.values()), len(banned_uids)))
 
             await ctx.send(embed=embed)
 
