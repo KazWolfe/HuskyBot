@@ -74,7 +74,6 @@ class AntiSpam:
                                 "{}.".format(message.author, str(len(message.mentions)), message.channel),
                     color=Colors.WARNING
                 ).set_author(name="Mass Ping Alert", icon_url=message.author.avatar_url))
-                return
 
         if PING_BAN_LIMIT is not None and len(message.mentions) >= PING_BAN_LIMIT:
             await message.author.ban(delete_message_days=0, reason="[AUTOMATIC BAN - AntiSpam Module] "
@@ -171,7 +170,7 @@ class AntiSpam:
             # And we increment the offense counter here.
             cooldownRecord['offenseCount'] += 1
 
-            if log_channel is not None:
+            if log_channel is not None and cooldownRecord['offenseCount'] <= COOLDOWN_SETTINGS['banLimit']:
                 # We've a valid invite, so let's log that with invite data.
                 log_embed = discord.Embed(
                     description="An invite with key `{}` by user {} (ID `{}`) was caught and filtered. Invite "
@@ -211,11 +210,17 @@ class AntiSpam:
             # If the user is at the offense limit, we're going to ban their ass. In this case, this means that on
             # their fifth invalid invite, we ban 'em.
             if COOLDOWN_SETTINGS['banLimit'] > 0 and (cooldownRecord['offenseCount'] >= COOLDOWN_SETTINGS['banLimit']):
-                await message.author.ban(reason="[AUTOMATIC BAN - AntiSpam Module] User sent {} unauthorized invites "
-                                                "in a {} minute period.".format(COOLDOWN_SETTINGS['banLimit'],
-                                                                                COOLDOWN_SETTINGS['minutes']),
-                                         delete_message_days=0)
-                del self.INVITE_COOLDOWNS[message.author.id]
+                try:
+                    del self.INVITE_COOLDOWNS[message.author.id]
+
+                    await message.author.ban(
+                        reason="[AUTOMATIC BAN - AntiSpam Plugin] User sent {} unauthorized invites "
+                               "in a {} minute period.".format(COOLDOWN_SETTINGS['banLimit'],
+                                                               COOLDOWN_SETTINGS['minutes']),
+                        delete_message_days=0)
+                except KeyError:
+                    LOG.warning("Attempted to delete cooldown record for user %s (ban over limit), but failed as the "
+                                "record count not be found.", message.author.id)
 
             break
 

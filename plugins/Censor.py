@@ -61,9 +61,13 @@ class Censor:
                 return
 
         if any((re.search(censor_term, message.content, re.IGNORECASE) is not None) for censor_term in censor_list):
-            await message.delete()
-            LOG.info("Deleted censored message (context %s, from %s in %s): %s", context, message.author,
-                     message.channel, message.content)
+            try:
+                await message.delete()
+                LOG.info("Deleted censored message (context %s, from %s in %s): %s", context, message.author,
+                         message.channel, message.content)
+            except discord.NotFound:
+                LOG.warning("I tried to delete a censored message (ID %s, ctx %s, from %s in %s), but I couldn't find "
+                            "it. Was it already deleted?", message.id, context, message.author, message.channel)
 
     async def on_message(self, message):
         await self.filter_message(message)
