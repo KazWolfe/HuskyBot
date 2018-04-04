@@ -378,6 +378,17 @@ class ServerLog:
     @logger.command(name="rotate", brief="Rotate the log channel out for a new clean one")
     @commands.has_permissions(administrator=True)
     async def rotate_logs(self, ctx: commands.Context):
+        """
+        Rotate the server logs securely.
+
+        This command will create a new server log channel, configure it the same as the old channel, and then delete
+        the old channel. By doing this, server logs can be effectively rotated and all staff-accessible records of
+        messages kept in the server log will be wiped.
+
+        The user who started the rotation will be logged in both the audit log, and at the start of the rotation.
+
+        This command takes no arguments, and may only be run by administrators.
+        """
         channels_config = self._config.get('specialChannels', {})
         old_channel = channels_config.get(ChannelKeys.STAFF_LOG.value, None)
 
@@ -419,7 +430,7 @@ class ServerLog:
         await ctx.send(embed=discord.Embed(
             title="Log refresh success!",
             description="The server logs were successfully refreshed, and are now available at {}. The bot's config "
-                        "has been automatically updated.",
+                        "has been automatically updated.".format(new_channel.mention),
             color=Colors.SUCCESS
         ))
 
