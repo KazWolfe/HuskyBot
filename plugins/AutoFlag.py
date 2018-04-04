@@ -32,9 +32,12 @@ class AutoFlag:
         flag_regexes = self._config.get("flaggedRegexes", [])
 
         alert_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_ALERTS.value, None)
-        if alert_channel is None:
-            return
-        alert_channel = self.bot.get_channel(alert_channel)  # type: discord.TextChannel
+        if alert_channel is not None:
+            alert_channel = self.bot.get_channel(alert_channel)  # type: discord.TextChannel
+
+        log_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
+        if log_channel is not None:
+            log_channel = self.bot.get_channel(alert_channel)  # type: discord.TextChannel
 
         if not isinstance(message.channel, discord.TextChannel):
             return
@@ -61,7 +64,11 @@ class AutoFlag:
                 embed.add_field(name="Message Timestamp", value=message.created_at.strftime(DATETIME_FORMAT),
                                 inline=True)
 
-                await alert_channel.send(embed=embed, delete_after=self._delete_time)
+                if alert_channel is not None:
+                    await alert_channel.send(embed=embed, delete_after=self._delete_time)
+
+                if log_channel is not None:
+                    await log_channel.send(embed=embed)
 
                 LOG.info("Got flagged message (context %s, key %s, from %s in %s): %s", context,
                          message.author, flag_term, message.channel, message.content)

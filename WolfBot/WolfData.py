@@ -78,3 +78,30 @@ class Mute:
             return False
 
         return self.expiry <= datetime.datetime.utcnow().timestamp()
+
+
+class GiveawayObject:
+    name = ""
+
+    start_time = None
+    end_time = None
+
+    register_channel_id = 0
+    register_message_id = 0
+
+    winner_count = 1
+
+    def load_dict(self, data: dict):
+        self.name = data.get('name')
+
+        self.end_time = data.get('end_time')
+
+        self.register_channel_id = data.get('register_channel_id')
+        self.register_message_id = data.get('register_message_id')
+
+        self.winner_count = data.get('winner_count')
+
+        return self
+
+    def is_over(self):
+        return self.end_time <= datetime.datetime.utcnow().timestamp()

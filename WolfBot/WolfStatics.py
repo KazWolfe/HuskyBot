@@ -48,6 +48,7 @@ class Emojis:
     SHIELD = "\uD83D\uDEE1"
     BOOKMARK2 = "\uD83D\uDCD1"
     RED_FLAG = "\uD83D\uDEA9"
+    TADA = "\U0001F389"
 
     # Mod shortcuts
     BAN = NO_ENTRY
@@ -55,3 +56,6 @@ class Emojis:
     UNBAN = UNLOCK
     MUTE = MUTED_SPEAKER
     UNMUTE = LOUD_SPEAKER
+
+    # Giveaway shortcut
+    GIVEAWAY = TADA

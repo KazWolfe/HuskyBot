@@ -44,7 +44,7 @@ class ServerLog:
 
             if guild.member_count % 1000 == 0:
                 await milestone_channel.send(embed=discord.Embed(
-                    title=Emojis.PARTY + "Guild Member Count Milestone!",
+                    title=Emojis.PARTY + " Guild Member Count Milestone!",
                     description="The guild has now reached " + str(guild.member_count) + " members! Thank you "
                                 + notif_member.display_name + " for joining!",
                     color=Colors.SUCCESS
