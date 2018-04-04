@@ -274,8 +274,7 @@ async def on_message(message):
 
         LOG.info("User %s ran %s", message.author, message.content)
 
-        async with message.channel.typing():
-            await bot.process_commands(message)
+        await bot.process_commands(message)
 
 
 def get_developers():
