@@ -96,6 +96,31 @@ class Debug:
 
         raise Exception("Random exception that was requested!")
 
+    @debug.command(name="ping", brief="Get the latency (in ms) to the Discord servers")
+    async def ping(self, ctx: commands.Context):
+        ping_in_ms = round(self.bot.latency * 1000, 2)
+
+        if 0 < ping_in_ms < 50:
+            color = 0x4D8B3F
+        elif ping_in_ms < 100:
+            color = 0x86BA55
+        elif ping_in_ms < 150:
+            color = 0xD7DE40
+        elif ping_in_ms < 200:
+            color = 0xF4D540
+        elif ping_in_ms < 250:
+            color = 0xD8732E
+        elif ping_in_ms > 250:
+            color = 0xBB2B2E
+        else:
+            color = 0x4854AF
+
+        await ctx.send(embed=discord.Embed(
+            title="WolfBot Debugger",
+            description="The latency to Discord's servers is currently **{} ms**.".format(ping_in_ms),
+            color=color
+        ))
+
     @commands.command(name="secho", brief="Repeat the message back to the current channel, deleting the original.",
                       hidden=True)
     @commands.has_permissions(administrator=True)

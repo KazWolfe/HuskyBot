@@ -1,10 +1,13 @@
 import datetime
+import logging
 import re
 
 import discord
 from discord.ext import commands
 
 from WolfBot import WolfUtils
+
+LOG = logging.getLogger("DiyBot.Utils." + __name__)
 
 
 class OfflineUserConverter(commands.UserConverter):
@@ -27,7 +30,8 @@ class OfflineUserConverter(commands.UserConverter):
                 result = await ctx.bot.get_user_info(int(match.group(1)))
 
         if result is None:
-            raise commands.BadArgument('User "{}" not found'.format(argument))
+            LOG.error("Couldn't find offline user matching ID %s. They may have been banned system-wide.", argument)
+            raise commands.BadArgument('User "{}" could not be found. Do they exist?'.format(argument))
 
         return result
 
@@ -51,7 +55,8 @@ class OfflineMemberConverter(commands.MemberConverter):
                 result = await ctx.bot.get_user_info(int(match.group(1)))
 
         if result is None:
-            raise commands.BadArgument('User "{}" not found'.format(argument))
+            LOG.error("Couldn't find offline user matching ID %s. They may have been banned system-wide.", argument)
+            raise commands.BadArgument('User "{}" could not be found. Do they exist?'.format(argument))
 
         return result
 

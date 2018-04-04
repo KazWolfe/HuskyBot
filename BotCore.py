@@ -117,100 +117,113 @@ async def on_guild_join(guild):
 async def on_command_error(ctx, error: commands.CommandError):
     command_name = ctx.message.content.split(' ')[0][1:]
 
+    # Handle cases where the calling user is missing a required permission.
     if isinstance(error, commands.MissingPermissions):
         if BOT_CONFIG.get("developmentMode", False):
             await ctx.send(embed=discord.Embed(
                 title="Command Handler",
-                description="**The command `/" + command_name
-                            + "` does not exist.** See `/help` for valid commands.",
+                description="**The command `/{}` does not exist.** See `/help` for valid "
+                            "commands.".format(command_name),
                 color=Colors.DANGER
             ))
 
         LOG.error("Encountered permission error when attempting to run command %s: %s", command_name, str(error))
-        return
 
-    if isinstance(error, commands.CheckFailure):
-        await ctx.send(embed=discord.Embed(
-            title="Command Handler",
-            description="**The command `/" + command_name
-                        + "` failed an execution check.** Additional information may be provided below.",
-            color=Colors.DANGER
-        ).add_field(name="Error Log", value="```" + str(error) + "```", inline=False))
-
-        LOG.error("Encountered check failure when attempting to run command %s: %s", command_name, str(error))
-        return
-
-    if isinstance(error, commands.NoPrivateMessage):
-        await ctx.send(embed=discord.Embed(
-            title="Command Handler",
-            description="**The command `/" + command_name + "` may not be run in a DM.** "
-                        + "See `/help` for valid commands.",
-            color=Colors.DANGER
-        ))
-
-        LOG.error("Command %s may not be run in a direct message!", command_name)
-        return
-
-    if isinstance(error, commands.DisabledCommand):
+    # Handle cases where the command is disabled.
+    elif isinstance(error, commands.DisabledCommand):
         if BOT_CONFIG.get("developmentMode", False):
             embed = discord.Embed(
                 title="Command Handler",
-                description="**The command `/" + command_name
-                            + "` does not exist.** See `/help` for valid commands.",
+                description="**The command `/{}` does not exist.** See `/help` for valid "
+                            "commands.".format(command_name),
                 color=Colors.DANGER
             )
 
             if ctx.message.author.guild_permissions.administrator:
                 embed.set_footer(text="E_DISABLED_COMMAND")
-
             await ctx.send(embed=embed)
 
         LOG.error("Command %s is disabled.", command_name)
-        return
 
-    if isinstance(error, commands.CommandNotFound):
+    # Handle cases where the command does not exist.
+    elif isinstance(error, commands.CommandNotFound):
         if BOT_CONFIG.get("developmentMode", False):
             await ctx.send(embed=discord.Embed(
                 title="Command Handler",
-                description="**The command `/" + command_name
-                            + "` does not exist.** See `/help` for valid commands.",
+                description="**The command `/{}` does not exist.** See `/help` for valid "
+                            "commands.".format(command_name, ),
                 color=Colors.DANGER
             ))
 
         LOG.error("Command %s does not exist to the system.", command_name)
-        return
 
-    if isinstance(error, commands.MissingRequiredArgument):
+    # Handle cases where a prerequisite command check failed to execute
+    elif isinstance(error, commands.CheckFailure):
         await ctx.send(embed=discord.Embed(
             title="Command Handler",
-            description="**The command `/" + command_name + "` could not run, because it is missing arguments.**\n"
-                        + " See `/help " + command_name + "` for the arguments required.",
+            description="**The command `/{}` failed an execution check.** "
+                        "Additional information may be provided below.".format(command_name),
+            color=Colors.DANGER
+        ).add_field(name="Error Log", value="```" + str(error) + "```", inline=False))
+
+        LOG.error("Encountered check failure when attempting to run command %s: %s", command_name, str(error))
+
+    # Handle cases where a command is run over a Direct Message without working over DMs
+    elif isinstance(error, commands.NoPrivateMessage):
+        await ctx.send(embed=discord.Embed(
+            title="Command Handler",
+            description="**The command `/{}` may not be run in a DM.** See `/help` for valid "
+                        "commands.".format(command_name),
+            color=Colors.DANGER
+        ))
+
+        LOG.error("Command %s may not be run in a direct message!", command_name)
+
+    # Handle cases where a command is run missing a required argument
+    elif isinstance(error, commands.MissingRequiredArgument):
+        await ctx.send(embed=discord.Embed(
+            title="Command Handler",
+            description="**The command `/{}` could not run, because it is missing arguments.**\n"
+                        "See `/help {}` for the arguments required.".format(command_name, command_name),
             color=Colors.DANGER
         ).add_field(name="Missing Parameter", value="`" + str(error).split(" ")[0] + "`", inline=True))
         LOG.error("Command %s was called with the wrong parameters.", command_name)
         return
 
-    if isinstance(error, commands.BadArgument):
+    # Handle cases where an argument can not be parsed properly.
+    elif isinstance(error, commands.BadArgument):
         await ctx.send(embed=discord.Embed(
             title="Command Handler",
-            description="**The command `/" + command_name + "` could not understand the arguments given.**\n"
-                        + "See `/help " + command_name + "` and the error below to fix this issue.",
+            description="**The command `/{}` could not understand the arguments given.**\n"
+                        "See `/help {}` and the error below to fix this issue.".format(command_name, command_name),
             color=Colors.DANGER
         ).add_field(name="Error Log", value="```" + str(error) + "```", inline=False))
+
         LOG.error("Command %s was unable to parse arguments: %s.", command_name, str(error))
-        return
 
-    # Handle all other errors
-    await ctx.send(embed=discord.Embed(
-        title="Bot Error Handler",
-        description="The bot has encountered a fatal error running the command given. Logs are below.",
-        color=Colors.DANGER
-    ).add_field(name="Error Log", value="```" + str(error) + "```", inline=False))
-    LOG.error("Error running command %s. See below for trace.\n%s",
-              ctx.message.content, ''.join(traceback.format_exception(type(error), error, error.__traceback__)))
+    # Handle cases where the bot is missing a required execution permission.
+    elif isinstance(error, commands.BotMissingPermissions):
+        await ctx.send(embed=discord.Embed(
+            title="Command Handler",
+            description="**The command `/{}` could not execute successfully, as the bot does not have a required"
+                        "permission.**\nPlease make sure that the bot has the following permissions: `{}`"
+                .format(command_name, ', '.join(error.missing_perms))
+        ))
 
-    # Send it over to the main error logger as well.
-    raise error
+        LOG.error("Bot is missing permissions %s to execute command %s", error.missing_perms, command_name)
+
+    # Handle any and all other error cases.
+    else:
+        await ctx.send(embed=discord.Embed(
+            title="Bot Error Handler",
+            description="The bot has encountered a fatal error running the command given. Logs are below.",
+            color=Colors.DANGER
+        ).add_field(name="Error Log", value="```" + str(error) + "```", inline=False))
+        LOG.error("Error running command %s. See below for trace.\n%s",
+                  ctx.message.content, ''.join(traceback.format_exception(type(error), error, error.__traceback__)))
+
+        # Send it over to the main error logger as well.
+        raise error
 
 
 @bot.event
