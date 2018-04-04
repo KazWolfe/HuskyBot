@@ -43,7 +43,7 @@ class Mute:
             "perms": self.perms_cache
         }
 
-    def toJSON(self):
+    def to_json(self):
         return self.to_data()
 
     def get_cached_override(self):

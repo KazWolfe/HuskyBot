@@ -27,7 +27,7 @@ class Censor:
     """
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
-        self._config = WolfConfig.getConfig()
+        self._config = WolfConfig.get_config()
 
         LOG.info("Loaded plugin!")
 

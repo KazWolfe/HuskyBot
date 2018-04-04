@@ -20,7 +20,7 @@ class ReactionPromote:
 
     def __init__(self, bot):
         self.bot = bot
-        self._config = WolfConfig.getConfig()
+        self._config = WolfConfig.get_config()
         self.roleRemovalBlacklist = []
         LOG.info("Loaded plugin!")
 

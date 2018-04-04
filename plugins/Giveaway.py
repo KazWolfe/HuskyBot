@@ -12,8 +12,8 @@ LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 class Giveaway:
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
-        self._config = WolfConfig.getConfig()
-        self._session_store = WolfConfig.getSessionStore()
+        self._config = WolfConfig.get_config()
+        self._session_store = WolfConfig.get_session_store()
         LOG.info("Loaded plugin!")
 
 

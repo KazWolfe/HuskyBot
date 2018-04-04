@@ -13,8 +13,8 @@ from WolfBot import WolfConfig
 from WolfBot import WolfUtils
 from WolfBot.WolfStatics import Colors, ChannelKeys
 
-BOT_CONFIG = WolfConfig.getConfig()
-LOCAL_STORAGE = WolfConfig.getSessionStore()
+BOT_CONFIG = WolfConfig.get_config()
+LOCAL_STORAGE = WolfConfig.get_session_store()
 
 __developers__ = [
     142494680158961664  # KazWolfe#2896, notification PoC
@@ -77,6 +77,7 @@ async def initialize():
         plugin_list = ["Debug"] + plugin_list
 
     for plugin in plugin_list:
+        # noinspection PyBroadException
         try:
             bot.load_extension(plugin)
         except:  # This is a very hacky way to do this, but we need to persist module loading through a failure
@@ -206,8 +207,8 @@ async def on_command_error(ctx, error: commands.CommandError):
         await ctx.send(embed=discord.Embed(
             title="Command Handler",
             description="**The command `/{}` could not execute successfully, as the bot does not have a required"
-                        "permission.**\nPlease make sure that the bot has the following permissions: `{}`"
-                .format(command_name, ', '.join(error.missing_perms))
+                        "permission.**\nPlease make sure that the bot has the following permissions: "
+                        "`{}`".format(command_name, ', '.join(error.missing_perms))
         ))
 
         LOG.error("Bot is missing permissions %s to execute command %s", error.missing_perms, command_name)
@@ -226,6 +227,7 @@ async def on_command_error(ctx, error: commands.CommandError):
         raise error
 
 
+# noinspection PyUnusedLocal
 @bot.event
 async def on_error(event_method, *args, **kwargs):
     LOG.error('Exception in method %s:\n%s', event_method, traceback.format_exc())

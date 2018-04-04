@@ -24,8 +24,8 @@ class BotAdmin:
     """
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
-        self._config = WolfConfig.getConfig()
-        self._session_store = WolfConfig.getSessionStore()
+        self._config = WolfConfig.get_config()
+        self._session_store = WolfConfig.get_session_store()
         self._debugmode = self._config.get("developerMode", False)
         LOG.info("Loaded plugin!")
 

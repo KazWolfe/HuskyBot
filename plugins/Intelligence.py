@@ -25,7 +25,7 @@ class Intelligence:
 
     def __init__(self, bot):
         self.bot = bot
-        self._config = WolfConfig.getConfig()
+        self._config = WolfConfig.get_config()
         LOG.info("Loaded plugin!")
 
     @commands.command(name="guildinfo", aliases=["sinfo", "ginfo"], brief="Get information about the current guild")
@@ -120,7 +120,7 @@ class Intelligence:
             member_details = discord.Embed(
                 title="User Information for " + member.name + "#" + member.discriminator,
                 color=member.color,
-                description="Currently in **" + str(member.status) + "** mode " + WolfUtils.getFancyGameData(member)
+                description="Currently in **" + str(member.status) + "** mode " + WolfUtils.get_fancy_game_data(member)
             )
         else:
             raise ValueError("Illegal state!")

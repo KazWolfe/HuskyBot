@@ -18,7 +18,7 @@ class Community:
     """
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
-        self._config = WolfConfig.getConfig()
+        self._config = WolfConfig.get_config()
         LOG.info("Loaded plugin!")
 
     @commands.command(name="staff", aliases=["stafflist"], brief="Get an up-to-date list of all staff on the guild")

@@ -26,7 +26,7 @@ class AutoResponder:
     """
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
-        self._config = WolfConfig.getConfig()
+        self._config = WolfConfig.get_config()
         LOG.info("Loaded plugin!")
 
     #   responses: {
@@ -55,7 +55,7 @@ class AutoResponder:
                     or (message.channel.id in responses[response].get('allowedChannels'))):
                 continue
 
-            if WolfUtils.memberHasAnyRole(message.author, responses[response].get('requiredRoles')) \
+            if WolfUtils.member_has_any_role(message.author, responses[response].get('requiredRoles')) \
                     or bool(message.author.permissions_in(message.channel).manage_messages):
                 if responses[response].get('isEmbed', False):
                     await message.channel.send(content=None,
@@ -76,7 +76,7 @@ class AutoResponder:
 
     @responses.command(name="add", aliases=["create"], brief="Add a new automatic response")
     @commands.has_permissions(manage_messages=True)
-    async def addResponse(self, ctx: discord.ext.commands.Context, trigger: str, response: str):
+    async def add_response(self, ctx: discord.ext.commands.Context, trigger: str, response: str):
         """
         Add a new response to the configuration.
 
@@ -116,8 +116,8 @@ class AutoResponder:
 
     @responses.command(name="edit", brief="Alter an existing automatic response")
     @commands.has_permissions(manage_messages=True)
-    async def editResponse(self, ctx: discord.ext.commands.Context, trigger: str, param: str, action: str, *,
-                           value: str = None):
+    async def edit_response(self, ctx: discord.ext.commands.Context, trigger: str, param: str, action: str, *,
+                            value: str = None):
         """
         Advanced editor for responses.
 
@@ -250,7 +250,7 @@ class AutoResponder:
 
     @responses.command(name="delete", aliases=["remove"], brief="Delete an existing automatic response")
     @commands.has_permissions(manage_messages=True)
-    async def deleteResponse(self, ctx: discord.ext.commands.Context, trigger: str):
+    async def delete_response(self, ctx: discord.ext.commands.Context, trigger: str):
         """
         Delete a response from the database.
 
@@ -280,7 +280,7 @@ class AutoResponder:
 
     @responses.command(name="list", brief="List all registered automatic responses")
     @commands.has_permissions(manage_messages=True)
-    async def listResponses(self, ctx: discord.ext.commands.Context):
+    async def list_responses(self, ctx: discord.ext.commands.Context):
         """
         List all available responses.
 

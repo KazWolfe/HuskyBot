@@ -4,7 +4,7 @@ from threading import Lock
 
 def override_dumper(obj):
     if hasattr(obj, "toJSON"):
-        return obj.toJSON()
+        return obj.to_json()
     else:
         return obj.__dict__
 
@@ -34,7 +34,7 @@ class WolfConfig:
         with self._lock:
             return self._config
 
-    def isPersistent(self):
+    def is_persistent(self):
         with self._lock:
             return self._path is not None
 
@@ -84,9 +84,9 @@ __BOT_CONFIG = WolfConfig("config/config.json")
 __SESSION_STORAGE = WolfConfig()
 
 
-def getConfig():
+def get_config():
     return __BOT_CONFIG
 
 
-def getSessionStore():
+def get_session_store():
     return __SESSION_STORAGE

@@ -28,7 +28,7 @@ class ModTools:
 
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
-        self._config = WolfConfig.getConfig()
+        self._config = WolfConfig.get_config()
         self._mute_manager = MuteHandler(self.bot)
         LOG.info("Loaded plugin!")
 
@@ -418,7 +418,7 @@ class ModTools:
 class MuteHandler:
     def __init__(self, bot: commands.Bot):
         self._bot = bot
-        self._bot_config = WolfConfig.getConfig()
+        self._bot_config = WolfConfig.get_config()
         self._mute_config = WolfConfig.WolfConfig('config/mutes.json')
         self.__cache__ = []
 

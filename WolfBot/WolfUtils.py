@@ -8,7 +8,7 @@ import WolfBot.WolfConfig
 from WolfBot import WolfStatics
 
 
-def memberHasRole(member, role_id):
+def member_has_role(member, role_id):
     for r in member.roles:
         if r.id == role_id:
             return True
@@ -16,7 +16,7 @@ def memberHasRole(member, role_id):
     return False
 
 
-def memberHasAnyRole(member, roles):
+def member_has_any_role(member, roles):
     if roles is None:
         return True
 
@@ -27,7 +27,7 @@ def memberHasAnyRole(member, roles):
     return False
 
 
-def getFancyGameData(member):
+def get_fancy_game_data(member):
     if member.activity is not None:
         state = {0: "Playing ", 1: "Streaming ", 2: "Listening to ", 3: "Watching "}
 
@@ -56,7 +56,7 @@ def tail(filename, n):
 
 
 def should_process_message(message):
-    if message.guild is not None and message.guild.id in WolfBot.WolfConfig.getConfig().get("ignoredGuilds", []):
+    if message.guild is not None and message.guild.id in WolfBot.WolfConfig.get_config().get("ignoredGuilds", []):
         return False
 
     if message.author.bot:

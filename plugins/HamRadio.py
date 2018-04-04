@@ -11,7 +11,7 @@ LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 class HamRadio:
     def __init__(self, bot):
         self.bot = bot
-        self._config = WolfConfig.getConfig()
+        self._config = WolfConfig.get_config()
         LOG.info("Loaded plugin!")
 
     @commands.group(pass_context=True)
