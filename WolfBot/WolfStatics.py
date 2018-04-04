@@ -47,6 +47,7 @@ class Emojis:
     LOUD_SPEAKER = "\uD83D\uDD0A"
     SHIELD = "\uD83D\uDEE1"
     BOOKMARK2 = "\uD83D\uDCD1"
+    RED_FLAG = "\uD83D\uDEA9"
 
     # Mod shortcuts
     BAN = NO_ENTRY

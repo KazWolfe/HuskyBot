@@ -94,7 +94,7 @@ class Intelligence:
 
         await ctx.send(embed=role_details)
 
-    @commands.command(name="userinfo", aliases=["uinfo", "memberinfo", "minfo"],
+    @commands.command(name="userinfo", aliases=["uinfo", "memberinfo", "minfo", "whois"],
                       brief="Get information about self or specified user")
     async def user_info(self, ctx: discord.ext.commands.Context, *,
                         member: WolfConverters.OfflineMemberConverter = None):
