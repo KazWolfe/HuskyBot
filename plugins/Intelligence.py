@@ -239,6 +239,10 @@ class Intelligence:
                 search_channels.append(await converter.convert(ctx, context))
 
             for channel in search_channels:
+                if not channel.permissions_for(self.bot.user).read_message_history:
+                    LOG.info("I don't have permission to get information for channel %s", channel)
+                    continue
+
                 LOG.info("Getting history for %s", channel)
                 hist = channel.history(limit=None, after=search_start)
 
