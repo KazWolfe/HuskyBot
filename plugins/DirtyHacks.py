@@ -29,6 +29,9 @@ class DirtyHacks:
         LOG.info("Loaded plugin!")
 
     async def on_message(self, message: discord.Message):
+        if not WolfUtils.should_process_message(message):
+            return
+
         # noinspection PyBroadException
         try:
             await self.kill_crashing_gifs(message)

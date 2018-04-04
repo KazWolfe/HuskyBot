@@ -35,9 +35,6 @@ class UniversalBanList:
         LOG.info("Loaded plugin!")
 
     async def filter_message(self, message: discord.Message, context: str = "new_message"):
-        if not isinstance(message.channel, discord.TextChannel):
-            return
-
         if not WolfUtils.should_process_message(message):
             return
 

@@ -80,9 +80,6 @@ class AutoFlag:
         if alert_channel is not None:
             alert_channel = self.bot.get_channel(alert_channel)  # type: discord.TextChannel
 
-        if not isinstance(message.channel, discord.TextChannel):
-            return
-
         if not WolfUtils.should_process_message(message):
             return
 

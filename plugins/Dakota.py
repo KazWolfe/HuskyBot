@@ -5,6 +5,7 @@ import discord
 from discord.ext import commands
 
 from WolfBot import WolfConfig
+from WolfBot import WolfUtils
 from WolfBot.WolfStatics import *
 
 LOG = logging.getLogger("DakotaBot.Plugin." + __name__)
@@ -79,6 +80,9 @@ class Dakota:
         return embed
 
     async def on_message(self, message: discord.Message):
+        if not WolfUtils.should_process_message(message):
+            return
+
         self.edit_stat('hunger', -1 * random.gauss(0.15, 0.05))
         self.edit_stat('happiness', -1 * random.gauss(0.05, 0.03))
         self.edit_stat('energy', -1 * random.gauss(0.15, 0.05))
