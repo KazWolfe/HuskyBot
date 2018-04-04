@@ -110,7 +110,7 @@ class Leaderboards:
     @commands.has_permissions(administrator=True)
     async def lbmap(self, ctx: commands.Context, map_from: str, map_to: str):
         lb_conf = self._config.get('leaderboard', {})
-        user_map = lb_conf.get('userMap', {})
+        user_map = lb_conf.setdefault('userMap', {})
 
         if map_to.lower() == "none":
             del user_map[map_from]
