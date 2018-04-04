@@ -1,4 +1,3 @@
-import discord
 from discord.ext import commands
 
 from BotCore import __developers__
@@ -33,7 +32,7 @@ def is_developer():
     def predicate(ctx: commands.Context):
         # Devs must have admin, or must be in a DM context
         if (ctx.guild is not None) and (not ctx.author.guild_permissions.administrator):
-            raise commands.MissingPermissions(discord.Permissions.administrator)
+            raise commands.MissingPermissions(["administrator", "developer"])
 
         if ctx.author.id in __developers__:
             return True
