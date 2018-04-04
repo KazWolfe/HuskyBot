@@ -28,47 +28,56 @@ class Leaderboards:
     async def ban_leaderboard(self, ctx: commands.Context):
         # "username": banCount
         cache = {}
+        processed_bans = []
+        banned_uids = []
+
+        def process_ban(banned_user_id: int, ban_reason: str, banning_user: discord.User = None):
+            if banned_user_id in processed_bans:
+                return
+
+            if banned_user_id not in banned_uids:
+                return
+
+            if banning_user is None or banning_user == self.bot.user:
+                if not re.match(r'\[.*By .*] .*', ban_reason):
+                    responsible_user = "Unknown"
+
+                    if ("AUTOMATIC BAN" in ban_reason) or ("AutoBan" in ban_reason):
+                        responsible_user = "DakotaBot AutoBan"
+
+                    ban_count = cache.setdefault(responsible_user, 0)
+                    ban_count += 1
+                    cache[responsible_user] = ban_count
+                else:
+                    responsible_user = ban_reason.split("By ", 1)[1].split("] ", 1)[0]
+
+                    ban_count = cache.setdefault(responsible_user, 0)
+                    ban_count += 1
+                    cache[responsible_user] = ban_count
+            elif banning_user is not None:
+                ban_count = cache.setdefault(str(banning_user), 0)
+                ban_count += 1
+                cache[str(banning_user)] = ban_count
+
+            processed_bans.append(banned_user_id)
 
         async with ctx.typing():
-            banned_members = [bo.user.id for bo in await ctx.guild.bans()]
+            banned_members = await ctx.guild.bans()
+            banned_uids = [bo.user.id for bo in banned_members]
 
             async for entry in ctx.guild.audit_logs(action=discord.AuditLogAction.ban,
                                                     limit=None):  # type: discord.AuditLogEntry
-                banned_user = entry.target  # discord.User
+                process_ban(entry.target.id, entry.reason, entry.user)
 
-                # Only count users still banned.
-                if banned_user.id not in banned_members:
-                    continue
-
-                if entry.user != self.bot.user:
-                    bans = cache.setdefault(str(entry.user), 0)
-                    bans += 1
-                    cache[str(entry.user)] = bans
-                else:
-                    reason = entry.reason  # type: str
-
-                    if not re.match(r'\[.*By .*] .*', reason):
-                        username = "Unknown"
-
-                        if ("AUTOMATIC BAN" in reason) or ("AutoBan" in reason):
-                            username = "DakotaBot AutoBan"
-
-                        bans = cache.setdefault(username, 0)
-                        bans += 1
-                        cache[username] = bans
-                    else:
-                        ruser = reason.split("By ", 1)[1].split("] ", 1)[0]
-
-                        bans = cache.setdefault(ruser, 0)
-                        bans += 1
-                        cache[ruser] = bans
+            for ban in banned_members:
+                process_ban(ban.user.id, ban.reason)
 
             # out of ban loop now
-            cache = sorted(cache.items(), key=lambda x: x[1], reverse=True)[:10]
+            board = sorted(cache.items(), key=lambda x: x[1], reverse=True)[:10]
 
             lc = ""
 
-            for record in cache:
+            for record in board:
                 lc += " - `{}` with **{} bans**\n".format(record[0], record[1])
 
             embed = discord.Embed(
@@ -76,6 +85,8 @@ class Leaderboards:
                 description="The mods with the top bans are: \n{}".format(lc),
                 color=Colors.INFO
             )
+
+            embed.set_footer(text="Σ={} | listed={}".format(sum(cache.values()), len(banned_uids)))
 
             await ctx.send(embed=embed)
 
