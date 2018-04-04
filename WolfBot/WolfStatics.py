@@ -46,6 +46,7 @@ class Emojis:
     MUTED_SPEAKER = "\uD83D\uDD07"
     LOUD_SPEAKER = "\uD83D\uDD0A"
     SHIELD = "\uD83D\uDEE1"
+    BOOKMARK2 = "\uD83D\uDCD1"
 
     # Mod shortcuts
     BAN = NO_ENTRY

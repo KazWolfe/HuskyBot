@@ -72,9 +72,9 @@ class Community:
             return
 
         rule_embed = discord.Embed(
-            title="Guild Rules for {}".format(ctx.guild.name),
+            title=Emojis.BOOKMARK2 + "Guild Rules for {}".format(ctx.guild.name),
             description="The following rules have been defined by the staff members. Please make sure you understand "
-                        "them before participating on the guild.",
+                        "them before participating.",
             color=Colors.INFO
         )
 
@@ -105,7 +105,15 @@ class Community:
     async def remove_rule(self, ctx: commands.Context, index: int):
         rules_list = self._config.get("guildRules", [])
 
-        rules_list.remove(index - 1)
+        try:
+            rules_list.remove(index - 1)
+        except KeyError:
+            await ctx.send(embed=discord.Embed(
+                title="Guild Rule Removal Failed",
+                description="Guild Rule number {} does not exist.".format(index),
+                color=Colors.SUCCESS
+            ))
+            return
 
         self._config.set("guildRules", rules_list)
 
@@ -120,14 +128,22 @@ class Community:
     async def edit_rule(self, ctx: commands.Context, index: int, *, new_description: str):
         rules_list = self._config.get("guildRules", [])
 
-        rule = rules_list[index - 1]
+        try:
+            rule = rules_list[index - 1]
+        except KeyError:
+            await ctx.send(embed=discord.Embed(
+                title="Guild Rule Edit Failed",
+                description="Guild Rule number {} does not exist.".format(index),
+                color=Colors.SUCCESS
+            ))
+            return
 
         rule['description'] = new_description
 
         self._config.set("guildRules", rules_list)
 
         await ctx.send(embed=discord.Embed(
-            title="Guild Rule Added!",
+            title="Guild Rule Description Updated!",
             description="Your rule (index {}) has had its description updated.".format(index),
             color=Colors.SUCCESS
         ))
@@ -137,14 +153,22 @@ class Community:
     async def rename_rule(self, ctx: commands.Context, index: int, *, new_title: str):
         rules_list = self._config.get("guildRules", [])
 
-        rule = rules_list[index - 1]
+        try:
+            rule = rules_list[index - 1]
+        except KeyError:
+            await ctx.send(embed=discord.Embed(
+                title="Guild Rule Rename Failed",
+                description="Guild Rule number {} does not exist.".format(index),
+                color=Colors.SUCCESS
+            ))
+            return
 
         rule['title'] = new_title
 
         self._config.set("guildRules", rules_list)
 
         await ctx.send(embed=discord.Embed(
-            title="Guild Rule Added!",
+            title="Guild Rule Title Updated!",
             description="Your rule (index {}) has had its title updated.".format(index),
             color=Colors.SUCCESS
         ))
@@ -166,6 +190,8 @@ class Community:
         try:
             invite = await ctx.guild.vanity_invite()
             invite_url = invite.url
+
+            invite_url.replace("http", "https")
         except discord.HTTPException:
             invite_fragment = self._config.get("inviteKey")
 
