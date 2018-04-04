@@ -6,7 +6,9 @@ import discord
 import git
 from discord.ext import commands
 
+from BotCore import get_developers
 from WolfBot import WolfConfig
+from WolfBot import WolfConverters
 from WolfBot import WolfUtils
 from WolfBot.WolfStatics import *
 
@@ -613,6 +615,73 @@ class BotAdmin:
 
         self._config.set('specialRoles', config)
 
+    @admin.command(name="blockUser", brief="Block a user from interacting with the bot over messages.")
+    async def block_user(self, ctx: commands.Context, user: WolfConverters.OfflineUserConverter):
+        """
+        Block a user from interacting with the bot.
 
-def setup(bot: discord.ext.commands.Bot):
+        If a user is blocked through this method, the bot will ignore any and all messages from this user. This means
+        that the target user will be unable to run commands (regardless of permissions). This will not affect censors
+        and the like, but it will affect auto responses and command execution.
+
+        See also:
+            /help admin unblockUser - Unblock a user blocked by this command.
+        """
+        config = self._config.get('userBlacklist', [])
+
+        if user.id in config:
+            await ctx.send(embed=discord.Embed(
+                title="Bot Manager",
+                description="The user `{}` is already ignored by the bot.".format(user),
+                color=Colors.WARNING
+            ))
+            return
+
+        if user.id in get_developers():
+            await ctx.send(embed=discord.Embed(
+                title="Bot Manager",
+                description="The user `{}` is a bot developer, and may not be ignored.".format(user),
+                color=Colors.WARNING
+            ))
+            return
+
+        config.append(user.id)
+
+        self._config.set('userBlacklist', config)
+
+        await ctx.send(embed=discord.Embed(
+            title="Bot Manager",
+            description="The user `{}` has been blacklisted by the bot.".format(user),
+            color=Colors.SUCCESS
+        ))
+
+    @admin.command(name="unblockUser", brief="Unblock a blocked user from bot interactions.")
+    async def unblock_user(self, ctx: commands.Context, user: WolfConverters.OfflineUserConverter):
+        """
+        Unblock a user blocked from interacting with the bot.
+
+        See /help admin blockUser for more information about this command.
+        """
+        config = self._config.get('userBlacklist', [])
+
+        if user.id not in config:
+            await ctx.send(embed=discord.Embed(
+                title="Bot Manager",
+                description="The user `{}` is not on the block list..".format(user),
+                color=Colors.WARNING
+            ))
+            return
+
+        config.remove(user.id)
+
+        self._config.set('userBlacklist', config)
+
+        await ctx.send(embed=discord.Embed(
+            title="Bot Manager",
+            description="The user `{}` has been removed from the blacklist.".format(user),
+            color=Colors.SUCCESS
+        ))
+
+
+def setup(bot: commands.Bot):
     bot.add_cog(BotAdmin(bot))

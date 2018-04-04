@@ -42,6 +42,9 @@ class AutoResponder:
         if not WolfUtils.should_process_message(message):
             return
 
+        if message.author.id in self._config.get('userBlacklist', []):
+            return
+
         responses = self._config.get("responses", {})
 
         for response in responses.keys():

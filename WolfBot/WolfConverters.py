@@ -19,9 +19,9 @@ class OfflineUserConverter(commands.UserConverter):
         result = None
 
         try:
-            result = await commands.UserConverter.convert(self, ctx, argument)
+            result = await super().convert(ctx, argument)
         except commands.BadArgument:
-            match = self._get_id_match(argument) or re.match(r'<@!?([0-9]+)>$', argument)
+            match = super()._get_id_match(argument) or re.match(r'<@!?([0-9]+)>$', argument)
 
             if match is not None:
                 result = await ctx.bot.get_user_info(int(match.group(1)))
@@ -43,9 +43,9 @@ class OfflineMemberConverter(commands.MemberConverter):
         result = None
 
         try:
-            result = await commands.MemberConverter.convert(self, ctx, argument)
+            result = await super().convert(ctx, argument)
         except commands.BadArgument:
-            match = self._get_id_match(argument) or re.match(r'<@!?([0-9]+)>$', argument)
+            match = super()._get_id_match(argument) or re.match(r'<@!?([0-9]+)>$', argument)
 
             if match is not None:
                 result = await ctx.bot.get_user_info(int(match.group(1)))

@@ -197,7 +197,7 @@ async def on_command_error(ctx, error: commands.CommandError):
                         + "See `/help " + command_name + "` and the error below to fix this issue.",
             color=Colors.DANGER
         ).add_field(name="Error Log", value="```" + str(error) + "```", inline=False))
-        LOG.error("Command %s was unable to parse arguments: %s.", command_name, )
+        LOG.error("Command %s was unable to parse arguments: %s.", command_name, str(error))
         return
 
     # Handle all other errors
@@ -245,6 +245,10 @@ async def on_message(message):
         return
 
     if message.content.startswith(bot.command_prefix):
+        if message.author.id in BOT_CONFIG.get('userBlacklist', []):
+            LOG.info("Blacklisted user %s attempted to run command %s", message.author, message.content)
+            return
+
         if message.content.lower().split(' ')[0][1:] in BOT_CONFIG.get('ignoredCommands', []):
             LOG.info("User %s ran an ignored command %s", message.author, message.content)
             return
@@ -255,6 +259,13 @@ async def on_message(message):
 
         LOG.info("User %s ran %s", message.author, message.content)
         await bot.process_commands(message)
+
+
+def get_developers():
+    """
+    Get a list of all registered bot developers.
+    """
+    return __developers__
 
 
 if __name__ == '__main__':
