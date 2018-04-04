@@ -108,7 +108,7 @@ class Censor:
         """
         List the censor terms in the global list.
 
-        Censors in the global list apply to the entire server. To edit the censor list, see /help censor.
+        Censors in the global list apply to the entire guild. To edit the censor list, see /help censor.
         """
 
         censor_config = self._config.get("censors", {})
@@ -121,7 +121,7 @@ class Censor:
         ))
 
     @censor.command(name="add", brief="Add a Censor to a channel")
-    @WolfChecks.has_server_permissions(manage_messages=True)
+    @WolfChecks.has_guild_permissions(manage_messages=True)
     async def addChannel(self, ctx: commands.Context, channel: discord.TextChannel, *, censor: str):
         """
         Add a censor to the channel list.
@@ -152,7 +152,7 @@ class Censor:
         ))
 
     @censor.command(name="globaladd", brief="Add a Censor to the global list", aliases=["gadd"])
-    @WolfChecks.has_server_permissions(manage_messages=True)
+    @WolfChecks.has_guild_permissions(manage_messages=True)
     async def addGlobal(self, ctx: commands.Context, *, censor: str):
         """
         Add a censor to the global list
@@ -183,13 +183,13 @@ class Censor:
         ))
 
     @censor.command(name="remove", brief="Remove a censor from a channel")
-    @WolfChecks.has_server_permissions(manage_messages=True)
+    @WolfChecks.has_guild_permissions(manage_messages=True)
     async def removeChannel(self, ctx: commands.Context, channel: discord.TextChannel, *, censor: str):
         """
         Remove a censor from a channel list.
 
         This command takes two arguments - a mandatory channel identifier (ID, #mention, name) and the censor text. The
-        censor text must be *exactly* as it is stored in the server configuration for the deletion to be successful.
+        censor text must be *exactly* as it is stored in the guild configuration for the deletion to be successful.
         """
 
         censor_config = self._config.get("censors", {})
@@ -218,7 +218,7 @@ class Censor:
         """
         Remove a censor from a the global list.
 
-        This command takes only one argument - the censor text. This must be *exactly* as it is stored in the server
+        This command takes only one argument - the censor text. This must be *exactly* as it is stored in the guild
         configuration for the deletion to be successful.
         """
 

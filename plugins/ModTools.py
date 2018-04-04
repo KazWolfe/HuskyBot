@@ -22,7 +22,7 @@ class ModTools:
 
     It includes such features as kick, ban, mute, warn, cleanup, and the like.
 
-    Commands here are generally restricted to actual moderators (as determined by server permissions). For detailed help
+    Commands here are generally restricted to actual moderators (as determined by guild permissions). For detailed help
     about various aspects of this plugin, please see the individual help commands.
     """
 
@@ -90,7 +90,7 @@ class ModTools:
         """
         Ban a user from the guild.
 
-        The ban command will target and remove a user immediately from the guild, regardless of their server state.
+        The ban command will target and remove a user immediately from the guild, regardless of their guild state.
 
         Users with ban privileges may not ban users at or above themselves in the role hierarchy. Offline users are not
         restricted by this, as they have no roles assigned to them.
@@ -119,9 +119,9 @@ class ModTools:
             await ctx.guild.ban(user, reason="User requested self-ban.")
             return
 
-        in_server = True
+        in_guild = True
         if not isinstance(user, discord.Member):
-            in_server = False
+            in_guild = False
         elif user.top_role.position >= ctx.message.author.top_role.position:
             await ctx.send(embed=discord.Embed(
                 title="Moderator Toolkit",
@@ -131,7 +131,7 @@ class ModTools:
             ))
             return
 
-        await ctx.guild.ban(user, reason="[{}By {}] {}".format("HACKBAN | " if not in_server else "",
+        await ctx.guild.ban(user, reason="[{}By {}] {}".format("HACKBAN | " if not in_guild else "",
                                                                ctx.author, reason), delete_message_days=1)
 
         await ctx.send(embed=discord.Embed(
@@ -484,7 +484,7 @@ class MuteHandler:
             self.__cache__.append(mute)
             self._mute_config.set("mutes", self.__cache__)
 
-            # Inform the server logs
+            # Inform the guild logs
             alert_channel = self._bot_config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
 
             if alert_channel is None:
@@ -538,7 +538,7 @@ class MuteHandler:
         guild = self._bot.get_guild(mute.guild)
         member = guild.get_member(mute.user_id)
 
-        # Member is no longer on the server, so their perms are cleared. Delete their records once their mute
+        # Member is no longer on the guild, so their perms are cleared. Delete their records once their mute
         # is up.
         if member is None:
             LOG.info("Left user ID {} has had their mute expire. Removing it.".format(mute.user_id))
@@ -564,13 +564,13 @@ class MuteHandler:
                 raise ValueError("A muted role is not set!")
 
             await member.remove_roles(mute_role,
-                                      reason="User's server mute has been lifted by {}".format(unmute_reason))
+                                      reason="User's guild mute has been lifted by {}".format(unmute_reason))
 
         # Remove from the disk
         self.__cache__.remove(mute)
         self._mute_config.set("mutes", self.__cache__)
 
-        # Inform the server logs
+        # Inform the guild logs
         alert_channel = self._bot_config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
 
         if alert_channel is None:

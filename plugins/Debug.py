@@ -5,6 +5,7 @@ import logging
 import discord
 from discord.ext import commands
 
+from WolfBot import WolfChecks
 from WolfBot import WolfConfig
 from WolfBot.WolfStatics import Colors
 
@@ -116,8 +117,8 @@ class Debug:
 
         await channel.send(message)
 
-    @commands.command(name="eval", brief="Execute an eval() statement on the server", hidden=True)
-    @commands.has_permissions(administrator=True)
+    @commands.command(name="eval", brief="Execute an eval() statement on the guild", hidden=True)
+    @WolfChecks.is_developer()
     async def evalcmd(self, ctx: discord.ext.commands.Context, *, expr: str):
         """
         Debug commands have no help. If you need help running a debug command, just don't.

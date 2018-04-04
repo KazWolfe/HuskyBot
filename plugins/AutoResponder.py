@@ -251,7 +251,7 @@ class AutoResponder:
         """
         Delete a response from the database.
 
-        Given a trigger (of type string), remove it and its configuration from the server.
+        Given a trigger (of type string), remove it and its configuration from the guild.
         """
 
         responses = self._config.get("responses", {})

@@ -114,7 +114,7 @@ class Fun:
     @commands.has_permissions(view_audit_log=True)
     async def rate_user(self, ctx: commands.Context, member: discord.User):
         """
-        The ultimate command for narcissists! Rate yourself or another member of the server!
+        The ultimate command for narcissists! Rate yourself or another member of the guild!
 
         This command uses advanced math, coding, and algorithms to determine a user's Relative Hotness based on three
         metrics: Attractiveness, Craziness, and Intelligence.

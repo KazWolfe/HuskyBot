@@ -331,11 +331,11 @@ class AntiSpam:
     @commands.has_permissions(manage_guild=True)
     async def allow_invite(self, ctx: commands.Context, guild: int):
         """
-        Add a server to the AntiSpam Invite Whitelist.
+        Add a guild to the AntiSpam Invite Whitelist.
 
         By default, AntiSpam will block all guild invites not posted by authorized members (or invites that are not to
-        this server). This may be overridden on a case-by-case basis using this command. Once a guild is added to the
-        whitelist, their invites will not be touched on this server.
+        this guild). This may be overridden on a case-by-case basis using this command. Once a guild is added to the
+        whitelist, their invites will not be touched on this guild.
 
         This command expects a single argument - a guild ID.
 
@@ -370,7 +370,7 @@ class AntiSpam:
     @commands.has_permissions(manage_guild=True)
     async def block_invite(self, ctx: commands.Context, guild: int):
         """
-        Remove a server from the AntiSpam Invite Whitelist.
+        Remove a guild from the AntiSpam Invite Whitelist.
 
         If a guild was added to the AntiSpam whitelist, this command may be used to remove the whitelist entry. See
         /help antispam allowInvite for more information on this command.
@@ -426,7 +426,7 @@ class AntiSpam:
         The command takes two arguments: cooldown_minutes, and ban_limit.
 
         If a user posts `ban_limit` or more guild invites in the span of `cooldown_minutes` minutes, they will be
-        automatically banned from the server.
+        automatically banned from the guild.
 
         See also:
             /help as blockInvite    - Remove a guild from the invite whitelist
@@ -458,7 +458,7 @@ class AntiSpam:
 
         If a user sends `warn_limit` announcements in a `cooldown_seconds` second period, they will be issued a warning
         message to cool on the spam. If they persist to `ban_limit` attachments in the same period, they will be
-        automatically banned from the server.
+        automatically banned from the guild.
 
         A message not containing attachments will reset the cooldown period.
         """

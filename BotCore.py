@@ -16,7 +16,9 @@ from WolfBot.WolfStatics import Colors, ChannelKeys
 BOT_CONFIG = WolfConfig.getConfig()
 LOCAL_STORAGE = WolfConfig.getSessionStore()
 
-PERSON_TO_YELL_AT = "<@142494680158961664>"
+__developers__ = [
+    142494680158961664  # KazWolfe#2896, notification PoC
+]
 
 initialized = False
 
@@ -127,6 +129,17 @@ async def on_command_error(ctx, error: commands.CommandError):
         LOG.error("Encountered permission error when attempting to run command %s: %s", command_name, str(error))
         return
 
+    if isinstance(error, commands.CheckFailure):
+        await ctx.send(embed=discord.Embed(
+            title="Command Handler",
+            description="**The command `/" + command_name
+                        + "` failed an execution check.** Additional information may be provided below.",
+            color=Colors.DANGER
+        ).add_field(name="Error Log", value="```" + str(error) + "```", inline=False))
+
+        LOG.error("Encountered check failure when attempting to run command %s: %s", command_name, str(error))
+        return
+
     if isinstance(error, commands.NoPrivateMessage):
         await ctx.send(embed=discord.Embed(
             title="Command Handler",
@@ -220,7 +233,7 @@ async def on_error(event_method, *args, **kwargs):
             color=Colors.DANGER
         )
 
-        await channel.send("{}, an error has occurred with the bot. See attached embed.".format(PERSON_TO_YELL_AT),
+        await channel.send("<@{}>, an error has occurred with the bot. See attached embed.".format(__developers__[0]),
                            embed=embed)
     except Exception as e:
         LOG.critical("There was an error sending an error to the error channel.\n " + str(e))

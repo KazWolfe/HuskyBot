@@ -16,7 +16,7 @@ class Mute:
     # Expiry of None is permanent.
     expiry = None
 
-    # Permissions cache (None is either server mute *or* "no manual permissions")
+    # Permissions cache (None is either guild mute *or* "no manual permissions")
     # tens digit = react (0 = not set, 1 = no, 2 = yes) [ perms_cache / 10 ]
     # ones digit = send  (0 = not set, 1 = no, 2 = yes) [ perms_cache % 10 ]
     perms_cache = None

@@ -263,9 +263,9 @@ class Community:
     @commands.group(name="invite", brief="Get this guild's invite link")
     async def get_invite(self, ctx: commands.Context):
         """
-        See the current server invite link.
+        See the current guild invite link.
 
-        If the server has a vanity invite, it will be returned. Otherwise, an administrator configured invite will be
+        If the guild has a vanity invite, it will be returned. Otherwise, an administrator configured invite will be
         returned instead.
         """
         if ctx.invoked_subcommand is not None:
@@ -307,7 +307,7 @@ class Community:
     @commands.has_permissions(administrator=True)
     async def set_invite(self, ctx: commands.Context, fragment: str):
         """
-        Set the invite code used by the server.
+        Set the invite code used by the guild.
 
         This command only takes a single argument - a fragment for an invite. It saves immediately.
         """
@@ -315,7 +315,7 @@ class Community:
 
         await ctx.send(embed=discord.Embed(
             title="Invite Link Set!",
-            description="The server invite link was set to https://discord.gg/{}.".format(fragment),
+            description="The guild invite link was set to https://discord.gg/{}.".format(fragment),
             color=Colors.SUCCESS
         ))
 

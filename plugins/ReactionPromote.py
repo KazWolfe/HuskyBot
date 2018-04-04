@@ -123,7 +123,7 @@ class ReactionPromote:
         increase the difficulty of maintaining and using this command.
 
         The Channel is a channel identifier (name, ID, #mention, etc.) that will hold the reaction in question. This may
-        be any channel in the server. Note that if the bot's strict mode is on for the channel, adding a new channel
+        be any channel in the guild. Note that if the bot's strict mode is on for the channel, adding a new channel
         *will* cause all reactions in that channel to be deleted.
 
         The Message ID is a field that the bot should listen to reactions on. This allows administrators to force users

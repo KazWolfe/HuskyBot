@@ -1,9 +1,12 @@
+import discord
 from discord.ext import commands
 
+from BotCore import __developers__
 
-def has_server_permissions(**perms):
+
+def has_guild_permissions(**perms):
     """
-    Check if a user (as determined by ctx.author) has server-level permissions to run this command.
+    Check if a user (as determined by ctx.author) has guild-level permissions to run this command.
     :param perms: A list of perms (e.x. manage_messages=True) to check
     :return: Returns TRUE if the command can be run, FALSE otherwise.
     """
@@ -17,5 +20,24 @@ def has_server_permissions(**perms):
             return True
 
         raise commands.MissingPermissions(missing)
+
+    return commands.check(predicate)
+
+
+def is_developer():
+    """
+    Check if the user is a bot developer.
+    :return: Returns TRUE if the command can be run, FALSE otherwise.
+    """
+
+    def predicate(ctx: commands.Context):
+        # Devs must have admin
+        if not ctx.author.guild_permissions.administrator:
+            raise commands.MissingPermissions(discord.Permissions.administrator)
+
+        if ctx.author.id in __developers__:
+            return True
+
+        raise commands.CheckFailure("SecurityException: User is not a listed developer for the bot.")
 
     return commands.check(predicate)

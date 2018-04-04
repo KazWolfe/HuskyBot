@@ -11,7 +11,7 @@ class Colors(IntEnum):
     WARNING = 0xFFC107
     INFO = 0x17A2B8
 
-    SERVER_COLOR = 0x3AC4FF
+    GUILD_COLOR = 0x3AC4FF
 
     # Shortcuts
     ERROR = DANGER
