@@ -62,7 +62,7 @@ class DirtyHacks:
             (width, height) = WolfUtils.get_image_size(image_name)
 
             # Image is larger than 5000 px * 5000 px but *less* than 1 MB
-            if (width > 5000) and (height > 5000) and os.path.getsize(image_name) < 1_000_000:
+            if (width > 5000) and (height > 5000) and os.path.getsize(image_name) < 1000000:
                 await message.delete()
 
     @commands.command(name="disableHacks", brief="Disable DirtyHacks")
