@@ -346,8 +346,6 @@ class AntiSpam:
             'totalLinks': 0
         })
 
-        print(cooldown_record)
-
         # We also want to track individual link posting
         if COOLDOWN_CONFIG['linkWarnLimit'] > 0:
 
