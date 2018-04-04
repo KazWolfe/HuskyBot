@@ -72,7 +72,7 @@ class LaMetric:
     async def on_member_remove(self, member: discord.Member):
         self.update_lametric_counts(member.guild)
 
-    @commands.group(name="lametric", brief="Base command for LaMetric interfaces")
+    @commands.group(name="lametric", brief="Base command for LaMetric interfaces", hidden=True)
     async def lametric(self, ctx: commands.Context):
         pass
 

@@ -64,6 +64,7 @@ class AutoResponder:
                     await message.channel.send(content=responses[response]['response'])
 
     @commands.group(name="responses", aliases=["response"], brief="Manage the AutoResponder plugin")
+    @commands.has_permissions(manage_messages=True)
     async def responses(self, ctx: discord.ext.commands.Context):
         """
         This is the parent command for the AutoResponder plugin.

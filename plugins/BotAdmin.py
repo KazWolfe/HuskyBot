@@ -52,7 +52,7 @@ class BotAdmin:
         embed.add_field(name="Current Host", value="`{}`".format(socket.gethostname()), inline=True)
         embed.set_thumbnail(url="https://cdn.discordapp.com/avatars/" + str(ctx.bot.user.id) + "/"
                                 + str(ctx.bot.user.avatar) + ".png")
-        embed.set_footer(text="<3 Dakota, roooooo",
+        embed.set_footer(text="(c) 2018, KazWolfe **|** Rooooooo!",
                          icon_url="https://avatars3.githubusercontent.com/u/5192145")
 
         await ctx.send(embed=embed)
