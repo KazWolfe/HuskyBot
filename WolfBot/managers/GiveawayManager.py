@@ -6,7 +6,7 @@ import random
 import discord
 from discord.ext import commands
 
-from WolfBot import WolfConfig, WolfData
+from WolfBot import WolfConfig, WolfData, WolfUtils
 from WolfBot.WolfStatics import *
 
 GIVEAWAY_CONFIG_KEY = 'giveaways'
@@ -21,13 +21,13 @@ class GiveawayManager:
 
         self.__cache__ = []
 
-        self.load_giveaways()
+        self.bot.loop.create_task(self.initialize_giveaways())
 
-        self.__task__ = self.bot.loop.create_task(self.process_giveaways())
+        self.__task__ = None
 
         LOG.info("Loaded GiveawayManager!")
 
-    def load_giveaways(self):
+    def load_giveaways_from_file(self):
         giveaway_list = self._giveaway_config.get(GIVEAWAY_CONFIG_KEY, [])
 
         for giveaway_raw in giveaway_list:
@@ -38,14 +38,29 @@ class GiveawayManager:
 
     async def process_giveaways(self):
         while not self.bot.is_closed():
-            for giveaway in self.__cache__:
-                # Check if the giveaway in cache has finished
-                if giveaway.is_over():
-                    LOG.info("Found a scheduled giveaway for {} ending. Triggering...".format(giveaway.name))
-                    await self.finish_giveaway(giveaway)
+            try:
+                nextQueued = self.__cache__[0]
+            except IndexError:
+                await asyncio.sleep(0.5)
+                continue
 
-            # Check again every 15 seconds (or thereabouts)
-            await asyncio.sleep(5 if len(self.__cache__) < 60 else 15)
+            # Check if the giveaway in cache has finished
+            if nextQueued.is_over():
+                LOG.info("Found a scheduled giveaway for {} ending. Triggering...".format(nextQueued.name))
+                await self.finish_giveaway(nextQueued)
+
+            # Check again every half second
+            await asyncio.sleep(0.5)
+
+    async def initialize_giveaways(self):
+        self.load_giveaways_from_file()
+
+        for g in self.__cache__:
+            if g.is_over():
+                LOG.info("Found a late scheduled giveaway for {} ending. Triggering...".format(g.name))
+                await self.finish_giveaway(g)
+
+        self.__task__ = self.bot.loop.create_task(self.process_giveaways())
 
     async def finish_giveaway(self, giveaway: WolfData.GiveawayObject):
         wcl = "\n\nWinners will be contacted shortly."
@@ -119,7 +134,9 @@ class GiveawayManager:
         giveaway.register_channel_id = channel.id
         giveaway.register_message_id = message.id
 
-        self.__cache__.append(giveaway)
+        pos = WolfUtils.get_sort_index(self.__cache__, giveaway, 'end_time')
+
+        self.__cache__.insert(pos, giveaway)
         self._giveaway_config.set(GIVEAWAY_CONFIG_KEY, self.__cache__)
 
     def get_giveaways(self):
@@ -152,4 +169,5 @@ class GiveawayManager:
         self._giveaway_config.set(GIVEAWAY_CONFIG_KEY, self.__cache__)
 
     async def cleanup(self):
-        self.__task__.cancel()
+        if self.__task__ is not None:
+            self.__task__.cancel()

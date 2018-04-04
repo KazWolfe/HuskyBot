@@ -118,3 +118,21 @@ def get_timedelta_from_string(timestring: str):
     if time_params == {}:
         raise ValueError("Invalid time string! Must be in form #d#h#m#s.")
     return datetime.timedelta(**time_params)
+
+
+def get_sort_index(target_list: list, new_object, attribute: str):
+    comparator = new_object[attribute]
+
+    # special null case
+    if comparator is None:
+        return len(target_list)
+
+    for i in range(0, len(target_list)):
+        index = i
+
+        item = target_list[i]
+
+        if comparator < item[attribute]:
+            return i
+
+    return len(target_list)

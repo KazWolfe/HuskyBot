@@ -4,6 +4,9 @@ import discord
 
 
 class Mute:
+    def __getitem__(self, item):
+        return getattr(self, item)
+
     user_id = 0
     reason = ""
 
@@ -22,25 +25,25 @@ class Mute:
     perms_cache = None
 
     def load_dict(self, data: dict):
-        self.user_id = data.get('userId')
+        self.user_id = data.get('user_id')
 
         self.reason = data.get('reason')
         self.guild = data.get('guild')
         self.channel = data.get('channel')
         self.expiry = data.get('expiry')
 
-        self.perms_cache = data.get('perms')
+        self.perms_cache = data.get('perms_cache')
 
         return self
 
     def to_data(self):
         return {
-            "userId": self.user_id,
+            "user_id": self.user_id,
             "reason": self.reason,
             "guild": self.guild,
             "channel": self.channel,
             "expiry": self.expiry,
-            "perms": self.perms_cache
+            "perms_cache": self.perms_cache
         }
 
     def to_json(self):
@@ -81,6 +84,9 @@ class Mute:
 
 
 class GiveawayObject:
+    def __getitem__(self, item):
+        return getattr(self, item)
+
     name = ""
 
     start_time = None
