@@ -45,13 +45,15 @@ class AntiSpam:
 
     async def cleanup_expired_cooldowns(self):
         """
-        This is ugly as fuck, but it iterates through each field every four hours to check for expired cooldowns.
-        :return:
+        Iterates through each field every four hours to check for expired cooldowns.
+
+        Ugly as fuck.
         """
         while not self.bot.is_closed():
             for d in [self.INVITE_COOLDOWNS, self.LINK_COOLDOWNS, self.ATTACHMENT_COOLDOWNS]:
                 for user_id in d.keys():
                     if d[user_id][EXPIRY_FIELD_NAME] < datetime.datetime.utcnow():
+                        LOG.info("Cleaning up expired cooldown for user %s", user_id)
                         del d[user_id]
 
             await asyncio.sleep(60 * 60 * 4)  # sleep for four hours
@@ -81,7 +83,7 @@ class AntiSpam:
             await message.delete()
             # ToDo: Issue actual warning through Punishment (once made available)
             await message.channel.send(embed=discord.Embed(
-                title="Mass Ping Blocked",
+                title=Emojis.NO_ENTRY + " Mass Ping Blocked",
                 description="A mass-ping message was blocked in the current channel.\n"
                             + "Please reduce the number of pings in your message and try again.",
                 color=Colors.WARNING
@@ -89,8 +91,8 @@ class AntiSpam:
 
             if alert_channel is not None:
                 await alert_channel.send(embed=discord.Embed(
-                    description="User {} has pinged {} users in a single in channel "
-                                "{}.".format(message.author, str(len(message.mentions)), message.channel),
+                    description="User {} has pinged {} users in a single message in channel "
+                                "{}.".format(message.author, str(len(message.mentions)), message.channel.mention),
                     color=Colors.WARNING
                 ).set_author(name="Mass Ping Alert", icon_url=message.author.avatar_url))
 

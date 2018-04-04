@@ -264,7 +264,7 @@ async def on_error(event_method, *args, **kwargs):
         )
 
         await channel.send("<@{}>, an error has occurred with the bot. See attached "
-                           "embed.".format(WolfStatics.__developers__[0]),
+                           "embed.".format(WolfStatics.DEVELOPERS[0]),
                            embed=embed)
     except Exception as e:
         LOG.critical("There was an error sending an error to the error channel.\n " + str(e))
@@ -277,7 +277,7 @@ async def on_message(message):
         return
 
     if message.content.startswith(bot.command_prefix):
-        if (author.id in BOT_CONFIG.get('userBlacklist', [])) and (author.id not in WolfStatics.__developers__):
+        if (author.id in BOT_CONFIG.get('userBlacklist', [])) and (author.id not in WolfStatics.DEVELOPERS):
             LOG.info("Blacklisted user %s attempted to run command %s", message.author, message.content)
             return
 
@@ -289,7 +289,7 @@ async def on_message(message):
             LOG.info("User %s linked to subreddit %s, ignoring command", message.author, message.content)
             return
 
-        if LOCAL_STORAGE.get('lockdown', False) and (author.id not in WolfStatics.__developers__):
+        if LOCAL_STORAGE.get('lockdown', False) and (author.id not in WolfStatics.DEVELOPERS):
             LOG.info("Lockdown mode is enabled for the bot. Command blocked.")
             return
 
@@ -302,7 +302,7 @@ def get_developers():
     """
     Get a list of all registered bot developers.
     """
-    return WolfStatics.__developers__
+    return WolfStatics.DEVELOPERS
 
 
 if __name__ == '__main__':

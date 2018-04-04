@@ -1,6 +1,6 @@
 from discord.ext import commands
 
-from WolfBot.WolfStatics import __developers__
+from WolfBot.WolfStatics import DEVELOPERS
 
 
 def has_guild_permissions(**perms):
@@ -34,7 +34,7 @@ def is_developer():
         if (ctx.guild is not None) and (not ctx.author.guild_permissions.administrator):
             raise commands.MissingPermissions(["Administrator", "Bot Developer"])
 
-        if ctx.author.id in __developers__:
+        if ctx.author.id in DEVELOPERS:
             return True
 
         raise commands.MissingPermissions(["Bot Developer"])

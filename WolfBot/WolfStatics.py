@@ -4,7 +4,7 @@ DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 GIT_URL = "https://www.github.com/KazWolfe/DakotaBot"
 
-__developers__ = [
+DEVELOPERS = [
     142494680158961664  # KazWolfe#2896, notification PoC
 ]
 
