@@ -11,7 +11,7 @@ from WolfBot import WolfUtils
 from WolfBot.WolfStatics import *
 from WolfBot.managers.MuteManager import MuteManager
 
-LOG = logging.getLogger("DiyBot.Plugin." + __name__)
+LOG = logging.getLogger("DakotaBot.Plugin." + __name__)
 
 
 # noinspection PyMethodMayBeStatic

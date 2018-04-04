@@ -10,7 +10,7 @@ from WolfBot import WolfConverters
 from WolfBot import WolfUtils
 from WolfBot.WolfStatics import *
 
-LOG = logging.getLogger("DiyBot.Plugin." + __name__)
+LOG = logging.getLogger("DakotaBot.Plugin." + __name__)
 
 
 class Intelligence:

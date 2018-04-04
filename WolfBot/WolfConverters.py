@@ -7,7 +7,7 @@ from discord.ext import commands
 
 from WolfBot import WolfUtils
 
-LOG = logging.getLogger("DiyBot.Utils." + __name__)
+LOG = logging.getLogger("DakotaBot.Utils." + __name__)
 
 
 class OfflineUserConverter(commands.UserConverter):

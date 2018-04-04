@@ -11,7 +11,7 @@ from WolfBot import WolfConverters
 from WolfBot import WolfUtils
 from WolfBot.WolfStatics import *
 
-LOG = logging.getLogger("DiyBot.Plugin." + __name__)
+LOG = logging.getLogger("DakotaBot.Plugin." + __name__)
 
 
 # noinspection PyMethodMayBeStatic
@@ -47,9 +47,7 @@ class BotAdmin:
         )
 
         embed.add_field(name="Authors", value="KazWolfe, Clover", inline=False)
-        embed.add_field(name="Bot Version", value="[`" + sha[:8]
-                                                  + "`](https://www.github.com/KazWolfe/diy_tech-bot/commit/"
-                                                  + sha + ")", inline=True)
+        embed.add_field(name="Bot Version", value="[`{}`]({}/commit/{})".format(sha[:8], GIT_URL, sha), inline=True)
         embed.add_field(name="Library Version", value=discord.__version__, inline=True)
         embed.add_field(name="Current Host", value="`{}`".format(socket.gethostname()), inline=True)
         embed.set_thumbnail(url="https://cdn.discordapp.com/avatars/" + str(ctx.bot.user.id) + "/"

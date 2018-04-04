@@ -9,7 +9,7 @@ from discord.ext import commands
 from WolfBot import WolfConfig
 from WolfBot.WolfStatics import *
 
-LOG = logging.getLogger("DiyBot.Plugin." + __name__)
+LOG = logging.getLogger("DakotaBot.Plugin." + __name__)
 
 
 class Fun:
@@ -218,7 +218,8 @@ class Fun:
 
         This command takes two arguments, a Channel (ID, mention, or name) and a message to send.
 
-        The targeted channel will receive a message from WolfBot containing exactly the text as entered in the message.
+        The targeted channel will receive a message from DakotaBot containing exactly the text as entered in the
+        message.
         """
 
         await channel.send(message)

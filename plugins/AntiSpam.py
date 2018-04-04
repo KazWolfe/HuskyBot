@@ -11,7 +11,7 @@ from WolfBot import WolfConfig
 from WolfBot import WolfUtils
 from WolfBot.WolfStatics import *
 
-LOG = logging.getLogger("DiyBot.Plugin." + __name__)
+LOG = logging.getLogger("DakotaBot.Plugin." + __name__)
 
 
 # noinspection PyMethodMayBeStatic
@@ -145,7 +145,7 @@ class AntiSpam:
                 # Message not found, let's log this
                 LOG.warning("Message was caught and already deleted before AS could handle it.")
 
-            # Add the user to the cooldowns table - we're going to use this to prevent DIYBot's spam and to ban the user
+            # Add the user to the cooldowns table - we're going to use this to prevent DakotaBot's spam and to ban the user
             # if they go over a defined number of invites in a period
             if message.author.id not in self.INVITE_COOLDOWNS.keys():
                 self.INVITE_COOLDOWNS[message.author.id] = {

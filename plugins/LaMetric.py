@@ -9,7 +9,7 @@ from WolfBot import WolfConfig
 from WolfBot.WolfStatics import *
 from WolfBot.apis import LaMetric as LaMetricApi
 
-LOG = logging.getLogger("DiyBot.Plugin." + __name__)
+LOG = logging.getLogger("DakotaBot.Plugin." + __name__)
 
 
 # noinspection PyMethodMayBeStatic

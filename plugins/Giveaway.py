@@ -10,7 +10,7 @@ from WolfBot.WolfData import GiveawayObject
 from WolfBot.WolfStatics import *
 from WolfBot.managers.GiveawayManager import GiveawayManager
 
-LOG = logging.getLogger("DiyBot.Plugin." + __name__)
+LOG = logging.getLogger("DakotaBot.Plugin." + __name__)
 
 GIVEAWAY_CONFIG_KEY = "giveaways"
 

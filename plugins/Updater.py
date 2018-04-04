@@ -9,7 +9,7 @@ from discord.ext import commands
 from WolfBot import WolfConfig
 from WolfBot.WolfStatics import *
 
-LOG = logging.getLogger("DiyBot.Plugin." + __name__)
+LOG = logging.getLogger("DakotaBot.Plugin." + __name__)
 
 
 # noinspection PyMethodMayBeStatic
@@ -54,9 +54,8 @@ class Updater:
         if fetch_info.commit.hexsha == current_sha:
             await ctx.send(embed=discord.Embed(
                 title="Bot Manager",
-                description="The bot is already up-to-date at version [`"
-                            + current_sha[:8] + "`](https://www.github.com/KazWolfe/diy_tech-bot/commit/"
-                            + current_sha + ")",
+                description="The bot is already up-to-date at version "
+                            "[`{}`]({}/commit/{})".format(current_sha[:8], GIT_URL, current_sha),
                 color=Colors.INFO
             ))
             return
@@ -79,8 +78,8 @@ class Updater:
         await ctx.send(embed=discord.Embed(
             title="Bot Manager",
             description="The bot's code has been updated from `" + current_sha[:8]
-                        + "` to [`" + new_sha[:8] + "`](https://www.github.com/KazWolfe/diy_tech-bot/commit/" + new_sha
-                        + ") Please wait while the bot restarts...",
+                        + "` to [`{}`]({}/commit/{}) Please wait while the"
+                          " bot restarts...".format(new_sha[:8], GIT_URL, new_sha),
             color=Colors.SUCCESS
         ))
 
@@ -113,8 +112,9 @@ class Updater:
         embed.add_field(name="Author", value=lastCommit.author, inline=True)
         embed.add_field(name="Author Date", value=datetime
                         .fromtimestamp(lastCommit.authored_date).strftime(DATETIME_FORMAT) + " UTC", inline=True)
-        embed.add_field(name="GitHub", value="[See Commit >](https://www.github.com/KazWolfe/"
-                                             + "diy_tech-bot/commit/" + lastCommit.hexsha + ")", inline=False)
+        embed.add_field(name="GitHub",
+                        value="[See Commit >]({}/commit/{})".format(GIT_URL, lastCommit.hexsha),
+                        inline=False)
 
         await ctx.send(embed=embed)
 

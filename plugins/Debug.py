@@ -11,7 +11,7 @@ from WolfBot import WolfChecks
 from WolfBot import WolfConfig
 from WolfBot.WolfStatics import Colors
 
-LOG = logging.getLogger("DiyBot.Plugin." + __name__)
+LOG = logging.getLogger("DakotaBot.Plugin." + __name__)
 
 
 # noinspection PyMethodMayBeStatic
@@ -121,7 +121,7 @@ class Debug:
             color = 0x4854AF
 
         await ctx.send(embed=discord.Embed(
-            title="WolfBot Debugger",
+            title="DakotaBot Debugger",
             description="The latency to Discord's servers is currently **{} ms**.".format(ping_in_ms),
             color=color
         ))

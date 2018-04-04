@@ -9,7 +9,7 @@ from WolfBot import WolfConfig
 from WolfBot import WolfUtils
 from WolfBot.WolfStatics import Colors
 
-LOG = logging.getLogger("DiyBot.Plugin." + __name__)
+LOG = logging.getLogger("DakotaBot.Plugin." + __name__)
 
 
 # noinspection PyMethodMayBeStatic

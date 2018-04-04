@@ -35,12 +35,12 @@ else:
 
 bot = commands.Bot(command_prefix=BOT_CONFIG.get('prefix', '/'), activity=start_activity, status=start_status)
 
-LOCAL_STORAGE.set('logPath', 'logs/wolfbot-' + str(datetime.datetime.utcnow()).split(' ')[0] + '.log')
+LOCAL_STORAGE.set('logPath', 'logs/dakotabot-' + str(datetime.datetime.utcnow()).split(' ')[0] + '.log')
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
                     datefmt="%Y-%m-%d %H:%M:%S",
                     handlers=[logging.FileHandler(LOCAL_STORAGE.get('logPath'), 'a'),
                               logging.StreamHandler(sys.stdout)])
-LOG = logging.getLogger("DiyBot.Core")
+LOG = logging.getLogger("DakotaBot.Core")
 
 
 async def initialize():

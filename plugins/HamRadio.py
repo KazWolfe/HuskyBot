@@ -5,7 +5,7 @@ from discord.ext import commands
 
 from WolfBot import WolfConfig
 
-LOG = logging.getLogger("DiyBot.Plugin." + __name__)
+LOG = logging.getLogger("DakotaBot.Plugin." + __name__)
 
 
 class HamRadio:
