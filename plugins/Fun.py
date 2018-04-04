@@ -126,7 +126,7 @@ class Fun:
         Please note that this algorithm is very complicated and results may not be 100% accurate.
         """
 
-        seed = 736580  # A certain wolfgirl...
+        seed = 736793  # Chris and Skag
         master_rng = random.Random((member.id + seed + datetime.utcnow().toordinal()) % seed)
 
         def get_value(user_value: int, imin: int, imax: int, dev: float):
