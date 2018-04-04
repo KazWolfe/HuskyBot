@@ -19,6 +19,10 @@ class Mute:
     def __gt__(self, other):
         return (self.expiry is None) or (self.expiry > other.expiry)
 
+    def __init__(self, data: dict = None):
+        if data is not None:
+            self.load_dict(data)
+
     user_id = 0
     reason = ""
 
@@ -111,6 +115,10 @@ class GiveawayObject:
 
     def __gt__(self, other):
         return (self.end_time is None) or (self.end_time > other.end_time)
+
+    def __init__(self, data: dict = None):
+        if data is not None:
+            self.load_dict(data)
 
     name = ""
 

@@ -10,15 +10,12 @@ import discord
 from discord.ext import commands
 
 from WolfBot import WolfConfig
+from WolfBot import WolfStatics
 from WolfBot import WolfUtils
 from WolfBot.WolfStatics import Colors, ChannelKeys
 
 BOT_CONFIG = WolfConfig.get_config()
 LOCAL_STORAGE = WolfConfig.get_session_store()
-
-__developers__ = [
-    142494680158961664  # KazWolfe#2896, notification PoC
-]
 
 initialized = False
 
@@ -33,14 +30,19 @@ elif restart_reason == "update":
 else:
     start_activity = discord.Activity(name="Starting...", type=discord.ActivityType.playing)
 
+# initialize our bot here
 bot = commands.Bot(command_prefix=BOT_CONFIG.get('prefix', '/'), activity=start_activity, status=start_status)
 
+# set up logging
 LOCAL_STORAGE.set('logPath', 'logs/dakotabot-' + str(datetime.datetime.utcnow()).split(' ')[0] + '.log')
-logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+logging.basicConfig(level=logging.WARNING, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
                     datefmt="%Y-%m-%d %H:%M:%S",
                     handlers=[logging.FileHandler(LOCAL_STORAGE.get('logPath'), 'a'),
                               logging.StreamHandler(sys.stdout)])
-LOG = logging.getLogger("DakotaBot.Core")
+# WolfUtils.configure_loggers()
+MASTER_LOGGER = logging.getLogger("DakotaBot")
+MASTER_LOGGER.setLevel(logging.INFO)
+LOG = MASTER_LOGGER.getChild('Core')
 
 
 async def initialize():
@@ -224,7 +226,7 @@ async def on_command_error(ctx, error: commands.CommandError):
         ))
 
         LOG.error("Command %s was on cooldown, and is unable to be run for %s seconds. Cooldown: %s", command_name,
-                  error.retry_after, error.cooldown)
+                  round(error.retry_after, 0), error.cooldown)
 
     # Handle any and all other error cases.
     else:
@@ -261,7 +263,8 @@ async def on_error(event_method, *args, **kwargs):
             color=Colors.DANGER
         )
 
-        await channel.send("<@{}>, an error has occurred with the bot. See attached embed.".format(__developers__[0]),
+        await channel.send("<@{}>, an error has occurred with the bot. See attached "
+                           "embed.".format(WolfStatics.__developers__[0]),
                            embed=embed)
     except Exception as e:
         LOG.critical("There was an error sending an error to the error channel.\n " + str(e))
@@ -294,7 +297,7 @@ def get_developers():
     """
     Get a list of all registered bot developers.
     """
-    return __developers__
+    return WolfStatics.__developers__
 
 
 if __name__ == '__main__':

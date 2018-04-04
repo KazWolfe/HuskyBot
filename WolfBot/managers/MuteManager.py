@@ -8,7 +8,7 @@ from discord.ext import commands
 from WolfBot import WolfConfig, WolfData, WolfUtils
 from WolfBot.WolfStatics import *
 
-LOG = logging.getLogger("DakotaBot.Managers." + __name__)
+LOG = logging.getLogger("DakotaBot.Managers.MuteManager")
 
 
 class MuteManager:
@@ -22,14 +22,13 @@ class MuteManager:
 
         self.__task__ = self._bot.loop.create_task(self.check_mutes())
 
-        LOG.info("Loaded mute submodule!")
+        LOG.info("Manager load complete.")
 
     def read_mutes_from_file(self):
         disk_mutes = self._mute_config.get("mutes", [])
 
         for raw_mute in disk_mutes:
-            mute = WolfData.Mute()
-            mute.load_dict(raw_mute)
+            mute = WolfData.Mute(raw_mute)
 
             self.__cache__.append(mute)
 

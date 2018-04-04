@@ -10,7 +10,7 @@ from WolfBot import WolfConfig, WolfData, WolfUtils
 from WolfBot.WolfStatics import *
 
 GIVEAWAY_CONFIG_KEY = 'giveaways'
-LOG = logging.getLogger("DakotaBot.Managers." + __name__)
+LOG = logging.getLogger("DakotaBot.Managers.GiveawayManager")
 
 
 class GiveawayManager:
@@ -39,7 +39,7 @@ class GiveawayManager:
 
         self.__task__ = self.bot.loop.create_task(self.process_giveaways())
 
-        LOG.info("Loaded GiveawayManager!")
+        LOG.info("Manager load complete.")
 
     def load_giveaways_from_file(self) -> None:
         """
@@ -49,8 +49,7 @@ class GiveawayManager:
         giveaway_list = self._giveaway_config.get(GIVEAWAY_CONFIG_KEY, [])
 
         for giveaway_raw in giveaway_list:
-            giveaway = WolfData.GiveawayObject()
-            giveaway.load_dict(giveaway_raw)
+            giveaway = WolfData.GiveawayObject(data=giveaway_raw)
 
             self.__cache__.append(giveaway)
 

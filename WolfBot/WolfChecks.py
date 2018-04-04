@@ -1,6 +1,6 @@
 from discord.ext import commands
 
-from BotCore import __developers__
+from WolfBot.WolfStatics import __developers__
 
 
 def has_guild_permissions(**perms):
