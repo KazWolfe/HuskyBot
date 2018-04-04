@@ -38,6 +38,9 @@ class Leaderboards:
             if banned_user_id not in banned_uids:
                 return
 
+            if (ban_reason is None) or (ban_reason == ""):
+                ban_reason = "<No ban reason provided>"
+
             if banning_user is None or banning_user == self.bot.user:
                 if not re.match(r'\[.*By .*] .*', ban_reason):
                     responsible_user = "Unknown"
