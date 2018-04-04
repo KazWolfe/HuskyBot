@@ -128,6 +128,16 @@ class ModTools:
             ))
             return
 
+        ban_entry = discord.utils.get(await ctx.guild.bans(), user=user)
+
+        if ban_entry is not None:
+            await ctx.send(embed=discord.Embed(
+                title="Moderator Toolkit",
+                description="User `{}` was already banned from the guild.".format(user),
+                color=Colors.DANGER
+            ))
+            return
+
         await ctx.guild.ban(user, reason="[{}By {}] {}".format("HACKBAN | " if not in_guild else "",
                                                                ctx.author, reason), delete_message_days=1)
 
