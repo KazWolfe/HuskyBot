@@ -23,7 +23,7 @@ class DirtyHacks:
     """
 
     def __init__(self, bot: discord.ext.commands.Bot):
-        self.bot = bot
+        self.bot = bot  # type: commands.Bot
         self._config = WolfConfig.get_config()
 
         LOG.info("Loaded plugin!")
@@ -64,6 +64,24 @@ class DirtyHacks:
             # Image is larger than 5000 px * 5000 px but *less* than 1 MB
             if (width > 5000) and (height > 5000) and os.path.getsize(image_name) < 1_000_000:
                 await message.delete()
+
+    @commands.command(name="disableHacks", brief="Disable DirtyHacks")
+    @commands.has_permissions(manage_messages=True)
+    async def disableHacks(self, ctx: commands.Context):
+        config = self._config.get('plugins', [])  # type: list
+
+        if "DirtyHacks" in config:
+            config.remove("DirtyHacks")
+            self._config.set('plugins', config)
+
+        self.bot.remove_cog("DirtyHacks")
+        await ctx.send("DirtyHacks has been unloaded and disabled. "
+                       "Paging <@142494680158961664> and <@84374504964358144>.")
+
+    @commands.command(name="testHacks", brief="Test DirtyHacks")
+    @commands.has_permissions(manage_messages=True)
+    async def testHacks(self, ctx: commands.Context):
+        await ctx.send("DirtyHacks is running.")
 
 
 def setup(bot: discord.ext.commands.Bot):
