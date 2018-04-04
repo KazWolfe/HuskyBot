@@ -49,6 +49,16 @@ class ModTools:
     @commands.command(name="pardon", aliases=["unban"], brief="Pardon a banned member from their ban")
     @commands.has_permissions(ban_members=True)
     async def pardon(self, ctx: discord.ext.commands.Context, user: WolfConverters.OfflineUserConverter):
+        """
+        Pardon a user currently banned from the guild.
+
+        This command will reverse a ban of any user currently in the ban list.
+
+        Unbanning a user generally takes a User ID, but in some rare cases (e.g. the user was recently banned), the ban
+        can be lifted by using a user name or other unique mention (see /help ban for a more in-depth explanation).
+
+        Note that a reason is not needed for an unban - just the user ID.
+        """
         try:
             await ctx.guild.unban(user, reason="Unbanned by " + str(ctx.author))
         except discord.NotFound:
@@ -308,6 +318,17 @@ class ModTools:
     @commands.command(name="roleping", brief="Ping all users with a certain role")
     @commands.has_permissions(manage_roles=True)
     async def roleping(self, ctx: commands.Context, target: discord.Role, *, message: str):
+        """
+        Mention a role without permissions to *actually* manage/mention that role.
+
+        This command is a quick-and-simple way of mentioning a role and mass pinging users without mucking around with
+        configs or risking a user attempting to abuse the open hole left by making the role mentionable.
+
+        The only required arguments for this command are a role identifier (either name, ID, or ping) and the message.
+
+        In order to prevent mass confusion, the bot will include the name of the user who triggered the ping. This
+        will also be recorded in the audit log.
+        """
         is_role_mentionable = target.mentionable
 
         if not is_role_mentionable:

@@ -11,6 +11,9 @@ LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 
 
 class ServerLog:
+    """
+    The ServerLog plugin exists to provide a clean and transparent method of tracking server activity on the bot.
+    """
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
         self._config = WolfConfig.getConfig()
@@ -285,6 +288,13 @@ class ServerLog:
     @commands.group(name="logger", aliases=["logging"], brief="Parent command to manage the ServerLog module")
     @commands.has_permissions(administrator=True)
     async def logger(self, ctx: discord.ext.commands.Context):
+        """
+        General parent command for logging management.
+
+        This command itself does nothing, but is instead a parent command to other actually useful commands.
+        :param ctx:
+        :return:
+        """
         if ctx.invoked_subcommand is None:
             await ctx.send(embed=discord.Embed(
                 title="Logging Manager",
@@ -295,6 +305,12 @@ class ServerLog:
 
     @logger.command(name="enable", brief="Enable a specified logger")
     async def enable_logger(self, ctx: commands.Context, name: str):
+        """
+        Add a logger to the configuration, and enable it.
+
+        This command takes a single logger name as an argument, and adds it to the enabled loggers list. Changes to
+        loggers take effect immediately.
+        """
         enabled_loggers = self._config.get('loggers', {})
 
         if name not in self._validLoggers:
@@ -325,6 +341,12 @@ class ServerLog:
 
     @logger.command(name="disable", brief="Disable a specified logger")
     async def disable_logger(self, ctx: commands.Context, name: str):
+        """
+        Remove a logger from the configuration, and disable it.
+
+        This command takes a single logger name as an argument, and adds it to the enabled loggers list. Changes to
+        loggers take effect immediately.
+        """
         enabled_loggers = self._config.get('loggers', {})
 
         if name not in self._validLoggers:

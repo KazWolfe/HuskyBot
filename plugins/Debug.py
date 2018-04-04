@@ -26,6 +26,10 @@ class Debug:
 
     @debug.command(name="dumpConfig", brief="Dump the bot's active configuration.")
     async def dumpConfig(self, ctx: discord.ext.commands.Context):
+        """
+        Debug commands have no help. If you need help running a debug command, just don't. Fuck off.
+        """
+
         config = str(self._config.dump())
         config = config.replace(self._config.get('apiKey', '<WTF HOW DID 8741234723890423>'), '[EXPUNGED]')
 
@@ -46,16 +50,28 @@ class Debug:
     @debug.command(name="react", brief="Force the bot to react to a specific message.")
     async def forceReact(self, ctx: discord.ext.commands.Context, channel: discord.TextChannel, message: int,
                          reaction: str):
+        """
+        Debug commands have no help. If you need help running a debug command, just don't. Fuck off.
+        """
+
         target_message = await channel.get_message(message)
 
         await target_message.add_reaction(reaction)
 
     @debug.command(name="echo", brief="Repeat the message back to the current channel.")
     async def echo(self, ctx: discord.ext.commands.Context, *, message: str):
+        """
+        Debug commands have no help. If you need help running a debug command, just don't. Fuck off.
+        """
+
         await ctx.send(message)
 
     @debug.command(name="richEcho", brief="Echo text in a rich embed")
     async def rich_echo(self, ctx: commands.Context, *, message: str):
+        """
+        Debug commands have no help. If you need help running a debug command, just don't. Fuck off.
+        """
+
         obj = json.loads(message)
 
         embed = discord.Embed.from_data(obj)
@@ -64,12 +80,20 @@ class Debug:
 
     @debug.command(name="forceExcept", brief="Force an exception (useful for testing purposes)")
     async def forceExcept(self, ctx: discord.ext.commands.Context):
+        """
+        Debug commands have no help. If you need help running a debug command, just don't. Fuck off.
+        """
+
         raise Exception("Random exception that was requested!")
 
     @commands.command(name="secho", brief="Repeat the message back to the current channel, deleting the original.",
                       hidden=True)
     @commands.has_permissions(administrator=True)
     async def secho(self, ctx: discord.ext.commands.Context, *, message: str):
+        """
+        Debug commands have no help. If you need help running a debug command, just don't. Fuck off.
+        """
+
         await ctx.message.delete()
         await ctx.send(message)
 
@@ -77,11 +101,19 @@ class Debug:
     @commands.command(name="sendmsg", brief="Send a message to another channel.", hidden=True)
     @commands.has_permissions(administrator=True)
     async def sendmsg(self, ctx: discord.ext.commands.Context, channel: discord.TextChannel, *, message: str):
+        """
+        Debug commands have no help. If you need help running a debug command, just don't. Fuck off.
+        """
+
         await channel.send(message)
 
     @commands.command(name="eval", brief="Execute an eval() statement on the server", hidden=True)
     @commands.has_permissions(administrator=True)
     async def evalcmd(self, ctx: discord.ext.commands.Context, *, expr: str):
+        """
+        Debug commands have no help. If you need help running a debug command, just don't. Fuck off.
+        """
+
         # Block *everyone* except Kaz from running eval
         if ctx.author.id != 142494680158961664:
             ctx.send(embed=discord.Embed(

@@ -20,6 +20,14 @@ class Intelligence:
 
     @commands.command(name="guildinfo", aliases=["sinfo", "ginfo"], brief="Get information about the current guild")
     async def guild_info(self, ctx: discord.ext.commands.Context):
+        """
+        Get an information dump for the current guild.
+
+        This command returns basic core information about a guild for reporting purposes.
+
+        The command takes no arguments.
+        """
+
         guild = ctx.guild
 
         guild_details = discord.Embed(
@@ -45,6 +53,15 @@ class Intelligence:
 
     @commands.command(name="roleinfo", aliases=["rinfo"], brief="Get information about a specified role.")
     async def role_info(self, ctx: discord.ext.commands.Context, *, role: discord.Role):
+        """
+        Get basic information about a specific role in this guild.
+
+        This command requires a single argument - a guild identifier. This can either be the guild's name, the guild ID,
+        a ping for the guild, or similar.
+
+        This command does not return sensitive information.
+        """
+
         role_details = discord.Embed(
             title="Role Information for " + role.name,
             color=role.color
@@ -68,6 +85,16 @@ class Intelligence:
     @commands.command(name="userinfo", aliases=["uinfo", "memberinfo", "minfo"],
                       brief="Get information about self or specified user")
     async def user_info(self, ctx: discord.ext.commands.Context, *, member: discord.Member = None):
+        """
+        Get basic information about a calling user.
+
+        This command takes a single (optional) argument - a member identifier. This may be a User ID, a ping, a
+        username, a nickname, etc. If this argument is not specified, the bot will return information about the calling
+        user.
+
+        This command does not return sensitive information on users, nor does it return punishment records.
+        """
+
         member = member or ctx.author
         member_details = discord.Embed(
             title="User Information for " + member.name + "#" + member.discriminator,
@@ -98,6 +125,17 @@ class Intelligence:
 
     @commands.command(name="avatar", brief="Get a link/high-resolution version of a user's avatar")
     async def avatar(self, ctx: commands.Context, user: discord.User = None):
+        """
+        Get a high-resolution version of a user's avatar.
+
+        This command will attempt to find and return the largest possible version of a user's avatar that it can, as
+        well as the avatar hash.
+
+        This command takes a single (optional) argument - a member identifier. This may be a User ID, a ping, a
+        username, a nickname, etc. If this argument is not specified, the bot will return the avatar of the calling
+        user.
+        """
+
         user = user or ctx.author
 
         embed = discord.Embed(

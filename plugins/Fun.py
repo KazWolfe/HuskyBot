@@ -20,13 +20,22 @@ class Fun:
 
     @commands.command(name="slap", brief="Slap a user silly!")
     async def slap(self, ctx: commands.Context, user: discord.Member = None):
+        """
+        Give a user a hearty slap with a trout (?)
+
+        This command allows you to slap a specified user (by ping, user ID, etc.) with a trout of varying size depending
+        on whichever is nearest the top of the fish pile.
+
+        It is recommended that one does not slap the bot or the bot's developer.
+        """
+
         if user is None:
             await ctx.send("\uD83D\uDC1F  ***{}*** *tried to slap someone with a large trout, but missed and hit "
                            "themselves!*".format(ctx.author.mention))
             return
 
-        if user == self.bot.user:
-            await(ctx.send(Emojis.WOLF + " *I slap {} around with a wolf!*"
+        if user.id in [self.bot.user.id, 142494680158961664]:
+            await(ctx.send(Emojis.WOLF + " *I slap {} around with a wolf. The wolf bites, dealing critical damage!*"
                            .format(ctx.author.mention)))
             return
 
@@ -58,6 +67,13 @@ class Fun:
 
     @commands.command(name="hug", brief="Get a hug from the bot, or give a hug!")
     async def hug(self, ctx: commands.Context, target: discord.Member = None):
+        """
+        Hug a user in need of a hug.
+
+        This command allows you to hug a user of their choice (provided you have permission to hug that user).
+
+        If you hug yourself or do not specify a user to hug, the bot will attempt to hug you instead.
+        """
         if target is None:
             target = ctx.author
 
@@ -91,6 +107,17 @@ class Fun:
     @commands.command(name="rate", brief="Rate another user based on attractiveness, craziness, and intelligence")
     @commands.has_permissions(view_audit_log=True)
     async def rate_user(self, ctx: commands.Context, member: discord.User):
+        """
+        The ultimate command for narcissists! Rate yourself or another member of the server!
+
+        This command uses advanced math, coding, and algorithms to determine a user's Relative Hotness based on three
+        metrics: Attractiveness, Craziness, and Intelligence.
+
+        These three scores are then summed up (with craziness being inverted) into an Overall Hotness Score.
+
+        Please note that this algorithm is very complicated and results may not be 100% accurate.
+        """
+
         seed = 736580  # A certain wolfgirl...
         master_rng = random.Random((member.id + seed + datetime.utcnow().toordinal()) % seed)
 

@@ -17,6 +17,13 @@ class Community:
 
     @commands.command(name="staff", aliases=["stafflist"], brief="Get an up-to-date list of all staff on the guild")
     async def stafflist(self, ctx: commands.Context):
+        """
+        Get an up-to-date list of staff members on the guild.
+
+        This command will dynamically retrieve a list of staff members currently in roles on the guild. It may be
+        re-run at any time to get a new list of staff members.
+        """
+
         mod_role = discord.utils.get(ctx.guild.roles, id=self._config.get("specialRoles", {})
                                      .get(SpecialRoleKeys.MODS.value))
         admin_role = discord.utils.get(ctx.guild.roles, id=self._config.get("specialRoles", {})
@@ -57,6 +64,12 @@ class Community:
 
     @commands.group(name="rules", brief="Get a copy of the guild rules")
     async def rules(self, ctx: commands.Context):
+        """
+        Retrieve the current rules list for the Discord guild.
+
+        By default, this command willy simply return the existing rules in an easy-to-parse embed. If a user is an
+        administrator, additional commands exist that allow setting/altering rules.
+        """
         if ctx.invoked_subcommand is not None:
             return
 
@@ -88,6 +101,15 @@ class Community:
     @rules.command(name="add", brief="Add a new rule to the system")
     @commands.has_permissions(administrator=True)
     async def add_rule(self, ctx: commands.Context, title: str, *, description: str):
+        """
+        Add a new rule to the Discord guild.
+
+        This command takes two arguments - a Title, and a Description. If the title has spaces in it, it must be
+        "surrounded with quotes". The Description does not require quotes in any cases.
+
+        When a new rule is added, it will be appended to the end of the list.
+        """
+
         rules_list = self._config.get("guildRules", [])
 
         rules_list.append({"title": title, "description": description})
@@ -103,6 +125,15 @@ class Community:
     @rules.command(name="remove", brief="Remove a rule from the system")
     @commands.has_permissions(administrator=True)
     async def remove_rule(self, ctx: commands.Context, index: int):
+        """
+        Remove an existing rule from the Discord guild.
+
+        This command takes a single argument - an index. This may be retrieved by looking at /rules and choosing the
+        rule number you would like to delete.
+
+        All existing rules are shifted up one position.
+        """
+
         rules_list = self._config.get("guildRules", [])
 
         try:
@@ -126,6 +157,15 @@ class Community:
     @rules.command(name="edit", brief="Change the description of a rule")
     @commands.has_permissions(administrator=True)
     async def edit_rule(self, ctx: commands.Context, index: int, *, new_description: str):
+        """
+        Edit the description of an existing guild rule.
+
+        This command takes two arguments - an index and a new description. No quotations are required. If the title
+        requires updating, see /help rules rename.
+
+        The index may be determined by looking at /rules and selecting the rule to update.
+        """
+
         rules_list = self._config.get("guildRules", [])
 
         try:
@@ -151,6 +191,15 @@ class Community:
     @rules.command(name="rename", brief="Rename a rule")
     @commands.has_permissions(administrator=True)
     async def rename_rule(self, ctx: commands.Context, index: int, *, new_title: str):
+        """
+        Edit the title of an existing guild rule.
+
+        This command takes two arguments - an index and a new title. No quotations are required. If the description
+        needs to be updated instead, see /help rules edit
+
+        The index may be determined by looking at /rules and selecting the rule to update.
+        """
+
         rules_list = self._config.get("guildRules", [])
 
         try:
@@ -176,10 +225,19 @@ class Community:
     @rules.command(name="move", brief="Move a rule")
     @commands.has_permissions(administrator=True)
     async def move_rule(self, ctx: commands.Context, old_index: int, new_index: int):
+        """
+        Move a rule to another position in the list.
+
+        This command takes two arguments - the old and new index. To determine the old index, use /rules and select the
+        number you wish to move.
+
+        The new index will be the new place for the rule. The indexes will not swap - only the existing rule will be
+        moved.
+        """
         rules_list = self._config.get("guildRules", [])
 
         try:
-            rules_list.insert(new_index, rules_list.pop(old_index))
+            rules_list.insert(new_index - 1, rules_list.pop(old_index - 1))
         except KeyError:
             await ctx.send(embed=discord.Embed(
                 title="Guild Rule Move Failed",
@@ -198,6 +256,12 @@ class Community:
 
     @commands.group(name="invite", brief="Get this guild's invite link")
     async def get_invite(self, ctx: commands.Context):
+        """
+        See the current server invite link.
+
+        If the server has a vanity invite, it will be returned. Otherwise, an administrator configured invite will be
+        returned instead.
+        """
         if ctx.invoked_subcommand is not None:
             return
 
@@ -236,6 +300,11 @@ class Community:
     @get_invite.command(name="set", brief="Set a preferred invite URL")
     @commands.has_permissions(administrator=True)
     async def set_invite(self, ctx: commands.Context, fragment: str):
+        """
+        Set the invite code used by the server.
+
+        This command only takes a single argument - a fragment for an invite. It saves immediately.
+        """
         self._config.set("inviteKey", fragment)
 
         await ctx.send(embed=discord.Embed(

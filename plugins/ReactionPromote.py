@@ -11,6 +11,13 @@ LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 
 # noinspection PyMethodMayBeStatic
 class ReactionPromote:
+    """
+    The original reason DIY Bot was created.
+
+    Give users a role based on their reaction to a message in a channel. If the user removes their reaction to the
+    message, the bot should also remove the role from that user.
+    """
+
     def __init__(self, bot):
         self.bot = bot
         self._config = WolfConfig.getConfig()
@@ -92,6 +99,9 @@ class ReactionPromote:
     @commands.group(pass_context=True, brief="Control the promotions plugin", hidden=True)
     @commands.has_permissions(administrator=True)
     async def rpromote(self, ctx: discord.ext.commands.Context):
+        """
+        Parent command for the reaction promotion module.
+        """
         if ctx.invoked_subcommand is None:
             await ctx.send(embed=discord.Embed(
                 title="Reaction Promotes",
@@ -103,6 +113,28 @@ class ReactionPromote:
     @rpromote.command(name="addPromotion", brief="Add a new promotion to the configs")
     async def addPromotion(self, ctx: discord.ext.commands.Context, channel: discord.TextChannel, message_id: int,
                            emoji: str, role: discord.Role):
+        """
+        Add a new Promotion to the Reaction Promotion configuration.
+
+        This is a relatively convoluted command due to the number of things that need to happen for it.
+
+        This command takes a large number of arguments, as it requires a lot to store and configure a promotion. There
+        is a strict limit of one emoji -> one role. This mapping may not be overridden or changed, as it would severely
+        increase the difficulty of maintaining and using this command.
+
+        The Channel is a channel identifier (name, ID, #mention, etc.) that will hold the reaction in question. This may
+        be any channel in the server. Note that if the bot's strict mode is on for the channel, adding a new channel
+        *will* cause all reactions in that channel to be deleted.
+
+        The Message ID is a field that the bot should listen to reactions on. This allows administrators to force users
+        to react to specific messages for specific roles.
+
+        The Emoji is any way of expressing an emoji (raw unicode, standard discord embed, :colon_notation:, etc). This
+        will become the promotion key. For best results, use a native emoji, but theoretically any will work.
+
+        The Role is the name (or other identifiable piece - ID, @mention, etc) of a role. This role will be granted to
+        a user when they click on the specified Emoji on the specified Message in the specified Channel.
+        """
         promotion_config = self._config.get('promotions', {})
 
         print(promotion_config)

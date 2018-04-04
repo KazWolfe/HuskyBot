@@ -14,6 +14,15 @@ LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 
 # noinspection PyMethodMayBeStatic
 class Updater:
+    """
+    Core class for bot update management.
+
+    This is an administrative non-critical plugin designed to assist in bot development by facilitating an easy way to
+    upgrade the bot's code without manually connecting to servers. While this plugin attempts to be smart with updates,
+    its capability for intelligence is rather limited. This plugin should not be relied upon to be a completely reliable
+    and bulletproof way of updating the bot.
+    """
+
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
         self._config = WolfConfig.getConfig()
@@ -22,7 +31,20 @@ class Updater:
 
     @commands.command(name="update", brief="Pull the latest version of code from Git")
     @commands.has_permissions(administrator=True)
-    async def updateBot(self, ctx: discord.ext.commands.Context):
+    async def update_bot(self, ctx: discord.ext.commands.Context):
+        """
+        Trigger an update check for the bot and get the latest version from GitHub.
+
+        This command will attempt to fast-forward the bot's code to the latest version (as present in GitHub). Once it
+        successfully pulls the latest version of the code, it will log itself out (triggering the restart loop in
+        BotCore). This updater does not alter the config files or run any configuration migrations, so care must be
+        taken to make sure changes don't break things.
+
+        This command also does *no checks* of the code to ensure it's runnable. This must be done client-side before
+        pushing.
+
+        DO NOT RUN THIS COMMAND WITHOUT BEING ABLE TO RESTART THE BOT MANUALLY (unless you like living on the edge)!
+        """
         remote = self.repo.remotes.origin
 
         current_sha = self.repo.head.object.hexsha
@@ -72,10 +94,19 @@ class Updater:
     @commands.command(name="changelog", brief="Get the Git changelog for the bot's current version")
     @commands.has_permissions(administrator=True)
     async def changelog(self, ctx: discord.ext.commands.Context):
+        """
+        Get the latest changelog for the bot.
+
+        This will pull a changelog from the Git log. Specifically, this exposes the last commit to users for
+        verification and change notification.
+
+        Git changelogs should not contain sensitive information, so this command is safe to run in public channels,
+        but admin discretion is advised.
+        """
         lastCommit = self.repo.head.commit
 
         embed = discord.Embed(
-            title="Changlog for version `" + str(lastCommit.hexsha)[:8] + "`",
+            title="Changelog for version `" + str(lastCommit.hexsha)[:8] + "`",
             description="```" + lastCommit.message + "```",
             color=Colors.PRIMARY
         )
