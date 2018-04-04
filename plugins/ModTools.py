@@ -140,36 +140,6 @@ class ModTools:
             color=Colors.SUCCESS
         ))
 
-    @commands.command(name="selfban", brief="Ban your own user permanently")
-    @commands.guild_only()
-    async def selfban(self, ctx: commands.Context, *, reason: str = "No reason provided"):
-        """
-        Request your own user be banned.
-
-        This command may be run by anyone. You may optionally specify a reason for your selfban. All messages in the
-        past day from you will be deleted.
-        """
-
-        if ctx.author.guild_permissions.ban_members:
-            await ctx.send(embed=discord.Embed(
-                title="Moderator Toolkit",
-                description="No matter how bad the world seems, please don't ban yourself using this command. `/ban` "
-                            "works better for moderators.",
-                color=Colors.DANGER
-            ))
-            return
-
-        await ctx.send(embed=discord.Embed(
-            title="Hello darkness my old friend...",
-            url="https://www.youtube.com/watch?v=4zLfCnGVeL4",
-            description="Thank you for using the `/selfban` command. Your user will be banned from the guild in 10 "
-                        "seconds. We wish you the best of luck in the future.",
-            color=0x000000
-        ))
-        await asyncio.sleep(10)
-        await ctx.guild.ban(ctx.author, reason="Self-Ban with reason: {}".format(reason))
-        return
-
     @commands.command(name="warn", brief="Issue an official warning to a user.", enabled=False)
     @commands.has_permissions(ban_members=True)
     async def warn(self, ctx: discord.ext.commands.Context, target: discord.Member, *, reason: str):
