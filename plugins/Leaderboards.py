@@ -31,6 +31,10 @@ class Leaderboards:
         processed_bans = []
         banned_uids = []
 
+        # old : new
+        lb_conf = self._config.get('leaderboard', {})
+        user_map = lb_conf.get('userMap', {})
+
         def process_ban(banned_user_id: int, ban_reason: str, banning_user: discord.User = None):
             if banned_user_id in processed_bans:
                 return
@@ -75,6 +79,12 @@ class Leaderboards:
             for ban in banned_members:
                 process_ban(ban.user.id, ban.reason)
 
+            # process mappings
+            for k in cache.keys():
+                if k in user_map.keys():
+                    cache[user_map[k]] += cache[k]
+                    del cache[k]
+
             # out of ban loop now
             board = sorted(cache.items(), key=lambda x: x[1], reverse=True)[:10]
 
@@ -92,6 +102,21 @@ class Leaderboards:
             embed.set_footer(text="Σ={} | listed={}".format(sum(cache.values()), len(banned_uids)))
 
             await ctx.send(embed=embed)
+
+    @commands.command(name="lbmap", brief="Map one userstring to another")
+    @commands.has_permissions(administrator=True)
+    async def lbmap(self, ctx: commands.Context, map_from: str, map_to: str):
+        lb_conf = self._config.get('leaderboard', {})
+        user_map = lb_conf.get('userMap', {})
+
+        if map_to.lower() == "none":
+            del user_map[map_from]
+        else:
+            user_map[map_from] = map_to
+
+        self._config.set('leaderboard', lb_conf)
+
+        await ctx.send("Mapped {} -> {}".format(map_from, map_to))
 
 
 def setup(bot: discord.ext.commands.Bot):
