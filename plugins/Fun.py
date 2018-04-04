@@ -41,8 +41,15 @@ class Fun:
                            "themselves!*".format(ctx.author.mention))
             return
 
+        # Wolf easter egg (bot or Kaz)
         if user.id in [self.bot.user.id, 142494680158961664]:
             await(ctx.send(Emojis.WOLF + " *I slap {} around with a wolf. The wolf bites, dealing critical damage!*"
+                           .format(ctx.author.mention)))
+            return
+
+        # Dakota easter egg (Chris)
+        if user.id == 341343404887900162:
+            await(ctx.send(Emojis.WOLF + " *{} pets Dakota a bit, and gives him a belly rub and a dog treat.*"
                            .format(ctx.author.mention)))
             return
 

@@ -195,6 +195,7 @@ class ServerLog:
             color=Colors.INFO
         )
 
+        embed.add_field(name="User ID", value=after.id, inline=False)
         embed.add_field(name="Old {}".format(update_type.capitalize()), value=old_val, inline=True)
         embed.add_field(name="New {}".format(update_type.capitalize()), value=new_val, inline=True)
         embed.set_author(name="{}'s {} has changed!".format(after, update_type), icon_url=after.avatar_url)
