@@ -49,7 +49,7 @@ class Fun:
 
         # Dakota easter egg (Chris)
         if user.id == 341343404887900162:
-            await(ctx.send(Emojis.WOLF + " *{} pets Dakota a bit, and gives him a belly rub and a dog treat.*"
+            await(ctx.send(Emojis.DOG + " *{} pets Dakota a bit, and gives him a belly rub and a dog treat.*"
                            .format(ctx.author.mention)))
             return
 

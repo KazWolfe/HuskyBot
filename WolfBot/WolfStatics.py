@@ -51,6 +51,7 @@ class Emojis:
     RED_FLAG = "\uD83D\uDEA9"
     TADA = "\U0001F389"
     REPEAT = "\U0001F501"
+    DOG = "\U0001F436"
 
     # Mod shortcuts
     BAN = NO_ENTRY
