@@ -310,7 +310,7 @@ class AntiSpam:
 
         # gen the embed here
         link_warning = discord.Embed(
-            title="Excessive Linkage D",
+            title="Hey! Listen!",
             description="Hey {}! It looks like you posted a lot of links.\n\n"
                         "In order to cut down on server spam, we have a limitation on the number of links "
                         "you are allowed to have in a time period. Generally, you won't exceed this limit "
