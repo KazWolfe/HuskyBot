@@ -208,10 +208,23 @@ async def on_command_error(ctx, error: commands.CommandError):
             title="Command Handler",
             description="**The command `/{}` could not execute successfully, as the bot does not have a required"
                         "permission.**\nPlease make sure that the bot has the following permissions: "
-                        "`{}`".format(command_name, ', '.join(error.missing_perms))
+                        "`{}`".format(command_name, ', '.join(error.missing_perms)),
+            color=Colors.DANGER
         ))
 
         LOG.error("Bot is missing permissions %s to execute command %s", error.missing_perms, command_name)
+
+    # Handle commands on cooldown
+    elif isinstance(error, commands.CommandOnCooldown):
+        await ctx.send(embed=discord.Embed(
+            title="Command Handler",
+            description="**The command `/{}` has been run too much recently!**\nPlease wait {} seconds until trying "
+                        "again.".format(command_name, error.retry_after),
+            color=Colors.DANGER
+        ))
+
+        LOG.error("Command %s was on cooldown, and is unable to be run for %s seconds. Cooldown: %s", command_name,
+                  error.retry_after, error.cooldown)
 
     # Handle any and all other error cases.
     else:

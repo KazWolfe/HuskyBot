@@ -89,6 +89,7 @@ class Dakota:
 
     @commands.command(name="feed", brief="Give Dakota a bowl of food")
     @commands.cooldown(1, 90, commands.BucketType.guild)
+    @commands.has_permissions(manage_messages=True)
     async def feed(self, ctx: commands.Context):
         food_types = {
             "kibble": 15.0,
@@ -113,6 +114,7 @@ class Dakota:
 
     @commands.command(name="pet", brief="Give Dakota a pet")
     @commands.cooldown(1, 30, commands.BucketType.user)
+    @commands.has_permissions(manage_messages=True)
     async def pet(self, ctx: commands.Context):
         stat = self.edit_stat('happiness', random.gauss(3, 0.1225))
 
@@ -124,6 +126,7 @@ class Dakota:
 
     @commands.command(name="walk", brief="Take Dakota for walkies")
     @commands.cooldown(1, 300, commands.BucketType.guild)
+    @commands.has_permissions(manage_messages=True)
     async def walkies(self, ctx: commands.Context):
         energy = self.edit_stat('energy', -1 * random.gauss(35, 3.525))
         energy_delta = energy['new'] - energy['old']
@@ -145,6 +148,7 @@ class Dakota:
         ))
 
     @commands.command(name="petstats", brief="Check up on Dakota")
+    @commands.has_permissions(manage_messages=True)
     async def stats(self, ctx: commands.Context):
         await ctx.send(embed=self.get_stat_embed(
             title="Stats for Dakota",
