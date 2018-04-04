@@ -109,14 +109,24 @@ class Intelligence:
         """
 
         member = member or ctx.author
-        member_details = discord.Embed(
-            title="User Information for " + member.name + "#" + member.discriminator,
-            color=member.color if member.color is not None else Colors.INFO,
-            description="Currently in **" + str(member.status) + "** mode " + WolfUtils.getFancyGameData(member)
-        )
+
+        if isinstance(member, discord.User):
+            member_details = discord.Embed(
+                title="User Information for " + member.name + "#" + member.discriminator,
+                color=Colors.INFO,
+                description="Currently **not a member of any shared guild!**\nData may be limited."
+            )
+        elif isinstance(member, discord.Member):
+            member_details = discord.Embed(
+                title="User Information for " + member.name + "#" + member.discriminator,
+                color=member.color,
+                description="Currently in **" + str(member.status) + "** mode " + WolfUtils.getFancyGameData(member)
+            )
+        else:
+            raise ValueError("Illegal state!")
 
         roles = []
-        if ctx.guild is not None:
+        if isinstance(member, discord.Member) and ctx.guild is not None:
             for r in member.roles:
                 if r.name == "@everyone":
                     continue
@@ -128,13 +138,13 @@ class Intelligence:
 
         member_details.add_field(name="User ID", value=member.id, inline=True)
 
-        if ctx.guild is not None:
+        if isinstance(member, discord.Member) and ctx.guild is not None:
             member_details.add_field(name="Display Name", value=member.display_name, inline=True)
 
         member_details.add_field(name="Joined Discord", value=member.created_at.strftime(DATETIME_FORMAT), inline=True)
         member_details.set_thumbnail(url=member.avatar_url)
 
-        if ctx.guild is not None:
+        if isinstance(member, discord.Member) and ctx.guild is not None:
             member_details.add_field(name="Joined Guild", value=member.joined_at.strftime(DATETIME_FORMAT), inline=True)
             member_details.add_field(name="Roles", value=", ".join(roles), inline=False)
 
