@@ -41,10 +41,13 @@ class Censor:
 
         censor_config = self._config.get("censors", {})
 
-        censor_list = censor_config.get("global", []) + censor_config.get(str(message.channel.id), []) \
-                      + censor_config.get("user-" + str(message.author.id), [])
+        global_censors = censor_config.get("global", [])
+        channel_censors = censor_config.get(str(message.channel.id), [])
+        user_censors = censor_config.get("user-" + str(message.author.id), [])
 
-        if message.author.permissions_in(message.channel).manage_messages:
+        censor_list = global_censors + channel_censors + user_censors
+
+        if message.author.permissions_in(message.channel).manage_messages and len(user_censors) == 0:
             return
 
         if any((re.search(censor_term, message.content, re.IGNORECASE) is not None) for censor_term in censor_list):
