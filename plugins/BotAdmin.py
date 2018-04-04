@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import socket
 
 import discord
 import git
@@ -14,6 +15,11 @@ LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 
 # noinspection PyMethodMayBeStatic
 class BotAdmin:
+    """
+    The BotAdmin plugin is a mandatory plugin that's required for the bot to operate normally.
+
+    It provides core administrative functions to bot administrators to change configurations and other important values.
+    """
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
         self._config = WolfConfig.getConfig()
@@ -23,6 +29,12 @@ class BotAdmin:
 
     @commands.command(name="about", aliases=["version"], brief="Get basic information about the bot.")
     async def about(self, ctx: discord.ext.commands.Context):
+        """
+        Get basic information about the current running instance of this bot.
+
+        This command returns a quick summary of this bot and its current state.
+        """
+
         repo = git.Repo(search_parent_directories=True)
         sha = repo.head.object.hexsha
 
@@ -38,6 +50,7 @@ class BotAdmin:
                                                   + "`](https://www.github.com/KazWolfe/diy_tech-bot/commit/"
                                                   + sha + ")", inline=True)
         embed.add_field(name="Library Version", value=discord.__version__, inline=True)
+        embed.add_field(name="Current Host", value="`{}`".format(socket.gethostname()), inline=True)
         embed.set_thumbnail(url="https://cdn.discordapp.com/avatars/" + str(ctx.bot.user.id) + "/"
                                 + str(ctx.bot.user.avatar) + ".png")
         embed.set_footer(text="MIT License, © 2018 KazWolfe",
@@ -45,19 +58,26 @@ class BotAdmin:
 
         await ctx.send(embed=embed)
 
-    @commands.group(pass_context=True, brief="Administrative bot control commands.", hidden=True)
+    @commands.group(pass_context=True, brief="Administrative bot control commands.")
     @commands.has_permissions(administrator=True)
     async def admin(self, ctx: discord.ext.commands.Context):
-        if ctx.invoked_subcommand is None:
-            await ctx.send(embed=discord.Embed(
-                title="Bot Manager",
-                description="The command you have requested is not available.",
-                color=Colors.DANGER
-            ))
-            return
+        """
+        Parent command for the BotAdmin module.
+
+        This command does nothing, but it instead acts as the parent to all other commands.
+        """
+
+        pass
 
     @admin.command(name="reloadConfig", brief="Reload the bot's configuration files from disk.")
     async def reloadConfig(self, ctx: discord.ext.commands.Context):
+        """
+        Dump the bot's existing in-memory configuration and reload the config from the disk.
+
+        ANY UNSAVED CHANGES TO THE CONFIGURATION WILL BE DISCARDED! (Note: this is a rare incidence - the bot generally
+        saves its config on any change)
+        """
+
         self._config.load()
         LOG.info("Bot configuration reloaded.")
         await ctx.send(embed=discord.Embed(
@@ -68,6 +88,21 @@ class BotAdmin:
 
     @admin.command(name="load", brief="Temporarily load a plugin into the bot.")
     async def load(self, ctx: discord.ext.commands.Context, plugin_name: str):
+        """
+        Load a plugin (temporarily) into the bot.
+
+        This command will attempt to load the named plugin into the bot's runtime. It will not mark this command as
+        enabled, nor will it allow the plugin to relaunch on start.
+
+        Plugin names are case sensitive, and almost always start with a capital letter.
+
+        See also:
+            /help admin unload   - Temporarily unload a plugin from the bot.
+            /help admin reload   - Unload and reload a plugin from the bot.
+            /help admin enable   - Permanently enable a plugin (load + run on start)
+            /help admin disable  - Permanently disable a plugin (unload + disallow startup execution)
+        """
+
         if plugin_name in ctx.bot.cogs.keys():
             await ctx.send(embed=discord.Embed(
                 title="Plugin Manager",
@@ -100,6 +135,21 @@ class BotAdmin:
 
     @admin.command(name="unload", brief="Temporarily unload a plugin from the bot.")
     async def unload(self, ctx: discord.ext.commands.Context, plugin_name: str):
+        """
+        (Temporarily) unload a plugin from the bot.
+
+        This command will attempt to unload non-critical plugin from the bot. It will not disable a plugin, and will
+        only last until the bot is restarted.
+
+        Plugin names are case sensitive, and almost always start with a capital letter.
+
+        See also:
+            /help admin unload   - Temporarily unload a plugin from the bot.
+            /help admin reload   - Unload and reload a plugin from the bot.
+            /help admin enable   - Permanently enable a plugin (load + run on start)
+            /help admin disable  - Permanently disable a plugin (unload + disallow startup execution)
+        """
+
         if plugin_name == "BotAdmin":
             await ctx.send(embed=discord.Embed(
                 title="Plugin Manager",
@@ -150,6 +200,26 @@ class BotAdmin:
 
     @admin.command(name="reload", brief="Unload and reload a plugin.")
     async def reload(self, ctx: discord.ext.commands.Context, plugin_name: str):
+        """
+        Unload and reload a plugin from the bot.
+
+        This will not enable or disable a command, but it will cause the plugin to re-initialize and reload. This may
+        wipe out configurations/timings for certain plugins, depending on how they save information.
+
+        This command will also cause that plugin's code to be reloaded, allowing dynamic re-execution of code. Note that
+        it will *not* reload imports of the plugin, so a full restart may be required to swap in other code.
+
+        The reload command *will* work with critical modules.
+
+        Plugin names are case sensitive, and almost always start with a capital letter.
+
+        See also:
+            /help admin load     - Temporarily load a plugin from the bot.
+            /help admin unload   - Temporarily unload a plugin from the bot.
+            /help admin enable   - Permanently enable a plugin (load + run on start)
+            /help admin disable  - Permanently disable a plugin (unload + disallow startup execution)
+        """
+
         self.bot.unload_extension(plugin_name)
         LOG.info("Unloaded plugin %s for reload.", plugin_name)
         try:
@@ -173,6 +243,20 @@ class BotAdmin:
 
     @admin.command(name="enable", brief="Enable a plugin to run now and at bot load.")
     async def enable(self, ctx: discord.ext.commands.Context, plugin_name: str):
+        """
+        Load a plugin into the bot, and mark it as auto-load.
+
+        This command will attempt to load a plugin into the bot, and then mark it for automatic load on bot start. This
+        should be used when a plugin is desired to permanently run alongside the bot.
+
+        Plugin names are case sensitive, and almost always start with a capital letter.
+
+        See also:
+            /help admin load     - Temporarily load a plugin from the bot.
+            /help admin unload   - Temporarily unload a plugin from the bot.
+            /help admin reload   - Unload and reload a plugin from the bot.
+            /help admin disable  - Permanently disable a plugin (unload + disallow startup execution)
+        """
         config = self._config.get('plugins', [])
 
         if plugin_name in config:
@@ -208,6 +292,20 @@ class BotAdmin:
 
     @admin.command(name="disable", brief="Disable a plugin from running at bot load. Also stops the plugin.")
     async def disable(self, ctx: discord.ext.commands.Context, plugin_name: str):
+        """
+        Unload a plugin from the bot, and prevent it from auto-loading
+
+        This command will unload a currently active plugin, and additionally mark it as "disabled", preventing it from
+        automatically executing at bot startup. The plugin may still be manually loaded using /admin load.
+
+        Plugin names are case sensitive, and almost always start with a capital letter.
+
+        See also:
+            /help admin load     - Temporarily load a plugin from the bot.
+            /help admin unload   - Temporarily unload a plugin from the bot.
+            /help admin reload   - Unload and reload a plugin from the bot.
+            /help admin enable   - Permanently enable a plugin (load + run on start)
+        """
         if plugin_name == "BotAdmin":
             await ctx.send(embed=discord.Embed(
                 title="Plugin Manager",
@@ -252,6 +350,18 @@ class BotAdmin:
 
     @admin.command(name="log", aliases=["logs"], brief="See the bot's current log.")
     async def log(self, ctx: discord.ext.commands.Context, lines: int = 10):
+        """
+        Extract a segment of the bot's current log file.
+
+        This command takes an optional parameter (lines) which can be used to seek back in the bot's log file by a
+        certain number of lines.
+
+        This command has a limited output of 2000 characters, so the log may be trimmed. This allows for administrators
+        to creatively abuse the lines function to get basic pagination.
+
+        WARNING: The log command may reveal some sensitive information about bot execution!
+        """
+
         log_file = self._session_store.get('logPath')
 
         if log_file is None:

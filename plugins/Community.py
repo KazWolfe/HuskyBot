@@ -10,6 +10,12 @@ LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 
 
 class Community:
+    """
+    The Community plugin gives users the ability to get information about the community itself.
+
+    This plugin is meant to inform users about staff, policies, rules, changes, etc. Basically, it answers questions to
+    keep mods from actually talking to users.
+    """
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
         self._config = WolfConfig.getConfig()

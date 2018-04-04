@@ -13,6 +13,11 @@ LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 
 
 class Fun:
+    """
+    Useless plugin.
+
+    // ToDo: Delete this.
+    """
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
         self._config = WolfConfig.getConfig()

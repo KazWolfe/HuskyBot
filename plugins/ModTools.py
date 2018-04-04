@@ -17,6 +17,15 @@ LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 
 # noinspection PyMethodMayBeStatic,PyUnresolvedReferences
 class ModTools:
+    """
+    ModTools is a plugin that provides a set of core moderator tools to guilds running WolfBot.
+
+    It includes such features as kick, ban, mute, warn, cleanup, and the like.
+
+    Commands here are generally restricted to actual moderators (as determined by server permissions). For detailed help
+    about various aspects of this plugin, please see the individual help commands.
+    """
+
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
         self._config = WolfConfig.getConfig()

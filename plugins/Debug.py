@@ -13,6 +13,15 @@ LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 
 # noinspection PyMethodMayBeStatic
 class Debug:
+    """
+    This is the debug module. It's used to debug the bot. It's meant for developers only. If you're not a developer,
+    don't touch this. You will break things and you will get yelled at.
+
+    If you do not know how to use this plugin, you have no place using it. Seriously, this isn't an insult to your
+    intelligence or anything. There are just *no* checks for any of these commands, no safeties. It is dangerously
+    easy to completely and possibly permanently cripple the bot with these commands.
+    """
+
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
         self._config = WolfConfig.getConfig()
@@ -27,7 +36,7 @@ class Debug:
     @debug.command(name="dumpConfig", brief="Dump the bot's active configuration.")
     async def dumpConfig(self, ctx: discord.ext.commands.Context):
         """
-        Debug commands have no help. If you need help running a debug command, just don't. Fuck off.
+        Debug commands have no help. If you need help running a debug command, just don't.
         """
 
         config = str(self._config.dump())
@@ -51,7 +60,7 @@ class Debug:
     async def forceReact(self, ctx: discord.ext.commands.Context, channel: discord.TextChannel, message: int,
                          reaction: str):
         """
-        Debug commands have no help. If you need help running a debug command, just don't. Fuck off.
+        Debug commands have no help. If you need help running a debug command, just don't.
         """
 
         target_message = await channel.get_message(message)
@@ -61,7 +70,7 @@ class Debug:
     @debug.command(name="echo", brief="Repeat the message back to the current channel.")
     async def echo(self, ctx: discord.ext.commands.Context, *, message: str):
         """
-        Debug commands have no help. If you need help running a debug command, just don't. Fuck off.
+        Debug commands have no help. If you need help running a debug command, just don't.
         """
 
         await ctx.send(message)
@@ -69,7 +78,7 @@ class Debug:
     @debug.command(name="richEcho", brief="Echo text in a rich embed")
     async def rich_echo(self, ctx: commands.Context, *, message: str):
         """
-        Debug commands have no help. If you need help running a debug command, just don't. Fuck off.
+        Debug commands have no help. If you need help running a debug command, just don't.
         """
 
         obj = json.loads(message)
@@ -81,7 +90,7 @@ class Debug:
     @debug.command(name="forceExcept", brief="Force an exception (useful for testing purposes)")
     async def forceExcept(self, ctx: discord.ext.commands.Context):
         """
-        Debug commands have no help. If you need help running a debug command, just don't. Fuck off.
+        Debug commands have no help. If you need help running a debug command, just don't.
         """
 
         raise Exception("Random exception that was requested!")
@@ -91,7 +100,7 @@ class Debug:
     @commands.has_permissions(administrator=True)
     async def secho(self, ctx: discord.ext.commands.Context, *, message: str):
         """
-        Debug commands have no help. If you need help running a debug command, just don't. Fuck off.
+        Debug commands have no help. If you need help running a debug command, just don't.
         """
 
         await ctx.message.delete()
@@ -102,7 +111,7 @@ class Debug:
     @commands.has_permissions(administrator=True)
     async def sendmsg(self, ctx: discord.ext.commands.Context, channel: discord.TextChannel, *, message: str):
         """
-        Debug commands have no help. If you need help running a debug command, just don't. Fuck off.
+        Debug commands have no help. If you need help running a debug command, just don't.
         """
 
         await channel.send(message)
@@ -111,7 +120,7 @@ class Debug:
     @commands.has_permissions(administrator=True)
     async def evalcmd(self, ctx: discord.ext.commands.Context, *, expr: str):
         """
-        Debug commands have no help. If you need help running a debug command, just don't. Fuck off.
+        Debug commands have no help. If you need help running a debug command, just don't.
         """
 
         # Block *everyone* except Kaz from running eval

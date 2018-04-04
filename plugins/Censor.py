@@ -14,6 +14,17 @@ LOG = logging.getLogger("DiyBot.Plugin." + __name__)
 
 # noinspection PyMethodMayBeStatic
 class Censor:
+    """
+    The Censor plugin allows moderators to lighten their workload and allow the bot to take care of menial and
+    repetitive moderation actions.
+
+    Message filtering is done relatively early in the event chain, so messages tend to be deleted fairly quickly.
+
+    There are two types of censors: Channel Censors, and Global Censors. Channel censors are restricted to a single
+    channel, and are configured on a per-channel basis. Global censors apply to all channels in any given guild.
+
+    Censors can take either plain text (that is, a single word) or regular expressions.
+    """
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
         self._config = WolfConfig.getConfig()
@@ -61,10 +72,24 @@ class Censor:
     @commands.group(name="censor", brief="Manage the Censor list for the guild")
     @commands.has_permissions(manage_messages=True)
     async def censor(self, ctx: commands.Context):
+        """
+        The parent command for the Censor module.
+
+        This command doesn't do anything - it's merely the entrypoint to everything else censor-related.
+        """
         pass
 
     @censor.command(name="list", brief="List all Censors for a channel")
     async def listChannel(self, ctx: commands.Context, channel: discord.TextChannel = None):
+        """
+        List the censor terms in a given channel.
+
+        This command takes one optional argument - a channel identifier (ID, #mention, or name). If this is not
+        specified, the current channel is used.
+
+        Censors in this list apply only to the specified channel. to edit the list, see /help censor
+        """
+
         censor_config = self._config.get("censors", {})
 
         if channel is None:
@@ -80,6 +105,12 @@ class Censor:
 
     @censor.command(name="globallist", brief="List all Censors in the global list", aliases=["glist"])
     async def listGlobal(self, ctx: commands.Context):
+        """
+        List the censor terms in the global list.
+
+        Censors in the global list apply to the entire server. To edit the censor list, see /help censor.
+        """
+
         censor_config = self._config.get("censors", {})
         censor_list = censor_config.setdefault("global", [])
 
@@ -92,6 +123,13 @@ class Censor:
     @censor.command(name="add", brief="Add a Censor to a channel")
     @WolfChecks.has_server_permissions(manage_messages=True)
     async def addChannel(self, ctx: commands.Context, channel: discord.TextChannel, *, censor: str):
+        """
+        Add a censor to the channel list.
+
+        This command takes two arguments - a mandatory channel identifier (ID, #mention, name) and the censor text. The
+        censor text may be a single word or a Python regular expression.
+        """
+
         censor_config = self._config.get("censors", {})
         censor_list = censor_config.setdefault(str(channel.id), [])
 
@@ -116,6 +154,13 @@ class Censor:
     @censor.command(name="globaladd", brief="Add a Censor to the global list", aliases=["gadd"])
     @WolfChecks.has_server_permissions(manage_messages=True)
     async def addGlobal(self, ctx: commands.Context, *, censor: str):
+        """
+        Add a censor to the global list
+
+        This command takes a single mandatory argument - the censor text. This may be a single word or a Python regular
+        expression.
+        """
+
         censor_config = self._config.get("censors", {})
         censor_list = censor_config.setdefault('global', [])
 
@@ -140,6 +185,13 @@ class Censor:
     @censor.command(name="remove", brief="Remove a censor from a channel")
     @WolfChecks.has_server_permissions(manage_messages=True)
     async def removeChannel(self, ctx: commands.Context, channel: discord.TextChannel, *, censor: str):
+        """
+        Remove a censor from a channel list.
+
+        This command takes two arguments - a mandatory channel identifier (ID, #mention, name) and the censor text. The
+        censor text must be *exactly* as it is stored in the server configuration for the deletion to be successful.
+        """
+
         censor_config = self._config.get("censors", {})
         censor_list = censor_config.setdefault(str(channel.id), [])
 
@@ -163,6 +215,13 @@ class Censor:
 
     @censor.command(name="globalremove", brief="Remove a censor from the global list", aliases=["gremove"])
     async def removeGlobal(self, ctx: commands.Context, *, censor: str):
+        """
+        Remove a censor from a the global list.
+
+        This command takes only one argument - the censor text. This must be *exactly* as it is stored in the server
+        configuration for the deletion to be successful.
+        """
+
         censor_config = self._config.get("censors", {})
         censor_list = censor_config.setdefault('global', [])
 
