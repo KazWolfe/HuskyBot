@@ -73,8 +73,42 @@ class AutoFlag:
                 LOG.info("Got flagged message (context %s, key %s, from %s in %s): %s", context,
                          message.author, flag_term, message.channel, message.content)
 
+    async def filter_user(self, message: discord.Message):
+        flag_users = self._config.get("flaggedUsers", [])
+
+        alert_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_ALERTS.value, None)
+        if alert_channel is not None:
+            alert_channel = self.bot.get_channel(alert_channel)  # type: discord.TextChannel
+
+        if not isinstance(message.channel, discord.TextChannel):
+            return
+
+        if not WolfUtils.should_process_message(message):
+            return
+
+        if message.author.id in flag_users:
+            embed = discord.Embed(
+                title=Emojis.RED_FLAG + " Message autoflag raised!",
+                description="A message from flagged user {} was detected and has been raised to staff. "
+                            "Please investigate.".format(message.author.mention),
+                color=Colors.WARNING
+            )
+
+            embed.add_field(name="Message Content", value=message.content, inline=False)
+            embed.add_field(name="Message ID", value=message.id, inline=True)
+            embed.add_field(name="Channel", value=message.channel.mention, inline=True)
+            embed.add_field(name="User ID", value=message.author.id, inline=True)
+            embed.add_field(name="Message Timestamp", value=message.created_at.strftime(DATETIME_FORMAT),
+                            inline=True)
+
+            if alert_channel is not None:
+                await alert_channel.send(embed=embed, delete_after=self._delete_time)
+
+            LOG.info("Got user flagged message (from %s in %s): %s", message.author, message.channel, message.content)
+
     async def on_message(self, message):
         await self.filter_message(message)
+        await self.filter_user(message)
 
     # noinspection PyUnusedLocal
     async def on_message_edit(self, before, after):
@@ -169,6 +203,71 @@ class AutoFlag:
         await ctx.send(embed=discord.Embed(
             title="Autoflag Plugin",
             description="The following regexes are autoflagged:\n- `{}`".format(fr),
+            color=Colors.INFO
+        ))
+
+    @autoflag.command(name="useradd", brief="Add a flag for any message from a user", aliases=["uadd"])
+    async def useradd(self, ctx: commands.Context, user: discord.Member):
+        flag_users = self._config.get("flaggedUsers", [])
+
+        if user.id in flag_users:
+            await ctx.send(embed=discord.Embed(
+                title="Autoflag Plugin",
+                description="The user {} is already autoflagged.".format(user),
+                color=Colors.WARNING
+            ))
+            return
+
+        flag_users.append(user.id)
+
+        self._config.set('flaggedUsers', flag_users)
+
+        await ctx.send(embed=discord.Embed(
+            title="Autoflag Plugin",
+            description="The user `{}` has been added to the autoflag list.".format(user),
+            color=Colors.SUCCESS
+        ))
+
+    @autoflag.command(name="userremove", brief="Add a flag for any message from a user", aliases=["uremove"])
+    async def userremove(self, ctx: commands.Context, user: discord.Member):
+        flag_users = self._config.get("flaggedUsers", [])
+
+        if user.id not in flag_users:
+            await ctx.send(embed=discord.Embed(
+                title="Autoflag Plugin",
+                description="The user {} is not autoflagged.".format(user),
+                color=Colors.WARNING
+            ))
+            return
+
+        flag_users.remove(user.id)
+
+        self._config.set('flaggedUsers', flag_users)
+
+        await ctx.send(embed=discord.Embed(
+            title="Autoflag Plugin",
+            description="The user `{}` has been removed from the autoflag list.".format(user),
+            color=Colors.SUCCESS
+        ))
+
+    @autoflag.command(name="userlist", brief="List all regexes in the autoflag config", aliases=["ulist"])
+    async def userlist(self, ctx: commands.Context):
+        """
+        List all defined autoflags registered with the bot.
+
+        This command will attempt to return a separated list of all known regexes that the bot has registered in the
+        autoflag database. All regexes in this list will generate a staff alert.
+        """
+
+        flag_users = self._config.get("flaggedUsers", [])
+
+        sep = '`\n- `'
+
+        fr = sep.join(map(str, flag_users))
+
+        await ctx.send(embed=discord.Embed(
+            title="Autoflag Plugin",
+            description="The following user IDs are autoflagged:\n- `{}`".format(fr),
             color=Colors.INFO
         ))
 
