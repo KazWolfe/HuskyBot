@@ -113,8 +113,7 @@ class Fun:
         await ctx.send("*{} gives {} a hug. Aww!*".format(ctx.author.mention, target.mention))
 
     @commands.command(name="rate", brief="Rate another user based on attractiveness, craziness, and intelligence")
-    @commands.has_permissions(view_audit_log=True)
-    async def rate_user(self, ctx: commands.Context, member: discord.User):
+    async def rate_user(self, ctx: commands.Context, member: discord.User = None):
         """
         The ultimate command for narcissists! Rate yourself or another member of the guild!
 
@@ -126,13 +125,16 @@ class Fun:
         Please note that this algorithm is very complicated and results may not be 100% accurate.
         """
 
+        if member is None:
+            member = ctx.author
+
         hardcoded_users = {
             250356727814291456: {"a": 8.74, "c": 3.53, "i": 8.52, "otp": "<@341343404887900162>"},  # Skag
             341343404887900162: {"a": 8.21, "c": 3.31, "i": 9.38, "otp": "<@250356727814291456>"},  # Chris
-            142494680158961664: {"a": 4.26, "c": 3.17, "i": 6.95, "otp": "a wolf"},  # Kaz
+            142494680158961664: {"a": 4.26, "c": 3.17, "i": 6.95, "otp": "a wolfgirl"},  # Kaz
             84374504964358144: {"a": 4.94, "c": 6.17, "i": 7.79, "otp": "DIY Tech"},  # Clover
             336301511942340608: {"a": 6.97, "c": 5.99, "i": 7.50, "otp": "turtles"},  # Court
-            237569958903545857: {"a": 2.01, "c": 10.0, "i": 1.74, "otp": "`NullPointerException`"}  # Squeegee
+            237569958903545857: {"a": 1.01, "c": 10.0, "i": 1.74, "otp": "`NullPointerException`"}  # Squeegee
         }
 
         seed = 736793  # Chris and Skag
