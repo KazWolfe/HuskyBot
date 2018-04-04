@@ -40,7 +40,7 @@ class BotAdmin:
         sha = repo.head.object.hexsha
 
         embed = discord.Embed(
-            title="DakotaBot" + " [DEBUG MODE]" if self._debugmode else "",
+            title="DakotaBot" + (" [DEBUG MODE]" if self._debugmode else ""),
             description="This is DakotaBot, a fork of the WolfBot core Discord bot platform. It is responsible for "
                         "managing and assisting the moderators on the DIY Tech subreddit.",
             color=Colors.INFO
