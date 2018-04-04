@@ -141,7 +141,8 @@ class Fun:
             142494680158961664: {"a": 4.26, "c": 3.17, "i": 6.95, "otp": "a wolfgirl"},  # Kaz
             84374504964358144: {"a": 4.94, "c": 6.17, "i": 7.79, "otp": "DIY Tech"},  # Clover
             336301511942340608: {"a": 6.97, "c": 5.99, "i": 7.50, "otp": "turtles"},  # Court
-            237569958903545857: {"a": 1.01, "c": 10.0, "i": 1.74, "otp": "`NullPointerException`"}  # Squeegee
+            237569958903545857: {"a": 1.01, "c": 10.0, "i": 1.74, "otp": "`NullPointerException`"},  # Squeegee
+            163973930187489280: {"a": 0, "c": 10.0, "i": 0}  # mseys
         }
 
         seed = 736793  # Chris and Skag
@@ -198,7 +199,7 @@ class Fun:
                         value=str(Emojis.BOOK * round(intelligence / 2)) + " ({})".format(intelligence),
                         inline=False)
 
-        if member.id in hardcoded_users.keys():
+        if member.id in hardcoded_users.keys() and hardcoded_users[member.id].get('otp') is not None:
             embed.add_field(name="Detected OTP",
                             value="User is shipped with ***{}***".format(hardcoded_users[member.id]['otp']),
                             inline=False
