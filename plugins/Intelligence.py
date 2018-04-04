@@ -157,7 +157,7 @@ class Intelligence:
         await ctx.send(embed=member_details)
 
     @commands.command(name="avatar", brief="Get a link/high-resolution version of a user's avatar")
-    async def avatar(self, ctx: commands.Context, user: discord.User = None):
+    async def avatar(self, ctx: commands.Context, *, user: discord.User = None):
         """
         Get a high-resolution version of a user's avatar.
 
