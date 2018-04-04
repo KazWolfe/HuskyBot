@@ -72,7 +72,7 @@ class Community:
             return
 
         rule_embed = discord.Embed(
-            title=Emojis.BOOKMARK2 + "Guild Rules for {}".format(ctx.guild.name),
+            title=Emojis.BOOKMARK2 + " Guild Rules for {}".format(ctx.guild.name),
             description="The following rules have been defined by the staff members. Please make sure you understand "
                         "them before participating.",
             color=Colors.INFO
@@ -173,6 +173,29 @@ class Community:
             color=Colors.SUCCESS
         ))
 
+    @rules.command(name="move", brief="Move a rule")
+    @commands.has_permissions(administrator=True)
+    async def move_rule(self, ctx: commands.Context, old_index: int, new_index: int):
+        rules_list = self._config.get("guildRules", [])
+
+        try:
+            rules_list.insert(new_index, rules_list.pop(old_index))
+        except KeyError:
+            await ctx.send(embed=discord.Embed(
+                title="Guild Rule Move Failed",
+                description="Could not move the rule!",
+                color=Colors.SUCCESS
+            ))
+            return
+
+        self._config.set("guildRules", rules_list)
+
+        await ctx.send(embed=discord.Embed(
+            title="Guild Rule Location Updated!",
+            description="Your rule has been successfully moved.",
+            color=Colors.SUCCESS
+        ))
+
     @commands.group(name="invite", brief="Get this guild's invite link")
     async def get_invite(self, ctx: commands.Context):
         if ctx.invoked_subcommand is not None:
@@ -191,7 +214,7 @@ class Community:
             invite = await ctx.guild.vanity_invite()
             invite_url = invite.url
 
-            invite_url.replace("http", "https")
+            invite_url = invite_url.replace("http", "https")
         except discord.HTTPException:
             invite_fragment = self._config.get("inviteKey")
 

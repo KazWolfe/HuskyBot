@@ -66,6 +66,7 @@ class Updater:
         LOG.info("Bot is going down for update restart!")
         self._config.set("restartNotificationChannel", ctx.channel.id)
         self._config.set("restartReason", "update")
+        ctx.trigger_typing()
         await ctx.bot.logout()
 
     @commands.command(name="changelog", brief="Get the Git changelog for the bot's current version")
