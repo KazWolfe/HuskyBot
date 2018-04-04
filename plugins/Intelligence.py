@@ -138,12 +138,17 @@ class Intelligence:
         message_count = 0
         search_channels = []
 
+        logging_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
+
         now = datetime.datetime.utcnow()
         search_start = now - timedelta
 
         async with ctx.typing():
             if context.lower() == "all":
                 for channel in ctx.guild.text_channels:
+                    if channel.id == logging_channel:
+                        continue
+
                     search_channels.append(channel)
 
             elif context.lower() == "public":

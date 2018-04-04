@@ -1,3 +1,4 @@
+import datetime
 import re
 
 import discord
@@ -55,7 +56,7 @@ class OfflineMemberConverter(commands.MemberConverter):
         return result
 
 
-class DateDiffConverter(commands.Converter):
+class DateDiffConverter(datetime.timedelta, commands.Converter):
     async def convert(self, ctx: commands.Context, argument: str):
         if argument in ["0", "perm", "permanent", "inf", "infinite", "-"]:
             return None
