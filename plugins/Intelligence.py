@@ -1,9 +1,11 @@
+import datetime
 import logging
 
 import discord
 from discord.ext import commands
 
 from WolfBot import WolfConfig
+from WolfBot import WolfConverters
 from WolfBot import WolfUtils
 from WolfBot.WolfStatics import *
 
@@ -108,6 +110,72 @@ class Intelligence:
         embed.set_image(url=user.avatar_url)
 
         await ctx.send(embed=embed)
+
+    @commands.command(name="msgcount", brief="Get a count of messages in a given context")
+    @commands.has_permissions(manage_messages=True)
+    async def message_count(self, ctx: commands.Context, context: str, timedelta: WolfConverters.DateDiffConverter):
+        """
+        Get a count of messages in any given context.
+
+        A context/area is defined as a single channel, the keyword "all", or the keyword "public". If a channel name is
+        specified, only that channel will be searched. "all" will attempt to search every channel that exists in the
+        guild. "public" will search every channel in the guild that can be seen by the @everyone user.
+
+        Timedelta is a time string formatted in 00d00h00m00s format. This may only be used to search back.
+
+        CAVEATS: It is important to know that this is a *slow* command, because it needs to iterate over every message
+        in the search channels in order to successfully operate. Because of this, the "Typing" indicator will display.
+        Also note that this command may not return accurate results due to the nature of the search system. It should be
+        used for approximation only.
+
+        Example commands:
+
+        /msgcount public 7d   - Get a count of all public messages in the last 7 days
+        /msgcount all 2d      - Get a count of all messages in the last two days.
+        /msgcount #general 5h - Get a count of all messages in #general within the last 5 hours.
+        """
+
+        message_count = 0
+        search_channels = []
+
+        now = datetime.datetime.utcnow()
+        search_start = now - timedelta
+
+        async with ctx.typing():
+            if context.lower() == "all":
+                for channel in ctx.guild.text_channels:
+                    search_channels.append(channel)
+
+            elif context.lower() == "public":
+                if not ctx.guild.default_role:
+                    await ctx.send(embed=discord.Embed(
+                        title="Intelligence Toolkit Error",
+                        description="There do not appear to be any public channels in this server.",
+                        color=Colors.DANGER
+                    ))
+                    return
+
+                for channel in ctx.guild.text_channels:
+                    if not channel.overwrites_for(ctx.guild.default_role).read_messages:
+                        continue
+
+                    search_channels.append(channel)
+            else:
+                converter = commands.TextChannelConverter()
+                search_channels.append(await converter.convert(ctx, context))
+
+            for channel in search_channels:
+                hist = channel.history(limit=None, after=search_start)
+
+                async for m in hist:
+                    message_count += 1
+
+            await ctx.send(embed=discord.Embed(
+                title="Message Count Report",
+                description="Since **`{} UTC`**, the channel context **`{}`** has seen about **`{}`** messages."
+                    .format(search_start.strftime(DATETIME_FORMAT), context, message_count),
+                color=Colors.INFO
+            ))
 
 
 def setup(bot: discord.ext.commands.Bot):
