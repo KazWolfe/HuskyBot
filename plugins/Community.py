@@ -85,8 +85,7 @@ class Community:
             return
 
         try:
-            raw_message = ctx.message.content
-            rule_num = int(raw_message.split(' ')[1])
+            rule_num = int(ctx.message.content.split(' ')[1])
         except IndexError:
             rule_num = None
         except ValueError:
@@ -96,7 +95,7 @@ class Community:
 
         if rule_num is not None:
             try:
-                rule = rule_list[rule_num]
+                rule = rule_list[rule_num - 1]
             except IndexError:
                 await ctx.send(embed=discord.Embed(
                     title="Guild Rules",

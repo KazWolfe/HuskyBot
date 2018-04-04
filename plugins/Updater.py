@@ -80,7 +80,7 @@ class Updater:
         await ctx.send(embed=discord.Embed(
             title="Bot Manager",
             description="The bot's code has been updated from `" + current_sha[:8]
-                        + "`to [`" + new_sha[:8] + "`](https://www.github.com/KazWolfe/diy_tech-bot/commit/" + new_sha
+                        + "` to [`" + new_sha[:8] + "`](https://www.github.com/KazWolfe/diy_tech-bot/commit/" + new_sha
                         + ") Please wait while the bot restarts...",
             color=Colors.SUCCESS
         ))
