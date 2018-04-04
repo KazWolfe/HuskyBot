@@ -20,10 +20,17 @@ class Censor:
 
     Message filtering is done relatively early in the event chain, so messages tend to be deleted fairly quickly.
 
-    There are two types of censors: Channel Censors, and Global Censors. Channel censors are restricted to a single
-    channel, and are configured on a per-channel basis. Global censors apply to all channels in any given guild.
+    There are three types of censors:
 
-    Censors can take either plain text (that is, a single word) or regular expressions.
+    - Global Censors: As the name implies, a global censor applies to every channel in the configured guild. These
+      messages are deleted by the bot no matter where they are.
+    - Channel Censors: These censors only take effect in the defined channel. This allows for lower-level censor
+      management and prevents the bot from being as strict.
+    - User Censors: These censors apply only to a specific user, but they apply globally. Unlike the other two censors,
+      staff members are not permitted to bypass them.
+
+    Censors can take either plain text (that is, a single word) or regular expressions. All censors are evaluated as
+    regular expressions.
     """
 
     def __init__(self, bot: discord.ext.commands.Bot):
@@ -47,8 +54,11 @@ class Censor:
 
         censor_list = global_censors + channel_censors + user_censors
 
-        if message.author.permissions_in(message.channel).manage_messages and len(user_censors) == 0:
-            return
+        if message.author.permissions_in(message.channel).manage_messages:
+            if len(user_censors) > 0:
+                censor_list = user_censors
+            else:
+                return
 
         if any((re.search(censor_term, message.content, re.IGNORECASE) is not None) for censor_term in censor_list):
             await message.delete()
@@ -66,9 +76,11 @@ class Censor:
     @commands.has_permissions(manage_messages=True)
     async def censor(self, ctx: commands.Context):
         """
-        The parent command for the Censor module.
+        The parent command for the Censor plugin.
 
         This command doesn't do anything - it's merely the entrypoint to everything else censor-related.
+
+        If you would like to see documentation on the Censor plugin, see `/help Censor`.
         """
         pass
 
