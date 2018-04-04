@@ -216,6 +216,9 @@ class MuteManager:
 
         self.__cache__.remove(mute)
 
+        old_reason = mute.reason
+        old_expiry = mute.expiry
+
         if reason is not None:
             mute.reason = reason
 
@@ -227,6 +230,35 @@ class MuteManager:
         self.__cache__.insert(pos, mute)
         self.__cache__.sort(key=lambda m: m.expiry if m.expiry else 10 * 100)
         self._mute_config.set("mutes", self.__cache__)
+
+        alert_channel = self._bot_config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
+        if alert_channel is not None:
+            alert_channel = self._bot.get_channel(alert_channel)
+
+            member = self._bot.get_guild(mute.guild).get_member(mute.user_id)
+
+            mute_context = "the guild" if mute.channel is None else str(self._bot.get_channel(mute.channel))
+
+            embed = discord.Embed(
+                description="User ID `{}`'s mute from {} was updated.".format(mute.user_id, mute_context),
+                color=Colors.WARNING
+            )
+
+            embed.set_author(name="{}'s mute updated!".format(member),
+                             icon_url=member.avatar_url)
+
+            if old_reason != reason:
+                embed.add_field(name="Old Reason", value=old_reason, inline=False)
+                embed.add_field(name="New Reason", value=mute.reason, inline=False)
+
+            if old_expiry != expiry:
+                embed.add_field(name="Old Expiry", value=old_expiry, inline=True)
+                embed.add_field(name="New Expiry", value=datetime.datetime.fromtimestamp(mute.expiry)
+                                .strftime(DATETIME_FORMAT) if mute.expiry is not None else "Never", inline=True)
+
+            embed.add_field(name="Timestamp", value=WolfUtils.get_timestamp(), inline=True)
+
+            await alert_channel.send(embed=embed)
 
     def cleanup(self):
         if self.__task__ is not None:

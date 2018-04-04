@@ -219,7 +219,7 @@ class Fun:
         This command takes two arguments, a Channel (ID, mention, or name) and a message to send.
 
         The targeted channel will receive a message from DakotaBot containing exactly the text as entered in the
-        message.
+            message.
         """
 
         await channel.send(message)

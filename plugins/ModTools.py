@@ -194,7 +194,7 @@ class ModTools:
             pretty_string = ""
         else:
             mute_until = datetime.datetime.utcnow() + time
-            pretty_string = "\nTheir mute will expire at {} UTC".format(mute_until.strftime(DATETIME_FORMAT))
+            pretty_string = "Their mute will expire at {} UTC".format(mute_until.strftime(DATETIME_FORMAT))
             mute_until = int(mute_until.timestamp())
 
         # Try to find a mute from this user
@@ -205,7 +205,7 @@ class ModTools:
 
             await ctx.send(embed=discord.Embed(
                 title=Emojis.MUTE + " {}'s mute for #{} was updated!".format(target, ctx.channel),
-                description="User has been muted from the channel.{}".format(pretty_string),
+                description="User's mute for this channel has been updated.\n\n{}".format(pretty_string),
                 color=Colors.WARNING
             ))
             return
@@ -214,7 +214,7 @@ class ModTools:
 
         await ctx.send(embed=discord.Embed(
             title=Emojis.MUTE + " {} muted from {}!".format(target, "#" + str(ctx.channel)),
-            description="User has been muted from this channel.{}".format(pretty_string),
+            description="User has been muted from this channel.\n\n{}".format(pretty_string),
             color=Colors.WARNING
         ))
 
@@ -245,7 +245,7 @@ class ModTools:
             pretty_string = ""
         else:
             mute_until = datetime.datetime.utcnow() + time
-            pretty_string = "\nTheir mute will expire at {} UTC".format(mute_until.strftime(DATETIME_FORMAT))
+            pretty_string = "Their mute will expire at {} UTC".format(mute_until.strftime(DATETIME_FORMAT))
             mute_until = int(mute_until.timestamp())
 
         # Try to find a mute from this user
@@ -256,7 +256,7 @@ class ModTools:
 
             await ctx.send(embed=discord.Embed(
                 title=Emojis.MUTE + " {}'s guild mute was updated!".format(target),
-                description="User has been muted from the guild.{}".format(pretty_string),
+                description="User's mute from this guild has been updated.\n\n{}".format(pretty_string),
                 color=Colors.WARNING
             ))
             return
@@ -265,7 +265,7 @@ class ModTools:
 
         await ctx.send(embed=discord.Embed(
             title=Emojis.MUTE + " {} muted from the guild!".format(target),
-            description="User has been muted from the guild.{}".format(pretty_string),
+            description="User has been muted from the guild.\n\n{}".format(pretty_string),
             color=Colors.WARNING
         ))
 
@@ -424,6 +424,54 @@ class ModTools:
             return dynamic_check
 
         await ctx.channel.purge(limit=lookback + 1, check=generate_cleanup_filter(), bulk=True)
+
+    @commands.command(name="editban", brief="Edit a banned user's reason")
+    @commands.has_permissions(ban_members=True)
+    async def editban(self, ctx: commands.Context, user: WolfConverters.OfflineUserConverter, *, reason: str):
+        # hack for PyCharm (duck typing)
+        user = user  # type: discord.User
+
+        ban_entry = discord.utils.get(await ctx.guild.bans(), user=user)
+
+        if ban_entry is None:
+            await ctx.send(embed=discord.Embed(
+                title="Moderator Toolkit",
+                description="User `{}` is not banned, so the ban can't be reworded.".format(user),
+                color=Colors.DANGER
+            ))
+            return
+
+        old_reason = ban_entry.reason
+
+        if old_reason is None:
+            old_reason = "<No ban reason provided>"
+
+        # see if this looks like a wolfbot ban message
+        if re.match(r'\[.*By .*] .*', old_reason):
+            reason = old_reason.split('] ', 1)[0] + '] ' + reason + " (edited by {})".format(ctx.author)
+        else:
+            reason = "[Non-Bot Ban] {} (edited by {})".format(reason, ctx.author)
+
+        await ctx.guild.unban(user, reason="Ban reason edit by {}".format(ctx.author))
+        await ctx.guild.ban(user, reason=reason, delete_message_days=0)
+
+        embed = discord.Embed(
+            description="A ban reason change was requested by {}.".format(ctx.author),
+            color=Colors.SUCCESS
+        )
+
+        embed.set_author(name="Ban Reason for {} Updated".format(user), icon_url=user.avatar_url)
+
+        embed.add_field(name="Old Ban Reason", value=old_reason, inline=False)
+        embed.add_field(name="New Ban Reason", value=reason, inline=False)
+
+        await ctx.send(embed=embed)
+
+        # send a message to logs too
+        alert_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
+        if alert_channel is not None:
+            alert_channel = self.bot.get_channel(alert_channel)  # type: discord.TextChannel
+            await alert_channel.send(embed=embed)
 
 
 def setup(bot: discord.ext.commands.Bot):
