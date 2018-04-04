@@ -238,10 +238,9 @@ class MuteManager:
         if expiry is not None:
             mute.expiry = expiry
 
-        # Update cache
-        self.__cache__.append(mute)
-
-        # Update the disk
+        # Update cache and disk
+        pos = WolfUtils.get_sort_index(self.__cache__, mute, 'expiry')
+        self.__cache__.insert(pos, mute)
         self._mute_config.set("mutes", self.__cache__)
 
     async def cleanup(self):
