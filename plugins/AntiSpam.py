@@ -112,7 +112,11 @@ class AntiSpam:
                     Route('GET', '/invite/{invite_id}?with_counts=true', invite_id=fragment))
                 invite_guild = discord.Guild(state=self.bot, data=invite_data['guild'])
             except discord.errors.NotFound:
-                await message.delete()
+                try:
+                    await message.delete()
+                except discord.NotFound:
+                    # Message not found, let's log this
+                    LOG.warning("Invalid message was caught and already deleted before AS could handle it.")
 
                 invalid_embed = discord.Embed(
                     description="An invalid invite with key `{}` by user {} (ID `{}`) was caught and filtered."
@@ -135,7 +139,7 @@ class AntiSpam:
                 await message.delete()
             except discord.NotFound:
                 # Message not found, let's log this
-                LOG.warning("Message was caught and already deleted before AS could handle it. Censor?")
+                LOG.warning("Message was caught and already deleted before AS could handle it.")
 
             # Add the user to the cooldowns table - we're going to use this to prevent DIYBot's spam and to ban the user
             # if they go over a defined number of invites in a period
