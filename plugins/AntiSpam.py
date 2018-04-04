@@ -1,5 +1,6 @@
 import datetime
 import logging
+import math
 import re
 
 import discord
@@ -21,6 +22,7 @@ class AntiSpam:
 
     It, alongside Censor, ModTools, and the UBL help form the moderative backbone and power of the bot platform.
     """
+
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
         self._config = WolfConfig.get_config()
@@ -28,6 +30,7 @@ class AntiSpam:
         # Statics
         self.INVITE_COOLDOWNS = {}
         self.ATTACHMENT_COOLDOWNS = {}
+        self.LINK_COOLDOWNS = {}
 
         LOG.info("Loaded plugin!")
 
@@ -42,6 +45,7 @@ class AntiSpam:
         await self.multi_ping_check(message)
         await self.prevent_discord_invites(message)
         await self.attachment_cooldown(message)
+        await self.prevent_link_spam(message)
 
     async def multi_ping_check(self, message):
         PING_WARN_LIMIT = self._config.get('antiSpam', {}).get('pingSoftLimit', 6)
@@ -206,7 +210,7 @@ class AntiSpam:
 
             # If the user is at the offense limit, we're going to ban their ass. In this case, this means that on
             # their fifth invalid invite, we ban 'em.
-            if cooldownRecord['offenseCount'] >= COOLDOWN_SETTINGS['banLimit']:
+            if COOLDOWN_SETTINGS['banLimit'] > 0 and (cooldownRecord['offenseCount'] >= COOLDOWN_SETTINGS['banLimit']):
                 await message.author.ban(reason="[AUTOMATIC BAN - AntiSpam Module] User sent {} unauthorized invites "
                                                 "in a {} minute period.".format(COOLDOWN_SETTINGS['banLimit'],
                                                                                 COOLDOWN_SETTINGS['minutes']),
@@ -258,6 +262,7 @@ class AntiSpam:
                                 "Thanks!".format(message.author.mention),
                     color=Colors.WARNING
                 ), delete_after=90.0)
+
                 if log_channel is not None:
                     await log_channel.send(embed=discord.Embed(
                         description="User {} has sent {} attachments in a {}-second period in channel "
@@ -281,6 +286,156 @@ class AntiSpam:
                 LOG.info("User {} previously on file cooldown warning list has sent a file-less message. Deleting "
                          "cooldown entry.".format(message.author))
                 del self.ATTACHMENT_COOLDOWNS[message.author.id]
+
+    async def prevent_link_spam(self, message: discord.Message):
+        """
+        Prevent link spam by scanning messages for anything that looks link-like.
+
+        If a link is found, we will attempt to kill it if it has more than [linkWarnLimit] links inside of it. After a
+        number of warnings determined by [warningsBeforeBan], the system will ban the account automatically. This
+        cooldown will automatically expire after [cooldownMinutes] from the first message.
+
+        Alternatively, if a user posts [totalBeforeBan] links in [minutes] from their initial link message, they will
+        also be banned.
+
+        :param message: The discord Message object to process.
+        :return: Does not return.
+        """
+
+        ANTISPAM_CONFIG = self._config.get('antiSpam', {})
+        COOLDOWN_CONFIG = ANTISPAM_CONFIG.get('cooldowns', {}).get('link', {'banLimit': 5,
+                                                                            'linkWarnLimit': 5,
+                                                                            'minutes': 30,
+                                                                            'totalBeforeBan': 100})
+
+        # gen the embed here
+        link_warning = discord.Embed(
+            title="Excessive Linkage D",
+            description="Hey {}! It looks like you posted a lot of links.\n\n"
+                        "In order to cut down on server spam, we have a limitation on the number of links "
+                        "you are allowed to have in a time period. Generally, you won't exceed this limit "
+                        "normally, but I'd like to give you a friendly warning to calm down on the number of "
+                        "links you have. Thanks!".format(message.author.mention),
+            color=Colors.WARNING
+        ).set_thumbnail(url="https://i.imgur.com/Z3l78Dh.gif")
+
+        # Prepare the logger
+        log_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
+        if log_channel is not None:
+            log_channel = message.guild.get_channel(log_channel)
+
+        # We can lazily delete link cooldowns on messages, instead of checking.
+        if message.author.id in self.LINK_COOLDOWNS \
+                and self.LINK_COOLDOWNS[message.author.id]['cooldownExpiry'] < datetime.datetime.utcnow():
+            del self.LINK_COOLDOWNS[message.author.id]
+
+        # Users with MANAGE_MESSAGES are allowed to send as many links as they want.
+        if message.author.permissions_in(message.channel).manage_messages:
+            return
+
+        regex_matches = re.findall(Regex.URL_REGEX, message.content, re.IGNORECASE)
+
+        # If a message has no links, abort right now.
+        if regex_matches is None or len(regex_matches) == 0:
+            return
+
+        # We have at least one link now, make the cooldown record.
+        cooldown_record = self.LINK_COOLDOWNS.setdefault(message.author.id, {
+            'cooldownExpiry': datetime.datetime.utcnow() + datetime.timedelta(minutes=COOLDOWN_CONFIG['minutes']),
+            'offenseCount': 0,
+            'totalLinks': 0
+        })
+
+        print(cooldown_record)
+
+        # We also want to track individual link posting
+        if COOLDOWN_CONFIG['linkWarnLimit'] > 0:
+
+            # Increment the record
+            cooldown_record['totalLinks'] += len(regex_matches)
+
+            # if a member is closely approaching their link cap (75% of max), warn them.
+            warn_limit = math.floor(COOLDOWN_CONFIG['totalBeforeBan'] * 0.75)
+            if cooldown_record['totalLinks'] >= warn_limit and cooldown_record['offenseCount'] == 0:
+                await message.channel.send(embed=link_warning, delete_after=90.0)
+                cooldown_record['offenseCount'] += 1
+
+                if log_channel is not None:
+                    embed = discord.Embed(
+                        description="User {} has sent {} links recently, and as a result has been warned. If they "
+                                    "continue to post links to the currently configured value of {} links, they will "
+                                    "be automatically banned.".format(message.author, cooldown_record['totalLinks'],
+                                                                      COOLDOWN_CONFIG['totalBeforeBan'])
+                    )
+
+                    embed.set_footer(text="Cooldown resets {}"
+                                     .format(cooldown_record['cooldownExpiry'].strftime(DATETIME_FORMAT)))
+
+                    embed.set_author(name="Link spam from {} detected!".format(str(message.author)),
+                                     icon_url=message.author.avatar_url)
+
+                    await log_channel.send(embed=embed)
+
+            # And then ban at max
+            if cooldown_record['totalLinks'] >= COOLDOWN_CONFIG['totalBeforeBan']:
+                await message.author.ban(reason="[AUTOMATIC BAN - AntiSpam Module] User sent {} or more links in a "
+                                                "{} minute period.".format(COOLDOWN_CONFIG['totalBeforeBan'],
+                                                                           COOLDOWN_CONFIG['minutes']),
+                                         delete_message_days=1)
+
+                # And purge their record, it's not needed anymore
+                del self.LINK_COOLDOWNS[message.author.id]
+                return
+
+        # And now process warning counters
+        if COOLDOWN_CONFIG['linkWarnLimit'] > 0 and (len(regex_matches) > COOLDOWN_CONFIG['linkWarnLimit']):
+
+            # First and foremost, delete the message
+            await message.delete()
+
+            # Add the user to the warning table if they're not already there
+            if cooldown_record['offenseCount'] == 0:
+                # Inform the user of what happened, on their first time only.
+                await message.channel.send(embed=link_warning, delete_after=90.0)
+
+            # Get the offender's cooldown record, and increment it.
+            cooldown_record['offenseCount'] += 1
+
+            # Post something to logs
+            if log_channel is not None:
+                embed = discord.Embed(
+                    description="User {} has sent a message containing over {} links to a public "
+                                "channel.".format(message.author, COOLDOWN_CONFIG['linkWarnLimit']),
+                    color=Colors.WARNING
+                )
+
+                embed.add_field(name="Message Text", value=WolfUtils.trim_string(message.content, 1000, False),
+                                inline=False)
+
+                embed.add_field(name="Message ID", value=message.id, inline=True)
+                embed.add_field(name="Channel", value=message.channel.mention, inline=True)
+
+                embed.set_footer(text="Strike {} of {}, resets {}"
+                                 .format(cooldown_record['offenseCount'],
+                                         COOLDOWN_CONFIG['banLimit'],
+                                         cooldown_record['cooldownExpiry'].strftime(DATETIME_FORMAT)))
+
+                embed.set_author(name="Link spam from {} blocked.".format(str(message.author)),
+                                 icon_url=message.author.avatar_url)
+
+                await log_channel.send(embed=embed)
+
+            # If the user is over the ban limit, get rid of them.
+            if cooldown_record['offenseCount'] >= COOLDOWN_CONFIG['banLimit']:
+                await message.author.ban(reason="[AUTOMATIC BAN - AntiSpam Module] User sent {} messages containing "
+                                                "{} or more links in a {} minute "
+                                                "period.".format(COOLDOWN_CONFIG['banLimit'],
+                                                                 COOLDOWN_CONFIG['linkWarnLimit'],
+                                                                 COOLDOWN_CONFIG['minutes']),
+                                         delete_message_days=1)
+
+                # And purge their record, it's not needed anymore
+                del self.LINK_COOLDOWNS[message.author.id]
 
     @commands.group(name="antispam", aliases=['as'], brief="Manage the Antispam configuration for the bot")
     @commands.has_permissions(manage_messages=True)
@@ -351,6 +506,7 @@ class AntiSpam:
             /help as inviteCooldown - Edit cooldown settings for the invite limiter.
         """
         as_config = self._config.get('antiSpam', {})
+
         allowed_invites = as_config.setdefault('allowedInvites', [ctx.guild.id])
 
         if guild in allowed_invites:
@@ -481,6 +637,57 @@ class AntiSpam:
             description="The attachments module of AntiSpam has been set to allow a max of **`{}`** attachments in a "
                         "**`{}` second** period, warning after **`{}`** "
                         "attachments".format(ban_limit, cooldown_seconds, warn_limit),
+            color=Colors.SUCCESS
+        ))
+
+    @asp.command(name="linkCooldown", brief="Set cooldowns for link posting", aliases=["zelda"])
+    @commands.has_permissions(manage_guild=True)
+    async def set_link_cooldown(self, ctx: commands.Context, cooldown_minutes: int, links_before_warn: int,
+                                ban_limit: int, total_link_limit: int):
+
+        """
+        Set cooldowns/ban thresholds for link spam.
+
+        AntiSpam will attempt to log users who post links excessively to chat. This command allows these settings to be
+        updated on the fly.
+
+        If a user sends a message containing `links_before_warn` messages in a single message, the message will be
+        deleted and the user will be issued a warning. If a user accrues `ban_limit` warnings in a period of time
+        `cooldown_minutes` minutes from the initial warning, they will be banned.
+
+        Alternatively, if a user posts `total_link_limit` links in a `minutes` period, they will be automatically
+        banned as well. A warning will be issued at 75% of links.
+
+        Setting links_before_warn to 0 disables this feature entirely, and setting `ban_limit` to 0 will disable the
+        autoban feature.
+
+        Cooldowns are not reset by anything other than time.
+
+        Default values:
+            cooldown_minutes: 30 minutes
+            links_before_warn: 5 links
+            ban_limit: 5 warnings
+            total_link_limit: 75 links
+        """
+
+        as_config = self._config.get('antiSpam', {})
+        link_config = as_config.setdefault('cooldowns', {}).setdefault('link', {'banLimit': 5,
+                                                                                'linkWarnLimit': 5,
+                                                                                'minutes': 30})
+
+        link_config['banLimit'] = ban_limit
+        link_config['linkWarnLimit'] = links_before_warn
+        link_config['minutes'] = cooldown_minutes
+        link_config['totalBeforeBan'] = total_link_limit
+
+        self._config.set('antiSpam', as_config)
+
+        await ctx.send(embed=discord.Embed(
+            title="AntiSpam Plugin",
+            description="The links module of AntiSpam has been set to allow a max of {} links in a single message. If "
+                        "a user posts more than {} illegal messages in a {} minute period, they will additionally be "
+                        "banned. If a user posts {} links in the same time period, they will also be "
+                        "banned.".format(links_before_warn, ban_limit, cooldown_minutes, total_link_limit),
             color=Colors.SUCCESS
         ))
 
