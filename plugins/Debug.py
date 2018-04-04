@@ -1,6 +1,8 @@
+import ast
 import inspect
 import json
 import logging
+import re
 
 import discord
 from discord.ext import commands
@@ -174,6 +176,70 @@ class Debug:
         await ctx.send(embed=discord.Embed(
             title="Evaluation Result",
             description="```python\n>>> {}\n\n{}```".format(code, result),
+            color=Colors.SECONDARY
+        ))
+
+    @commands.command(name="feval", brief="Execute an eval as a function/method", hidden=True)
+    @WolfChecks.is_developer()
+    async def func_eval(self, ctx: discord.ext.commands.Context, *, expr: str):
+        """
+        Help documentation is not available for this plugin.
+        """
+
+        # Block *everyone* except Kaz from running feval
+        if ctx.author.id != 142494680158961664:
+            ctx.send(embed=discord.Embed(
+                title="Access denied!",
+                description="Due to the danger of this command, access to it has been blocked for this account.",
+                color=Colors.DANGER
+            ))
+            return
+
+        fn_name = "_eval_expr"
+
+        # remove code formatting if present
+        expr = re.sub(r'^```(python)*\n*', '', expr, flags=re.MULTILINE)
+        expr = re.sub(r'```$', '', expr, flags=re.MULTILINE)
+
+        # add indentation
+        split_expr = expr.splitlines()
+        cmd = "\n".join("    {}".format(i) for i in split_expr)
+
+        # wrap in async def body
+        body = ("async def {}():\n".format(fn_name)
+                + cmd)
+
+        # format code for printing
+
+        formatted_code = ""
+        formatted_code += split_expr[0]
+        if len(split_expr) > 1:
+            for line in split_expr[1:]:
+                formatted_code += "\n...    {}".format(line)
+
+        parsed = ast.parse(body)
+        body = parsed.body[0].body
+
+        # insert return stmt if the last expression is a expression statement
+        if isinstance(body[-1], ast.Expr):
+            body[-1] = ast.Return(body[-1].value)
+
+        ast.fix_missing_locations(body[-1])
+
+        env = {
+            'bot': ctx.bot,
+            'discord': discord,
+            'commands': commands,
+            'ctx': ctx,
+            'import': __import__
+        }
+        exec(compile(parsed, filename="<ast>", mode="exec"), env)
+
+        result = await eval("{}()".format(fn_name), env)
+
+        await ctx.send(embed=discord.Embed(
+            title="Evaluation Result",
+            description="```python\n>>> {}\n\n{}```".format(formatted_code, result),
             color=Colors.SECONDARY
         ))
 
