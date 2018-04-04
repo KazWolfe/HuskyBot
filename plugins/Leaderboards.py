@@ -80,10 +80,13 @@ class Leaderboards:
                 process_ban(ban.user.id, ban.reason)
 
             # process mappings
-            for k in cache.keys():
-                if k in user_map.keys():
-                    cache[user_map[k]] += cache[k]
-                    del cache[k]
+            new_cache = {}
+            for user in cache.keys():
+                mapped_user = user_map.get(user, user)
+
+                new_cache[mapped_user] = new_cache.get(mapped_user, 0) + cache[user]
+
+            cache = new_cache
 
             # out of ban loop now
             board = sorted(cache.items(), key=lambda x: x[1], reverse=True)[:10]
@@ -116,7 +119,7 @@ class Leaderboards:
 
         self._config.set('leaderboard', lb_conf)
 
-        await ctx.send("Mapped {} -> {}".format(map_from, map_to))
+        await ctx.send("Mapped `{}` -> `{}`".format(map_from, map_to))
 
 
 def setup(bot: discord.ext.commands.Bot):
