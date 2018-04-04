@@ -252,6 +252,42 @@ class Intelligence:
                 color=Colors.INFO
             ))
 
+    @commands.command(name="prunesim", brief="Get a number of users scheduled for pruning")
+    @commands.has_permissions(manage_guild=True)
+    async def check_prune(self, ctx: commands.Context, days: int = 7):
+        """
+        Simulate a prune on the server.
 
-def setup(bot: discord.ext.commands.Bot):
+        This command will simulate a prune on the server and return a count of members expected to be lost. A member is
+        considered for pruning if they have not spoken in the specified number of days *and* they have no roles.
+
+        This command takes a single argument: the days to look through. By default, it will look for 7 days, but any
+        value between 1 and 180 will be accepted.
+        """
+
+        if days < 1 or days > 180:
+            raise commands.BadArgument("The `days` argument must be between 1 and 180.")
+
+        prune_count = await ctx.guild.estimate_pruned_members(days=days)
+
+        if days == 1:
+            days = "1 day"
+        else:
+            days = "{} days".format(days)
+
+        if prune_count == 1:
+            prune_count = "1 user"
+        else:
+            prune_count = "{} users".format(prune_count)
+
+        await ctx.send(embed=discord.Embed(
+            title="Simulated Prune Report",
+            description="With a simulated cutoff of {}, an estimated **{}** will be pruned from the guild. "
+                        "\n\nThis number represents the count of members who have not spoken in the last {}, and "
+                        "do not have a role (including self-assigned roles).".format(days, prune_count, days),
+            color=Colors.INFO
+        ))
+
+
+def setup(bot: commands.Bot):
     bot.add_cog(Intelligence(bot))
