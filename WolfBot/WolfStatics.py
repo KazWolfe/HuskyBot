@@ -49,6 +49,7 @@ class Emojis:
     BOOKMARK2 = "\uD83D\uDCD1"
     RED_FLAG = "\uD83D\uDEA9"
     TADA = "\U0001F389"
+    REPEAT = "\U0001F501"
 
     # Mod shortcuts
     BAN = NO_ENTRY

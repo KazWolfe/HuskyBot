@@ -375,6 +375,54 @@ class ServerLog:
             color=Colors.SUCCESS
         ))
 
+    @logger.command(name="rotate", brief="Rotate the log channel out for a new clean one")
+    @commands.has_permissions(administrator=True)
+    async def rotate_logs(self, ctx: commands.Context):
+        channels_config = self._config.get('specialChannels', {})
+        old_channel = channels_config.get(ChannelKeys.STAFF_LOG.value, None)
+
+        if old_channel is not None:
+            old_channel = ctx.guild.get_channel(old_channel)  # type: discord.TextChannel
+
+        if old_channel is None:
+            await ctx.send(embed=discord.Embed(
+                title="Logging Manager",
+                description="No logging channel has been configured, so it can't be rotated.",
+                color=Colors.DANGER
+            ))
+            return
+
+        topic_string = "Staff server logs, starting at {}".format(ctx.message.created_at.strftime(DATETIME_FORMAT))
+        reason_string = "Log rotation requested by {}.".format(ctx.author)
+
+        new_channel = await ctx.guild.create_text_channel(name=old_channel.name,
+                                                          overwrites=dict(old_channel.overwrites),
+                                                          category=old_channel.category,
+                                                          reason=reason_string)  # type: discord.TextChannel
+
+        await new_channel.edit(reason=reason_string, position=old_channel.position, topic=topic_string, nsfw=True)
+
+        channels_config[ChannelKeys.STAFF_LOG.value] = new_channel.id
+        self._config.set('specialChannels', channels_config)
+
+        await old_channel.delete(reason=reason_string)
+
+        log_embed = discord.Embed(
+            title=Emojis.REPEAT + " Server log refresh!",
+            description="A server log refresh was executed at {}, and was requested by {}.".format(
+                ctx.message.created_at.strftime(DATETIME_FORMAT), ctx.message.author),
+            color=Colors.INFO
+        )
+
+        await new_channel.send(embed=log_embed)
+
+        await ctx.send(embed=discord.Embed(
+            title="Log refresh success!",
+            description="The server logs were successfully refreshed, and are now available at {}. The bot's config "
+                        "has been automatically updated.",
+            color=Colors.SUCCESS
+        ))
+
 
 def setup(bot: discord.ext.commands.Bot):
     bot.add_cog(ServerLog(bot))
