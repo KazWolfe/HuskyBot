@@ -196,7 +196,7 @@ class LaMetric:
             device_list += "\n- ID `{}` (owned by <@{}>), events: `{}`".format(i.lower(), dev['ownerId'],
                                                                                dev['enabledTasks'])
 
-        await ctx.send(discord.Embed(
+        await ctx.send(embed=discord.Embed(
             title="Registered LaMetric Devices",
             description="The following devices are registered with the bot.\n{}".format(device_list),
             color=Colors.INFO
