@@ -32,11 +32,11 @@ def is_developer():
     def predicate(ctx: commands.Context):
         # Devs must have admin, or must be in a DM context
         if (ctx.guild is not None) and (not ctx.author.guild_permissions.administrator):
-            raise commands.MissingPermissions(["administrator", "developer"])
+            raise commands.MissingPermissions(["Administrator", "Bot Developer"])
 
         if ctx.author.id in __developers__:
             return True
 
-        raise commands.CheckFailure("SecurityException: User is not a listed developer for the bot.")
+        raise commands.MissingPermissions(["Bot Developer"])
 
     return commands.check(predicate)

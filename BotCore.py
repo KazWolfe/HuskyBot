@@ -120,11 +120,11 @@ async def on_command_error(ctx, error: commands.CommandError):
 
     # Handle cases where the calling user is missing a required permission.
     if isinstance(error, commands.MissingPermissions):
-        if BOT_CONFIG.get("developmentMode", False):
+        if BOT_CONFIG.get("developerMode", False):
             await ctx.send(embed=discord.Embed(
                 title="Command Handler",
-                description="**The command `/{}` does not exist.** See `/help` for valid "
-                            "commands.".format(command_name),
+                description="**You are not authorized to run `/{}`:**\n```{}```\n\nPlease ask a staff member for "
+                            "assistance".format(command_name, str(error)),
                 color=Colors.DANGER
             ))
 
@@ -132,7 +132,7 @@ async def on_command_error(ctx, error: commands.CommandError):
 
     # Handle cases where the command is disabled.
     elif isinstance(error, commands.DisabledCommand):
-        if BOT_CONFIG.get("developmentMode", False):
+        if BOT_CONFIG.get("developerMode", False):
             embed = discord.Embed(
                 title="Command Handler",
                 description="**The command `/{}` does not exist.** See `/help` for valid "
@@ -148,7 +148,7 @@ async def on_command_error(ctx, error: commands.CommandError):
 
     # Handle cases where the command does not exist.
     elif isinstance(error, commands.CommandNotFound):
-        if BOT_CONFIG.get("developmentMode", False):
+        if BOT_CONFIG.get("developerMode", False):
             await ctx.send(embed=discord.Embed(
                 title="Command Handler",
                 description="**The command `/{}` does not exist.** See `/help` for valid "
