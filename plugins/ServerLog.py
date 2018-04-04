@@ -18,6 +18,8 @@ class ServerLog:
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
         self._config = WolfConfig.get_config()
+        self._session_store = WolfConfig.get_session_store()
+
         LOG.info("Loaded plugin!")
 
         # ToDo: Find a better way of storing valid loggers.
@@ -107,6 +109,12 @@ class ServerLog:
         if "userBan" not in self._config.get("loggers", {}).keys():
             return
 
+        logger_ignores = self._session_store.get('loggerIgnores', {})  # type: dict
+        ignored_bans = logger_ignores.setdefault('ban', [])
+
+        if user.id in ignored_bans:
+            return
+
         # Get timestamp as soon as the event is fired, because waiting for bans may take a while.
         timestamp = WolfUtils.get_timestamp()
 
@@ -143,6 +151,12 @@ class ServerLog:
     # noinspection PyUnusedLocal
     async def on_member_unban(self, guild: discord.Guild, user: discord.User):
         if "userBan" not in self._config.get("loggers", {}).keys():
+            return
+
+        logger_ignores = self._session_store.get('loggerIgnores', {})  # type: dict
+        ignored_bans = logger_ignores.setdefault('ban', [])
+
+        if user.id in ignored_bans:
             return
 
         alert_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)

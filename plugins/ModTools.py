@@ -28,6 +28,8 @@ class ModTools:
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
         self._config = WolfConfig.get_config()
+        self._session_store = WolfConfig.get_session_store()
+
         self._mute_manager = MuteManager(self.bot)
         LOG.info("Loaded plugin!")
 
@@ -441,6 +443,11 @@ class ModTools:
             ))
             return
 
+        logger_ignores = self._session_store.get('loggerIgnores', {})  # type: dict
+        ignored_bans = logger_ignores.setdefault('ban', [])
+        ignored_bans.append(user.id)
+        self._session_store.set('loggerIgnores', logger_ignores)
+
         old_reason = ban_entry.reason
 
         if old_reason is None:
@@ -472,6 +479,11 @@ class ModTools:
         if alert_channel is not None:
             alert_channel = self.bot.get_channel(alert_channel)  # type: discord.TextChannel
             await alert_channel.send(embed=embed)
+
+        logger_ignores = self._session_store.get('loggerIgnores', {})  # type: dict
+        ignored_bans = logger_ignores.setdefault('ban', [])
+        ignored_bans.remove(user.id)
+        self._session_store.set('loggerIgnores', logger_ignores)
 
 
 def setup(bot: discord.ext.commands.Bot):
