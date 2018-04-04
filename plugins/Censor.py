@@ -54,7 +54,10 @@ class Censor:
 
         censor_list = global_censors + channel_censors + user_censors
 
-        if message.author.permissions_in(message.channel).manage_messages:
+        if not isinstance(message.author, discord.Member):
+            LOG.warning("Attempted to censor a message (ID %s) from user %s (ID %s), but they do not exist.",
+                        message.id, str(message.author), message.author.id)
+        elif message.author.permissions_in(message.channel).manage_messages:
             if len(user_censors) > 0:
                 censor_list = user_censors
             else:
