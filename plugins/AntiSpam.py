@@ -51,9 +51,9 @@ class AntiSpam:
         PING_WARN_LIMIT = self._config.get('antiSpam', {}).get('pingSoftLimit', 6)
         PING_BAN_LIMIT = self._config.get('antiSpam', {}).get('pingHardLimit', 15)
 
-        log_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
-        if log_channel is not None:
-            log_channel = message.guild.get_channel(log_channel)
+        alert_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_ALERTS.value, None)
+        if alert_channel is not None:
+            alert_channel = message.guild.get_channel(alert_channel)
 
         if message.author.permissions_in(message.channel).mention_everyone:
             return
@@ -64,12 +64,12 @@ class AntiSpam:
             await message.channel.send(embed=discord.Embed(
                 title="Mass Ping Blocked",
                 description="A mass-ping message was blocked in the current channel.\n"
-                            + "Please reduce the number of pings in your message and try again.",
+                            + "Please reduce thek number of pings in your message and try again.",
                 color=Colors.WARNING
             ))
 
-            if log_channel is not None:
-                await log_channel.send(embed=discord.Embed(
+            if alert_channel is not None:
+                await alert_channel.send(embed=discord.Embed(
                     description="User {} has pinged {} users in a single in channel "
                                 "{}.".format(message.author, str(len(message.mentions)), message.channel),
                     color=Colors.WARNING
