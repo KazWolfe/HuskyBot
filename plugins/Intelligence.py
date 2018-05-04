@@ -3,6 +3,7 @@ import logging
 
 import discord
 from discord.ext import commands
+from discord.http import Route
 
 from WolfBot import WolfConfig
 from WolfBot import WolfConverters
@@ -304,6 +305,63 @@ class Intelligence:
             description="This guild currently has **{} total users**.".format(len(ctx.guild.members)),
             color=Colors.INFO
         ))
+
+    @commands.command(name="invitespy", brief="Find information about Guild invite", aliases=["invspy"])
+    @commands.has_permissions(view_audit_log=True)
+    async def invitespy(self, ctx: commands.Context, fragment: str):
+        try:
+            invite_data = await self.bot.http.request(
+                Route('GET', '/invite/{invite_id}?with_counts=true', invite_id=fragment))  # type: dict
+            invite_guild = discord.Guild(state=self.bot, data=invite_data['guild'])
+
+            if invite_data.get("inviter") is not None:
+                invite_user = discord.User(state=self.bot, data=invite_data["inviter"])
+            else:
+                invite_user = None
+        except discord.NotFound:
+            await ctx.send(embed=discord.Embed(
+                title="Invitespy Error",
+                description="This invite does not appear to exist",
+                color=Colors.DANGER
+            ))
+            return
+
+        embed = discord.Embed(
+            description="Information about `{}` for Guild {}".format(fragment, invite_guild.name),
+            color=Colors.INFO
+        )
+
+        embed.set_thumbnail(url=invite_guild.icon_url)
+
+        if invite_user is not None:
+            embed.set_author(
+                name="Invite for {} by {}#{}".format(invite_guild.name, invite_user.name, invite_user.discriminator),
+                icon_url=invite_user.avatar_url
+            )
+        else:
+            embed.set_author(name="Invite for {}".format(invite_guild.name))
+
+        embed.add_field(name="Invited Guild ID", value=invite_guild.id, inline=True)
+
+        ch_type = {0: "#", 2: "[VC] ", 4: "[CAT] "}
+        embed.add_field(name="Invited Channel Name",
+                        value=ch_type[invite_data['channel']['type']] + invite_data['channel']['name'],
+                        inline=True)
+
+        embed.add_field(name="Invited Guild Creation Date",
+                        value=invite_guild.created_at.strftime(DATETIME_FORMAT),
+                        inline=True)
+
+        if invite_data.get('approximate_member_count', -1) != -1:
+            embed.add_field(name="Invited Guild User Count",
+                            value="{} ({} online)".format(invite_data.get('approximate_member_count', -1),
+                                                          invite_data.get('approximate_presence_count',
+                                                                          -1)))
+
+        if len(invite_guild.features) > 0:
+            embed.add_field(name="Guild Features", value=', '.join(invite_guild.features))
+
+        await ctx.send(embed=embed)
 
 
 def setup(bot: commands.Bot):
