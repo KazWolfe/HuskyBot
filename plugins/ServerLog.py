@@ -208,7 +208,7 @@ class ServerLog:
         if "messageDelete" not in self._config.get("loggers", {}).keys():
             return
 
-        alert_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
+        alert_channel = self._config.get('specialChannels', {}).get(ChannelKeys.MESSAGE_LOG.value, None)
 
         if alert_channel is None:
             return
@@ -247,7 +247,7 @@ class ServerLog:
         if "messageEdit" not in self._config.get("loggers", {}).keys():
             return
 
-        alert_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
+        alert_channel = self._config.get('specialChannels', {}).get(ChannelKeys.MESSAGE_LOG.value, None)
 
         if alert_channel is None:
             return
@@ -390,7 +390,7 @@ class ServerLog:
         This command takes no arguments, and may only be run by administrators.
         """
         channels_config = self._config.get('specialChannels', {})
-        old_channel = channels_config.get(ChannelKeys.STAFF_LOG.value, None)
+        old_channel = channels_config.get(ChannelKeys.MESSAGE_LOG.value, None)
 
         if old_channel is not None:
             old_channel = ctx.guild.get_channel(old_channel)  # type: discord.TextChannel
@@ -413,19 +413,25 @@ class ServerLog:
 
         await new_channel.edit(reason=reason_string, position=old_channel.position, topic=topic_string, nsfw=True)
 
-        channels_config[ChannelKeys.STAFF_LOG.value] = new_channel.id
+        channels_config[ChannelKeys.MESSAGE_LOG.value] = new_channel.id
         self._config.set('specialChannels', channels_config)
 
         await old_channel.delete(reason=reason_string)
 
         log_embed = discord.Embed(
             title=Emojis.REPEAT + " Server log refresh!",
-            description="A server log refresh was executed at {}, and was requested by {}.".format(
+            description="A message log refresh was executed at {}, and was requested by {}.".format(
                 ctx.message.created_at.strftime(DATETIME_FORMAT), ctx.message.author),
             color=Colors.INFO
         )
 
         await new_channel.send(embed=log_embed)
+
+        alert_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
+
+        if alert_channel is not None:
+            alert_channel = ctx.message.guild.get_channel(alert_channel)
+            await alert_channel.send(embed=log_embed)
 
         await ctx.send(embed=discord.Embed(
             title="Log refresh success!",

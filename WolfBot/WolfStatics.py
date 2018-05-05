@@ -22,6 +22,7 @@ class ChannelKeys(Enum):
     STAFF_HUB = "modChannel"
     STAFF_ALERTS = "staffAlerts"
     PUBLIC_LOG = "audit"
+    MESSAGE_LOG= "messageLogs"
 
 
 class SpecialRoleKeys(Enum):
