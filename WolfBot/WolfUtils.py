@@ -74,7 +74,7 @@ def should_process_message(message: discord.Message):
     return True
 
 
-def trim_string(string: str, limit: int, add_ellipses: bool):
+def trim_string(string: str, limit: int, add_ellipses: bool = True):
     s = string
 
     if len(string) > limit:

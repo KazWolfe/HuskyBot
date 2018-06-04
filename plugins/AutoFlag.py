@@ -57,7 +57,8 @@ class AutoFlag:
                     color=Colors.WARNING
                 )
 
-                embed.add_field(name="Message Content", value=message.content, inline=False)
+                embed.add_field(name="Message Content", value=WolfUtils.trim_string(message.content, 1000),
+                                inline=False)
                 embed.add_field(name="Message ID", value=message.id, inline=True)
                 embed.add_field(name="Channel", value=message.channel.mention, inline=True)
                 embed.add_field(name="User", value=message.author.mention, inline=True)
@@ -91,7 +92,7 @@ class AutoFlag:
                 color=Colors.WARNING
             )
 
-            embed.add_field(name="Message Content", value=message.content, inline=False)
+            embed.add_field(name="Message Content", value=WolfUtils.trim_string(message.content, 1000), inline=False)
             embed.add_field(name="Message ID", value=message.id, inline=True)
             embed.add_field(name="Channel", value=message.channel.mention, inline=True)
             embed.add_field(name="User ID", value=message.author.id, inline=True)
