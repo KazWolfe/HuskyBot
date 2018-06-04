@@ -22,73 +22,73 @@ class ReactionPromote:
         self.roleRemovalBlacklist = []
         LOG.info("Loaded plugin!")
 
-    async def on_raw_reaction_add(self, emoji, message_id, channel_id, user_id):
+    async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
         promotion_config = self._config.get('promotions', {})
 
-        channel = self.bot.get_channel(channel_id)
+        channel = self.bot.get_channel(payload.channel_id)
 
         if not isinstance(channel, discord.TextChannel):
             return
 
-        message = await channel.get_message(message_id)
+        message = await channel.get_message(payload.message_id)
         guild = message.guild
-        user = guild.get_member(user_id)
+        user = guild.get_member(payload.user_id)
 
-        emoji_slug = emoji.name
-        if emoji.is_custom_emoji():
-            emoji_slug = str(emoji)
+        emoji_slug = payload.emoji.name
+        if payload.emoji.is_custom_emoji():
+            emoji_slug = str(payload.emoji)
 
         try:
-            group_to_add = discord.utils.get(guild.roles,
-                                             id=promotion_config[str(channel_id)][str(message_id)][emoji_slug])
+            role_id = promotion_config[str(payload.channel_id)][str(payload.message_id)][emoji_slug]
+            group_to_add = discord.utils.get(guild.roles, id=role_id)
             await user.add_roles(group_to_add)
             LOG.info("Added user " + user.display_name + " to role " + str(group_to_add))
         except KeyError:
-            if promotion_config.get(str(channel_id)) is None:
+            if promotion_config.get(str(payload.channel_id)) is None:
                 # LOG.warning("Not configured for this channel. Ignoring.")
                 return
 
-            if promotion_config.get(str(channel_id)).get(str(message_id)) is None \
-                    and not promotion_config.get(str(channel_id)).get('strictReacts'):
+            if promotion_config.get(str(payload.channel_id)).get(str(payload.message_id)) is None \
+                    and not promotion_config.get(str(payload.channel_id)).get('strictReacts'):
                 LOG.warning("Not configured for this message. Ignoring.")
                 return
 
             LOG.warning("Got bad emoji " + emoji_slug + " (" + str(hex(ord(emoji_slug))) + ")")
-            self.roleRemovalBlacklist.append(str(user_id) + str(message_id))
-            await message.remove_reaction(emoji, user)
+            self.roleRemovalBlacklist.append(str(payload.user_id) + str(payload.message_id))
+            await message.remove_reaction(payload.emoji, user)
 
-    async def on_raw_reaction_remove(self, emoji, message_id, channel_id, user_id):
+    async def on_raw_reaction_remove(self, payload: discord.RawReactionActionEvent):
         promotion_config = self._config.get('promotions', {})
 
-        if (str(user_id) + str(message_id)) in self.roleRemovalBlacklist:
+        if (str(payload.user_id) + str(payload.message_id)) in self.roleRemovalBlacklist:
             LOG.warning("Removal throttled.")
-            self.roleRemovalBlacklist.remove(str(user_id) + str(message_id))
+            self.roleRemovalBlacklist.remove(str(payload.user_id) + str(payload.message_id))
             return
 
-        channel = self.bot.get_channel(channel_id)
+        channel = self.bot.get_channel(payload.channel_id)
 
         if not isinstance(channel, discord.TextChannel):
             return
 
-        message = await channel.get_message(message_id)
+        message = await channel.get_message(payload.message_id)
         guild = message.guild
-        user = guild.get_member(user_id)
+        user = guild.get_member(payload.user_id)
 
-        emoji_slug = emoji.name
-        if emoji.is_custom_emoji():
-            emoji_slug = str(emoji)
+        emoji_slug = payload.emoji.name
+        if payload.emoji.is_custom_emoji():
+            emoji_slug = str(payload.emoji)
 
         try:
-            group_to_remove = discord.utils.get(guild.roles,
-                                                id=promotion_config[str(channel_id)][str(message_id)][emoji_slug])
+            role_id = promotion_config[str(payload.channel_id)][str(payload.message_id)][emoji_slug]
+            group_to_remove = discord.utils.get(guild.roles, id=role_id)
             await user.remove_roles(group_to_remove)
             LOG.info("Removed user " + user.display_name + " from role " + str(group_to_remove))
         except KeyError:
-            if promotion_config.get(str(channel_id)) is None:
+            if promotion_config.get(str(payload.channel_id)) is None:
                 # LOG.warning("Not configured for this channel. Ignoring.")
                 return
 
-            if promotion_config.get(str(channel_id)).get(str(message_id)) is None:
+            if promotion_config.get(str(payload.channel_id)).get(str(payload.message_id)) is None:
                 LOG.warning("Not configured for this message. Ignoring.")
                 return
 
