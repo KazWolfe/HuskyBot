@@ -223,7 +223,7 @@ class ServerLog:
         if "messageDelete" not in self._config.get("loggers", {}).keys():
             return
 
-        server_log_channel = self._config.get('specialChannels', {}).get(ChannelKeys.SERVER_LOG.value, -1)
+        server_log_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, -1)
         alert_channel = self._config.get('specialChannels', {}).get(ChannelKeys.MESSAGE_LOG.value, None)
 
         if alert_channel is None:
