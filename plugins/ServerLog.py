@@ -223,6 +223,7 @@ class ServerLog:
         if "messageDelete" not in self._config.get("loggers", {}).keys():
             return
 
+        server_log_channel = self._config.get('specialChannels', {}).get(ChannelKeys.SERVER_LOG.value, -1)
         alert_channel = self._config.get('specialChannels', {}).get(ChannelKeys.MESSAGE_LOG.value, None)
 
         if alert_channel is None:
@@ -231,7 +232,7 @@ class ServerLog:
         alert_channel = message.guild.get_channel(alert_channel)
 
         # Allow event cleanups for bot users.
-        if message.channel == alert_channel and message.author.bot:
+        if (message.channel.id in [alert_channel.id, server_log_channel]) and message.author.bot:
             return
 
         embed = discord.Embed(
@@ -248,9 +249,12 @@ class ServerLog:
             embed.add_field(name="Message", value=WolfUtils.trim_string(message.content, 1000, True), inline=False)
 
         if message.attachments is not None and len(message.attachments) > 1:
-            embed.add_field(name="Attachments", value=WolfUtils.trim_string(str(message.attachments), 1000, True),
+            attachments_list = str("- {}\n".format(a.url) for a in message.attachments)
+            embed.add_field(name="Attachments",
+                            value=WolfUtils.trim_string(attachments_list, 1000, True),
                             inline=False)
         elif message.attachments is not None and len(message.attachments) == 1:
+            embed.add_field(name="Attachment URL", value=message.attachments[0].url, inline=False)
             embed.set_image(url=message.attachments[0].url)
 
         await alert_channel.send(embed=embed)

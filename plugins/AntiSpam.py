@@ -80,7 +80,11 @@ class AntiSpam:
             return
 
         if PING_WARN_LIMIT is not None and len(message.mentions) >= PING_WARN_LIMIT:
-            await message.delete()
+            try:
+                await message.delete()
+            except discord.NotFound:
+                LOG.warning("Message already deleted before AS could handle it (censor?).")
+
             # ToDo: Issue actual warning through Punishment (once made available)
             await message.channel.send(embed=discord.Embed(
                 title=Emojis.NO_ENTRY + " Mass Ping Blocked",
@@ -426,7 +430,10 @@ class AntiSpam:
         if COOLDOWN_CONFIG['linkWarnLimit'] > 0 and (len(regex_matches) > COOLDOWN_CONFIG['linkWarnLimit']):
 
             # First and foremost, delete the message
-            await message.delete()
+            try:
+                await message.delete()
+            except discord.NotFound:
+                LOG.warning("Message was deleted before AS could handle it.")
 
             # Add the user to the warning table if they're not already there
             if cooldown_record['offenseCount'] == 0:
