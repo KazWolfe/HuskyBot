@@ -182,6 +182,9 @@ class ServerLog:
         if "userRename" not in self._config.get("loggers", {}).keys():
             return
 
+        logger_ignores = self._session_store.get('loggerIgnores', {})  # type: dict
+        ignored_nicks = logger_ignores.setdefault('nickname', [])
+
         alert_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
 
         if alert_channel is None:
@@ -196,6 +199,10 @@ class ServerLog:
             update_type = 'nickname'
             old_val = before.nick
             new_val = after.nick
+
+            if before.id in ignored_nicks:
+                return
+
         elif before.name != after.name:
             update_type = 'username'
             old_val = before.name

@@ -184,3 +184,11 @@ def get_image_size(fname):
         else:
             return
         return width, height
+
+
+async def send_to_keyed_channel(bot: discord.Client, channel: WolfStatics.ChannelKeys, embed: discord.Embed):
+    log_channel = WolfBot.WolfConfig.get_config().get('specialChannels', {}).get(channel.value, None)
+    if log_channel is not None:
+        log_channel = bot.get_channel(log_channel)  # type: discord.TextChannel
+
+        await log_channel.send(embed=embed)

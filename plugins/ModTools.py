@@ -31,27 +31,53 @@ class ModTools:
         self._session_store = WolfConfig.get_session_store()
 
         self._mute_manager = MuteManager(self.bot)
+
         LOG.info("Loaded plugin!")
 
     def __unload(self):
         # super.__unload()
         self._mute_manager.cleanup()
 
-    # Prevent users from becoming bot role if they're not actually bots.
-    async def on_member_update(self, before, after):
-        if before.roles == after.roles:
-            return
+    async def on_member_update(self, before: discord.Member, after: discord.Member):
+        async def lockdown_bot_role():
+            if before.roles == after.roles:
+                return
 
-        special_roles = self._config.get("specialRoles", {})
+            special_roles = self._config.get("specialRoles", {})
 
-        if special_roles.get('bots') is None:
-            return
+            if special_roles.get('bots') is None:
+                return
 
-        bot_role = discord.utils.get(after.roles, id=int(special_roles.get('bots')))
+            bot_role = discord.utils.get(after.roles, id=int(special_roles.get('bots')))
 
-        if (bot_role is not None) and (bot_role not in before.roles) and (not before.bot):
-            await after.remove_roles(bot_role, reason="User is not an authorized bot.")
-            LOG.info("User " + after.display_name + " was granted bot role, but was not a bot. Removing.")
+            if (bot_role is not None) and (bot_role not in before.roles) and (not before.bot):
+                await after.remove_roles(bot_role, reason="User is not an authorized bot.")
+                LOG.info("User " + after.display_name + " was granted bot role, but was not a bot. Removing.")
+
+        async def nickname_lock():
+            if before.nick == after.nick:
+                return
+
+            locked_users = self._config.get("nicknameLocks", {})
+
+            lock_entry = locked_users.get(str(before.id), -1)
+
+            if lock_entry != -1 and lock_entry != after.nick:
+                logger_ignores = self._session_store.get('loggerIgnores', {})  # type: dict
+                ignored_nicks = logger_ignores.setdefault('nickname', [])
+                ignored_nicks.append(before.id)
+                self._session_store.set('loggerIgnores', logger_ignores)
+
+                await after.edit(nick=lock_entry, reason="Nickname is currently locked.")
+
+                # We get this again to reload the cache in case of changes elsewhere.
+                logger_ignores = self._session_store.get('loggerIgnores', {})  # type: dict
+                ignored_nicks = logger_ignores.setdefault('nickname', [])
+                ignored_nicks.remove(before.id)
+                self._session_store.set('loggerIgnores', logger_ignores)
+
+        await lockdown_bot_role()
+        await nickname_lock()
 
     async def on_member_join(self, member: discord.Member):
         await self._mute_manager.restore_user_mute(member)
@@ -484,6 +510,88 @@ class ModTools:
         ignored_bans = logger_ignores.setdefault('ban', [])
         ignored_bans.remove(user.id)
         self._session_store.set('loggerIgnores', logger_ignores)
+
+    @commands.command(name="locknick", brief="Lock a member's nickname")
+    @commands.has_permissions(manage_nicknames=True)
+    async def lock_nickname(self, ctx: commands.Context, member: discord.Member, *, new_nickname: str = None):
+        locked_users = self._config.get("nicknameLocks", {})
+
+        if member.top_role.position >= ctx.message.author.top_role.position:
+            await ctx.send(embed=discord.Embed(
+                title="Moderator Toolkit",
+                description="User `{}` could can not be nick locked, as they are not below you in the role "
+                            "hierarchy.".format(member),
+                color=Colors.DANGER
+            ))
+            return
+
+        if (member.id in locked_users.keys()) and new_nickname is None:
+            await ctx.send(embed=discord.Embed(
+                title="Nickname Lock",
+                description="The user {} already has their nickname locked. If you would like to change their "
+                            "locked nickname, include it at the end of the command.".format(member),
+                color=Colors.DANGER
+            ))
+            return
+
+        if new_nickname is None:
+            new_nickname = member.nick
+
+        locked_users[str(member.id)] = new_nickname
+        self._config.set('nicknameLocks', locked_users)
+
+        if new_nickname != member.nick:
+            await member.edit(nick=new_nickname, reason="Forced nickchange (and lock) by {}".format(ctx.author))
+
+        await ctx.send(embed=discord.Embed(
+            title="Nickname Lock",
+            description="The user {} has had their nickname locked to `{}`.".format(member, new_nickname),
+            color=Colors.SUCCESS
+        ))
+
+        # Send to staff logs (if we can)
+        log_entry = discord.Embed(
+            description="The user {} has had their nickname locked to `{}`.".format(member, new_nickname),
+            color=Colors.WARNING
+        )
+        log_entry.set_author(name="Nickname Locked!", icon_url=member.avatar_url)
+        log_entry.add_field(name="User ID", value=member.id, inline=True)
+        log_entry.add_field(name="Responsible Moderator", value=ctx.author, inline=True)
+
+        await WolfUtils.send_to_keyed_channel(ctx.bot, ChannelKeys.STAFF_LOG, log_entry)
+
+    @commands.command(name="unlocknick", brief="Unlock a locked member's nickname")
+    @commands.has_permissions(manage_nicknames=True)
+    async def unlock_nickname(self, ctx: commands.Context, member: discord.Member):
+        locked_users = self._config.get("nicknameLocks", {})
+
+        if str(member.id) not in locked_users.keys():
+            await ctx.send(embed=discord.Embed(
+                title="Nickname Lock",
+                description="The user {} doesn't have their nickname locked. Can't do anything!".format(member),
+                color=Colors.DANGER
+            ))
+            return
+
+        del locked_users[str(member.id)]
+        self._config.set('nicknameLocks', locked_users)
+
+        await ctx.send(embed=discord.Embed(
+            title="Nickname Lock",
+            description="The user {} has had their nickname unlocked.".format(member, member.nick),
+            color=Colors.SUCCESS
+        ))
+
+        # Send to staff logs (if we can)
+        log_entry = discord.Embed(
+            description="The user {} has had their nickname unlocked.".format(member),
+            color=Colors.WARNING
+        )
+        log_entry.set_author(name="Nickname Unlocked!", icon_url=member.avatar_url)
+        log_entry.add_field(name="User ID", value=member.id, inline=True)
+        log_entry.add_field(name="Responsible Moderator", value=ctx.author, inline=True)
+
+        await WolfUtils.send_to_keyed_channel(ctx.bot, ChannelKeys.STAFF_LOG, log_entry)
 
 
 def setup(bot: discord.ext.commands.Bot):
