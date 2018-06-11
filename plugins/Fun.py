@@ -136,17 +136,16 @@ class Fun:
             member = ctx.author
 
         hardcoded_users = {
-            250356727814291456: {"a": 8.74, "c": 3.53, "i": 8.52, "otp": "<@341343404887900162>"},  # Skag
-            341343404887900162: {"a": 8.21, "c": 3.31, "i": 9.38, "otp": "<@250356727814291456>"},  # Chris
             142494680158961664: {"a": 2.24, "c": 4.81, "i": 2.95, "otp": "a wolfgirl"},  # Kaz
             84374504964358144: {"a": 4.94, "c": 6.17, "i": 7.79, "otp": "DIY Tech"},  # Clover
             336301511942340608: {"a": 6.97, "c": 5.99, "i": 7.50, "otp": "<@418530320707747868>"},  # Court
+            118559596284608512: {"a": 6.41, "c": 2.74, "i": 9.44, "otp": "Whiskey"}, # Carl
             237569958903545857: {"a": 7.01, "c": 3.0, "i": 8.74},  # Squeegee
             163973930187489280: {"a": 0, "c": 10.0, "i": 0},  # mseys
             255802794244571136: {"a": 3.16, "c": 8.92, "i": 0.26, "otp": "TnT"}  # junkrat
         }
 
-        seed = 736793  # Chris and Skag
+        seed = 736580  # I love you, woof <3
         master_rng = random.Random((member.id + seed + datetime.utcnow().toordinal()) % seed)
 
         def get_value(mode: str, user_value: int, imin: int, imax: int, dev: float):
