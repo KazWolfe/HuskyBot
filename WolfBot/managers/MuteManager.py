@@ -188,7 +188,7 @@ class MuteManager:
 
     async def restore_user_mute(self, member: discord.Member):
         for mute in self.__cache__:
-            if (mute.user_id == member.id) and not mute.is_over():
+            if (mute.user_id == member.id) and not mute.is_expired():
                 LOG.info("Restoring mute state for left user {} in channel".format(member, mute.channel))
                 await self.mute_user_by_object(mute, "System - ReJoin")
 
