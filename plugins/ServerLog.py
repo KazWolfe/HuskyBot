@@ -262,7 +262,7 @@ class ServerLog:
                             inline=False)
         elif message.attachments is not None and len(message.attachments) == 1:
             embed.add_field(name="Attachment URL", value=message.attachments[0].url, inline=False)
-            embed.set_image(url=message.attachments[0].url)
+            embed.set_image(url=message.attachments[0].proxy_url)
 
         await alert_channel.send(embed=embed)
 
