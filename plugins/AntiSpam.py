@@ -545,7 +545,7 @@ class AntiSpam:
         if cooldown_record['offenseCount'] == 0:
             await message.channel.send(embed=discord.Embed(
                 title=Emojis.SHIELD + " Oops! Non-ASCII Message!",
-                description="Hey {}!\n\bIt looks like you posted a message containing a lot of non-ascii characters. "
+                description="Hey {}!\n\nIt looks like you posted a message containing a lot of non-ascii characters. "
                             "In order to cut down on spam, we are a bit strict with this. We won't delete your "
                             "message, but please keep ASCII spam off the server.\n\nContinuing to spam ASCII messages "
                             "may result in a ban. Thank you for keeping DIY Tech clean!".format(message.author.mention)
@@ -556,7 +556,7 @@ class AntiSpam:
         if log_channel is not None:
             embed = discord.Embed(
                 description="User {} has sent a message with {} non-ASCII characters (out of {} total)."
-                            "".format(message.author, len(message.content), len(nonascii_characters),
+                            "".format(message.author, len(nonascii_characters), len(message.content),
                                       cooldown_record['offenseCount'], CHECK_CONFIG['banLimit']),
                 color=Colors.WARNING
             )
