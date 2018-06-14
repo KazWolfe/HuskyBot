@@ -101,19 +101,19 @@ class Updater:
         Git changelogs should not contain sensitive information, so this command is safe to run in public channels,
         but admin discretion is advised.
         """
-        lastCommit = self.repo.head.commit
+        last_commit = self.repo.head.commit
 
         embed = discord.Embed(
-            title="Changelog for version `" + str(lastCommit.hexsha)[:8] + "`",
-            description="```" + lastCommit.message + "```",
+            title="Changelog for version `" + str(last_commit.hexsha)[:8] + "`",
+            description="```" + last_commit.message + "```",
             color=Colors.PRIMARY
         )
 
-        embed.add_field(name="Author", value=lastCommit.author, inline=True)
+        embed.add_field(name="Author", value=last_commit.author, inline=True)
         embed.add_field(name="Author Date", value=datetime
-                        .fromtimestamp(lastCommit.authored_date).strftime(DATETIME_FORMAT) + " UTC", inline=True)
+                        .fromtimestamp(last_commit.authored_date).strftime(DATETIME_FORMAT) + " UTC", inline=True)
         embed.add_field(name="GitHub",
-                        value="[See Commit >]({}/commit/{})".format(GIT_URL, lastCommit.hexsha),
+                        value="[See Commit >]({}/commit/{})".format(GIT_URL, last_commit.hexsha),
                         inline=False)
 
         await ctx.send(embed=embed)

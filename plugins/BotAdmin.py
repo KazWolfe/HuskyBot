@@ -466,7 +466,7 @@ class BotAdmin:
         """
         command = command.lower()
 
-        ignoredCommands = self._config.get('ignoredCommands', [])
+        ignored_commands = self._config.get('ignoredCommands', [])
 
         if ctx.bot.get_command(command) is not None:
             await ctx.send(embed=discord.Embed(
@@ -476,7 +476,7 @@ class BotAdmin:
             ))
             return
 
-        if command in ignoredCommands:
+        if command in ignored_commands:
             await ctx.send(embed=discord.Embed(
                 title="Bot Manager",
                 description="The command `/" + command + "` is already being ignored.",
@@ -484,8 +484,8 @@ class BotAdmin:
             ))
             return
 
-        ignoredCommands.append(command)
-        self._config.set('ignoredCommands', ignoredCommands)
+        ignored_commands.append(command)
+        self._config.set('ignoredCommands', ignored_commands)
 
         await ctx.send(embed=discord.Embed(
             title="Bot Manager",
@@ -508,9 +508,9 @@ class BotAdmin:
         """
         command = command.lower()
 
-        ignoredCommands = self._config.get('ignoredCommands', [])
+        ignored_commands = self._config.get('ignoredCommands', [])
 
-        if command not in ignoredCommands:
+        if command not in ignored_commands:
             await ctx.send(embed=discord.Embed(
                 title="Bot Manager",
                 description="The command `/" + command + "` is already being accepted.",
@@ -518,8 +518,8 @@ class BotAdmin:
             ))
             return
 
-        ignoredCommands.remove(command)
-        self._config.set('ignoredCommands', ignoredCommands)
+        ignored_commands.remove(command)
+        self._config.set('ignoredCommands', ignored_commands)
 
         await ctx.send(embed=discord.Embed(
             title="Bot Manager",
@@ -544,14 +544,14 @@ class BotAdmin:
         config = self._config.get('specialChannels', {})
 
         if name not in ChannelKeys.__members__:
-            channelNames = []
+            channel_names = []
 
             for ch in ChannelKeys:
-                channelNames.append(ch.name)
+                channel_names.append(ch.name)
 
             await ctx.send(embed=discord.Embed(
                 title="Bot Manager",
-                description="Valid channel names are: \n- `" + "`\n- `".join(channelNames) + "`",
+                description="Valid channel names are: \n- `" + "`\n- `".join(channel_names) + "`",
                 color=Colors.PRIMARY
             ))
             return
@@ -582,14 +582,14 @@ class BotAdmin:
         config = self._config.get('specialRoles', {})
 
         if name not in SpecialRoleKeys.__members__:
-            specialRoles = []
+            special_roles = []
 
             for r in SpecialRoleKeys:
-                specialRoles.append(r.name)
+                special_roles.append(r.name)
 
             await ctx.send(embed=discord.Embed(
                 title="Bot Manager",
-                description="Valid role names are: \n- `" + "`\n- `".join(specialRoles) + "`",
+                description="Valid role names are: \n- `" + "`\n- `".join(special_roles) + "`",
                 color=Colors.PRIMARY
             ))
             return

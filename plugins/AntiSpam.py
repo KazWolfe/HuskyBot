@@ -58,7 +58,6 @@ class AntiSpam:
 
             await asyncio.sleep(60 * 60 * 4)  # sleep for four hours
 
-
     async def on_message(self, message):
         if not WolfUtils.should_process_message(message):
             return
@@ -191,15 +190,15 @@ class AntiSpam:
                     color=Colors.WARNING
                 ), delete_after=90.0)
 
-            cooldownRecord = self.INVITE_COOLDOWNS[message.author.id]
+            cooldown_record = self.INVITE_COOLDOWNS[message.author.id]
 
             # And we increment the offense counter here.
-            cooldownRecord['offenseCount'] += 1
+            cooldown_record['offenseCount'] += 1
 
             # Keep track if we're planning on removing this user.
             was_kicked = False
 
-            if cooldownRecord['offenseCount'] == COOLDOWN_SETTINGS['banLimit']:
+            if cooldown_record['offenseCount'] == COOLDOWN_SETTINGS['banLimit']:
                 was_kicked = True
             elif message.author.joined_at > datetime.datetime.utcnow() - datetime.timedelta(seconds=60):
                 await message.author.kick(reason="New user (less than 60 seconds old) posted invite.")
@@ -234,9 +233,9 @@ class AntiSpam:
                                                                                       -1)))
 
                 log_embed.set_footer(text="Strike {} of {}, resets {} {}"
-                                     .format(cooldownRecord['offenseCount'],
+                                     .format(cooldown_record['offenseCount'],
                                              COOLDOWN_SETTINGS['banLimit'],
-                                             cooldownRecord[EXPIRY_FIELD_NAME].strftime(DATETIME_FORMAT),
+                                             cooldown_record[EXPIRY_FIELD_NAME].strftime(DATETIME_FORMAT),
                                              "| User Removed" if was_kicked else ""))
 
                 log_embed.set_thumbnail(url=invite_guild.icon_url)
@@ -245,7 +244,7 @@ class AntiSpam:
 
             # If the user is at the offense limit, we're going to ban their ass. In this case, this means that on
             # their fifth invalid invite, we ban 'em.
-            if COOLDOWN_SETTINGS['banLimit'] > 0 and (cooldownRecord['offenseCount'] >= COOLDOWN_SETTINGS['banLimit']):
+            if COOLDOWN_SETTINGS['banLimit'] > 0 and (cooldown_record['offenseCount'] >= COOLDOWN_SETTINGS['banLimit']):
                 try:
                     del self.INVITE_COOLDOWNS[message.author.id]
 
@@ -289,13 +288,13 @@ class AntiSpam:
                     'offenseCount': 0
                 }
 
-            cooldownRecord = self.ATTACHMENT_COOLDOWNS[message.author.id]
+            cooldown_record = self.ATTACHMENT_COOLDOWNS[message.author.id]
 
             # And we increment the offense counter here.
-            cooldownRecord['offenseCount'] += 1
+            cooldown_record['offenseCount'] += 1
 
             # Give them a fair warning on attachment #3
-            if COOLDOWN_CONFIG['warnLimit'] != 0 and cooldownRecord['offenseCount'] == COOLDOWN_CONFIG['warnLimit']:
+            if COOLDOWN_CONFIG['warnLimit'] != 0 and cooldown_record['offenseCount'] == COOLDOWN_CONFIG['warnLimit']:
                 await message.channel.send(embed=discord.Embed(
                     title="\uD83D\uDED1 Whoa there, pardner!",
                     description="Hey there {}! You're sending files awfully fast. Please help us keep this chat clean "
@@ -307,16 +306,16 @@ class AntiSpam:
                 if log_channel is not None:
                     await log_channel.send(embed=discord.Embed(
                         description="User {} has sent {} attachments in a {}-second period in channel "
-                                    "{}.".format(message.author, cooldownRecord['offenseCount'],
+                                    "{}.".format(message.author, cooldown_record['offenseCount'],
                                                  COOLDOWN_CONFIG['seconds'], message.channel),
                         color=Colors.WARNING
                     ).set_author(name="Possible Attachment Spam", icon_url=message.author.avatar_url))
                     return
 
             # And ban their sorry ass at #5.
-            if cooldownRecord['offenseCount'] >= COOLDOWN_CONFIG['banLimit']:
+            if cooldown_record['offenseCount'] >= COOLDOWN_CONFIG['banLimit']:
                 await message.author.ban(reason="[AUTOMATIC BAN - AntiSpam Module] User sent {} attachments in a {} "
-                                                "second period.".format(cooldownRecord['offenseCount'],
+                                                "second period.".format(cooldown_record['offenseCount'],
                                                                         COOLDOWN_CONFIG['banLimit']),
                                          delete_message_days=1)
                 del self.ATTACHMENT_COOLDOWNS[message.author.id]
