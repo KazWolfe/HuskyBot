@@ -15,7 +15,7 @@ class MuteManager:
     def __init__(self, bot: commands.Bot):
         self._bot = bot
         self._bot_config = WolfConfig.get_config()
-        self._mute_config = WolfConfig.WolfConfig('config/mutes.json')
+        self._mute_config = WolfConfig.get_config('mutes', create_if_nonexistent=True)
         self.__cache__ = []
 
         self.read_mutes_from_file()

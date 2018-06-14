@@ -2,9 +2,10 @@ import logging
 import os
 import re
 import uuid
+import requests
+import tempfile
 
 import discord
-import requests
 from discord.ext import commands
 
 from WolfBot import WolfConfig
@@ -58,15 +59,15 @@ class DirtyHacks:
                 return
 
             image_name = '/tmp/{}.gif'.format(str(uuid.uuid4()))
+            temp_file = tempfile.NamedTemporaryFile()
             img_data = requests.get(match).content
 
-            with open(image_name, 'wb') as handler:
-                handler.write(img_data)
+            temp_file.write(img_data)
 
-            (width, height) = WolfUtils.get_image_size(image_name)
+            (width, height) = WolfUtils.get_image_size(temp_file.name)
 
             # Image is larger than 5000 px * 5000 px but *less* than 1 MB
-            if (width > 5000) and (height > 5000) and os.path.getsize(image_name) < 1000000:
+            if (width > 5000) and (height > 5000) and os.path.getsize(temp_file.name) < 1000000:
                 await message.delete()
 
             os.remove(image_name)

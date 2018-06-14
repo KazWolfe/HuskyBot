@@ -80,13 +80,56 @@ class WolfConfig:
             f.write(json.dumps(self._config, sort_keys=True, default=override_dumper))
 
 
-__BOT_CONFIG = WolfConfig("config/config.json")
-__SESSION_STORAGE = WolfConfig()
+__cache__ = {}
 
 
-def get_config():
-    return __BOT_CONFIG
+def get_config(name: str = 'config', create_if_nonexistent: bool = False):
+    """
+    Get the bot's current persistent configuration (thread-safe).
+
+    Due to Python's annoyance, we can't grab the same object from everything, so instead we will just load the config
+    here, and expose it through get_config() to clients. DO NOT access the config manually, as it may be out of date, or
+    otherwise rewrite configs without expectation.
+
+    :param name: Define the name of the persistent configuration to get.
+    :param create_if_nonexistent: Create this config file if it doesn't exist.
+    :return: Returns the bot's shared persistent configuration.
+    """
+
+    if name != 'config':
+        key = 'config_{}'.format(name)
+    else:
+        key = 'config'
+
+    if name not in __cache__:
+        # The requested store does not exist in cache.
+        __cache__[key] = WolfConfig('config/{}.json'.format(name), create_if_nonexistent=create_if_nonexistent)
+
+    return __cache__[key]
 
 
-def get_session_store():
-    return __SESSION_STORAGE
+def get_session_store(name: str = None):
+    """
+    Get the bot's Session Store (thread-safe).
+
+    The Session Store is a ephemeral key-value store used for information that does *not* need to persist past a bot
+    restart. Because of this, nothing should be stored in the Session Store that requires persistence - this is a temp
+    space.
+
+    Session Stores are completely ephemeral, so either the shared session store can be used or one may be created by
+    passing a name value.
+
+    :param name: The name of the Session Store to retrieve
+    :return: Returns a Session Store with a specified name.
+    """
+
+    if name is None:
+        key = 'session_store'
+    else:
+        key = 'session_store_{}'.format(name)
+
+    if key not in __cache__:
+        # The requested store does not exist in cache.
+        __cache__[key] = WolfConfig()
+
+    return __cache__[key]

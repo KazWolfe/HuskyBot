@@ -29,7 +29,7 @@ class GiveawayManager:
 
         self.bot = bot
         self._config = WolfConfig.get_config()
-        self._giveaway_config = WolfConfig.WolfConfig('config/giveaways.json', create_if_nonexistent=True)
+        self._giveaway_config = WolfConfig.get_config('giveaways', create_if_nonexistent=True)
 
         # We store all giveaways in a time-ordered cache list. Reading and working with the file directly is
         # *generally* a bad idea.
