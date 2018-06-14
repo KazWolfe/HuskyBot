@@ -28,7 +28,7 @@ class AutoFlag:
         self._delete_time = 30 * 60  # 30 minutes (30 x 60 seconds)
         LOG.info("Loaded plugin!")
 
-    async def filter_message(self, message: discord.Message, context: str = "new_message"):
+    async def regex_message_filter(self, message: discord.Message, context: str = "new_message"):
         flag_regexes = self._config.get("flaggedRegexes", [])
 
         alert_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_ALERTS.value, None)
@@ -74,7 +74,7 @@ class AutoFlag:
                 LOG.info("Got flagged message (context %s, key %s, from %s in %s): %s", context,
                          message.author, flag_term, message.channel, message.content)
 
-    async def filter_user(self, message: discord.Message):
+    async def user_filter(self, message: discord.Message):
         flag_users = self._config.get("flaggedUsers", [])
 
         alert_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_ALERTS.value, None)
@@ -105,12 +105,12 @@ class AutoFlag:
             LOG.info("Got user flagged message (from %s in %s): %s", message.author, message.channel, message.content)
 
     async def on_message(self, message):
-        await self.filter_message(message)
-        await self.filter_user(message)
+        await self.regex_message_filter(message)
+        await self.user_filter(message)
 
     # noinspection PyUnusedLocal
     async def on_message_edit(self, before, after):
-        await self.filter_message(after, "edit")
+        await self.regex_message_filter(after, "edit")
 
     @commands.group(name="autoflag", brief="Manage the autoflag plugin")
     @WolfChecks.has_guild_permissions(manage_messages=True)

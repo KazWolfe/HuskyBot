@@ -19,23 +19,29 @@ EXPIRY_FIELD_NAME = "cooldownExpiry"
 # Default configuration values for the AntiSpam features.
 DEFAULTS = {
     "multiPing": {
-        "soft": 6,
-        "hard": 15
+        "soft": 6,  # Number of unique pings in a message before deleting the message
+        "hard": 15  # Number of unique pings in a message before banning the user
     },
     "invites": {
-        'minutes': 30,
-        'banLimit': 5
+        'minutes': 30,  # Cooldown timer (reset)
+        'banLimit': 5  # Number of warnings before ban
     },
     'attach': {
-        'seconds': 15,
-        'warnLimit': 3,
-        'banLimit': 5
+        'seconds': 15,  # Cooldown timer (reset)
+        'warnLimit': 3,  # Number of attachment messages before warning the user
+        'banLimit': 5  # Number of attachment messages before banning the user
     },
     'link': {
-        'banLimit': 5,
-        'linkWarnLimit': 5,
-        'minutes': 30,
-        'totalBeforeBan': 100
+        'banLimit': 5,  # Number of warnings before banning the user
+        'linkWarnLimit': 5,  # The number of links in a single message before banning
+        'minutes': 30,  # Cooldown timer (reset)
+        'totalBeforeBan': 100  # Total links in cooldown period before ban
+    },
+    'nonAscii': {
+        'minMessageLength': 40,  # Minimum length of messages to check
+        'nonAsciiThreshold': 0.5,  # Threshold (0 to 1) before marking the message as spam
+        'banLimit': 3,  # Number of spam messages before banning
+        'minutes': 5  # Cooldown timer (minutes)
     }
 }
 
@@ -57,6 +63,7 @@ class AntiSpam:
         self.INVITE_COOLDOWNS = {}
         self.ATTACHMENT_COOLDOWNS = {}
         self.LINK_COOLDOWNS = {}
+        self.NONASCII_COOLDOWNS = {}
 
         # Tasks
         self.__cleanup_task__ = self.bot.loop.create_task(self.cleanup_expired_cooldowns())
@@ -89,6 +96,7 @@ class AntiSpam:
         await self.prevent_discord_invites(message)
         await self.attachment_cooldown(message)
         await self.prevent_link_spam(message)
+        await self.block_nonascii_spam(message)
 
     async def multi_ping_check(self, message):
         PING_WARN_LIMIT = self._config.get('antiSpam', {}).get('pingSoftLimit', DEFAULTS['multiPing']['soft'])
@@ -496,6 +504,92 @@ class AntiSpam:
                 # And purge their record, it's not needed anymore
                 del self.LINK_COOLDOWNS[message.author.id]
 
+    async def block_nonascii_spam(self, message: discord.Message):
+        ANTISPAM_CONFIG = self._config.get('antiSpam', {})
+        CHECK_CONFIG = ANTISPAM_CONFIG.get('cooldowns', {}).get('link', DEFAULTS['nonAscii'])
+
+        # Prepare the logger
+        log_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
+        if log_channel is not None:
+            log_channel = message.guild.get_channel(log_channel)
+
+        # We can lazily delete link cooldowns on messages, instead of checking.
+        if message.author.id in self.NONASCII_COOLDOWNS \
+                and self.NONASCII_COOLDOWNS[message.author.id][EXPIRY_FIELD_NAME] < datetime.datetime.utcnow():
+            del self.NONASCII_COOLDOWNS[message.author.id]
+
+        # Disable if min length is 0 or less
+        if CHECK_CONFIG['minMessageLength'] <= 0:
+            return
+
+        # Users with MANAGE_MESSAGES are allowed to send as many links as they want.
+        if message.author.permissions_in(message.channel).manage_messages:
+            return
+
+        # Message is too short, just ignore it.
+        if len(message.content) < CHECK_CONFIG['minMessageLength']:
+            return
+
+        nonascii_characters = re.sub('[ -~]', '', message.content)
+
+        # Message doesn't have enough non-ascii characters, we can ignore it.
+        if len(nonascii_characters) < (len(message.content) * CHECK_CONFIG['nonAsciiThreshold']):
+            return
+
+        # Message is now over threshold, get/create their cooldown record.
+        cooldown_record = self.NONASCII_COOLDOWNS.setdefault(message.author.id, {
+            EXPIRY_FIELD_NAME: datetime.datetime.utcnow() + datetime.timedelta(minutes=CHECK_CONFIG['minutes']),
+            'offenseCount': 0
+        })
+
+        if cooldown_record['offenseCount'] == 0:
+            await message.channel.send(embed=discord.Embed(
+                title=Emojis.SHIELD + " Oops! Non-ASCII Message!",
+                description="Hey {}!\n\bIt looks like you posted a message containing a lot of non-ascii characters. "
+                            "In order to cut down on spam, we are a bit strict with this. We won't delete your "
+                            "message, but please keep ASCII spam off the server.\n\nContinuing to spam ASCII messages "
+                            "may result in a ban. Thank you for keeping DIY Tech clean!".format(message.author.mention)
+            ), delete_after=90.0)
+
+        cooldown_record['offenseCount'] += 1
+
+        if log_channel is not None:
+            embed = discord.Embed(
+                description="User {} has sent a message with {} non-ASCII characters (out of {} total)."
+                            "".format(message.author, len(message.content), len(nonascii_characters),
+                                      cooldown_record['offenseCount'], CHECK_CONFIG['banLimit']),
+                color=Colors.WARNING
+            )
+
+            embed.add_field(name="Message Text", value=WolfUtils.trim_string(message.content, 1000, False),
+                            inline=False)
+
+            embed.add_field(name="Message ID", value=message.id, inline=True)
+            embed.add_field(name="Channel", value=message.channel.mention, inline=True)
+
+            embed.set_footer(text="Strike {} of {}, resets {}"
+                             .format(cooldown_record['offenseCount'],
+                                     CHECK_CONFIG['banLimit'],
+                                     cooldown_record[EXPIRY_FIELD_NAME].strftime(DATETIME_FORMAT)))
+
+            embed.set_author(name="Link spam from {} blocked.".format(str(message.author)),
+                             icon_url=message.author.avatar_url)
+
+            embed.set_author(name="Non-ASCII spam from {} detected!".format(str(message.author)),
+                             icon_url=message.author.avatar_url)
+
+            await log_channel.send(embed=embed)
+
+        if cooldown_record['offenseCount'] >= CHECK_CONFIG['banLimit']:
+            await message.author.ban(reason="[AUTOMATIC BAN - AntiSpam Module] User sent {} messages over the "
+                                            "non-ASCII threshold in a {} minute "
+                                            "period.".format(CHECK_CONFIG['banLimit'],
+                                                             CHECK_CONFIG['minutes']),
+                                     delete_message_days=1)
+
+            # And purge their record, it's not needed anymore
+            del self.NONASCII_COOLDOWNS[message.author.id]
+
     @commands.group(name="antispam", aliases=['as'], brief="Manage the Antispam configuration for the bot")
     @commands.has_permissions(manage_messages=True)
     async def asp(self, ctx: commands.Context):
@@ -744,6 +838,56 @@ class AntiSpam:
                         "a user posts more than {} illegal messages in a {} minute period, they will additionally be "
                         "banned. If a user posts {} links in the same time period, they will also be "
                         "banned.".format(links_before_warn, ban_limit, cooldown_minutes, total_link_limit),
+            color=Colors.SUCCESS
+        ))
+
+    @asp.command(name="nonAsciiCooldown", brief="Set non-ASCII cooldown and ban limits")
+    @commands.has_permissions(manage_guild=True)
+    async def set_ascii_cooldown(self, ctx: commands.Context, cooldown_minutes: int, ban_limit: int, min_length: int,
+                                 threshold: int):
+        """
+        Set cooldowns/ban thresholds on non-ASCII spam.
+
+        AntiSpam will attempt to detect and ban uses who excessively post non-ASCII characters. These are defined as
+        symbols that can not be typed on a normal keyboard such as emoji and box art. Effectively, this command will
+        single-handedly kill ASCII art spam on the guild.
+
+        If a user posts a message with at least `min_length` characters which contains at least `length * threshold`
+        non-ASCII characters, the bot will log a warning and warn the user on the first offense. If a user exceeds
+        `ban_limit` warnings, they will be automatically banned. This feature does NOT delete messages pre-ban.
+
+        Setting min_length to 0 or less will disable this feature.
+
+        Parameters:
+            cooldown_minutes: The number of minutes before a given cooldown expires (default: 5)
+            ban_limit: The number of warnings before a user is autobanned (default: 3)
+            min_length: The minimum total number of characters to process a message (default: 40)
+            threshold: A value (between 0 and 1) that represents the percentage of characters that need to be
+                       non-ASCII before a warning is fired. (default: 0.5)
+        """
+
+        as_config = self._config.get('antiSpam', {})
+        nonascii_config = as_config.setdefault('cooldowns', {}).setdefault('nonAscii', DEFAULTS['nonAscii'])
+
+        if not 0 <= threshold <= 1:
+            await ctx.send(embed=discord.Embed(
+                title="Configuration Error",
+                description="The `threshold` value must be between 0 and 1!",
+                color=Colors.DANGER
+            ))
+
+        nonascii_config['minutes'] = cooldown_minutes
+        nonascii_config['banLimit'] = ban_limit
+        nonascii_config['minMessageLength'] = min_length
+        nonascii_config['nonAsciiThreshold'] = threshold
+
+        self._config.set('antiSpam', as_config)
+
+        await ctx.send(embed=discord.Embed(
+            title="AntiSpam Plugin",
+            description="The non-ASCII module of AntiSpam has been set to scan messages over **{} characters** for a "
+                        "non-ASCII **threshold of {}**. Users will be automatically banned for posting **{} messages** "
+                        "in a **{} minute** period.".format(min_length, threshold, ban_limit, min_length),
             color=Colors.SUCCESS
         ))
 
