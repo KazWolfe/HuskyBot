@@ -34,7 +34,7 @@ else:
 bot = commands.Bot(command_prefix=BOT_CONFIG.get('prefix', '/'), activity=start_activity, status=start_status)
 
 # set up logging
-LOCAL_STORAGE.set('logPath', 'logs/dakotabot-' + str(datetime.datetime.utcnow()).split(' ')[0] + '.log')
+LOCAL_STORAGE.set('logPath', 'logs/dakotabot-{}.log'.format(WolfUtils.get_timestamp().split(' ', 1)[0]))
 logging.basicConfig(level=logging.WARNING, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
                     datefmt="%Y-%m-%d %H:%M:%S",
                     handlers=[logging.FileHandler(LOCAL_STORAGE.get('logPath'), 'a'),
@@ -56,7 +56,8 @@ async def initialize():
         del start_activity
         restart_reason = "start"
 
-    LOG.info("DakotaBot is online, running discord.py " + discord.__version__)
+    LOG.info("DakotaBot is online, running discord.py {}. "
+             "Initializing and loading modules...".format(discord.__version__))
 
     # Lock the bot to a single guild
     if not BOT_CONFIG.get("developerMode", False):
@@ -102,11 +103,16 @@ async def initialize():
 async def on_ready():
     if not initialized:
         await initialize()
+        LOG.info("The bot has been initialized. Ready to process commands and events.")
+    else:
+        LOG.warning("A new on_ready() was called after initialization. Did the network die?")
 
     bot_presence = BOT_CONFIG.get('presence', {"game": "DakotaBot", "type": 2, "status": "dnd"})
 
-    await bot.change_presence(activity=discord.Activity(name=bot_presence['game'], type=bot_presence['type']),
-                              status=discord.Status[bot_presence['status']])
+    await bot.change_presence(
+        activity=discord.Activity(name=bot_presence['game'], type=bot_presence['type']),
+        status=discord.Status[bot_presence['status']]
+    )
 
 
 @bot.event
@@ -142,8 +148,6 @@ async def on_command_error(ctx, error: commands.CommandError):
                 color=Colors.DANGER
             )
 
-            if ctx.message.author.guild_permissions.administrator:
-                embed.set_footer(text="E_DISABLED_COMMAND")
             await ctx.send(embed=embed)
 
         LOG.error("Command %s is disabled.", command_name)
@@ -306,6 +310,7 @@ def get_developers():
 
 
 if __name__ == '__main__':
+    LOG.info("Set log path to {}".format(LOCAL_STORAGE.get('logPath')))
     bot.run(BOT_CONFIG['apiKey'])
 
     # Auto restart if a reason is present

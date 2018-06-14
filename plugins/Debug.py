@@ -107,17 +107,18 @@ class Debug:
 
         if 0 < ping_in_ms < 50:
             color = 0x368C23
-        elif ping_in_ms < 100:
+        elif 50 <= ping_in_ms < 100:
             color = 0x9BBF30
-        elif ping_in_ms < 150:
+        elif 100 <= ping_in_ms < 150:
             color = 0xD7DE38
-        elif ping_in_ms < 200:
+        elif 150 <= ping_in_ms < 200:
             color = 0xF4D43C
-        elif ping_in_ms < 250:
+        elif 200 <= ping_in_ms < 250:
             color = 0xD8732E
-        elif ping_in_ms > 250:
+        elif ping_in_ms >= 250:
             color = 0xBB2B2E
         else:
+            # what the fuck negative ping should not be possible
             color = 0x4854AF
 
         await ctx.send(embed=discord.Embed(
@@ -215,7 +216,7 @@ class Debug:
         formatted_code += split_expr[0]
         if len(split_expr) > 1:
             for line in split_expr[1:]:
-                formatted_code += "\n...    {}".format(line)
+                formatted_code += "\n... {}".format(line)
 
         parsed = ast.parse(body)
         body = parsed.body[0].body

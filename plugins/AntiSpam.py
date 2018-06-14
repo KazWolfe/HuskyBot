@@ -16,6 +16,28 @@ LOG = logging.getLogger("DakotaBot.Plugin." + __name__)
 
 EXPIRY_FIELD_NAME = "cooldownExpiry"
 
+# Default configuration values for the AntiSpam features.
+DEFAULTS = {
+    "multiPing": {
+        "soft": 6,
+        "hard": 15
+    },
+    "invites": {
+        'minutes': 30,
+        'banLimit': 5
+    },
+    'attach': {
+        'seconds': 15,
+        'warnLimit': 3,
+        'banLimit': 5
+    },
+    'link': {
+        'banLimit': 5,
+        'linkWarnLimit': 5,
+        'minutes': 30
+    }
+}
+
 
 # noinspection PyMethodMayBeStatic
 class AntiSpam:
@@ -68,8 +90,8 @@ class AntiSpam:
         await self.prevent_link_spam(message)
 
     async def multi_ping_check(self, message):
-        PING_WARN_LIMIT = self._config.get('antiSpam', {}).get('pingSoftLimit', 6)
-        PING_BAN_LIMIT = self._config.get('antiSpam', {}).get('pingHardLimit', 15)
+        PING_WARN_LIMIT = self._config.get('antiSpam', {}).get('pingSoftLimit', DEFAULTS['multiPing']['soft'])
+        PING_BAN_LIMIT = self._config.get('antiSpam', {}).get('pingHardLimit', DEFAULTS['multiPing']['hard'])
 
         alert_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_ALERTS.value, None)
         if alert_channel is not None:
@@ -88,7 +110,7 @@ class AntiSpam:
             await message.channel.send(embed=discord.Embed(
                 title=Emojis.NO_ENTRY + " Mass Ping Blocked",
                 description="A mass-ping message was blocked in the current channel.\n"
-                            + "Please reduce the number of pings in your message and try again.",
+                            "Please reduce the number of pings in your message and try again.",
                 color=Colors.WARNING
             ))
 
@@ -107,7 +129,7 @@ class AntiSpam:
         ANTISPAM_CONFIG = self._config.get('antiSpam', {})
 
         ALLOWED_INVITES = ANTISPAM_CONFIG.get('allowedInvites', [message.guild.id])
-        COOLDOWN_SETTINGS = ANTISPAM_CONFIG.get('cooldowns', {}).get('invites', {'minutes': 30, 'banLimit': 5})
+        COOLDOWN_SETTINGS = ANTISPAM_CONFIG.get('cooldowns', {}).get('invites', DEFAULTS['invites'])
 
         # Prepare the logger
         log_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
@@ -144,7 +166,7 @@ class AntiSpam:
                     await message.delete()
                 except discord.NotFound:
                     # Message not found, let's log this
-                    LOG.warning("Invalid message was caught and already deleted before AS could handle it.")
+                    LOG.warning("Invalid message was caught and already deleted before I could handle it.")
 
                 invalid_embed = discord.Embed(
                     description="An invalid invite with key `{}` by user {} (ID `{}`) was caught and "
@@ -167,7 +189,7 @@ class AntiSpam:
                 await message.delete()
             except discord.NotFound:
                 # Message not found, let's log this
-                LOG.warning("Message was caught and already deleted before AS could handle it.")
+                LOG.warning("Message was caught and already deleted before I could handle it.")
 
             # Add the user to the cooldowns table - we're going to use this to prevent DakotaBot's spam and to ban
             # the user if they go over a defined number of invites in a period
@@ -261,9 +283,7 @@ class AntiSpam:
 
     async def attachment_cooldown(self, message: discord.Message):
         ANTISPAM_CONFIG = self._config.get('antiSpam', {})
-        COOLDOWN_CONFIG = ANTISPAM_CONFIG.get('cooldowns', {}).get('attach', {'seconds': 15,
-                                                                              'warnLimit': 3,
-                                                                              'banLimit': 5})
+        COOLDOWN_CONFIG = ANTISPAM_CONFIG.get('cooldowns', {}).get('attach', DEFAULTS['attach'])
 
         # Prepare the logger
         log_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
@@ -343,10 +363,7 @@ class AntiSpam:
         """
 
         ANTISPAM_CONFIG = self._config.get('antiSpam', {})
-        COOLDOWN_CONFIG = ANTISPAM_CONFIG.get('cooldowns', {}).get('link', {'banLimit': 5,
-                                                                            'linkWarnLimit': 5,
-                                                                            'minutes': 30,
-                                                                            'totalBeforeBan': 100})
+        COOLDOWN_CONFIG = ANTISPAM_CONFIG.get('cooldowns', {}).get('link', DEFAULTS['link'])
 
         # gen the embed here
         link_warning = discord.Embed(
@@ -633,7 +650,7 @@ class AntiSpam:
             /help as blockInvite    - Add a guild to the invite whitelist
         """
         as_config = self._config.get('antiSpam', {})
-        invite_cooldown = as_config.setdefault('cooldowns', {}).setdefault('invites', {'minutes': 30, 'banLimit': 5})
+        invite_cooldown = as_config.setdefault('cooldowns', {}).setdefault('invites', DEFAULTS['invites'])
 
         invite_cooldown['minutes'] = cooldown_minutes
         invite_cooldown['banLimit'] = ban_limit
@@ -664,8 +681,7 @@ class AntiSpam:
         """
 
         as_config = self._config.get('antiSpam', {})
-        attach_config = as_config.setdefault('cooldowns', {}).setdefault('attach', {'seconds': 15,
-                                                                                    'warnLimit': 3, 'banLimit': 5})
+        attach_config = as_config.setdefault('cooldowns', {}).setdefault('attach', DEFAULTS['attach'])
 
         attach_config['seconds'] = cooldown_seconds
         attach_config['warnLimit'] = warn_limit
@@ -712,9 +728,7 @@ class AntiSpam:
         """
 
         as_config = self._config.get('antiSpam', {})
-        link_config = as_config.setdefault('cooldowns', {}).setdefault('link', {'banLimit': 5,
-                                                                                'linkWarnLimit': 5,
-                                                                                'minutes': 30})
+        link_config = as_config.setdefault('cooldowns', {}).setdefault('link', DEFAULTS['link'])
 
         link_config['banLimit'] = ban_limit
         link_config['linkWarnLimit'] = links_before_warn
