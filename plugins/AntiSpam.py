@@ -34,7 +34,8 @@ DEFAULTS = {
     'link': {
         'banLimit': 5,
         'linkWarnLimit': 5,
-        'minutes': 30
+        'minutes': 30,
+        'totalBeforeBan': 100
     }
 }
 
