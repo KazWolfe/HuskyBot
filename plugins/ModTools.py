@@ -151,7 +151,7 @@ class ModTools:
         if user == ctx.bot.user:
             await ctx.send(embed=discord.Embed(
                 title="Moderator Toolkit",
-                description="**You can not ban the bot.** How would that even work?\n\nGo do something else with your"
+                description="**You can not ban the bot.** How would that even work?\n\nGo do something else with your "
                             "time.",
                 color=Colors.DANGER
             ))
@@ -220,7 +220,7 @@ class ModTools:
         if target == ctx.bot.user:
             await ctx.send(embed=discord.Embed(
                 title="Moderator Toolkit",
-                description="**You can not mute the bot.** How would that even work?\n\nGo do something else with your"
+                description="**You can not mute the bot.** How would that even work?\n\nGo do something else with your "
                             "time.",
                 color=Colors.DANGER
             ))
@@ -281,7 +281,7 @@ class ModTools:
         if target == ctx.bot.user:
             await ctx.send(embed=discord.Embed(
                 title="Moderator Toolkit",
-                description="**You can not mute the bot.** How would that even work?\n\nGo do something else with your"
+                description="**You can not mute the bot.** How would that even work?\n\nGo do something else with your "
                             "time.",
                 color=Colors.DANGER
             ))
