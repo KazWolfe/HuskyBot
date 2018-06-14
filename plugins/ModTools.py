@@ -148,6 +148,15 @@ class ModTools:
             ))
             return
 
+        if user == ctx.bot.user:
+            await ctx.send(embed=discord.Embed(
+                title="Moderator Toolkit",
+                description="**You can not ban the bot.** How would that even work?\n\nGo do something else with your"
+                            "time.",
+                color=Colors.DANGER
+            ))
+            return
+
         in_guild = True
         if not isinstance(user, discord.Member):
             in_guild = False
@@ -208,6 +217,15 @@ class ModTools:
         """
         # ToDo: Implement database, and better logging.
 
+        if target == ctx.bot.user:
+            await ctx.send(embed=discord.Embed(
+                title="Moderator Toolkit",
+                description="**You can not mute the bot.** How would that even work?\n\nGo do something else with your"
+                            "time.",
+                color=Colors.DANGER
+            ))
+            return
+
         if target.top_role.position >= ctx.message.author.top_role.position:
             await ctx.send(embed=discord.Embed(
                 title="Moderator Toolkit",
@@ -259,6 +277,16 @@ class ModTools:
 
         See /help mute for further details on how this command works.
         """
+
+        if target == ctx.bot.user:
+            await ctx.send(embed=discord.Embed(
+                title="Moderator Toolkit",
+                description="**You can not mute the bot.** How would that even work?\n\nGo do something else with your"
+                            "time.",
+                color=Colors.DANGER
+            ))
+            return
+
         if target.top_role.position >= ctx.message.author.top_role.position:
             await ctx.send(embed=discord.Embed(
                 title="Moderator Toolkit",
@@ -515,6 +543,15 @@ class ModTools:
     @commands.has_permissions(manage_nicknames=True)
     async def lock_nickname(self, ctx: commands.Context, member: discord.Member, *, new_nickname: str = None):
         locked_users = self._config.get("nicknameLocks", {})
+
+        if member == ctx.bot.user:
+            await ctx.send(embed=discord.Embed(
+                title="Moderator Toolkit",
+                description="**You can not nicklock the bot.** How would that even work?\n\nGo do something else with "
+                            "your time.",
+                color=Colors.DANGER
+            ))
+            return
 
         if member.top_role.position >= ctx.message.author.top_role.position:
             await ctx.send(embed=discord.Embed(
