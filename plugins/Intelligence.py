@@ -265,6 +265,11 @@ class Intelligence:
 
         Bots do not count towards the "active user" count.
 
+        CAVEAT: It is important to know that this is a *slow* command, because it needs to iterate over every message
+        in the search context in order to successfully operate. Because of this, the "Typing" indicator will display.
+        Also note that this command may not return accurate results due to the nature of the search system. It should be
+        used for approximation only.
+
         Parameters:
             search_context - A string (or channel ID) that resolves to a channel ctx. See /help msgcount. Default "all"
             delta          -  A string in ##d##h##m##s format to capture. Default 24h.
@@ -299,7 +304,7 @@ class Intelligence:
                 hist = channel.history(limit=None, after=search_start)
 
                 async for m in hist:  # type: discord.Message
-                    if m.author == self.bot.user:
+                    if m.author.bot:
                         continue
 
                     message_counts[m.author.id] = message_counts.get(m.author.id, 0) + 1
