@@ -75,6 +75,5 @@ class Emojis:
 
 
 class Regex:
-    URL_REGEX = r"\b((?:[a-z][\w-]+:(?:/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>" \
-                r"]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{}" \
-                r";:'\".,<>?«»“”‘’]))"
+    # @stephenhay's regex from https://mathiasbynens.be/demo/url-regex
+    URL_REGEX = r"\b(([\w-]+://?|www[.])[^\s()<>]+(?:\([\w\d]+\)|([^[:punct:]\s]|\/)))"
