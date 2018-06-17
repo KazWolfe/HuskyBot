@@ -222,10 +222,13 @@ async def on_command_error(ctx, error: commands.CommandError):
 
     # Handle commands on cooldown
     elif isinstance(error, commands.CommandOnCooldown):
+        seconds = round(error.retry_after)
+        tx = "{} {}".format(seconds, "second" if seconds == 1 else "seconds")
+
         await ctx.send(embed=discord.Embed(
             title="Command Handler",
-            description="**The command `/{}` has been run too much recently!**\nPlease wait {} seconds until trying "
-                        "again.".format(command_name, error.retry_after),
+            description="**The command `/{}` has been run too much recently!**\nPlease wait **{}** until trying "
+                        "again.".format(command_name, tx),
             color=Colors.DANGER
         ))
 

@@ -185,8 +185,9 @@ class Intelligence:
     @commands.command(name="msgcount", brief="Get a count of messages in a given context")
     @commands.has_permissions(manage_messages=True)
     @commands.cooldown(1, 60, commands.BucketType.user)
-    async def message_count(self, ctx: commands.Context, search_context: WolfConverters.ChannelContextConverter,
-                            timedelta: WolfConverters.DateDiffConverter):
+    async def message_count(self, ctx: commands.Context,
+                            search_context: WolfConverters.ChannelContextConverter = "public",
+                            timedelta: WolfConverters.DateDiffConverter = "24h"):
         """
         Get a count of messages in any given context.
 
@@ -201,6 +202,10 @@ class Intelligence:
         Also note that this command may not return accurate results due to the nature of the search system. It should be
         used for approximation only.
 
+        Parameters:
+            search_context - A search context as described above. Default "public".
+            timedelta      - A timedelta string as described above. Default 24h.
+
         Example commands:
             /msgcount public 7d   - Get a count of all public messages in the last 7 days
             /msgcount all 2d      - Get a count of all messages in the last two days.
@@ -209,6 +214,13 @@ class Intelligence:
         See also:
             /help activeusercount - Get the count of active users on the guild.
         """
+
+        if search_context == "public":
+            converter = WolfConverters.ChannelContextConverter()
+            search_context = await converter.convert(ctx, "all")
+
+        if timedelta == "24h":
+            timedelta = datetime.timedelta(hours=24)
 
         message_count = 0
 
@@ -239,8 +251,8 @@ class Intelligence:
     @commands.has_permissions(view_audit_log=True)
     @commands.cooldown(1, 60, commands.BucketType.user)
     async def active_user_count(self, ctx: commands.Context,
-                                search_context: WolfConverters.ChannelContextConverter = None,
-                                delta: WolfConverters.DateDiffConverter = datetime.timedelta(hours=24),
+                                search_context: WolfConverters.ChannelContextConverter = "all",
+                                delta: WolfConverters.DateDiffConverter = "24h",
                                 threshold: int=20):
         """
         Get an active user count for the current guild.
@@ -254,23 +266,26 @@ class Intelligence:
         Bots do not count towards the "active user" count.
 
         Parameters:
-            search_context: A string (or channel ID) that resolves to a channel ctx. See /help msgcount. Default "all"
-            delta: A string in ##d##h##m##s format to capture. Default 24h.
-            threshold: The minimum number of messages a user should send per hour (on average). Default 20.
+            search_context - A string (or channel ID) that resolves to a channel ctx. See /help msgcount. Default "all"
+            delta          -  A string in ##d##h##m##s format to capture. Default 24h.
+            threshold      -  The minimum number of messages a user should send per hour (on average). Default 20.
 
         See also:
             /help usercount - Get a count of users on the guild
             /help msgcount  - Get a count of messages in the current context
         """
+        if search_context == "all":
+            converter = WolfConverters.ChannelContextConverter()
+            search_context = await converter.convert(ctx, "all")
+
+        if delta == "24h":
+            delta = datetime.timedelta(hours=24)
+
         message_counts = {}
         active_user_count = 0
 
         now = datetime.datetime.utcnow()
         search_start = now - delta
-
-        if search_context is None:
-            converter = WolfConverters.ChannelContextConverter()
-            search_context = await converter.convert(ctx, "all")
 
         min_messages = max(threshold * (delta.seconds // 3600), threshold)
 
