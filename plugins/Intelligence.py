@@ -184,7 +184,9 @@ class Intelligence:
 
     @commands.command(name="msgcount", brief="Get a count of messages in a given context")
     @commands.has_permissions(manage_messages=True)
-    async def message_count(self, ctx: commands.Context, context: str, timedelta: WolfConverters.DateDiffConverter):
+    @commands.cooldown(1, 60, commands.BucketType.user)
+    async def message_count(self, ctx: commands.Context, search_context: WolfConverters.ChannelContextConverter,
+                            timedelta: WolfConverters.DateDiffConverter):
         """
         Get a count of messages in any given context.
 
@@ -200,47 +202,21 @@ class Intelligence:
         used for approximation only.
 
         Example commands:
+            /msgcount public 7d   - Get a count of all public messages in the last 7 days
+            /msgcount all 2d      - Get a count of all messages in the last two days.
+            /msgcount #general 5h - Get a count of all messages in #general within the last 5 hours.
 
-        /msgcount public 7d   - Get a count of all public messages in the last 7 days
-        /msgcount all 2d      - Get a count of all messages in the last two days.
-        /msgcount #general 5h - Get a count of all messages in #general within the last 5 hours.
+        See also:
+            /help activeusercount - Get the count of active users on the guild.
         """
 
         message_count = 0
-        search_channels = []
-
-        logging_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
 
         now = datetime.datetime.utcnow()
         search_start = now - timedelta
 
         async with ctx.typing():
-            if context.lower() == "all":
-                for channel in ctx.guild.text_channels:
-                    if channel.id == logging_channel:
-                        continue
-
-                    search_channels.append(channel)
-
-            elif context.lower() == "public":
-                if not ctx.guild.default_role.permissions.read_messages:
-                    await ctx.send(embed=discord.Embed(
-                        title="Intelligence Toolkit Error",
-                        description="There do not appear to be any public channels in this guild.",
-                        color=Colors.DANGER
-                    ))
-                    return
-
-                for channel in ctx.guild.text_channels:
-                    if channel.overwrites_for(ctx.guild.default_role).read_messages is False:
-                        continue
-
-                    search_channels.append(channel)
-            else:
-                converter = commands.TextChannelConverter()
-                search_channels.append(await converter.convert(ctx, context))
-
-            for channel in search_channels:
+            for channel in search_context['channels']:
                 if not channel.permissions_for(ctx.me).read_message_history:
                     LOG.info("I don't have permission to get information for channel %s", channel)
                     continue
@@ -253,10 +229,78 @@ class Intelligence:
 
             await ctx.send(embed=discord.Embed(
                 title="Message Count Report",
-                description="Since **`{} UTC`**, the channel context **`{}`** has seen about **`{}`**"
-                            " messages.".format(search_start.strftime(DATETIME_FORMAT), context, message_count),
+                description="Since `{} UTC`, the channel context `{}` has seen about **`{}`**"
+                            " messages.".format(search_start.strftime(DATETIME_FORMAT), search_context['name'],
+                                                message_count),
                 color=Colors.INFO
             ))
+
+    @commands.command(name="activeusercount", brief="Get a count of active users on the guild", aliases=["auc"])
+    @commands.has_permissions(view_audit_log=True)
+    @commands.cooldown(1, 60, commands.BucketType.user)
+    async def active_user_count(self, ctx: commands.Context,
+                                search_context: WolfConverters.ChannelContextConverter = None,
+                                delta: WolfConverters.DateDiffConverter = datetime.timedelta(hours=24),
+                                threshold: int=20):
+        """
+        Get an active user count for the current guild.
+
+        This command will look back through message history and attempt to find the number of active users in the guild.
+        By default, it will look for all users with (on average) 20 or more messages per hour.
+
+        This command operates on "context" logic, much like /msgcount. Context are the same as there - either a channel,
+        the word "public", or the word "all".
+
+        Bots do not count towards the "active user" count.
+
+        Parameters:
+            search_context: A string (or channel ID) that resolves to a channel ctx. See /help msgcount. Default "all"
+            delta: A string in ##d##h##m##s format to capture. Default 24h.
+            threshold: The minimum number of messages a user should send per hour (on average). Default 20.
+
+        See also:
+            /help usercount - Get a count of users on the guild
+            /help msgcount  - Get a count of messages in the current context
+        """
+        message_counts = {}
+        active_user_count = 0
+
+        now = datetime.datetime.utcnow()
+        search_start = now - delta
+
+        if search_context is None:
+            converter = WolfConverters.ChannelContextConverter()
+            search_context = await converter.convert(ctx, "all")
+
+        min_messages = max(threshold * (delta.seconds // 3600), threshold)
+
+        async with ctx.typing():
+            for channel in search_context['channels']:
+                if not channel.permissions_for(ctx.me).read_message_history:
+                    LOG.info("I don't have permission to get information for channel %s", channel)
+                    continue
+
+                LOG.info("Getting history for %s", channel)
+                hist = channel.history(limit=None, after=search_start)
+
+                async for m in hist:  # type: discord.Message
+                    if m.author == self.bot.user:
+                        continue
+
+                    message_counts[m.author.id] = message_counts.get(m.author.id, 0) + 1
+
+            for user in message_counts:
+                if message_counts[user] >= min_messages:
+                    active_user_count += 1
+
+        await ctx.send(embed=discord.Embed(
+            title="Active User Count Report",
+            description="Since `{} UTC`, the the channel context `{}` has seen about **`{}`**"
+                        " active users (sending on average {} or more messages per hour)."
+                        "".format(search_start.strftime(DATETIME_FORMAT), search_context['name'], active_user_count,
+                                  threshold),
+            color=Colors.INFO
+        ))
 
     @commands.command(name="prunesim", brief="Get a number of users scheduled for pruning")
     @commands.has_permissions(manage_guild=True)
@@ -300,6 +344,9 @@ class Intelligence:
         Get a count of users on the guild.
 
         This is a lighter version of /ginfo. It takes no commands.
+
+        See also:
+            - /help activeusercount - Get a count of active users on the guild.
         """
         await ctx.send(embed=discord.Embed(
             title="User Count Report",

@@ -5,7 +5,7 @@ import re
 import discord
 from discord.ext import commands
 
-from WolfBot import WolfUtils
+from WolfBot import WolfUtils, WolfConfig, WolfStatics
 
 LOG = logging.getLogger("DakotaBot.Utils." + __name__)
 
@@ -78,3 +78,42 @@ class DateDiffConverter(datetime.timedelta, commands.Converter):
             return WolfUtils.get_timedelta_from_string(argument)
         except ValueError as e:
             raise commands.BadArgument(str(e))
+
+
+class ChannelContextConverter(dict, commands.Converter):
+    async def convert(self, ctx: commands.Context, context: str):
+        logging_channel = WolfConfig.get_config() \
+            .get('specialChannels', {}).get(WolfStatics.ChannelKeys.STAFF_LOG.value, None)
+
+        channels = []
+        name = context
+
+        if context.lower() == "all":
+            for channel in ctx.guild.text_channels:
+                if channel.id == logging_channel:
+                    continue
+
+                channels.append(channel)
+
+        elif context.lower() == "public":
+            if not ctx.guild.default_role.permissions.read_messages:
+                raise commands.BadArgument("No public channels exist in this guild.")
+
+            for channel in ctx.guild.text_channels:
+                if channel.overwrites_for(ctx.guild.default_role).read_messages is False:
+                    continue
+
+                channels.append(channel)
+        else:
+            cl = context.split(',')
+            converter = commands.TextChannelConverter()
+
+            for ch_key in cl:
+                channels.append(await converter.convert(ctx, ch_key.strip()))
+
+            if len(channels) == 1:
+                name = channels[0].name
+            else:
+                name = str(list(c.name for c in channels))
+
+        return {"name": name, "channels": channels}
