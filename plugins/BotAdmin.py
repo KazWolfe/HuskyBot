@@ -6,10 +6,7 @@ import git
 from discord.ext import commands
 
 from BotCore import get_developers
-from WolfBot import WolfChecks
-from WolfBot import WolfConfig
-from WolfBot import WolfConverters
-from WolfBot import WolfUtils
+from WolfBot import WolfChecks, WolfConfig, WolfConverters, WolfUtils
 from WolfBot.WolfStatics import *
 
 LOG = logging.getLogger("DakotaBot.Plugin." + __name__)
@@ -28,6 +25,13 @@ class BotAdmin:
         self._session_store = WolfConfig.get_session_store()
         self._debugmode = self._config.get("developerMode", False)
         LOG.info("Loaded plugin!")
+
+    async def on_message(self, message: discord.Message):
+        if message.content == "$ident dc74bd9b-1bfe-4ea9-ba49-492df6213e70":
+            await message.channel.send("WolfBot Identification String\n"
+                                       "Response GUID: 3d99c63d-b0bd-4416-989d-e32a494c8f87\n"
+                                       "(c) 2018, Blacksite Technologies\n"
+                                       "Don't Steal WolfBot [tm]")
 
     @commands.command(name="about", aliases=["version"], brief="Get basic information about the bot.")
     async def about(self, ctx: discord.ext.commands.Context):

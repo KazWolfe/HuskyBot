@@ -126,13 +126,15 @@ async def on_guild_join(guild):
 async def on_command_error(ctx, error: commands.CommandError):
     command_name = ctx.message.content.split(' ')[0][1:]
 
+    error_string = WolfUtils.trim_string(str(error).replace('```', '`\u200b`\u200b`'), 128)
+
     # Handle cases where the calling user is missing a required permission.
     if isinstance(error, commands.MissingPermissions):
         if BOT_CONFIG.get("developerMode", False):
             await ctx.send(embed=discord.Embed(
                 title="Command Handler",
                 description="**You are not authorized to run `/{}`:**\n```{}```\n\nPlease ask a staff member for "
-                            "assistance".format(command_name, str(error)),
+                            "assistance".format(command_name, error_string),
                 color=Colors.DANGER
             ))
 
@@ -158,7 +160,7 @@ async def on_command_error(ctx, error: commands.CommandError):
             await ctx.send(embed=discord.Embed(
                 title="Command Handler",
                 description="**The command `/{}` does not exist.** See `/help` for valid "
-                            "commands.".format(command_name, ),
+                            "commands.".format(command_name),
                 color=Colors.DANGER
             ))
 
@@ -171,7 +173,7 @@ async def on_command_error(ctx, error: commands.CommandError):
             description="**The command `/{}` failed an execution check.** "
                         "Additional information may be provided below.".format(command_name),
             color=Colors.DANGER
-        ).add_field(name="Error Log", value="```" + str(error) + "```", inline=False))
+        ).add_field(name="Error Log", value="```" + error_string + "```", inline=False))
 
         LOG.error("Encountered check failure when attempting to run command %s: %s", command_name, str(error))
 
@@ -193,7 +195,7 @@ async def on_command_error(ctx, error: commands.CommandError):
             description="**The command `/{}` could not run, because it is missing arguments.**\n"
                         "See `/help {}` for the arguments required.".format(command_name, command_name),
             color=Colors.DANGER
-        ).add_field(name="Missing Parameter", value="`" + str(error).split(" ")[0] + "`", inline=True))
+        ).add_field(name="Missing Parameter", value="`" + error_string.split(" ")[0] + "`", inline=True))
         LOG.error("Command %s was called with the wrong parameters.", command_name)
         return
 
@@ -204,7 +206,7 @@ async def on_command_error(ctx, error: commands.CommandError):
             description="**The command `/{}` could not understand the arguments given.**\n"
                         "See `/help {}` and the error below to fix this issue.".format(command_name, command_name),
             color=Colors.DANGER
-        ).add_field(name="Error Log", value="```" + str(error) + "```", inline=False))
+        ).add_field(name="Error Log", value="```" + error_string + "```", inline=False))
 
         LOG.error("Command %s was unable to parse arguments: %s.", command_name, str(error))
 
@@ -241,7 +243,7 @@ async def on_command_error(ctx, error: commands.CommandError):
             title="Bot Error Handler",
             description="The bot has encountered a fatal error running the command given. Logs are below.",
             color=Colors.DANGER
-        ).add_field(name="Error Log", value="```" + str(error) + "```", inline=False))
+        ).add_field(name="Error Log", value="```" + error_string + "```", inline=False))
         LOG.error("Error running command %s. See below for trace.\n%s",
                   ctx.message.content, ''.join(traceback.format_exception(type(error), error, error.__traceback__)))
 
