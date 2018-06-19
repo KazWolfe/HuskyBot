@@ -372,7 +372,7 @@ class BotAdmin:
 
         await ctx.send(embed=discord.Embed(
             title="Log Entries from " + log_file,
-            description="```" + WolfUtils.trim_string(logs, 2042, True) + "```",
+            description="```" + WolfUtils.trim_string(logs, 2042, True).replace('```', '`\u200b`\u200b`') + "```",
             color=Colors.SECONDARY
         ))
 
