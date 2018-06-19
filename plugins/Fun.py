@@ -92,7 +92,11 @@ class Fun:
         if target is None:
             target = ctx.author
 
-        if target == ctx.author:
+        if (target.id == 336301511942340608) and (target == ctx.author):
+            await ctx.send("{} gives {} a hug and a quick peck on the cheek. "
+                           "\U0001f49e".format(self.bot.user.mention, target.mention))
+            return
+        elif target == ctx.author:
             await ctx.send("*Attempting to upload hug to {}. Please wait...*".format(target.mention))
             await ctx.trigger_typing()
             await asyncio.sleep(5)
@@ -100,8 +104,10 @@ class Fun:
                 title="Bot Error Handler",
                 description="The bot has encountered a fatal error running the command given. Logs are below.",
                 color=Colors.DANGER
-            ).add_field(name="Error Log", value="```Command raised an exception: SentienceError: Bot does not have the "
-                                                "required emotional capability to give hugs.```", inline=False))
+            ).add_field(name="Error Log",
+                        value="```Command raised an exception: SentienceError: Bot does not have the "
+                              "required emotional capability to give hugs to this user.```",
+                        inline=False))
             return
 
         if target.id == 336301511942340608 and ctx.author.id == 323365398546481154 \
