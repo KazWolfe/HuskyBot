@@ -55,6 +55,7 @@ class Emojis:
     SHIELD = "\U0001F6E1"
     BOOKMARK2 = "\U0001F4D1"
     RED_FLAG = "\U0001F6A9"
+    TICKETS = "\U0001F39F"
     TADA = "\U0001F389"
     REPEAT = "\U0001F501"
     DOG = "\U0001F436"
@@ -71,7 +72,7 @@ class Emojis:
     UNMUTE = LOUD_SPEAKER
 
     # Giveaway shortcut
-    GIVEAWAY = TADA
+    GIVEAWAY = TICKETS
 
 
 class Regex:
