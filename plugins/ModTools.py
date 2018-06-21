@@ -610,6 +610,15 @@ class ModTools:
             ))
             return
 
+        if member.top_role.position >= ctx.message.author.top_role.position:
+            await ctx.send(embed=discord.Embed(
+                title="Moderator Toolkit",
+                description="User `{}` could can not be nick locked, as they are not below you in the role "
+                            "hierarchy.".format(member),
+                color=Colors.DANGER
+            ))
+            return
+
         del locked_users[str(member.id)]
         self._config.set('nicknameLocks', locked_users)
 

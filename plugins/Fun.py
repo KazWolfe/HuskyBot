@@ -96,6 +96,9 @@ class Fun:
             await ctx.send("{} gives {} a hug and a quick peck on the cheek. "
                            "\U0001f49e".format(self.bot.user.mention, target.mention))
             return
+        elif target == self.bot.user:
+            await ctx.send("Sorry, I don't like hugs. Perhaps ear scritches instead?")
+            return
         elif target == ctx.author:
             await ctx.send("*Attempting to upload hug to {}. Please wait...*".format(target.mention))
             await ctx.trigger_typing()
@@ -109,18 +112,12 @@ class Fun:
                               "required emotional capability to give hugs to this user.```",
                         inline=False))
             return
-
-        if target.id == 336301511942340608 and ctx.author.id == 323365398546481154 \
-                or target.id in [142494680158961664, 84374504964358144]:  # Anyone hugging kaz or clover
+        elif target.id in [142494680158961664, 84374504964358144]:  # Anyone hugging kaz or clover
             await ctx.send(embed=discord.Embed(
                 title="Hug Manager",
                 description="You are not permitted to hug this user.",
                 color=Colors.DANGER
             ))
-            return
-
-        if target == self.bot.user:
-            await ctx.send("Sorry, I don't like hugs. Perhaps ear scritches instead?")
             return
 
         await ctx.send("*{} gives {} a hug. Aww!*".format(ctx.author.mention, target.mention))
