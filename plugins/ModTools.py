@@ -562,7 +562,7 @@ class ModTools:
             ))
             return
 
-        if (member.id in locked_users.keys()) and new_nickname is None:
+        if (member.id in locked_users.keys()) and (new_nickname is None):
             await ctx.send(embed=discord.Embed(
                 title="Nickname Lock",
                 description="The user {} already has their nickname locked. If you would like to change their "
@@ -572,7 +572,7 @@ class ModTools:
             return
 
         if new_nickname is None:
-            new_nickname = member.nick
+            new_nickname = member.display_name
 
         locked_users[str(member.id)] = new_nickname
         self._config.set('nicknameLocks', locked_users)
@@ -613,7 +613,7 @@ class ModTools:
         if member.top_role.position >= ctx.message.author.top_role.position:
             await ctx.send(embed=discord.Embed(
                 title="Moderator Toolkit",
-                description="User `{}` could can not be nick locked, as they are not below you in the role "
+                description="User `{}` can not have their nickname unlocked, as they are not below you in the role "
                             "hierarchy.".format(member),
                 color=Colors.DANGER
             ))
