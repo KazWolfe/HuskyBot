@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 
-import datetime
 import logging
 import os
 import sys
+import re
 import traceback
 
 import discord
 from discord.ext import commands
+import discord.ext.commands.bot as BotClass
 
 from WolfBot import WolfConfig
 from WolfBot import WolfStatics
@@ -31,7 +32,10 @@ else:
     start_activity = discord.Activity(name="Starting...", type=discord.ActivityType.playing)
 
 # initialize our bot here
-bot = commands.Bot(command_prefix=BOT_CONFIG.get('prefix', '/'), activity=start_activity, status=start_status)
+bot = commands.Bot(command_prefix=BOT_CONFIG.get('prefix', '/'),
+                   activity=start_activity,
+                   status=start_status,
+                   command_not_found="**Error:** The bot could not find the command `/{}`.")
 
 # set up logging
 LOCAL_STORAGE.set('logPath', 'logs/dakotabot-{}.log'.format(WolfUtils.get_timestamp().split(' ', 1)[0]))
@@ -68,6 +72,13 @@ async def initialize():
         for guild in bot.guilds:
             if guild.id != BOT_CONFIG.get("guildId"):
                 guild.leave()
+
+    # Disable help, and register our own
+    bot.remove_command("help")
+    bot.add_command(commands.Command(name="help",
+                                     brief="Get help with the bot",
+                                     aliases=["?"],
+                                     callback=help_command))
 
     # Load plugins
     sys.path.insert(1, os.getcwd() + "/plugins/")
@@ -307,6 +318,27 @@ async def on_message(message):
         LOG.info("User %s ran %s", author, message.content)
 
         await bot.process_commands(message)
+
+
+async def help_command(ctx: commands.Context, *command: str):
+    """
+    Get help information from the bot database.
+
+    This command takes a string (command) as an argument to look up. If a command does not exist, the bot will throw
+    an error.
+    """
+    content = ctx.message.content
+
+    # Evil parse magic is evil, I hate this code.
+    if len(command) == 0:
+        command = ''
+    elif len(command) > 0:
+        content = content.split(None, 1)[1]
+        command = re.sub(r'[_*`~]', '', content, flags=re.M)
+        command = command.split()
+
+    # noinspection PyProtectedMember
+    await BotClass._default_help_command(ctx, *command)
 
 
 def get_developers():
