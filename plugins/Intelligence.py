@@ -217,7 +217,7 @@ class Intelligence:
 
         if search_context == "public":
             converter = WolfConverters.ChannelContextConverter()
-            search_context = await converter.convert(ctx, "all")
+            search_context = await converter.convert(ctx, "public")
 
         if timedelta == "24h":
             timedelta = datetime.timedelta(hours=24)
@@ -241,9 +241,9 @@ class Intelligence:
 
             await ctx.send(embed=discord.Embed(
                 title="Message Count Report",
-                description="Since `{} UTC`, the channel context `{}` has seen about **`{}`**"
-                            " messages.".format(search_start.strftime(DATETIME_FORMAT), search_context['name'],
-                                                message_count),
+                description="Since `{} UTC`, the channel context `{}` has seen about **{} "
+                            "messages**.".format(search_start.strftime(DATETIME_FORMAT), search_context['name'],
+                                                 message_count),
                 color=Colors.INFO
             ))
 
@@ -253,7 +253,7 @@ class Intelligence:
     async def active_user_count(self, ctx: commands.Context,
                                 search_context: WolfConverters.ChannelContextConverter = "all",
                                 delta: WolfConverters.DateDiffConverter = "24h",
-                                threshold: int=20):
+                                threshold: int = 20):
         """
         Get an active user count for the current guild.
 
@@ -315,8 +315,8 @@ class Intelligence:
 
         await ctx.send(embed=discord.Embed(
             title="Active User Count Report",
-            description="Since `{} UTC`, the the channel context `{}` has seen about **`{}`**"
-                        " active users (sending on average {} or more messages per hour)."
+            description="Since `{} UTC`, the channel context `{}` has seen about **{}"
+                        " active users** (sending on average {} or more messages per hour)."
                         "".format(search_start.strftime(DATETIME_FORMAT), search_context['name'], active_user_count,
                                   threshold),
             color=Colors.INFO
@@ -352,7 +352,7 @@ class Intelligence:
 
         await ctx.send(embed=discord.Embed(
             title="Simulated Prune Report",
-            description="With a simulated cutoff of {}, an estimated **{}** will be pruned from the guild. "
+            description="With a simulated cutoff of {}, an estimated **{} users** will be pruned from the guild. "
                         "\n\nThis number represents the count of members who have not spoken in the last {}, and "
                         "do not have a role (including self-assigned roles).".format(days, prune_count, days),
             color=Colors.INFO
