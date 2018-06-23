@@ -211,9 +211,19 @@ class ModTools:
         `reason` is a mandatory explanation field logging why the mute was given.
 
         Example commands:
-        /mute SomeSpammer 90s Image spam  - Mute user SomeSpammer for 90 seconds
-        /mute h4xxy perm General rudeness - Mute user h4xxy permanently
-        /mute Dog 0 woof                  - Mute user Dog permanently.
+            /mute SomeSpammer 90s Image spam  - Mute user SomeSpammer for 90 seconds
+            /mute h4xxy perm General rudeness - Mute user h4xxy permanently
+            /mute Dog 0 woof                  - Mute user Dog permanently.
+
+        See also:
+            /globalmute   - Mute users across all channels
+            /unmute       - Reverse an active standing mute
+            /globalunmute - Reverse an active standing global mute
+
+        Parameters:
+            target - The user to mute
+            time   - A ##d##h##m##s string to represent mute time
+            reason - A string explaining the mute reason.
         """
         # ToDo: Implement database, and better logging.
 
@@ -337,8 +347,11 @@ class ModTools:
         The only parameter of this is `target`, or the user to unmute.
 
         Example Commands:
-        /unmute SomeSpammer    - Unmute a user named SomeSpammer
-        /unmute @Dog#4171      - Unmute a user named Dog
+            /unmute SomeSpammer    - Unmute a user named SomeSpammer
+            /unmute @Dog#4171      - Unmute a user named Dog
+
+        Parameters:
+            target - The user to unmute from the current channel
         """
         # Try to find a mute from this user
         mute = await self._mute_manager.find_user_mute_record(target, ctx.channel)
@@ -372,6 +385,9 @@ class ModTools:
         DO NOT manually unmute users via role, as this creates data inconsistencies!
 
         See /help unmute for further information on how to use this command.
+
+        Parameters:
+            target - The user to unmute
         """
         # Try to find a mute from this user
         mute = await self._mute_manager.find_user_mute_record(target, None)
@@ -404,6 +420,10 @@ class ModTools:
 
         In order to prevent mass confusion, the bot will include the name of the user who triggered the ping. This
         will also be recorded in the audit log.
+
+        Parameters:
+            target - The name, ID, or mention of the role to ping
+            message - A variable-length message to include in the ping
         """
         is_role_mentionable = target.mentionable
 
@@ -484,6 +504,24 @@ class ModTools:
     @commands.command(name="editban", brief="Edit a banned user's reason")
     @commands.has_permissions(ban_members=True)
     async def editban(self, ctx: commands.Context, user: WolfConverters.OfflineUserConverter, *, reason: str):
+        """
+        Edit a recorded ban reason.
+
+        If a ban reason needs to be amended or altered, this command will allow a moderator to change a ban reason
+        without risking the user re-joining.
+
+        Ban reasons will be updated to DakotaBot format if not already updated, and all ban reasons will contain the
+        username of the last editor:
+
+            [By SomeMod#1234] Posting rule-breaking content (edited by OtherMod#9876)
+
+        Ban credits will be kept the same if they exist, while bans without credit will be updated to reflect that
+        it was a ban that did not execute through the bot.
+
+        Parameters:
+            user - A user name, ID, or any other identifying piece of data used to select a banned user
+            reason - A string to be set as the new ban reason.
+        """
         # hack for PyCharm (duck typing)
         user = user  # type: discord.User
 
@@ -542,6 +580,30 @@ class ModTools:
     @commands.command(name="locknick", brief="Lock a member's nickname")
     @commands.has_permissions(manage_nicknames=True)
     async def lock_nickname(self, ctx: commands.Context, member: discord.Member, *, new_nickname: str = None):
+        """
+        Lock a user from changing their nickname.
+
+        If a user has abused nickname permissions, constantly switches to improper nicknames, or otherwise is violating
+        guild nickname policy, this command will "lock" them to a specific nickname.
+
+        A watcher will be added to the specified user, ensuring that any nickname changes are met with an automatic
+        update.
+
+        This command takes two parameters - a member to lock, and an optional new nickname. If the new nickname is not
+        set, the bot will force the user's current display name (be it username or set nickname) to the lock. If the
+        user does not have a specified nickname, the bot will copy their username into their nickname, preventing name
+        changes from affecting the user. Users can not be locked into having no nickname.
+
+        Updating a locked user's nickname is also possible through the bot. By relocking an already locked user with a
+        new nickname, the bot will update the nickname and the lock record to reflect the change.
+
+        Parameters:
+            member - The member whose nickname to lock
+            new_nickname - The (optional) new nickname to lock this user to
+
+        See also:
+            /unlocknick - Unlock a locked user's nickname
+        """
         locked_users = self._config.get("nicknameLocks", {})
 
         if member == ctx.bot.user:
@@ -600,6 +662,18 @@ class ModTools:
     @commands.command(name="unlocknick", brief="Unlock a locked member's nickname")
     @commands.has_permissions(manage_nicknames=True)
     async def unlock_nickname(self, ctx: commands.Context, member: discord.Member):
+        """
+        Unlock a locked user's nickname.
+
+        This command reverses the nickname locking effect of /locknick. Note that this will not delete any set
+        nicknames, this is the responsibility of a moderator or the locked user.
+
+        See also:
+            /locknick - Lock a user's nickname
+
+        Parameters:
+            member - The user to unlock
+        """
         locked_users = self._config.get("nicknameLocks", {})
 
         if str(member.id) not in locked_users.keys():
