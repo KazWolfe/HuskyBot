@@ -63,6 +63,7 @@ class Emojis:
     MEAT = "\U0001F356"
     BATTERY = "\U0001F50B"
     STAR = "\U00002B50"
+    STOP = "\U0001F6D1"
 
     # Mod shortcuts
     BAN = NO_ENTRY

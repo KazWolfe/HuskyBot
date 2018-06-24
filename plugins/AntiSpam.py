@@ -154,15 +154,10 @@ class AntiSpam:
         if message.author.permissions_in(message.channel).manage_messages:
             return
 
-        regex_matches = re.findall('discord\.gg/[0-9a-z\-]+', message.content, flags=re.IGNORECASE)
-        regex_matches += re.findall('discordapp\.com/invite/[0-9a-z\-]+', message.content, flags=re.IGNORECASE)
-
-        # Handle messages without any invites in them (by ignoring them)
-        if regex_matches is None or regex_matches == []:
-            return
+        regex_matches = re.finditer(Regex.INVITE_REGEX, message.content, flags=re.IGNORECASE)
 
         for regex_match in regex_matches:
-            fragment = regex_match.split('/', maxsplit=1)[1]
+            fragment = regex_match.group('fragment')
 
             # Attempt to validate the invite, deleting invalid ones
             try:
@@ -212,7 +207,7 @@ class AntiSpam:
                 # We're also going to be nice and inform the user on their *first offense only*. The message will
                 # self-destruct after 90 seconds.
                 await message.channel.send(embed=discord.Embed(
-                    title="Discord Invite Blocked",
+                    title=Emojis.STOP + " Discord Invite Blocked",
                     description="Hey {}! It looks like you posted a Discord invite.\n\n"
                                 "Here on DIY Tech, we have a strict no-invites policy in order to prevent spam and "
                                 "advertisements. If you would like to post an invite, you may contact the admins to "
@@ -223,8 +218,11 @@ class AntiSpam:
 
             cooldown_record = self.INVITE_COOLDOWNS[message.author.id]
 
-            # And we increment the offense counter here.
+            # And we increment the offense counter here, and extend their expiry
             cooldown_record['offenseCount'] += 1
+            cooldown_record[EXPIRY_FIELD_NAME] = datetime.datetime.utcnow() + datetime.timedelta(
+                minutes=COOLDOWN_SETTINGS['minutes']
+            )
 
             # Keep track if we're planning on removing this user.
             was_kicked = False
@@ -325,7 +323,7 @@ class AntiSpam:
             # Give them a fair warning on attachment #3
             if COOLDOWN_CONFIG['warnLimit'] != 0 and cooldown_record['offenseCount'] == COOLDOWN_CONFIG['warnLimit']:
                 await message.channel.send(embed=discord.Embed(
-                    title="\uD83D\uDED1 Whoa there, pardner!",
+                    title=Emojis.STOP + " Whoa there, pardner!",
                     description="Hey there {}! You're sending files awfully fast. Please help us keep this chat clean "
                                 "and readable by not sending lots of files so quickly. "
                                 "Thanks!".format(message.author.mention),
@@ -376,7 +374,7 @@ class AntiSpam:
 
         # gen the embed here
         link_warning = discord.Embed(
-            title="Hey! Listen!",
+            title=Emojis.STOP + "Hey! Listen!",
             description="Hey {}! It looks like you posted a lot of links.\n\n"
                         "In order to cut down on server spam, we have a limitation on the number of links "
                         "you are allowed to have in a time period. Generally, you won't exceed this limit "
@@ -859,10 +857,10 @@ class AntiSpam:
         Setting min_length to 0 or less will disable this feature.
 
         Parameters:
-            cooldown_minutes: The number of minutes before a given cooldown expires (default: 5)
-            ban_limit: The number of warnings before a user is autobanned (default: 3)
-            min_length: The minimum total number of characters to process a message (default: 40)
-            threshold: A value (between 0 and 1) that represents the percentage of characters that need to be
+            cooldown_minutes - The number of minutes before a given cooldown expires (default: 5)
+            ban_limit - The number of warnings before a user is autobanned (default: 3)
+            min_length - The minimum total number of characters to process a message (default: 40)
+            threshold - A value (between 0 and 1) that represents the percentage of characters that need to be
                        non-ASCII before a warning is fired. (default: 0.5)
         """
 
