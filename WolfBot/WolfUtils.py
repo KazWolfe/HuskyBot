@@ -192,3 +192,21 @@ async def send_to_keyed_channel(bot: discord.Client, channel: WolfStatics.Channe
         log_channel = bot.get_channel(log_channel)  # type: discord.TextChannel
 
         await log_channel.send(embed=embed)
+
+
+def get_fragment_from_invite(data: str) -> str:
+    """
+    Attempt to get a fragment from an invite data string.
+
+    This method makes no attempt to verify the legitimacy (or accuracy) of the invite fragment. It will only attempt
+    to strip out the URL portion (if it exists).
+
+    :param data: The data to attempt to strip a fragment from
+    :return: The best guess for the invite fragment
+    """
+    discordgg_link_check = re.search(WolfStatics.Regex.INVITE_REGEX, data, flags=re.IGNORECASE)
+
+    if discordgg_link_check is not None:
+        return discordgg_link_check.group('fragment')
+
+    return data

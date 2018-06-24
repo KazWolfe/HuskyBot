@@ -78,3 +78,5 @@ class Emojis:
 class Regex:
     # @stephenhay's regex from https://mathiasbynens.be/demo/url-regex
     URL_REGEX = r"\b(([\w-]+://?|www[.])[^\s()<>]+(?:\([\w\d]+\)|([^[:punct:]\s]|\/)))"
+
+    INVITE_REGEX = r'(discord\.gg|discordapp.com/invite)/(?P<fragment>[0-9a-z\-]+)'

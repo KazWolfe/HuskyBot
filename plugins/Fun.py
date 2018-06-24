@@ -181,7 +181,7 @@ class Fun:
 
         embed = discord.Embed(
             title="{} has an overall rating of {}!".format(member.display_name, average_score),
-            description="The rating for for {} is ready!".format(member.mention),
+            description="The rating for {} is ready!".format(member.mention),
             color=Colors.INFO
         )
 

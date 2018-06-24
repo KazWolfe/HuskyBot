@@ -80,6 +80,11 @@ class DateDiffConverter(datetime.timedelta, commands.Converter):
             raise commands.BadArgument(str(e))
 
 
+class InviteLinkConverter(str, commands.Converter):
+    async def convert(self, ctx: commands.Context, argument: str):
+        return WolfUtils.get_fragment_from_invite(argument)
+
+
 class ChannelContextConverter(dict, commands.Converter):
     async def convert(self, ctx: commands.Context, context: str):
         logging_channel = WolfConfig.get_config() \

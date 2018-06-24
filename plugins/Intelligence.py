@@ -376,7 +376,7 @@ class Intelligence:
 
     @commands.command(name="invitespy", brief="Find information about Guild invite", aliases=["invspy"])
     @commands.has_permissions(view_audit_log=True)
-    async def invitespy(self, ctx: commands.Context, fragment: str):
+    async def invitespy(self, ctx: commands.Context, fragment: WolfConverters.InviteLinkConverter):
         try:
             invite_data = await self.bot.http.request(
                 Route('GET', '/invite/{invite_id}?with_counts=true', invite_id=fragment))  # type: dict
@@ -395,15 +395,17 @@ class Intelligence:
             return
 
         embed = discord.Embed(
-            description="Information about `{}` for Guild {}".format(fragment, invite_guild.name),
+            description="Information about invite slug `{}`".format(fragment),
             color=Colors.INFO
         )
 
         embed.set_thumbnail(url=invite_guild.icon_url)
 
+        embed.add_field(name="Guild Name", value="**{}**".format(invite_guild.name), inline=False)
+
         if invite_user is not None:
             embed.set_author(
-                name="Invite for {} by {}#{}".format(invite_guild.name, invite_user.name, invite_user.discriminator),
+                name="Invite for {} by {}".format(invite_guild.name, invite_user),
                 icon_url=invite_user.avatar_url
             )
         else:
@@ -412,22 +414,43 @@ class Intelligence:
         embed.add_field(name="Invited Guild ID", value=invite_guild.id, inline=True)
 
         ch_type = {0: "#", 2: "[VC] ", 4: "[CAT] "}
-        embed.add_field(name="Invited Channel Name",
+        embed.add_field(name="Join Channel Name",
                         value=ch_type[invite_data['channel']['type']] + invite_data['channel']['name'],
                         inline=True)
 
-        embed.add_field(name="Invited Guild Creation Date",
+        embed.add_field(name="Guild Creation Date",
                         value=invite_guild.created_at.strftime(DATETIME_FORMAT),
                         inline=True)
 
         if invite_data.get('approximate_member_count', -1) != -1:
-            embed.add_field(name="Invited Guild User Count",
+            embed.add_field(name="User Count",
                             value="{} ({} online)".format(invite_data.get('approximate_member_count', -1),
                                                           invite_data.get('approximate_presence_count',
                                                                           -1)))
 
+        vl_map = {
+            0: "No Verification",
+            1: "Verified Email Needed",
+            2: "User for 5+ minutes",
+            3: "Member for 10+ minutes",
+            4: "Verified Phone Needed"
+        }
+        embed.add_field(name="Verification Level", value=vl_map[invite_guild.verification_level])
+
+        if invite_user is not None:
+            embed.add_field(name="Invite Creator", value=str(invite_user), inline=True)
+
         if len(invite_guild.features) > 0:
-            embed.add_field(name="Guild Features", value=', '.join(invite_guild.features))
+            embed.add_field(name="Guild Features",
+                            value=', '.join(list('`{}`'.format(f) for f in invite_guild.features)))
+
+        if invite_guild.splash is not None:
+            embed.add_field(name="Splash Image",
+                            value="[Open in Browser >]({})".format(invite_guild.splash_url),
+                            inline=False)
+            embed.set_image(url=invite_guild.splash_url)
+
+        embed.set_footer(text="Report generated at {} UTC".format(WolfUtils.get_timestamp()))
 
         await ctx.send(embed=embed)
 
