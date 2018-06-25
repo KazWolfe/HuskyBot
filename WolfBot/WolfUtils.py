@@ -1,4 +1,5 @@
 import datetime
+import functools
 import imghdr
 import re
 import struct

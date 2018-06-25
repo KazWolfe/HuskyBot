@@ -7,8 +7,11 @@ import re
 import discord
 from discord.ext import commands
 
+from aiohttp import web
+
 from WolfBot import WolfChecks
 from WolfBot import WolfConfig
+from WolfBot import WolfHTTP
 from WolfBot.WolfStatics import Colors
 
 LOG = logging.getLogger("DakotaBot.Plugin." + __name__)
@@ -243,6 +246,10 @@ class Debug:
             description="```python\n>>> {}\n\n{}```".format(formatted_code, result),
             color=Colors.SECONDARY
         ))
+
+    @WolfHTTP.register("/debug/hello", ["GET"])
+    async def say_hello(self, request):
+        return web.Response(text="Hello world from {}!".format(self.bot.user))
 
 
 def setup(bot: discord.ext.commands.Bot):

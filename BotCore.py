@@ -10,9 +10,12 @@ import discord
 from discord.ext import commands
 import discord.ext.commands.bot as BotClass
 
+from aiohttp import web
+
 from WolfBot import WolfConfig
 from WolfBot import WolfStatics
 from WolfBot import WolfUtils
+from WolfBot import WolfHTTP
 from WolfBot.WolfStatics import Colors, ChannelKeys
 
 BOT_CONFIG = WolfConfig.get_config()
@@ -36,6 +39,8 @@ bot = commands.Bot(command_prefix=BOT_CONFIG.get('prefix', '/'),
                    activity=start_activity,
                    status=start_status,
                    command_not_found="**Error:** The bot could not find the command `/{}`.")
+
+webapp = web.Application()
 
 # set up logging
 LOCAL_STORAGE.set('logPath', 'logs/dakotabot-{}.log'.format(WolfUtils.get_timestamp().split(' ', 1)[0]))
@@ -79,6 +84,19 @@ async def initialize():
                                      brief="Get help with the bot",
                                      aliases=["?"],
                                      callback=help_command))
+
+    # Initialize our HTTP server
+    http_config = BOT_CONFIG.get('httpConfig', {
+        "host": "localhost",
+        "port": "9339"
+    })
+
+    webapp.router.add_route('GET', '/{tail:.*}', WolfHTTP.get_router().handle(bot))
+    runner = web.AppRunner(webapp)
+    await runner.setup()
+    site = web.TCPSite(runner, host=http_config['host'], port=http_config['port'])
+    await site.start()
+    LOG.info("Started HTTP server at {}:{}, now listening...".format(http_config['host'], http_config['port']))
 
     # Load plugins
     sys.path.insert(1, os.getcwd() + "/plugins/")
