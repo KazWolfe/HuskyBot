@@ -250,9 +250,13 @@ class Debug:
             color=Colors.SECONDARY
         ))
 
-    @WolfHTTP.register("/hello", ["GET"])
-    async def say_hello(self, request):
-        return web.Response(text="Hello world from {}!".format(self.bot.user))
+    @WolfHTTP.register("/hello", ["GET", "POST"])
+    async def say_hello(self, request: web.BaseRequest):
+        target = "world"
+        if request.method == "POST":
+            data = await request.json()
+            target = data.get("name", "world")
+        return web.Response(text="Hello {} from {}!".format(target, self.bot.user))
 
 
 def setup(bot: discord.ext.commands.Bot):

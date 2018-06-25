@@ -370,7 +370,8 @@ async def start_webserver():
             ssl_context = ssl.SSLContext()
             ssl_context.load_cert_chain(cert)
 
-    webapp.router.add_route('GET', '/{tail:.*}', WolfHTTP.get_router().handle(bot))
+    for method in ["GET", "HEAD", "POST", "PATCH", "PUT", "DELETE", "VIEW"]:
+        webapp.router.add_route(method, '/{tail:.*}', WolfHTTP.get_router().handle(bot))
     runner = web.AppRunner(webapp)
     await runner.setup()
     site = web.TCPSite(runner, host=http_config['host'], port=http_config['port'], ssl_context=ssl_context)
