@@ -36,8 +36,6 @@ class Intelligence:
         Get an information dump for the current guild.
 
         This command returns basic core information about a guild for reporting purposes.
-
-        The command takes no arguments.
         """
 
         guild = ctx.guild
@@ -69,10 +67,15 @@ class Intelligence:
         """
         Get basic information about a specific role in this guild.
 
-        This command requires a single argument - a guild identifier. This can either be the guild's name, the guild ID,
-        a ping for the guild, or similar.
+        This command will dump configuration information (with the exception of permissions) for the selected role. It
+        will also attempt to count the number of users with the specified role.
 
-        This command does not return sensitive information.
+        Parameters:
+            role - A uniquely identifying role string. This can be a role mention, a role ID, or name.
+                   This parameter is case-sensitive, but does not need to be "quoted in case of spaces."
+
+        Example Command:
+            /roleinfo Admins - Get information about the role "Admins"
         """
 
         role_details = discord.Embed(
@@ -99,37 +102,42 @@ class Intelligence:
     @commands.command(name="userinfo", aliases=["uinfo", "memberinfo", "minfo", "whois"],
                       brief="Get information about self or specified user")
     async def user_info(self, ctx: discord.ext.commands.Context, *,
-                        member: WolfConverters.OfflineMemberConverter = None):
+                        user: WolfConverters.OfflineMemberConverter = None):
         """
         Get basic information about a calling user.
 
-        This command takes a single (optional) argument - a member identifier. This may be a User ID, a ping, a
-        username, a nickname, etc. If this argument is not specified, the bot will return information about the calling
-        user.
+        This command will attempt to return join dates, name status, roles, and the index number of the user in the
+        current guild. The bot will attempt to get information for users not in the guild, but information in this case
+        is somewhat limited.
 
-        This command does not return sensitive information on users, nor does it return punishment records.
+        Parameters:
+            user - A uniquely identifying user string, such as a mention, a user ID, a username, or a nickname.
+                   This parameter is case-sensitive, but does not need to be "quoted in case of spaces."
+
+        Example Command:
+            /uinfo SomeUser#1234 - Get information for user "SomeUser#1234".
         """
 
-        member = member or ctx.author
+        user = user or ctx.author
 
-        if isinstance(member, discord.User):
+        if isinstance(user, discord.User):
             member_details = discord.Embed(
-                title="User Information for " + member.name + "#" + member.discriminator,
+                title="User Information for " + user.name + "#" + user.discriminator,
                 color=Colors.INFO,
                 description="Currently **not a member of any shared guild!**\nData may be limited."
             )
-        elif isinstance(member, discord.Member):
+        elif isinstance(user, discord.Member):
             member_details = discord.Embed(
-                title="User Information for " + member.name + "#" + member.discriminator,
-                color=member.color,
-                description="Currently in **" + str(member.status) + "** mode " + WolfUtils.get_fancy_game_data(member)
+                title="User Information for " + user.name + "#" + user.discriminator,
+                color=user.color,
+                description="Currently in **" + str(user.status) + "** mode " + WolfUtils.get_fancy_game_data(user)
             )
         else:
             raise ValueError("Illegal state!")
 
         roles = []
-        if isinstance(member, discord.Member) and ctx.guild is not None:
-            for r in member.roles:
+        if isinstance(user, discord.Member) and ctx.guild is not None:
+            for r in user.roles:
                 if r.name == "@everyone":
                     continue
 
@@ -138,21 +146,21 @@ class Intelligence:
             if len(roles) == 0:
                 roles.append("None")
 
-        member_details.add_field(name="User ID", value=member.id, inline=True)
+        member_details.add_field(name="User ID", value=user.id, inline=True)
 
-        if isinstance(member, discord.Member) and ctx.guild is not None:
-            member_details.add_field(name="Display Name", value=member.display_name, inline=True)
+        if isinstance(user, discord.Member) and ctx.guild is not None:
+            member_details.add_field(name="Display Name", value=user.display_name, inline=True)
 
-        member_details.add_field(name="Joined Discord", value=member.created_at.strftime(DATETIME_FORMAT), inline=True)
-        member_details.set_thumbnail(url=member.avatar_url)
+        member_details.add_field(name="Joined Discord", value=user.created_at.strftime(DATETIME_FORMAT), inline=True)
+        member_details.set_thumbnail(url=user.avatar_url)
 
-        if isinstance(member, discord.Member) and ctx.guild is not None:
-            member_details.add_field(name="Joined Guild", value=member.joined_at.strftime(DATETIME_FORMAT), inline=True)
+        if isinstance(user, discord.Member) and ctx.guild is not None:
+            member_details.add_field(name="Joined Guild", value=user.joined_at.strftime(DATETIME_FORMAT), inline=True)
             member_details.add_field(name="Roles", value=", ".join(roles), inline=False)
 
             member_details.set_footer(text="Member #{} on the guild"
                                       .format(str(sorted(ctx.guild.members,
-                                                         key=lambda m: m.joined_at).index(member) + 1)))
+                                                         key=lambda m: m.joined_at).index(user) + 1)))
 
         await ctx.send(embed=member_details)
 
@@ -167,6 +175,15 @@ class Intelligence:
         This command takes a single (optional) argument - a member identifier. This may be a User ID, a ping, a
         username, a nickname, etc. If this argument is not specified, the bot will return the avatar of the calling
         user.
+
+        Parameters:
+            user - A uniquely identifying user string, such as a mention, a user ID, a username, or a nickname.
+                   This parameter is case-sensitive, but does not need to be "quoted in case of spaces."
+
+
+        Example Commands:
+            /avatar               - Get the calling user's avatar.
+            /avatar SomeUser#1234 - Get avatar for user "SomeUser#1234"
         """
 
         user = user or ctx.author
@@ -206,7 +223,7 @@ class Intelligence:
             search_context - A search context as described above. Default "public".
             timedelta      - A timedelta string as described above. Default 24h.
 
-        Example commands:
+        Example Commands:
             /msgcount public 7d   - Get a count of all public messages in the last 7 days
             /msgcount all 2d      - Get a count of all messages in the last two days.
             /msgcount #general 5h - Get a count of all messages in #general within the last 5 hours.
@@ -331,8 +348,11 @@ class Intelligence:
         This command will simulate a prune on the server and return a count of members expected to be lost. A member is
         considered for pruning if they have not spoken in the specified number of days *and* they have no roles.
 
-        This command takes a single argument: the days to look through. By default, it will look for 7 days, but any
-        value between 1 and 180 will be accepted.
+        Parameters:
+            days - The "prune cutoff" value for a user to be eligible for pruning. Defaults to 7.
+
+        Example Command:
+            /prunesim 5 - Get the count of users who have not talked in the last 5 days, and have no roles
         """
 
         if days < 1 or days > 180:
@@ -363,10 +383,10 @@ class Intelligence:
         """
         Get a count of users on the guild.
 
-        This is a lighter version of /ginfo. It takes no commands.
+        This command will return a count of all members on the guild. It's really that simple.
 
         See also:
-            - /help activeusercount - Get a count of active users on the guild.
+            /help activeusercount - Get a count of active users on the guild.
         """
         await ctx.send(embed=discord.Embed(
             title="User Count Report",
@@ -377,6 +397,23 @@ class Intelligence:
     @commands.command(name="invitespy", brief="Find information about Guild invite", aliases=["invspy"])
     @commands.has_permissions(view_audit_log=True)
     async def invitespy(self, ctx: commands.Context, fragment: WolfConverters.InviteLinkConverter):
+        """
+        Get information about a guild invite.
+
+        This command allows moderators to pull information about any given (valid) invite. It will display all
+        publicly-gleanable information about the invite such as user count, verification level, join channel names,
+        the invite's creator, and other such information.
+
+        This command calls the API directly, and will validate an invite's existence. If either the bot's account
+        or the bot's IP are banned, the system will act as though the invite does not exist.
+
+        Parameters:
+            fragment - Either a Invite URL or fragment (aa1122) for the invite you wish to target.
+
+        Example Commands:
+            /invitespy aabbcc                       - Get invite data for invite aabbcc
+            /invitespy https://discord.gg/someguild - Get invite data for invite someguild
+        """
         try:
             invite_data = await self.bot.http.request(
                 Route('GET', '/invite/{invite_id}?with_counts=true', invite_id=fragment))  # type: dict
@@ -388,8 +425,8 @@ class Intelligence:
                 invite_user = None
         except discord.NotFound:
             await ctx.send(embed=discord.Embed(
-                title="Invitespy Error",
-                description="This invite does not appear to exist",
+                title="Could Not Retrieve Invite Data",
+                description="This invite does not appear to exist, or the bot has been banned from the guild.",
                 color=Colors.DANGER
             ))
             return
@@ -425,8 +462,7 @@ class Intelligence:
         if invite_data.get('approximate_member_count', -1) != -1:
             embed.add_field(name="User Count",
                             value="{} ({} online)".format(invite_data.get('approximate_member_count', -1),
-                                                          invite_data.get('approximate_presence_count',
-                                                                          -1)))
+                                                          invite_data.get('approximate_presence_count', -1)))
 
         vl_map = {
             0: "No Verification",
