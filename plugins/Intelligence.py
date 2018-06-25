@@ -412,7 +412,7 @@ class Intelligence:
 
         Example Commands:
             /invitespy aabbcc                       - Get invite data for invite aabbcc
-            /invitespy https://discord.gg/someguild - Get invite data for invite someguild
+            /invitespy https://disco\u200brd.gg/someguild - Get invite data for invite someguild
         """
         try:
             invite_data = await self.bot.http.request(
