@@ -29,6 +29,9 @@ class Debug:
         self._session_store = WolfConfig.get_session_store()
         LOG.info("Loaded plugin!")
 
+    def __unload(self):
+        WolfHTTP.get_router().unload_plugin(self)
+
     @commands.group(name="debug", hidden=True)
     @commands.has_permissions(administrator=True)
     async def debug(self, ctx: discord.ext.commands.Context):
@@ -183,9 +186,9 @@ class Debug:
             color=Colors.SECONDARY
         ))
 
-    @commands.command(name="feval", brief="Execute an eval as a function/method", hidden=True)
+    @commands.command(name="exec", brief="Execute an eval as a function/method", aliases=["feval"], hidden=True)
     @WolfChecks.is_developer()
-    async def func_eval(self, ctx: discord.ext.commands.Context, *, expr: str):
+    async def func_exec(self, ctx: discord.ext.commands.Context, *, expr: str):
         """
         Help documentation is not available for this plugin.
         """
@@ -202,8 +205,9 @@ class Debug:
         fn_name = "_eval_expr"
 
         # remove code formatting if present
-        expr = re.sub(r'^```(python)*\n*', '', expr, flags=re.MULTILINE)
-        expr = re.sub(r'```$', '', expr, flags=re.MULTILINE)
+        expr = expr.strip('```')
+        if expr.startswith('python'):
+            expr = expr.lstrip('python')
 
         # add indentation
         split_expr = expr.splitlines()
@@ -214,7 +218,6 @@ class Debug:
                 + cmd)
 
         # format code for printing
-
         formatted_code = ""
         formatted_code += split_expr[0]
         if len(split_expr) > 1:
@@ -247,7 +250,7 @@ class Debug:
             color=Colors.SECONDARY
         ))
 
-    @WolfHTTP.register("/debug/hello", ["GET"])
+    @WolfHTTP.register("/hello", ["GET"])
     async def say_hello(self, request):
         return web.Response(text="Hello world from {}!".format(self.bot.user))
 

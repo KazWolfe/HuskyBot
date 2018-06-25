@@ -58,9 +58,13 @@ class WolfRouter:
 
         :param path: The starting string to find and delete.
         """
-        for p in self.routes:
+
+        for p in list(self.routes.keys()):
             if p.startswith(path):
                 del self.routes[p]
+
+    def unload_plugin(self, instance):
+        self.remove_paths("/{}".format(type(instance).__name__.lower()))
 
     def handle(self, bot: commands.Bot):
         async def wrapped(request: web.BaseRequest):
@@ -94,7 +98,8 @@ def register(path: str, methods: list):
         """
         for method in methods:
             plugin = f.__qualname__.split('.')[-2]
-            router.add_route(method, path, plugin, f)
-            LOG.info("Registered HTTP endpoint \"{} {}\" for plugin {}".format(method, path, plugin))
+            full_path = "/{}{}".format(plugin.lower(), path)
+            router.add_route(method, full_path, plugin, f)
+            LOG.info("Registered HTTP endpoint \"{} {}\" for plugin {}".format(method, full_path, plugin))
 
     return decorator

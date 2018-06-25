@@ -11,6 +11,7 @@ from discord.ext import commands
 import discord.ext.commands.bot as BotClass
 
 from aiohttp import web
+import ssl
 
 from WolfBot import WolfConfig
 from WolfBot import WolfStatics
@@ -86,17 +87,7 @@ async def initialize():
                                      callback=help_command))
 
     # Initialize our HTTP server
-    http_config = BOT_CONFIG.get('httpConfig', {
-        "host": "localhost",
-        "port": "9339"
-    })
-
-    webapp.router.add_route('GET', '/{tail:.*}', WolfHTTP.get_router().handle(bot))
-    runner = web.AppRunner(webapp)
-    await runner.setup()
-    site = web.TCPSite(runner, host=http_config['host'], port=http_config['port'])
-    await site.start()
-    LOG.info("Started HTTP server at {}:{}, now listening...".format(http_config['host'], http_config['port']))
+    await start_webserver()
 
     # Load plugins
     sys.path.insert(1, os.getcwd() + "/plugins/")
@@ -364,6 +355,28 @@ def get_developers():
     Get a list of all registered bot developers.
     """
     return WolfStatics.DEVELOPERS
+
+
+async def start_webserver():
+    http_config = BOT_CONFIG.get('httpConfig', {
+        "host": "localhost",
+        "port": "9339",
+        "ssl_cert": None
+    })
+
+    ssl_context = None
+    if http_config.get('ssl_cert', None) is not None:
+        with open(http_config.get('ssl_cert', 'certs/cert.pem'), 'rb') as cert:
+            ssl_context = ssl.SSLContext()
+            ssl_context.load_cert_chain(cert)
+
+    webapp.router.add_route('GET', '/{tail:.*}', WolfHTTP.get_router().handle(bot))
+    runner = web.AppRunner(webapp)
+    await runner.setup()
+    site = web.TCPSite(runner, host=http_config['host'], port=http_config['port'], ssl_context=ssl_context)
+    await site.start()
+    LOG.info("Started {} server at {}:{}, now listening...".format("HTTPS" if ssl_context is not None else "HTTP",
+                                                                   http_config['host'], http_config['port']))
 
 
 if __name__ == '__main__':
