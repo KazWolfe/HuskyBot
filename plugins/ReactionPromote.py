@@ -94,11 +94,13 @@ class ReactionPromote:
 
             LOG.warning("Got bad emoji " + emoji_slug + " (" + str(hex(ord(emoji_slug))) + ")")
 
-    @commands.group(pass_context=True, brief="Control the promotions plugin", hidden=True)
+    @commands.group(pass_context=True, brief="Control the promotions plugin")
     @commands.has_permissions(administrator=True)
     async def rpromote(self, ctx: discord.ext.commands.Context):
         """
         Parent command for the reaction promotion module.
+
+        Run /help rpromote <subcommand> for more information.
         """
         if ctx.invoked_subcommand is None:
             await ctx.send(embed=discord.Embed(

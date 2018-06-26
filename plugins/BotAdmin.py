@@ -53,7 +53,7 @@ class BotAdmin:
 
         embed.add_field(name="Authors", value="KazWolfe, Clover", inline=False)
         embed.add_field(name="Bot Version", value="[`{}`]({}/commit/{})".format(sha[:8], GIT_URL, sha), inline=True)
-        embed.add_field(name="Library Version", value=discord.__version__, inline=True)
+        embed.add_field(name="Library Version", value="discord.py {}".format(discord.__version__), inline=True)
         embed.add_field(name="Current Host", value="`{}`".format(socket.gethostname()), inline=True)
         embed.set_thumbnail(url="https://cdn.discordapp.com/avatars/" + str(ctx.bot.user.id) + "/"
                                 + str(ctx.bot.user.avatar) + ".png")

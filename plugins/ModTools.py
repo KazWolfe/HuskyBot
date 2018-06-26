@@ -428,13 +428,15 @@ class ModTools:
         is_role_mentionable = target.mentionable
 
         if not is_role_mentionable:
-            await target.edit(reason="Role Ping requested by " + str(ctx.message.author), mentionable=True)
+            await target.edit(reason="Role Ping requested by {}".format(ctx.message.author),
+                              mentionable=True)
 
-        await ctx.send(target.mention + " <" + ctx.message.author.display_name + "> " + message)
+        await ctx.send("{ping} <{user}> {message}".format(ping=target.mention, user=ctx.message.author,
+                                                          message=message))
 
         if not is_role_mentionable:
-            await target.edit(reason="Role Ping requested by " + str(ctx.message.author)
-                                     + " completed", mentionable=False)
+            await target.edit(reason="Role Ping requested by {} completed".format(ctx.message.author),
+                              mentionable=False)
 
     @commands.command(name="cleanup", aliases=["mcu", "bulkdelete"], brief="Clean up many messages quickly")
     @commands.has_permissions(manage_messages=True)

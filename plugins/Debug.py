@@ -2,7 +2,6 @@ import ast
 import inspect
 import json
 import logging
-import re
 
 import discord
 from discord.ext import commands
@@ -147,7 +146,7 @@ class Debug:
             files=message.attachments
         )
 
-    @commands.command(name="eval", brief="Execute an eval() statement on the guild", hidden=True)
+    @commands.command(name="eval", brief="Execute an eval() statement on the bot")
     @WolfChecks.is_developer()
     async def evalcmd(self, ctx: discord.ext.commands.Context, *, expr: str):
         """
@@ -186,7 +185,7 @@ class Debug:
             color=Colors.SECONDARY
         ))
 
-    @commands.command(name="exec", brief="Execute an eval as a function/method", aliases=["feval"], hidden=True)
+    @commands.command(name="exec", brief="Execute an eval as a function/method", aliases=["feval"])
     @WolfChecks.is_developer()
     async def func_exec(self, ctx: discord.ext.commands.Context, *, expr: str):
         """
@@ -207,7 +206,7 @@ class Debug:
         # remove code formatting if present
         expr = expr.strip('```')
         if expr.startswith('python'):
-            expr = expr.lstrip('python')
+            expr = expr.replace("python", "", 1)
 
         # add indentation
         split_expr = expr.splitlines()
