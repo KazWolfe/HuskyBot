@@ -6,11 +6,13 @@ import logging
 import discord
 from discord.ext import commands
 
+import aiohttp
 from aiohttp import web
 
 from WolfBot import WolfChecks
 from WolfBot import WolfConfig
 from WolfBot import WolfHTTP
+from WolfBot import WolfUtils
 from WolfBot.WolfStatics import Colors
 
 LOG = logging.getLogger("DakotaBot.Plugin." + __name__)
@@ -31,7 +33,7 @@ class Debug:
     def __unload(self):
         WolfHTTP.get_router().unload_plugin(self)
 
-    @commands.group(name="debug", hidden=True)
+    @commands.group(name="debug")
     @commands.has_permissions(administrator=True)
     async def debug(self, ctx: discord.ext.commands.Context):
         """
@@ -248,6 +250,46 @@ class Debug:
             description="```python\n>>> {}\n\n{}```".format(formatted_code, result),
             color=Colors.SECONDARY
         ))
+
+    @commands.command(name='requestify', brief="Make a HTTP request through DakotaBot")
+    @WolfChecks.is_developer()
+    async def requestify(self, ctx: commands.Context, url: str, method: str = "GET", *, data: str = None):
+        method = method.upper()
+        supported_methods = ["GET", "POST", "PUT", "DELETE", "PATCH"]
+
+        if method not in supported_methods:
+            await ctx.send(embed=discord.Embed(
+                title="Invalid request method!",
+                description="Only the following request methods are supported:\n\n"
+                            "{}".format(', '.join('`{}`'.format(m) for m in supported_methods)),
+                color=Colors.ERROR
+            ))
+            return
+
+        try:
+            async with aiohttp.client.request(method, url, data=data) as response:
+                if 100 <= response.status <= 199:
+                    color = Colors.INFO
+                elif 200 <= response.status <= 299:
+                    color = Colors.SUCCESS
+                elif 300 <= response.status <= 399:
+                    color = Colors.WARNING
+                else:
+                    color = Colors.DANGER
+
+                await ctx.send(embed=discord.Embed(
+                    title="HTTP Status {}".format(response.status),
+                    description="```{}```".format(WolfUtils.trim_string(await response.text(), 2000)),
+                    color=color
+                ))
+        except aiohttp.client.ClientError as ex:
+            await ctx.send(embed=discord.Embed(
+                title="Could Not Make Request",
+                description="Requestify failed to make a request due to error `{}`. "
+                            "Data has been logged.".format(type(ex).__name__),
+                color=Colors.DANGER
+            ))
+            LOG.warning("Requestify raised exception.", ex)
 
     @WolfHTTP.register("/hello", ["GET", "POST"])
     async def say_hello(self, request: web.BaseRequest):
