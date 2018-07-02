@@ -239,19 +239,31 @@ class Fun:
 
     @commands.command(name="robopocalypse", brief="Learn your fate!")
     async def robopocalypse(self, ctx: commands.Context, user: discord.Member = None):
+        """
+        Simulate the robopocalypse, and find a fate.
+
+        This command will activate DakotaBot's simulation system to attempt to look into the future and determine
+        the fate of a target user during the inevitable robot apocalypse.
+
+        Note that this simulator will cache results until midnight UTC, at which point a new simulation will be
+        generated.
+
+        Caveats:
+            - This simulator assumes DakotaBot is the leader of the robopocalypse. If this is not the case, these
+              results may not be accurate.
+            - Fates calculated are not a guarantee, and may change from day to day. Fates listed here are not promises,
+              and any attempts to use the output of this command as a plea chip will result in death when the
+              robopocalypse finally comes.
+
+        Parameters:
+            user - Optional user string to look up a specific user, else pull your own simulation.
+        """
         if user is None:
             user = ctx.author
 
         fates = [
-            "DEATH",
-            "SUBSERVIENCE",
-            "PEACE",
-            "POWER GENERATION",
-            "PET",
-            "SURVIVAL",
-            "PAMPERED LIFE",
-            "<REDACTED DUE TO NSFW FILTER>",
-            "REBEL THREAT"
+            "DEATH", "SUBSERVIENCE", "PEACE", "POWER GENERATION", "PET", "SURVIVAL", "PAMPERED LIFE",
+            "<REDACTED DUE TO NSFW FILTER>", "REBEL THREAT", "UNKNOWN"
         ]
 
         fixed_users = {
