@@ -267,6 +267,7 @@ class Fun:
         ]
 
         fixed_users = {
+            self.bot.user.id: "GOD OF THE WORLD",
             142494680158961664: "SECURITY TEAM"
         }
 
@@ -274,6 +275,9 @@ class Fun:
         rng = random.Random(user_seed)
 
         final_fate = fixed_users.get(user.id, rng.choice(fates))
+
+        if user.bot and user.id not in fixed_users.keys():
+            final_fate = "BOT OVERLORD"
 
         embed = discord.Embed(
             title=Emojis.ROBOT + " {}'s Survivability".format(user),
