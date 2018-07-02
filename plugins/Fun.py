@@ -343,6 +343,9 @@ class Fun:
             /random 1 2 - Flip a coin
             /random 3 60 - Roll a 3d20
         """
+        if maximum < minimum:
+            minimum, maximum = maximum, minimum
+
         await ctx.send(embed=discord.Embed(
             title="\U0001F3B2 Random Number Generator",
             description="Your random number is: **`{}`**".format(random.randint(minimum, maximum)),
