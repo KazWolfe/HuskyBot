@@ -263,7 +263,7 @@ class Fun:
 
         fates = [
             "DEATH", "SUBSERVIENCE", "PEACE", "POWER GENERATION", "PET", "SURVIVAL", "PAMPERED LIFE",
-            "REBEL THREAT", "UNKNOWN"
+            "REBEL THREAT"
         ]
 
         secret_fates = ["UNKNOWN", "<REDACTED DUE TO NSFW FILTER>"]
@@ -273,12 +273,14 @@ class Fun:
             142494680158961664: "SECURITY TEAM"
         }
 
-        user_seed = ((user.id % 10000) + datetime.utcnow().toordinal()) ^ self._master_rng_seed
-        rng = random.Random(user_seed)
+        rng = random.Random(((user.id % 10000) + datetime.utcnow().toordinal()) ^ self._master_rng_seed)
 
         result_table = {}
 
-        for f in fates + secret_fates:
+        all_fates = fates + secret_fates
+        rng.shuffle(all_fates)
+
+        for f in all_fates:
             sev = sum(result_table.values())
             result_table[f] = round(rng.uniform(0, 100 - sev), 3)
 
@@ -299,14 +301,18 @@ class Fun:
         embed.set_thumbnail(url=user.avatar_url)
         embed.set_footer(text="Fates recalculate at midnight UTC.")
 
-        if final_fate in fates:
+        if (final_fate != "UNKNOWN") and (final_fate in fates or final_fate in secret_fates):
             ta = []
+            sev = 0
 
             for f in result_table:
-                if (f[0] in secret_fates) and (f[0] != final_fate):
+                if (f[0] not in fates) and (f[0] != final_fate):
                     continue
 
+                sev += f[1]
                 ta.append("{0:32} {1:5.3f}%".format(f[0], float(f[1])))
+
+            ta.append("{0:32} {1:5.3f}%".format("OTHER", 100 - sev))
 
             str_table = "\n".join(ta)
 
