@@ -305,11 +305,10 @@ class Fun:
             ta = []
             sev = 0
 
-            for i in range(len(result_table)):
-                if i > 6:
-                    continue
+            for f in result_table:
+                if len(ta) >= 5:
+                    break
 
-                f = result_table[i]
                 if (f[0] not in fates) and (f[0] != final_fate):
                     continue
 
