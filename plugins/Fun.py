@@ -323,6 +323,32 @@ class Fun:
 
         await ctx.send(embed=embed)
 
+    @commands.command(name="random", brief="Get a random number!", aliases=["rng"])
+    async def random_number(self, ctx: commands.Context, minimum: int = 0, maximum: int = 10):
+        """
+        Generate a simple random number.
+
+        This command will take a minimum and maximum value, and generate a number between those two (inclusive).
+
+        This command may be used to simulate dice rolls. To calculate the min/max values of a roll, take the expression
+        format of that roll (3d20). Your first number (3) is the minimum, and your first number times the second number
+        (3 * 20) is your maximum. Therefore to roll a 2d10, your minimum will be 2, and your max will be 20.
+
+        Parameters:
+            minimum - The lowest number the bot can choose
+            maximum - The highest number the bot can choose
+
+        Example Commands:
+            /random 1 6 - Roll a die
+            /random 1 2 - Flip a coin
+            /random 3 60 - Roll a 3d20
+        """
+        await ctx.send(embed=discord.Embed(
+            title="\U0001F3B2 Random Number Generator",
+            description="Your random number is: **`{}`**".format(random.randint(minimum, maximum)),
+            color=Colors.INFO
+        ))
+
 
 def setup(bot: discord.ext.commands.Bot):
     bot.add_cog(Fun(bot))
