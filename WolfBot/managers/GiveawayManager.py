@@ -31,6 +31,9 @@ class GiveawayManager:
         self._config = WolfConfig.get_config()
         self._giveaway_config = WolfConfig.get_config('giveaways', create_if_nonexistent=True)
 
+        # Random number generator
+        self._rng = random.SystemRandom()
+
         # We store all giveaways in a time-ordered cache list. Reading and working with the file directly is
         # *generally* a bad idea.
         self.__cache__ = []
@@ -105,7 +108,7 @@ class GiveawayManager:
         # Remove the bot
         contending_users.remove(self.bot.user)
 
-        winning_users = random.sample(contending_users, min(giveaway.winner_count, len(contending_users)))
+        winning_users = self._rng.sample(contending_users, min(giveaway.winner_count, len(contending_users)))
 
         if len(winning_users) == 1:
             win_text = "Congratulations to our winner, {}!".format(winning_users[0].mention) + wcl

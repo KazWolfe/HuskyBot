@@ -44,8 +44,8 @@ class Giveaway:
         Manage the Giveaway plugin.
 
         This command, by itself, does nothing. Please refer to the below *actual* commands:
-
         """
+
         pass
 
     @ga.command(name="list", brief="List all active giveaways in the guild")
@@ -89,15 +89,18 @@ class Giveaway:
         """
         Start a new Giveaway on the guild.
 
-        This command allows a moderator to start a giveaway in the current channel. This command takes three arguments:
+        This command allows a moderator to start a giveaway in the current channel. Giveaway winners are chosen by a
+        cryptographically secure random number generator, as determined by the number of entrants.
 
-        name: The giveaway name. This may be any text string, but it will need to be wrapped in "quotes" if it will
-              contain spaces.
-        timedelta: The time this giveaway should run. This argument is in format ##d##h##m##s, and will always be in
-                   the future.
-        winners: The number of winners this giveaway will have. This number must be greater than 0.
+        The giveaway will take place in the current channel, and will require every user willing to participate to
+        react with the specified emoji (see Emojis.GIVEAWAY in code).
 
-        The Giveaway will stop around the posted time (or, within up to 60 seconds of the posted time).
+        Giveaways will end at most 60 seconds after the specified time, depending on server load and other factors.
+
+        Parameters:
+            name      - The giveaway name, as a text string. A giveaway with spaces in names must be "quoted".
+            timedelta - The time (in standard ##d##h##m##s format) before this giveaway ends.
+            winners   - A count of total winners to be chosen and listed in the final message.
         """
 
         end_time = datetime.datetime.utcnow() + timedelta
@@ -117,11 +120,13 @@ class Giveaway:
         """
         Gracefully stop a running Giveaway.
 
-        If necessary, this command will stop a giveaway denoted by giveaway_id. The ID may be determined by checking
-        `/giveaways list`.
+        This command will gracefully end a currently running giveaway, and immediately declare a winner.
 
-        This command will stop the giveaway normally, and will declare a winner. If you do not want to declare a winner,
-        use `/giveaways kill`.
+        Parameters:
+            giveaway_id - The ID of the giveaway (see /giveaways list) to stop.
+
+        See Also:
+            /giveaway kill - Forcefully terminate a giveaway
         """
         giveaway_id = giveaway_id - 1  # We present the ID as one-indexed, but python is zero-indexed.
 
@@ -143,12 +148,18 @@ class Giveaway:
     @commands.has_permissions(administrator=True)
     async def kill(self, ctx: commands.Context, giveaway_id: int):
         """
-        Non-gracefully kill a giveaway.
+        Forcefully kill a giveaway.
 
-        If a giveaway needs to be stopped *immediately* without defining a winner, this command be used. It takes a
-        single argument, giveaway_id. This may be obtained from /giveaways list.
+        This command will stop a giveaway immediately, without declaring a winner or otherwise running any
+        cleanup (such as deleting the giveaway registration message).
 
         NOTE THAT THIS COMMAND MAY CAUSE *VERY* UNEXPECTED BEHAVIOR WITH CERTAIN GIVEAWAYS. Use with caution!
+
+        Parameters:
+            giveaway_id - The ID of the giveaway (see /giveaways list) to stop.
+
+        See Also:
+            /giveaway stop - Gracefully stop a running Giveaway.
         """
 
         giveaway_id = giveaway_id - 1  # We present the ID as one-indexed, but python is zero-indexed.

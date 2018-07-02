@@ -64,6 +64,7 @@ class Emojis:
     BATTERY = "\U0001F50B"
     STAR = "\U00002B50"
     STOP = "\U0001F6D1"
+    ROBOT = "\U0001F916"
 
     # Mod shortcuts
     BAN = NO_ENTRY

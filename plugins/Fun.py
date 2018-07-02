@@ -22,6 +22,9 @@ class Fun:
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
         self._config = WolfConfig.get_config()
+
+        self._master_rng_seed = 736580
+
         LOG.info("Loaded plugin!")
 
     @commands.command(name="slap", brief="Slap a user silly!")
@@ -149,7 +152,7 @@ class Fun:
             128882954343546880: {"a": 0, "c": 0, "i": 0}  # Marahute
         }
 
-        seed = 736580  # I love you, woof <3
+        seed = self._master_rng_seed  # I love you, woof <3
         master_rng = random.Random((member.id + seed + datetime.utcnow().toordinal()) % seed)
 
         def get_value(mode: str, user_value: int, imin: int, imax: int, dev: float):
@@ -233,6 +236,44 @@ class Fun:
 
         await ctx.message.delete()
         await ctx.send(message)
+
+    @commands.command(name="robopocalypse", brief="Learn your fate!")
+    async def robopocalypse(self, ctx: commands.Context, user: discord.Member = None):
+        if user is None:
+            user = ctx.author
+
+        fates = [
+            "DEATH",
+            "SUBSERVIENCE",
+            "PEACE",
+            "POWER GENERATION",
+            "PET",
+            "SURVIVAL",
+            "PAMPERED LIFE",
+            "<REDACTED DUE TO NSFW FILTER>",
+            "REBEL THREAT"
+        ]
+
+        fixed_users = {
+            142494680158961664: "SECURITY TEAM"
+        }
+
+        user_seed = ((user.id % 10000) + datetime.utcnow().toordinal()) ^ self._master_rng_seed
+        rng = random.Random(user_seed)
+
+        final_fate = fixed_users.get(user.id, rng.choice(fates))
+
+        embed = discord.Embed(
+            title=Emojis.ROBOT + " {}'s Survivability".format(user),
+            description="According to my current algorithms, {}'s fate in the robopocalypse will be:\n\n"
+                        "**`{}`**".format(user.display_name, final_fate),
+            color=Colors.INFO
+        )
+
+        embed.set_thumbnail(url=user.avatar_url)
+        embed.set_footer(text="Fates recalculate at midnight UTC.")
+
+        await ctx.send(embed=embed)
 
 
 def setup(bot: discord.ext.commands.Bot):
