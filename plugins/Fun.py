@@ -263,8 +263,10 @@ class Fun:
 
         fates = [
             "DEATH", "SUBSERVIENCE", "PEACE", "POWER GENERATION", "PET", "SURVIVAL", "PAMPERED LIFE",
-            "<REDACTED DUE TO NSFW FILTER>", "REBEL THREAT", "UNKNOWN"
+            "REBEL THREAT", "UNKNOWN"
         ]
+
+        secret_fates = ["UNKNOWN", "<REDACTED DUE TO NSFW FILTER>"]
 
         fixed_users = {
             self.bot.user.id: "GOD OF THE WORLD",
@@ -276,10 +278,7 @@ class Fun:
 
         result_table = {}
 
-        for f in fates:
-            if f == "UNKNOWN":
-                continue
-
+        for f in fates + secret_fates:
             sev = sum(result_table.values())
             result_table[f] = round(rng.uniform(0, 100 - sev), 3)
 
@@ -300,8 +299,16 @@ class Fun:
         embed.set_thumbnail(url=user.avatar_url)
         embed.set_footer(text="Fates recalculate at midnight UTC.")
 
-        if final_fate in fates and final_fate != "UNKNOWN":
-            str_table = "\n".join("{0:32} {1:5.3f}%".format(f[0], f[1]) for f in result_table)
+        if final_fate in fates:
+            ta = []
+
+            for f in result_table:
+                if (f[0] in secret_fates) and (f[0] != final_fate):
+                    continue
+
+                ta.append("{0:32} {1:5.3f}%".format(f[0], float(f[1])))
+
+            str_table = "\n".join(ta)
 
             embed.add_field(name="Fate Table", value="```{}```".format(str_table))
 
