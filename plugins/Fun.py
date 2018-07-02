@@ -262,7 +262,7 @@ class Fun:
             user = ctx.author
 
         fates = [
-            "DEATH", "SUBSERVIENCE", "PEACE", "POWER GENERATION", "PET", "SURVIVAL", "PAMPERED LIFE",
+            "DEATH", "SUBSERVIENCE", "MARS COLONIST", "POWER GENERATION", "PET", "SURVIVAL", "PAMPERED LIFE",
             "REBEL THREAT"
         ]
 
@@ -305,7 +305,11 @@ class Fun:
             ta = []
             sev = 0
 
-            for f in result_table:
+            for i in range(len(result_table)):
+                if i > 6:
+                    continue
+
+                f = result_table[i]
                 if (f[0] not in fates) and (f[0] != final_fate):
                     continue
 
