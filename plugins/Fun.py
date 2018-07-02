@@ -237,7 +237,7 @@ class Fun:
         await ctx.message.delete()
         await ctx.send(message)
 
-    @commands.command(name="robopocalypse", brief="Learn your fate!")
+    @commands.command(name="robopocalypse", brief="Learn your fate!", aliases=["robocalypse", "fate"])
     async def robopocalypse(self, ctx: commands.Context, user: discord.Member = None):
         """
         Simulate the robopocalypse, and find a fate.
@@ -274,20 +274,36 @@ class Fun:
         user_seed = ((user.id % 10000) + datetime.utcnow().toordinal()) ^ self._master_rng_seed
         rng = random.Random(user_seed)
 
-        final_fate = fixed_users.get(user.id, rng.choice(fates))
+        result_table = {}
+
+        for f in fates:
+            if f == "UNKNOWN":
+                continue
+
+            sev = sum(result_table.values())
+            result_table[f] = round(rng.uniform(0, 100 - sev), 3)
+
+        result_table = sorted(result_table.items(), key=lambda kv: kv[1], reverse=True)
+
+        final_fate = fixed_users.get(user.id, result_table[0][0])
 
         if user.bot and user.id not in fixed_users.keys():
             final_fate = "BOT OVERLORD"
 
         embed = discord.Embed(
             title=Emojis.ROBOT + " {}'s Survivability".format(user),
-            description="According to my current algorithms, {}'s fate in the robopocalypse will be:\n\n"
+            description="According to my current algorithms, {}'s fate in the robopocalypse will be: "
                         "**`{}`**".format(user.display_name, final_fate),
             color=Colors.INFO
         )
 
         embed.set_thumbnail(url=user.avatar_url)
         embed.set_footer(text="Fates recalculate at midnight UTC.")
+
+        if final_fate in fates and final_fate != "UNKNOWN":
+            str_table = "\n".join("{0:32} {1:5.3f}%".format(f[0], f[1]) for f in result_table)
+
+            embed.add_field(name="Fate Table", value="```{}```".format(str_table))
 
         await ctx.send(embed=embed)
 
