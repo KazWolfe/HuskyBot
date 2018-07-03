@@ -108,7 +108,7 @@ def get_config(name: str = 'config', create_if_nonexistent: bool = False):
     return __cache__[key]
 
 
-def get_session_store(name: str = None):
+def get_session_store(name: str = None) -> WolfConfig:
     """
     Get the bot's Session Store (thread-safe).
 

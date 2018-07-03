@@ -65,6 +65,8 @@ class Emojis:
     STAR = "\U00002B50"
     STOP = "\U0001F6D1"
     ROBOT = "\U0001F916"
+    CHECK = "\U00002705"
+    X = "\U0000274C"
 
     # Mod shortcuts
     BAN = NO_ENTRY

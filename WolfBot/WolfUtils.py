@@ -6,6 +6,7 @@ import struct
 import subprocess
 
 import discord
+from discord.ext import commands
 
 import WolfBot.WolfConfig
 from WolfBot import WolfStatics
@@ -210,4 +211,22 @@ def get_fragment_from_invite(data: str) -> str:
     if discordgg_link_check is not None:
         return discordgg_link_check.group('fragment')
 
-    return data
+    return
+
+
+def confirm_dialog_check(triggering_user: discord.Member):
+    def wrap(reaction: discord.Reaction, user: discord.Member):
+        if user.bot:
+            # Ignore all bots.
+            return False
+
+        if not (user == triggering_user or user.guild_permissions.administrator):
+            return False
+
+        if reaction.emoji in [WolfStatics.Emojis.CHECK, WolfStatics.Emojis.X]:
+            return True
+        else:
+            return False
+
+    return wrap
+
