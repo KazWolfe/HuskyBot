@@ -20,6 +20,7 @@ class GuildSecurity:
     It will prevent user promotions in a number of cases, as well as protect the guild from unauthorized bots
     and other potentially nefarious actions
     """
+
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
         self._config = WolfConfig.get_config()
@@ -124,12 +125,20 @@ class GuildSecurity:
             await ctx.send(embed=discord.Embed(
                 title="Permission Error",
                 description="You are not permitted to promote users to {}, as that role is not below your highest "
-                            "role. Please contact an administrator for assistance.".format(role.mention)
+                            "role. Please contact an administrator for assistance.".format(role.mention),
+                color=Colors.ERROR
             ))
             return
 
         if role.position >= ctx.guild.get_member(self.bot.user.id).top_role.position:
             raise commands.BadArgument(message="This role is above the bot's role, and can not be promoted to.")
+
+        if role in member.roles:
+            await ctx.send(embed=discord.Embed(
+                title="Promotion Failed!",
+                description="User {} already has role {}, so it can't be assigned again!".format(member, role.mention),
+                color=Colors.ERROR
+            ))
 
         confirm_dialog = await ctx.send(embed=discord.Embed(
             title="Confirm Promotion",
