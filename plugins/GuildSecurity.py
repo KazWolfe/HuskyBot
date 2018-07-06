@@ -139,6 +139,7 @@ class GuildSecurity:
                 description="User {} already has role {}, so it can't be assigned again!".format(member, role.mention),
                 color=Colors.ERROR
             ))
+            return
 
         confirm_dialog = await ctx.send(embed=discord.Embed(
             title="Confirm Promotion",
