@@ -125,7 +125,7 @@ class Fun:
 
         await ctx.send("*{} gives {} a hug. Aww!*".format(ctx.author.mention, target.mention))
 
-    @commands.command(name="rate", brief="Rate another user based on attractiveness, craziness, and intelligence")
+    @commands.command(name="rate", brief="Get attractiveness ratings for members!")
     async def rate_user(self, ctx: commands.Context, member: discord.User = None):
         """
         The ultimate command for narcissists! Rate yourself or another member of the guild!

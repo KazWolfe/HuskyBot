@@ -77,6 +77,7 @@ class GuildSecurity:
         asyncio.ensure_future(lockdown_bot_role())
 
     @commands.group(name="guildsecurity", brief="Manage the Guild Security plugin", aliases=["gs", "guildsec"])
+    @commands.has_permissions(manage_guild=True)
     async def guildsecurity(self, ctx: commands.Context):
         """
         This command is a virtual group to manage guild security.
