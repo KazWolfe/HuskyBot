@@ -1,20 +1,22 @@
 #!/usr/bin/env python3
 
+# System imports
 import logging
 import os
 import sys
 import re
 import traceback
 
-from logging import handlers
-
+# discord.py imports
 import discord
 from discord.ext import commands
 import discord.ext.commands.bot as BotClass
 
+# aiohttp/web api support
 from aiohttp import web
 import ssl
 
+# WolfBot related imports
 from WolfBot import WolfConfig
 from WolfBot import WolfStatics
 from WolfBot import WolfUtils
@@ -25,6 +27,7 @@ BOT_CONFIG = WolfConfig.get_config()
 LOCAL_STORAGE = WolfConfig.get_session_store()
 
 initialized = False
+
 
 # Determine restart reason (pretty mode) - HACK FOR BOT INIT
 restart_reason = BOT_CONFIG.get("restartReason", "start")
@@ -46,15 +49,20 @@ bot = commands.Bot(command_prefix=BOT_CONFIG.get('prefix', '/'),
 webapp = web.Application()
 
 # set up logging
+LOCAL_STORAGE.set("daemonMode", "--daemon" in " ".join(sys.argv))
 LOCAL_STORAGE.set('logPath', 'logs/dakotabot.log')
 
 file_log_handler = WolfUtils.CompressingRotatingFileHandler(LOCAL_STORAGE.get('logPath'), maxBytes=(1024 ** 2) * 5,
                                                             backupCount=5, encoding='utf-8')
+file_log_handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s"))
+
+stream_log_handler = logging.StreamHandler(sys.stdout)
+if LOCAL_STORAGE.get('daemonMode', False):
+    stream_log_handler.setFormatter(logging.Formatter("[%(levelname)s] %(name)s: %(message)s"))
 
 logging.basicConfig(level=logging.WARNING, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
                     datefmt="%Y-%m-%d %H:%M:%S",
-                    handlers=[file_log_handler,
-                              logging.StreamHandler(sys.stdout)])
+                    handlers=[file_log_handler, stream_log_handler])
 # WolfUtils.configure_loggers()
 MASTER_LOGGER = logging.getLogger("DakotaBot")
 MASTER_LOGGER.setLevel(logging.INFO)
@@ -71,6 +79,10 @@ async def initialize():
         BOT_CONFIG.delete("restartReason")
         del start_activity
         restart_reason = "start"
+
+    if LOCAL_STORAGE.get("daemonMode", False):
+        LOG.info("Bot loaded in daemon mode! Logging and certain features have been altered to better utilize daemon "
+                 "functionality.")
 
     LOG.info("DakotaBot is online, running discord.py {}. "
              "Initializing and loading modules...".format(discord.__version__))
