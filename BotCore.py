@@ -17,7 +17,7 @@ from WolfBot import WolfConfig
 from WolfBot import WolfStatics
 from WolfBot import WolfUtils
 from WolfBot import WolfHTTP
-from WolfBot.WolfStatics import Colors, ChannelKeys
+from WolfBot.WolfStatics import *
 
 BOT_CONFIG = WolfConfig.get_config()
 LOCAL_STORAGE = WolfConfig.get_session_store()
