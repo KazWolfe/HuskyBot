@@ -2,6 +2,7 @@ import ast
 import inspect
 import json
 import logging
+import subprocess
 
 import discord
 from discord.ext import commands
@@ -257,6 +258,33 @@ class Debug:
             title="Evaluation Result",
             description="```python\n>>> {}\n\n{}```".format(formatted_code, result),
             color=Colors.SECONDARY
+        ))
+
+    @commands.command(name="shell", brief="Run a command through the shell")
+    @WolfChecks.is_developer()
+    async def run_command(self, ctx: commands.Context, *, command: str):
+        command = command.strip('`')
+
+        try:
+            output = {
+                "text": subprocess.check_output(command, shell=True, stderr=subprocess.STDOUT).decode('utf-8'),
+                "status": 0,
+                "color": Colors.SUCCESS
+            }
+        except subprocess.CalledProcessError as e:
+            output = {
+                "text": e.output.decode('utf-8'),
+                "status": e.returncode,
+                "color": Colors.ERROR,
+            }
+
+        pretty_desc = "```$ {}\n{}```".format(command.replace("```", "`\u200b``"),
+                                              output['text'].replace("```", "`\u200b``"))
+
+        await ctx.send(embed=discord.Embed(
+            title="Command returned code {}".format(output['status']),
+            description=pretty_desc,
+            color=output['color']
         ))
 
     @commands.command(name='requestify', brief="Make a HTTP request through DakotaBot")
