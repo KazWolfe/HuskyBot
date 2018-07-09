@@ -273,7 +273,7 @@ class Fun:
             142494680158961664: "SECURITY TEAM"
         }
 
-        rng = random.Random(((user.id % 10000) + datetime.utcnow().toordinal()) ^ self._master_rng_seed)
+        rng = random.Random((user.id + datetime.utcnow().toordinal()) ^ self._master_rng_seed)
 
         result_table = {}
 
@@ -313,11 +313,13 @@ class Fun:
                     continue
 
                 sev += f[1]
-                ta.append("{0:32} {1:5.3f}%".format(f[0], float(f[1])))
+                ta.append("{0:30} {1:>6.3f}%".format(f[0], float(f[1])))
 
-            ta.append("{0:32} {1:5.3f}%".format("OTHER", 100 - sev))
+            ta.append("-" * 38)
+            ta.append("{0:30} {1:>6.3f}%".format("OTHER", 100 - sev))
 
             str_table = "\n".join(ta)
+            # str_table = str_table.replace("OTHER", "\nOTHER")
 
             embed.add_field(name="Fate Table", value="```{}```".format(str_table))
 
