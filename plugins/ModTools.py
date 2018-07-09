@@ -39,21 +39,6 @@ class ModTools:
         self._mute_manager.cleanup()
 
     async def on_member_update(self, before: discord.Member, after: discord.Member):
-        async def lockdown_bot_role():
-            if before.roles == after.roles:
-                return
-
-            special_roles = self._config.get("specialRoles", {})
-
-            if special_roles.get('bots') is None:
-                return
-
-            bot_role = discord.utils.get(after.roles, id=int(special_roles.get('bots')))
-
-            if (bot_role is not None) and (bot_role not in before.roles) and (not before.bot):
-                await after.remove_roles(bot_role, reason="User is not an authorized bot.")
-                LOG.info("User " + after.display_name + " was granted bot role, but was not a bot. Removing.")
-
         async def nickname_lock():
             if before.nick == after.nick:
                 return
@@ -76,7 +61,6 @@ class ModTools:
                 ignored_nicks.remove(before.id)
                 self._session_store.set('loggerIgnores', logger_ignores)
 
-        await lockdown_bot_role()
         await nickname_lock()
 
     async def on_member_join(self, member: discord.Member):
@@ -96,18 +80,18 @@ class ModTools:
         Note that a reason is not needed for an unban - just the user ID.
         """
         try:
-            await ctx.guild.unban(user, reason="Unbanned by " + str(ctx.author))
+            await ctx.guild.unban(user, reason="Unbanned by {}".format(ctx.author))
         except discord.NotFound:
             await ctx.send(embed=discord.Embed(
                 title="Mod Toolkit",
-                description="User `" + str(user) + "` is not banned on this guild, so they can not be unbanned.",
+                description="User `{}` is not banned on this guild, so they can not be unbanned.".format(user),
                 color=Colors.WARNING
             ))
             return
 
         await ctx.send(embed=discord.Embed(
-            title="Mod Toolkit",
-            description="User `" + str(user) + "` was successfully pardoned.",
+            title=Emojis.UNBAN + " User Pardoned!",
+            description="User `{}` was successfully pardoned.".format(user),
             color=Colors.SUCCESS
         ))
 
@@ -183,7 +167,7 @@ class ModTools:
                                                                ctx.author, reason), delete_message_days=1)
 
         await ctx.send(embed=discord.Embed(
-            title="User banned.",
+            title=Emojis.BAN + " User banned!",
             description="User `{}` was successfully banned from the guild.".format(user),
             color=Colors.SUCCESS
         ))
@@ -645,7 +629,7 @@ class ModTools:
             await member.edit(nick=new_nickname, reason="Forced nickchange (and lock) by {}".format(ctx.author))
 
         await ctx.send(embed=discord.Embed(
-            title="Nickname Lock",
+            title=Emojis.LOCK + " Nickname Lock",
             description="The user {} has had their nickname locked to `{}`.".format(member, new_nickname),
             color=Colors.SUCCESS
         ))
@@ -699,7 +683,7 @@ class ModTools:
         self._config.set('nicknameLocks', locked_users)
 
         await ctx.send(embed=discord.Embed(
-            title="Nickname Lock",
+            title=Emojis.UNLOCK + " Nickname Lock",
             description="The user {} has had their nickname unlocked.".format(member, member.nick),
             color=Colors.SUCCESS
         ))

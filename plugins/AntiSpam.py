@@ -92,11 +92,16 @@ class AntiSpam:
         if not WolfUtils.should_process_message(message):
             return
 
-        await self.multi_ping_check(message)
-        await self.prevent_discord_invites(message)
-        await self.attachment_cooldown(message)
-        await self.prevent_link_spam(message)
-        await self.block_nonascii_spam(message)
+        events = [
+            self.multi_ping_check(message),
+            self.prevent_discord_invites(message),
+            self.attachment_cooldown(message),
+            self.prevent_link_spam(message),
+            self.block_nonascii_spam(message)
+        ]
+
+        for event in events:
+            asyncio.ensure_future(event)
 
     async def multi_ping_check(self, message):
         PING_WARN_LIMIT = self._config.get('antiSpam', {}).get('pingSoftLimit', DEFAULTS['multiPing']['soft'])
@@ -154,6 +159,9 @@ class AntiSpam:
         if message.author.permissions_in(message.channel).manage_messages:
             return
 
+        # Determine if this is a "new user"
+        is_new_user = (message.author.joined_at > datetime.datetime.utcnow() - datetime.timedelta(seconds=60))
+
         regex_matches = re.finditer(Regex.INVITE_REGEX, message.content, flags=re.IGNORECASE)
 
         for regex_match in regex_matches:
@@ -205,16 +213,17 @@ class AntiSpam:
                 }
 
                 # We're also going to be nice and inform the user on their *first offense only*. The message will
-                # self-destruct after 90 seconds.
-                await message.channel.send(embed=discord.Embed(
-                    title=Emojis.STOP + " Discord Invite Blocked",
-                    description="Hey {}! It looks like you posted a Discord invite.\n\n"
-                                "Here on DIY Tech, we have a strict no-invites policy in order to prevent spam and "
-                                "advertisements. If you would like to post an invite, you may contact the admins to "
-                                "request an invite code be whitelisted.\n\n"
-                                "We apologize for the inconvenience.".format(message.author.mention),
-                    color=Colors.WARNING
-                ), delete_after=90.0)
+                # self-destruct after 90 seconds. Don't show this to new users scheduled for removal.
+                if not is_new_user:
+                    await message.channel.send(embed=discord.Embed(
+                        title=Emojis.STOP + " Discord Invite Blocked",
+                        description="Hey {}! It looks like you posted a Discord invite.\n\n"
+                                    "Here on DIY Tech, we have a strict no-invites policy in order to prevent spam and "
+                                    "advertisements. If you would like to post an invite, you may contact the admins "
+                                    "to request an invite code be whitelisted.\n\n"
+                                    "We apologize for the inconvenience.".format(message.author.mention),
+                        color=Colors.WARNING
+                    ), delete_after=90.0)
 
             cooldown_record = self.INVITE_COOLDOWNS[message.author.id]
 
@@ -227,9 +236,9 @@ class AntiSpam:
             # Keep track if we're planning on removing this user.
             was_kicked = False
 
-            if cooldown_record['offenseCount'] == COOLDOWN_SETTINGS['banLimit']:
+            if cooldown_record['offenseCount'] >= COOLDOWN_SETTINGS['banLimit']:
                 was_kicked = True
-            elif message.author.joined_at > datetime.datetime.utcnow() - datetime.timedelta(seconds=60):
+            elif is_new_user:
                 await message.author.kick(reason="New user (less than 60 seconds old) posted invite.")
                 was_kicked = True
 
@@ -251,7 +260,7 @@ class AntiSpam:
                                     inline=True)
                 log_embed.add_field(name="Invited Guild ID", value=invite_guild.id, inline=True)
 
-                log_embed.add_field(name="Invited Guild Creation Date",
+                log_embed.add_field(name="Invited Guild Creation",
                                     value=invite_guild.created_at.strftime(DATETIME_FORMAT),
                                     inline=True)
 
@@ -260,6 +269,11 @@ class AntiSpam:
                                         value="{} ({} online)".format(invite_data.get('approximate_member_count', -1),
                                                                       invite_data.get('approximate_presence_count',
                                                                                       -1)))
+
+                if invite_data.get('inviter') is not None:
+                    inviter = invite_data.get('inviter', {})  # type: dict
+                    log_embed.add_field(name="Invite Creator",
+                                        value="{}#{}".format(inviter['username'], inviter['discriminator']))
 
                 log_embed.set_footer(text="Strike {} of {}, resets {} {}"
                                      .format(cooldown_record['offenseCount'],

@@ -58,7 +58,23 @@ class GuildSecurity:
                     LOG.info("A protected role {} was granted to {} without prior authorization. "
                              "Removed.".format(r, after))
 
-        await protect_roles()
+        async def lockdown_bot_role():
+            if before.roles == after.roles:
+                return
+
+            special_roles = self._config.get("specialRoles", {})
+
+            if special_roles.get('bots') is None:
+                return
+
+            bot_role = discord.utils.get(after.roles, id=int(special_roles.get('bots')))
+
+            if (bot_role is not None) and (bot_role not in before.roles) and (not before.bot):
+                await after.remove_roles(bot_role, reason="User is not an authorized bot.")
+                LOG.info("User {} was granted bot role, but was not a bot. Removing.".format(after))
+
+        asyncio.ensure_future(protect_roles())
+        asyncio.ensure_future(lockdown_bot_role())
 
     @commands.group(name="guildsecurity", brief="Manage the Guild Security plugin", aliases=["gs", "guildsec"])
     async def guildsecurity(self, ctx: commands.Context):
@@ -80,7 +96,7 @@ class GuildSecurity:
         self._guildsecurity_store.set('permittedBotList', permitted_bots)
 
         await ctx.send(embed=discord.Embed(
-            title="Bot allowed to join guild.",
+            title=Emojis.CHECK + "Bot allowed to join guild.",
             description="The bot `{}` has been given permission to join the guild. This permission will be valid until "
                         "DakotaBot restarts.",
             color=Colors.SUCCESS
@@ -110,7 +126,7 @@ class GuildSecurity:
         self._config.set('guildSecurity', sec_config)
 
         await ctx.send(embed=discord.Embed(
-            title="Role Protected!",
+            title=Emojis.LOCK + "Role Protected!",
             description="The role {} may now only be granted by using `/promote`.".format(role.mention),
             color=Colors.SUCCESS
         ))

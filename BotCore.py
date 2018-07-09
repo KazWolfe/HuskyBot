@@ -110,7 +110,7 @@ async def initialize():
     if BOT_CONFIG.get("restartNotificationChannel") is not None:
         channel = bot.get_channel(BOT_CONFIG.get("restartNotificationChannel"))
         await channel.send(embed=discord.Embed(
-            title="Bot Manager",
+            title=Emojis.REFRESH + " Bot Manager",
             description="The bot has been successfully restarted, and is now online.",
             color=Colors.SUCCESS
         ))

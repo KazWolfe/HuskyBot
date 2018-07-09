@@ -445,7 +445,7 @@ class ServerLog:
         await old_channel.delete(reason=reason_string)
 
         log_embed = discord.Embed(
-            title=Emojis.REPEAT + " Server log refresh!",
+            title=Emojis.REFRESH + " Server log refresh!",
             description="A message log refresh was executed at {}, and was requested by {}.".format(
                 ctx.message.created_at.strftime(DATETIME_FORMAT), ctx.message.author),
             color=Colors.INFO

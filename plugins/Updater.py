@@ -76,7 +76,7 @@ class Updater:
         remote.pull()
         new_sha = self.repo.head.object.hexsha
         await ctx.send(embed=discord.Embed(
-            title="Bot Manager",
+            title=Emojis.INBOX + " Bot Update Utility",
             description="The bot's code has been updated from `" + current_sha[:8]
                         + "` to [`{}`]({}/commit/{}) Please wait while the"
                           " bot restarts...".format(new_sha[:8], GIT_URL, new_sha),
@@ -104,7 +104,7 @@ class Updater:
         last_commit = self.repo.head.commit
 
         embed = discord.Embed(
-            title="Changelog for version `" + str(last_commit.hexsha)[:8] + "`",
+            title=Emojis.MEMO + " Changelog for version `" + str(last_commit.hexsha)[:8] + "`",
             description="```" + last_commit.message + "```",
             color=Colors.PRIMARY
         )

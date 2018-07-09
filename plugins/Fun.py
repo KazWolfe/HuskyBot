@@ -184,7 +184,7 @@ class Fun:
         average_score = round((attractiveness + (10.0 - craziness) + intelligence) / 3, 2)
 
         embed = discord.Embed(
-            title="{} has an overall rating of {}!".format(member.display_name, average_score),
+            title=Emojis.FIRE + " {} has an overall rating of {}!".format(member.display_name, average_score),
             description="The rating for {} is ready!".format(member.mention),
             color=Colors.INFO
         )
