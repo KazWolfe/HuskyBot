@@ -6,6 +6,8 @@ import sys
 import re
 import traceback
 
+from logging import handlers
+
 import discord
 from discord.ext import commands
 import discord.ext.commands.bot as BotClass
@@ -44,10 +46,14 @@ bot = commands.Bot(command_prefix=BOT_CONFIG.get('prefix', '/'),
 webapp = web.Application()
 
 # set up logging
-LOCAL_STORAGE.set('logPath', 'logs/dakotabot-{}.log'.format(WolfUtils.get_timestamp().split(' ', 1)[0]))
+LOCAL_STORAGE.set('logPath', 'logs/dakotabot.log')
+
+file_log_handler = WolfUtils.CompressingRotatingFileHandler(LOCAL_STORAGE.get('logPath'), maxBytes=(1024 ** 2) * 5,
+                                                            backupCount=5, encoding='utf-8')
+
 logging.basicConfig(level=logging.WARNING, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
                     datefmt="%Y-%m-%d %H:%M:%S",
-                    handlers=[logging.FileHandler(LOCAL_STORAGE.get('logPath'), 'a'),
+                    handlers=[file_log_handler,
                               logging.StreamHandler(sys.stdout)])
 # WolfUtils.configure_loggers()
 MASTER_LOGGER = logging.getLogger("DakotaBot")

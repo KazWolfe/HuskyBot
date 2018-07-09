@@ -148,6 +148,14 @@ class Debug:
             files=message.attachments
         )
 
+    @debug.command(name="spamLog", brief="Spam the log with a *lot* of content")
+    async def spam_log(self, ctx: commands.Context, spams: int = 300):
+
+        for i in range(spams):
+            LOG.info("spam " * 30)
+
+        await ctx.send("OK")
+
     @commands.command(name="eval", brief="Execute an eval() statement on the bot")
     @WolfChecks.is_developer()
     async def evalcmd(self, ctx: discord.ext.commands.Context, *, expr: str):

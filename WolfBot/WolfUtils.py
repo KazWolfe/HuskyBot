@@ -1,12 +1,15 @@
 import datetime
-import functools
+import gzip
 import imghdr
+import os
 import re
 import struct
 import subprocess
 
+import logging
+from logging import handlers
+
 import discord
-from discord.ext import commands
 
 import WolfBot.WolfConfig
 from WolfBot import WolfStatics
@@ -211,7 +214,7 @@ def get_fragment_from_invite(data: str) -> str:
     if discordgg_link_check is not None:
         return discordgg_link_check.group('fragment')
 
-    return
+    return data
 
 
 def confirm_dialog_check(triggering_user: discord.Member):
@@ -230,3 +233,40 @@ def confirm_dialog_check(triggering_user: discord.Member):
 
     return wrap
 
+
+class CompressingRotatingFileHandler(logging.handlers.RotatingFileHandler):
+    # Code source: https://stackoverflow.com/a/35547094/1817097
+    # Modified by Kaz Wolfe
+
+    def __init__(self, filename, **kws):
+        backupCount = kws.get('backupCount', 0)
+        self.backup_count = backupCount
+        logging.handlers.RotatingFileHandler.__init__(self, filename, **kws)
+
+    # noinspection PyMethodMayBeStatic
+    def doArchive(self, old_log):
+        with open(old_log, 'rb') as log:
+            with gzip.open(old_log + '.gz', 'wb') as comp_log:
+                comp_log.writelines(log)
+        os.remove(old_log)
+
+    def doRollover(self):
+        if self.stream:
+            self.stream.close()
+            self.stream = None
+        if self.backup_count > 0:
+            for i in range(self.backup_count - 1, 0, -1):
+                sfn = "%s.%d.gz" % (self.baseFilename, i)
+                dfn = "%s.%d.gz" % (self.baseFilename, i + 1)
+                if os.path.exists(sfn):
+                    if os.path.exists(dfn):
+                        os.remove(dfn)
+                    os.rename(sfn, dfn)
+        dfn = self.baseFilename + ".1"
+        if os.path.exists(dfn):
+            os.remove(dfn)
+        if os.path.exists(self.baseFilename):
+            os.rename(self.baseFilename, dfn)
+            self.doArchive(dfn)
+        if not self.delay:
+            self.stream = self._open()
