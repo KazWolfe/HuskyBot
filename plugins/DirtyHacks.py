@@ -50,8 +50,6 @@ class DirtyHacks:
         if matches is None or len(matches) == 0:
             return
 
-        print(matches)
-
         for match in matches:  # type: str
             match = ''.join(match)
 

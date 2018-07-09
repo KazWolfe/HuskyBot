@@ -137,13 +137,10 @@ class ReactionPromote:
         """
         promotion_config = self._config.get('promotions', {})
 
-        print(promotion_config)
         message_config = promotion_config.setdefault(str(channel.id), {}).setdefault(str(message_id), {})
 
-        print(promotion_config)
         message_config[emoji] = role.id
         self._config.set('promotions', promotion_config)
-        print(promotion_config)
 
         await ctx.send(embed=discord.Embed(
             title="Reaction Promotes",
