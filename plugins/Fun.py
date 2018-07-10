@@ -40,20 +40,14 @@ class Fun:
         """
 
         if user is None:
-            await ctx.send("\uD83D\uDC1F  ***{}*** *tried to slap someone with a large trout, but missed and hit "
-                           "themselves!*".format(ctx.author.mention))
+            await ctx.send("\uD83D\uDC1F  ***{ctx.author.mention}*** *tried to slap someone with a large trout, but "
+                           "missed and hit themselves!*")
             return
 
         # Wolf easter egg (bot or Kaz)
         if user.id in [self.bot.user.id, 142494680158961664]:
-            await(ctx.send(Emojis.WOLF + " *I slap {} around with a wolf. The wolf bites, dealing critical damage!*"
-                           .format(ctx.author.mention)))
-            return
-
-        # Dakota easter egg (Chris)
-        if user.id == 341343404887900162:
-            await(ctx.send(Emojis.DOG + " *{} pets Dakota a bit, and gives him a belly rub and a dog treat.*"
-                           .format(ctx.author.mention)))
+            await ctx.send(Emojis.WOLF + f" *I slap {ctx.author.mention} around with a wolf. The wolf bites, dealing "
+                                         f"critical damage!*")
             return
 
         victim = user.mention
@@ -64,23 +58,19 @@ class Fun:
         slap = random.randint(1, 40)
 
         if slap == 40:
-            await ctx.send("\uD83D\uDC1F ***{}*** *slaps* ***{}*** *around with a rainbow trout!*"
-                           .format(ctx.author.mention, victim))
+            s = "\uD83D\uDC1F ***{}*** *slaps* ***{}*** *around with a rainbow trout!*"
         elif slap > 30:
-            await ctx.send("\uD83D\uDC1F ***{}*** *bludgeons* ***{}*** *with a rather large trout!*"
-                           .format(ctx.author.mention, victim))
+            s = "\uD83D\uDC1F ***{}*** *bludgeons* ***{}*** *with a rather large trout!*"
         elif slap > 20:
-            await ctx.send("\uD83D\uDC1F ***{}*** *slaps* ***{}*** *around with a large trout!*"
-                           .format(ctx.author.mention, victim))
+            s = "\uD83D\uDC1F ***{}*** *slaps* ***{}*** *around with a large trout!*"
         elif slap > 10:
-            await ctx.send("\uD83D\uDC1F ***{}*** *slaps* ***{}*** *around with a trout!*"
-                           .format(ctx.author.mention, victim))
+            s = "\uD83D\uDC1F ***{}*** *slaps* ***{}*** *around with a trout!*"
         elif slap > 1:
-            await ctx.send("\uD83D\uDC1F ***{}*** *slaps* ***{}*** *around with a small trout!*"
-                           .format(ctx.author.mention, victim))
+            s = "\uD83D\uDC1F ***{}*** *slaps* ***{}*** *around with a small trout!*"
         else:
-            await ctx.send("\uD83D\uDC1F ***{}*** *annoys* ***{}*** *by waving a minnow in their face!*"
-                           .format(ctx.author.mention, victim))
+            s = "\uD83D\uDC1F ***{}*** *annoys* ***{}*** *by waving a minnow in their face!*"
+
+        await ctx.send(s.format(ctx.author.mention, victim))
 
     @commands.command(name="hug", brief="Get a hug from the bot, or give a hug!")
     @commands.guild_only()
@@ -96,14 +86,14 @@ class Fun:
             target = ctx.author
 
         if (target.id == 336301511942340608) and (target == ctx.author):
-            await ctx.send("{} gives {} a hug and a quick peck on the cheek. "
-                           "\U0001f49e".format(self.bot.user.mention, target.mention))
+            await ctx.send(f"{self.bot.user.mention} gives {target.mention} a hug and a quick peck on the cheek. "
+                           f"\U0001f49e")
             return
         elif target == self.bot.user:
             await ctx.send("Sorry, I don't like hugs. Perhaps ear scritches instead?")
             return
         elif target == ctx.author:
-            await ctx.send("*Attempting to upload hug to {}. Please wait...*".format(target.mention))
+            await ctx.send(f"*Attempting to upload hug to {target.mention}. Please wait...*")
             await ctx.trigger_typing()
             await asyncio.sleep(5)
             await ctx.send(embed=discord.Embed(
@@ -123,7 +113,7 @@ class Fun:
             ))
             return
 
-        await ctx.send("*{} gives {} a hug. Aww!*".format(ctx.author.mention, target.mention))
+        await ctx.send(f"*{ctx.author.mention} gives {target.mention} a hug. Aww!*")
 
     @commands.command(name="rate", brief="Get attractiveness ratings for members!")
     async def rate_user(self, ctx: commands.Context, member: discord.User = None):
@@ -184,24 +174,24 @@ class Fun:
         average_score = round((attractiveness + (10.0 - craziness) + intelligence) / 3, 2)
 
         embed = discord.Embed(
-            title=Emojis.FIRE + " {} has an overall rating of {}!".format(member.display_name, average_score),
-            description="The rating for {} is ready!".format(member.mention),
+            title=Emojis.FIRE + f" {member.display_name} has an overall rating of {average_score}!",
+            description=f"The rating for {member.mention} is ready!",
             color=Colors.INFO
         )
 
         embed.add_field(name="Attractiveness",
-                        value=str(Emojis.FIRE * round(attractiveness / 2)) + " ({})".format(attractiveness),
+                        value=str(Emojis.FIRE * round(attractiveness / 2)) + f" ({attractiveness})",
                         inline=False)
         embed.add_field(name="Craziness",
-                        value=str(Emojis.SKULL * round(craziness / 2)) + " ({})".format(craziness),
+                        value=str(Emojis.SKULL * round(craziness / 2)) + f" ({craziness})",
                         inline=False)
         embed.add_field(name="Intelligence",
-                        value=str(Emojis.BOOK * round(intelligence / 2)) + " ({})".format(intelligence),
+                        value=str(Emojis.BOOK * round(intelligence / 2)) + f" ({intelligence})",
                         inline=False)
 
         if member.id in hardcoded_users.keys() and hardcoded_users[member.id].get('otp') is not None:
             embed.add_field(name="Detected OTP",
-                            value="User is shipped with ***{}***".format(hardcoded_users[member.id]['otp']),
+                            value=f"User is shipped with ***{hardcoded_users[member.id]['otp']}***",
                             inline=False
                             )
 
@@ -292,9 +282,9 @@ class Fun:
             final_fate = "BOT OVERLORD"
 
         embed = discord.Embed(
-            title=Emojis.ROBOT + " {}'s Survivability".format(user),
-            description="According to my current algorithms, {}'s fate in the robopocalypse will be: "
-                        "**`{}`**".format(user.display_name, final_fate),
+            title=Emojis.ROBOT + f" {user}'s Survivability",
+            description=f"According to my current algorithms, {user.display_name}'s fate in the robopocalypse will be: "
+                        f"**`{final_fate}`**",
             color=Colors.INFO
         )
 
@@ -321,7 +311,7 @@ class Fun:
             str_table = "\n".join(ta)
             # str_table = str_table.replace("OTHER", "\nOTHER")
 
-            embed.add_field(name="Fate Table", value="```{}```".format(str_table))
+            embed.add_field(name="Fate Table", value=f"```{str_table}```")
 
         await ctx.send(embed=embed)
 
@@ -348,9 +338,11 @@ class Fun:
         if maximum < minimum:
             minimum, maximum = maximum, minimum
 
+        number = random.randint(minimum, maximum)
+
         await ctx.send(embed=discord.Embed(
             title="\U0001F3B2 Random Number Generator",
-            description="Your random number is: **`{}`**".format(random.randint(minimum, maximum)),
+            description=f"Your random number is: **`{number}`**",
             color=Colors.INFO
         ))
 

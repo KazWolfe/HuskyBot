@@ -95,15 +95,15 @@ class Leaderboards:
             lc = ""
 
             for record in board:
-                lc += " - `{}` with **{} bans**\n".format(record[0], record[1])
+                lc += f" - `{record[0]}` with **{record[1]} bans**\n"
 
             embed = discord.Embed(
                 title="Top 10 Mods (By Bans)",
-                description="The mods with the top bans are: \n{}".format(lc),
+                description=f"The mods with the top bans are: \n{lc}",
                 color=Colors.INFO
             )
 
-            embed.set_footer(text="Σ={} | total bans={}".format(sum(cache.values()), len(banned_uids)))
+            embed.set_footer(text=f"Σ={sum(cache.values())} | total bans={len(banned_uids)}")
 
             await ctx.send(embed=embed)
 
@@ -120,7 +120,7 @@ class Leaderboards:
 
         self._config.set('leaderboard', lb_conf)
 
-        await ctx.send("Mapped `{}` -> `{}`".format(map_from, map_to))
+        await ctx.send(f"Mapped `{map_from}` -> `{map_to}`")
 
 
 def setup(bot: discord.ext.commands.Bot):

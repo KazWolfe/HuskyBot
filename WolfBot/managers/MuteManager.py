@@ -38,8 +38,7 @@ class MuteManager:
         while not self._bot.is_closed():
             for mute in self.__cache__:
                 if mute.is_expired():
-                    LOG.info("Found a scheduled unmute - [{}, {}]. Triggering...".format(mute.user_id,
-                                                                                         mute.channel))
+                    LOG.info(f"Found a scheduled unmute - [{mute.user_id}, {mute.channel}]. Triggering...")
                     await self.unmute_user(mute, "System - Scheduled")
 
                 # Because mutes are sorted by expiry, we can just exit the loop if we encounter a mute that's not yet
@@ -53,12 +52,10 @@ class MuteManager:
         guild = self._bot.get_guild(mute.guild)
 
         member = guild.get_member(mute.user_id)
-        channel = None
 
         expiry_string = ""
         if mute.expiry is not None:
-            expiry_string = " (muted until {})".format(
-                datetime.datetime.fromtimestamp(mute.expiry).strftime(DATETIME_FORMAT))
+            expiry_string = f" (muted until {datetime.datetime.fromtimestamp(mute.expiry).strftime(DATETIME_FORMAT)})"
 
         if mute.channel is None:
             mute_role = discord.utils.get(guild.roles, id=self._bot_config.get("specialRoles", {}).get("muted"))
@@ -67,14 +64,14 @@ class MuteManager:
             if mute_role is None:
                 raise ValueError("A muted role is not set!")
 
-            await member.add_roles(mute_role, reason="Muted by {} for reason {}{}"
-                                   .format(staff_member, mute.reason, expiry_string))
+            await member.add_roles(mute_role, reason=f"Muted by {staff_member} for reason {mute.reason}{expiry_string}")
         else:
             channel = guild.get_channel(mute.channel)
             mute_context = channel.mention
 
-            await channel.set_permissions(member, reason="Muted by {} for reason {}{}"
-                                          .format(staff_member, mute.reason, expiry_string), send_messages=False,
+            await channel.set_permissions(member,
+                                          reason=f"Muted by {staff_member} for reason {mute.reason}{expiry_string}",
+                                          send_messages=False,
                                           add_reactions=False)
 
         if mute not in self.__cache__:
@@ -90,13 +87,12 @@ class MuteManager:
                 alert_channel = member.guild.get_channel(alert_channel)
 
                 embed = discord.Embed(
-                    description="User ID `{}` was muted from {}.".format(member.id, mute_context),
+                    description=f"User ID `{member.id}` was muted from {mute_context}.",
                     color=Colors.WARNING
                 )
 
-                embed.set_author(name="{} was muted from {}!".format(member,
-                                                                     "the guild" if mute.channel is None else
-                                                                     "#" + str(channel)),
+                embed.set_author(name=f"{member} was muted from "
+                                      f"{'the guild' if mute.channel is None else mute.channel.mention}!",
                                  icon_url=member.avatar_url)
                 embed.add_field(name="Responsible User", value=str(staff_member), inline=True)
                 embed.add_field(name="Timestamp", value=WolfUtils.get_timestamp(), inline=True)
@@ -128,7 +124,7 @@ class MuteManager:
 
     async def unmute_user(self, mute: WolfData.Mute, staff_member: str):
         if staff_member is not None:
-            unmute_reason = "user {}".format(staff_member)
+            unmute_reason = f"user {staff_member}"
         else:
             unmute_reason = "expiry"
 
@@ -138,7 +134,7 @@ class MuteManager:
         # Member is no longer on the guild, so their perms are cleared. Delete their records once their mute
         # is up.
         if member is None:
-            LOG.info("Left user ID {} has had their mute expire. Removing it.".format(mute.user_id))
+            LOG.info(f"Left user ID {mute.user_id} has had their mute expire. Removing it.")
             self.__cache__.remove(mute)
             self._mute_config.set("mutes", self.__cache__)
 
@@ -149,7 +145,7 @@ class MuteManager:
             unmute_context = channel.mention
 
             await channel.set_permissions(member, overwrite=mute.get_cached_override(),
-                                          reason="User's channel mute has been lifted by {}".format(unmute_reason))
+                                          reason=f"User's channel mute has been lifted by {unmute_reason}")
         else:
             unmute_context = "the guild"
             channel = None
@@ -161,7 +157,7 @@ class MuteManager:
                 raise ValueError("A muted role is not set!")
 
             await member.remove_roles(mute_role,
-                                      reason="User's guild mute has been lifted by {}".format(unmute_reason))
+                                      reason=f"User's guild mute has been lifted by {unmute_reason}")
 
         # Remove from the disk
         self.__cache__.remove(mute)
@@ -174,13 +170,12 @@ class MuteManager:
             alert_channel = member.guild.get_channel(alert_channel)
 
             embed = discord.Embed(
-                description="User ID `{}` was unmuted from {}.".format(mute.user_id, unmute_context),
+                description=f"User ID `{mute.user_id}` was unmuted from {unmute_context}.",
                 color=Colors.INFO
             )
 
             embed.set_author(
-                name="{} was unmuted from {}!".format(member,
-                                                      "the guild" if mute.channel is None else "#" + str(channel)),
+                name=f"{member} was unmuted from {'the guild' if mute.channel is None else '#' + str(channel)}!",
                 icon_url=member.avatar_url),
             embed.add_field(name="Responsible User", value=str(staff_member), inline=True)
 
@@ -189,7 +184,7 @@ class MuteManager:
     async def restore_user_mute(self, member: discord.Member):
         for mute in self.__cache__:
             if (mute.user_id == member.id) and not mute.is_expired():
-                LOG.info("Restoring mute state for left user {} in channel".format(member, mute.channel))
+                LOG.info(f"Restoring mute state for left user {member} in channel")
                 await self.mute_user_by_object(mute, "System - ReJoin")
 
     async def find_user_mute_record(self, member: discord.Member, channel):
@@ -239,12 +234,11 @@ class MuteManager:
             mute_context = "the guild" if mute.channel is None else str(self._bot.get_channel(mute.channel))
 
             embed = discord.Embed(
-                description="User ID `{}`'s mute from {} was updated.".format(mute.user_id, mute_context),
+                description=f"User ID `{mute.user_id}`'s mute from {mute_context} was updated.",
                 color=Colors.WARNING
             )
 
-            embed.set_author(name="{}'s mute updated!".format(member),
-                             icon_url=member.avatar_url)
+            embed.set_author(name=f"{member}'s mute updated!", icon_url=member.avatar_url)
 
             if old_reason != reason:
                 embed.add_field(name="Old Reason", value=old_reason, inline=False)

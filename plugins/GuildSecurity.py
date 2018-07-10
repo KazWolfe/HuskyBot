@@ -55,8 +55,8 @@ class GuildSecurity:
             for r in new_roles:
                 if r.id in protected_roles and r.id not in allowed_promotions_for_user:
                     await after.remove_roles(r, reason="Unauthorized grant of protected role")
-                    LOG.info("A protected role {} was granted to {} without prior authorization. "
-                             "Removed.".format(r, after))
+                    LOG.info(f"A protected role {r} was granted to {after} without prior authorization. "
+                             f"Removed.")
 
         async def lockdown_bot_role():
             if before.roles == after.roles:
@@ -71,7 +71,7 @@ class GuildSecurity:
 
             if (bot_role is not None) and (bot_role not in before.roles) and (not before.bot):
                 await after.remove_roles(bot_role, reason="User is not an authorized bot.")
-                LOG.info("User {} was granted bot role, but was not a bot. Removing.".format(after))
+                LOG.info(f"User {after} was granted bot role, but was not a bot. Removing.")
 
         asyncio.ensure_future(protect_roles())
         asyncio.ensure_future(lockdown_bot_role())
@@ -118,7 +118,7 @@ class GuildSecurity:
         if role.id in protected_roles:
             await ctx.send(embed=discord.Embed(
                 title="Role Already Protected!",
-                description="The role {} is already protected by the bot.".format(role.mention),
+                description=f"The role {role.mention} is already protected by the bot.",
                 color=Colors.WARNING
             ))
             return
@@ -128,7 +128,7 @@ class GuildSecurity:
 
         await ctx.send(embed=discord.Embed(
             title=Emojis.LOCK + "Role Protected!",
-            description="The role {} may now only be granted by using `/promote`.".format(role.mention),
+            description=f"The role {role.mention} may now only be granted by using `/promote`.",
             color=Colors.SUCCESS
         ))
 
@@ -141,8 +141,8 @@ class GuildSecurity:
         if role.position >= ctx.author.top_role.position:
             await ctx.send(embed=discord.Embed(
                 title="Permission Error",
-                description="You are not permitted to promote users to {}, as that role is not below your highest "
-                            "role. Please contact an administrator for assistance.".format(role.mention),
+                description=f"You are not permitted to promote users to {role.mention}, as that role is not below your "
+                            f"highest role. Please contact an administrator for assistance.",
                 color=Colors.ERROR
             ))
             return
@@ -153,16 +153,16 @@ class GuildSecurity:
         if role in member.roles:
             await ctx.send(embed=discord.Embed(
                 title="Promotion Failed!",
-                description="User {} already has role {}, so it can't be assigned again!".format(member, role.mention),
+                description=f"User {member} already has role {role.mention}, so it can't be assigned again!",
                 color=Colors.ERROR
             ))
             return
 
         confirm_dialog = await ctx.send(embed=discord.Embed(
             title="Confirm Promotion",
-            description="You are going to promote user {} to role {}. Is this intended?\n\nTo confirm, react with the "
-                        "{} emoji. To cancel, either wait 30 seconds or press the {} "
-                        "emoji.".format(member.mention, role.mention, Emojis.CHECK, Emojis.X)
+            description=f"You are going to promote user {member.mention} to role {role.mention}. Is this intended?\n\n"
+                        f"To confirm, react with the {Emojis.CHECK} emoji. To cancel, either wait 30 seconds or press "
+                        f"the {Emojis.X} emoji."
         ))  # type: discord.Message
 
         await confirm_dialog.add_reaction(Emojis.CHECK)
@@ -185,8 +185,7 @@ class GuildSecurity:
         if not confirmed:
             await confirm_dialog.edit(embed=discord.Embed(
                 title=Emojis.X + " Promotion DENIED",
-                description="The promotion of `{}` to {} was **DENIED** by "
-                            "{}.".format(member, role.mention, confirming_user),
+                description=f"The promotion of `{member}` to {role.mention} was **DENIED** by {confirming_user}.",
                 color=Colors.DANGER
             ))
             return
@@ -195,7 +194,7 @@ class GuildSecurity:
         allowed_promotions[member.id] = allowed_promotions.get(member.id, []) + [role.id]
         self._guildsecurity_store.set("allowedPromotions", allowed_promotions)
 
-        await member.add_roles(role, reason="Promoted by {}".format(confirming_user))
+        await member.add_roles(role, reason=f"Promoted by {confirming_user}")
 
         await self.bot.wait_for('member_update', timeout=10.0, check=lambda b, a: role in a.roles)
 
@@ -205,8 +204,8 @@ class GuildSecurity:
 
         await confirm_dialog.edit(embed=discord.Embed(
             title=Emojis.CHECK + " Promotion APPROVED",
-            description="The promotion of `{}` to {} was **APPROVED** by "
-                        "{}.\n\nUser has been promoted.".format(member, role.mention, confirming_user),
+            description=f"The promotion of `{member}` to {role.mention} was **APPROVED** by {confirming_user}."
+                        f"\n\nUser has been promoted.",
             color=Colors.SUCCESS
         ))
 

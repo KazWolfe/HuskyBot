@@ -70,7 +70,7 @@ class GiveawayManager:
             # This is what peak performance looks like, kids.
             for giveaway in self.__cache__:
                 if giveaway.is_over():
-                    LOG.info("Found a scheduled giveaway for {} ending. Triggering...".format(giveaway.name))
+                    LOG.info(f"Found a scheduled giveaway for {giveaway.name} ending. Triggering...")
                     await self.finish_giveaway(giveaway)
 
                 # Because giveaways are sorted by finish date, if we encounter a giveaway that *isn't* over, we can
@@ -111,21 +111,20 @@ class GiveawayManager:
         winning_users = self._rng.sample(contending_users, min(giveaway.winner_count, len(contending_users)))
 
         if len(winning_users) == 1:
-            win_text = "Congratulations to our winner, {}!".format(winning_users[0].mention) + wcl
+            win_text = f"{f'Congratulations to our winner, {winning_users[0].mention}!'}{wcl}"
         elif len(winning_users) == 2:
-            win_text = "Congratulations to our winners, " \
-                       "{} and {}!".format(winning_users[0].mention, winning_users[1].mention) + wcl
+            message = f'Congratulations to our winners, {winning_users[0].mention} and {winning_users[1].mention}!'
+            win_text = f"{message}{wcl}"
         elif len(winning_users) > 2:
             win_csb = [u.mention for u in winning_users]
 
-            win_text = "Congratulations to our winners: {}, and {}!".format(' ,'.join(win_csb[:-1]), win_csb[-1:][0]) \
-                       + wcl
+            win_text = f"Congratulations to our winners: {' ,'.join(win_csb[:-1])}, and {win_csb[-1:][0]}! {wcl}"
         else:
             win_text = "Unfortunately, nobody entered this giveaway... :sob:"
 
         embed = discord.Embed(
             title=Emojis.GIVEAWAY + " Giveaway over!",
-            description="Woo! The giveaway for **{}** has ended!\n\n{}".format(giveaway.name, win_text),
+            description=f"Woo! The giveaway for **{giveaway.name}** has ended!\n\n{win_text}",
             color=Colors.PRIMARY
         )
 
@@ -157,13 +156,13 @@ class GiveawayManager:
         if winners == 1:
             winner_str = "1 winner"
         else:
-            winner_str = "{} winners".format(winners)
+            winner_str = f"{winners} winners"
 
         giveaway_embed = discord.Embed(
-            title="{} New Giveaway: {}!".format(Emojis.GIVEAWAY, title),
-            description="A giveaway has been started for **{}**!\n\nAnyone may enter, and up to {} will be selected "
-                        "for the final prize. React with the {} emoji to enter.\n\nThis giveaway will end at "
-                        "{} UTC".format(title, winner_str, Emojis.GIVEAWAY, end_time.strftime(DATETIME_FORMAT)),
+            title=f"{Emojis.GIVEAWAY} New Giveaway: {title}!",
+            description=f"A giveaway has been started for **{title}**!\n\nAnyone may enter, and up to {winner_str} "
+                        f"will be selected for the final prize. React with the {Emojis.GIVEAWAY} emoji to enter."
+                        f"\n\nThis giveaway will end at {end_time.strftime(DATETIME_FORMAT)} UTC",
             color=Colors.INFO
         )
 

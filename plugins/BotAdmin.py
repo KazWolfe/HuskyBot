@@ -1,4 +1,5 @@
 import logging
+import platform
 import socket
 
 import discord
@@ -19,19 +20,16 @@ class BotAdmin:
 
     It provides core administrative functions to bot administrators to change configurations and other important values.
     """
+
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
         self._config = WolfConfig.get_config()
         self._session_store = WolfConfig.get_session_store()
         self._debugmode = self._config.get("developerMode", False)
-        LOG.info("Loaded plugin!")
 
-    async def on_message(self, message: discord.Message):
-        if message.content == "$ident dc74bd9b-1bfe-4ea9-ba49-492df6213e70":
-            await message.channel.send("WolfBot Identification String\n"
-                                       "Response GUID: 3d99c63d-b0bd-4416-989d-e32a494c8f87\n"
-                                       "(c) 2018, Blacksite Technologies\n"
-                                       "Don't Steal WolfBot [tm]")
+        self._critical_plugins = ["BotAdmin"]
+
+        LOG.info("Loaded plugin!")
 
     @commands.command(name="about", aliases=["version"], brief="Get basic information about the bot.")
     async def about(self, ctx: discord.ext.commands.Context):
@@ -52,11 +50,12 @@ class BotAdmin:
         )
 
         embed.add_field(name="Authors", value="KazWolfe, Clover", inline=False)
-        embed.add_field(name="Bot Version", value="[`{}`]({}/commit/{})".format(sha[:8], GIT_URL, sha), inline=True)
-        embed.add_field(name="Library Version", value="discord.py {}".format(discord.__version__), inline=True)
-        embed.add_field(name="Current Host", value="`{}`".format(socket.gethostname()), inline=True)
-        embed.set_thumbnail(url="https://cdn.discordapp.com/avatars/" + str(ctx.bot.user.id) + "/"
-                                + str(ctx.bot.user.avatar) + ".png")
+        embed.add_field(name="Bot Version", value=f"[`{sha[:8]}`]({GIT_URL}/commit/{sha})", inline=True)
+        embed.add_field(name="Library Version", value=f"discord.py {discord.__version__}", inline=True)
+        embed.add_field(name="Python Version", value=f"Python {platform.python_version()}")
+        embed.add_field(name="Current Host", value=f"`{socket.gethostname()}`", inline=True)
+
+        embed.set_thumbnail(url=f"https://cdn.discordapp.com/avatars/{ctx.bot.user.id}/{ctx.bot.user.avatar}.png")
         embed.set_footer(text="(c) 2018, KazWolfe | Rooooooo!",
                          icon_url="https://avatars3.githubusercontent.com/u/5192145")
 
@@ -110,8 +109,7 @@ class BotAdmin:
         if plugin_name in ctx.bot.cogs.keys():
             await ctx.send(embed=discord.Embed(
                 title="Plugin Manager",
-                description="The plugin `" + plugin_name
-                            + "` could not be loaded, as it is already loaded.",
+                description=f"The plugin `{plugin_name}` could not be loaded, as it is already loaded.",
                 color=Colors.WARNING
             ))
             LOG.warning("Attempted to unload already-unloaded plugin %s", plugin_name)
@@ -122,9 +120,8 @@ class BotAdmin:
         except (AttributeError, ImportError) as e:
             await ctx.send(embed=discord.Embed(
                 title="Plugin Manager",
-                description="The plugin `" + plugin_name
-                            + "` has failed to load. The following "
-                            + "error is available:\n ```{}: {}```".format(type(e).__name__, str(e)),
+                description=f"The plugin `{plugin_name}` has failed to load. The following "
+                            f"error is available:\n ```{type(e).__name__}: {e}```",
                 color=Colors.DANGER
             ))
             LOG.error("Could not load plugin %s. Error: %s", plugin_name, e)
@@ -133,7 +130,7 @@ class BotAdmin:
         LOG.info("Loaded plugin %s", plugin_name)
         await ctx.send(embed=discord.Embed(
             title="Plugin Manager",
-            description="The plugin `" + plugin_name + "` has been loaded.",
+            description=f"The plugin `{plugin_name}` has been loaded.",
             color=Colors.INFO
         ))
 
@@ -154,14 +151,13 @@ class BotAdmin:
             /help admin disable  - Permanently disable a plugin (unload + disallow startup execution)
         """
 
-        if plugin_name == "BotAdmin":
+        if plugin_name in self._critical_plugins:
             await ctx.send(embed=discord.Embed(
                 title="Plugin Manager",
-                description="The plugin `" + plugin_name
-                            + "` could not be unloaded, as it is a critical module. ",
+                description=f"The plugin `{plugin_name}` could not be unloaded, as it is a critical plugin. ",
                 color=Colors.DANGER
             ))
-            LOG.warning("A request was made to unload BotAdmin. Blocked.")
+            LOG.warning("A request was made to unload %s. Blocked.", plugin_name)
             return
 
         if plugin_name == "Debug" and self._debugmode:
@@ -177,8 +173,8 @@ class BotAdmin:
         if plugin_name not in ctx.bot.cogs.keys():
             await ctx.send(embed=discord.Embed(
                 title="Plugin Manager",
-                description="The plugin `" + plugin_name
-                            + "` could not be unloaded, as it is not loaded. Plugin names are case-sensitive.",
+                description=f"The plugin `{plugin_name}` could not be unloaded, as it is not loaded. "
+                            f"Plugin names are case-sensitive.",
                 color=Colors.WARNING
             ))
             LOG.warning("Attempted to unload already-unloaded plugin %s", plugin_name)
@@ -189,7 +185,7 @@ class BotAdmin:
         LOG.info("Unloaded plugin %s", plugin_name)
         await ctx.send(embed=discord.Embed(
             title="Plugin Manager",
-            description="The plugin `" + plugin_name + "` has been unloaded.",
+            description=f"The plugin `{plugin_name}` has been unloaded.",
             color=Colors.INFO
         ))
 
@@ -222,9 +218,8 @@ class BotAdmin:
         except (AttributeError, ImportError) as e:
             await ctx.send(embed=discord.Embed(
                 title="Plugin Manager",
-                description="The plugin `" + plugin_name
-                            + "` has failed to reload. The following "
-                            + "error is available:\n ```{}: {}```".format(type(e).__name__, str(e)),
+                description=f"The plugin `{plugin_name}` has failed to reload. The following "
+                            f"error is available:\n ```{type(e).__name__}: {e}```",
                 color=Colors.DANGER
             ))
             LOG.error("Could not reload plugin %s. Error: %s", plugin_name, e)
@@ -232,7 +227,7 @@ class BotAdmin:
         LOG.info("Reloaded plugin %s", plugin_name)
         await ctx.send(embed=discord.Embed(
             title="Plugin Manager",
-            description="The plugin `" + plugin_name + "` has been reloaded.",
+            description=f"The plugin `{plugin_name}` has been reloaded.",
             color=Colors.INFO
         ))
 
@@ -257,8 +252,8 @@ class BotAdmin:
         if plugin_name in config:
             await ctx.send(embed=discord.Embed(
                 title="Plugin Manager",
-                description="The plugin `" + plugin_name
-                            + "` is already enabled. If it is not loaded, use `/admin load " + plugin_name + "`.",
+                description=f"The plugin `{plugin_name}` is already enabled. If it is not loaded, use "
+                            f"`/admin load {plugin_name}`.",
                 color=Colors.WARNING
             ))
             return
@@ -268,8 +263,8 @@ class BotAdmin:
         except (AttributeError, ImportError) as e:
             await ctx.send(embed=discord.Embed(
                 title="Plugin Manager",
-                description="The plugin `" + plugin_name + "` has failed to enable. The following error is "
-                            + "available:\n ```{}: {}```".format(type(e).__name__, str(e)),
+                description=f"The plugin `{plugin_name}` has failed to enable. The following error is "
+                            f"available:\n ```{type(e).__name__}: {e}```",
                 color=Colors.DANGER
             ))
             LOG.error("Could not enable plugin %s. Error: %s", plugin_name, e)
@@ -281,7 +276,7 @@ class BotAdmin:
         LOG.info("Enabled plugin %s", plugin_name)
         await ctx.send(embed=discord.Embed(
             title="Plugin Manager",
-            description="The plugin `" + plugin_name + "` has been enabled and will run automatically.",
+            description=f"The plugin `{plugin_name}` has been enabled and will run automatically.",
             color=Colors.SUCCESS
         ))
 
@@ -301,14 +296,13 @@ class BotAdmin:
             /help admin reload   - Unload and reload a plugin from the bot.
             /help admin enable   - Permanently enable a plugin (load + run on start)
         """
-        if plugin_name == "BotAdmin":
+        if plugin_name in self._critical_plugins:
             await ctx.send(embed=discord.Embed(
                 title="Plugin Manager",
-                description="The plugin `" + plugin_name
-                            + "` could not be disabled, as it is a critical module. ",
+                description=f"The plugin `{plugin_name}` could not be disabled, as it is a critical module.",
                 color=Colors.DANGER
             ))
-            LOG.warning("The BotAdmin module was requested to be disabled.")
+            LOG.warning("The %s module was requested to be disabled. Blocked.", plugin_name)
             return
 
         if plugin_name == "Debug" and self._debugmode:
@@ -326,7 +320,7 @@ class BotAdmin:
         if plugin_name not in config:
             await ctx.send(embed=discord.Embed(
                 title="Plugin Manager",
-                description="The plugin `" + plugin_name + "` is already disabled.",
+                description=f"The plugin `{plugin_name}` is already disabled.",
                 color=Colors.WARNING
             ))
             return
@@ -339,7 +333,7 @@ class BotAdmin:
         LOG.info("Disabled plugin %s", plugin_name)
         await ctx.send(embed=discord.Embed(
             title="Plugin Manager",
-            description="The plugin `" + plugin_name + "` has been disabled and will no longer run automatically.",
+            description=f"The plugin `{plugin_name}` has been disabled and will no longer run automatically.",
             color=Colors.WARNING
         ))
 
@@ -363,7 +357,7 @@ class BotAdmin:
             await ctx.send(embed=discord.Embed(
                 title="Bot Manager",
                 description="A log file was expected, but was not found or configured. This suggests a *serious* "
-                            + "problem with the bot.",
+                            "problem with the bot.",
                 color=Colors.DANGER
             ))
             return
@@ -483,7 +477,7 @@ class BotAdmin:
         if command in ignored_commands:
             await ctx.send(embed=discord.Embed(
                 title="Bot Manager",
-                description="The command `/" + command + "` is already being ignored.",
+                description=f"The command `/{command}` is already being ignored.",
                 color=Colors.WARNING
             ))
             return
@@ -493,7 +487,7 @@ class BotAdmin:
 
         await ctx.send(embed=discord.Embed(
             title="Bot Manager",
-            description="The command `/" + command + "` has been added to the ignore list.",
+            description=f"The command `/{command}` has been added to the ignore list.",
             color=Colors.SUCCESS
         ))
 
@@ -517,7 +511,7 @@ class BotAdmin:
         if command not in ignored_commands:
             await ctx.send(embed=discord.Embed(
                 title="Bot Manager",
-                description="The command `/" + command + "` is already being accepted.",
+                description=f"The command `/{command}` is already being accepted.",
                 color=Colors.WARNING
             ))
             return
@@ -527,7 +521,7 @@ class BotAdmin:
 
         await ctx.send(embed=discord.Embed(
             title="Bot Manager",
-            description="The command `/" + command + "` has been removed from the ignore list.",
+            description=f"The command `/{command}` has been removed from the ignore list.",
             color=Colors.SUCCESS
         ))
 
@@ -555,7 +549,7 @@ class BotAdmin:
 
             await ctx.send(embed=discord.Embed(
                 title="Bot Manager",
-                description="Valid channel names are: \n- `" + "`\n- `".join(channel_names) + "`",
+                description="Valid channel names are: {}".format(''.join(f"\n- `{c}`" for c in channel_names)),
                 color=Colors.PRIMARY
             ))
             return
@@ -566,7 +560,7 @@ class BotAdmin:
 
         await ctx.send(embed=discord.Embed(
             title="Bot Manager",
-            description="Channel value `{}` has been set to {}".format(name, channel.mention),
+            description=f"Channel value `{name}` has been set to {channel.mention}",
             color=Colors.SUCCESS
         ))
 
@@ -602,7 +596,7 @@ class BotAdmin:
 
         await ctx.send(embed=discord.Embed(
             title="Bot Manager",
-            description="Role value `{}` has been set to {}".format(name, role.mention),
+            description=f"Role value `{name}` has been set to {role.mention}",
             color=Colors.SUCCESS
         ))
 
@@ -629,7 +623,7 @@ class BotAdmin:
         if user.id in config:
             await ctx.send(embed=discord.Embed(
                 title="Bot Manager",
-                description="The user `{}` is already ignored by the bot.".format(user),
+                description=f"The user `{user}` is already ignored by the bot.",
                 color=Colors.WARNING
             ))
             return
@@ -637,7 +631,7 @@ class BotAdmin:
         if user.id in get_developers():
             await ctx.send(embed=discord.Embed(
                 title="Bot Manager",
-                description="The user `{}` is a bot developer, and may not be ignored.".format(user),
+                description=f"The user `{user}` is a bot developer, and may not be ignored.",
                 color=Colors.WARNING
             ))
             return
@@ -648,7 +642,7 @@ class BotAdmin:
 
         await ctx.send(embed=discord.Embed(
             title="Bot Manager",
-            description="The user `{}` has been blacklisted by the bot.".format(user),
+            description=f"The user `{user}` has been blacklisted by the bot.",
             color=Colors.SUCCESS
         ))
 
@@ -668,7 +662,7 @@ class BotAdmin:
         if user.id not in config:
             await ctx.send(embed=discord.Embed(
                 title="Bot Manager",
-                description="The user `{}` is not on the block list.".format(user),
+                description=f"The user `{user}` is not on the block list.",
                 color=Colors.WARNING
             ))
             return
@@ -679,7 +673,7 @@ class BotAdmin:
 
         await ctx.send(embed=discord.Embed(
             title="Bot Manager",
-            description="The user `{}` has been removed from the blacklist.".format(user),
+            description=f"The user `{user}` has been removed from the blacklist.",
             color=Colors.SUCCESS
         ))
 
@@ -710,7 +704,7 @@ class BotAdmin:
 
         self._session_store.set('lockdown', lockdown_state)
 
-        await ctx.send("**Bot Lockdown State:** `{}`".format(st))
+        await ctx.send(f"**Bot Lockdown State:** `{st}`")
 
 
 def setup(bot: commands.Bot):

@@ -108,7 +108,7 @@ class AutoResponder:
         if trigger.startswith(self.bot.command_prefix):
             await ctx.send(embed=discord.Embed(
                 title="Response Manager",
-                description="Responses may not start with the command prefix (`{}`)!".format(self.bot.command_prefix),
+                description=f"Responses may not start with the command prefix (`{self.bot.command_prefix}`)!",
                 color=Colors.DANGER
             ))
             return
@@ -123,7 +123,7 @@ class AutoResponder:
         await ctx.send(embed=discord.Embed(
             title="Response Manager",
             description="Your response has been created. It may be used by users with `MANAGE_MESSAGES` in the "
-                        + "current channel. To change this, use `/responses edit`",
+                        "current channel. To change this, use `/responses edit`",
             color=Colors.SUCCESS
         ))
 
@@ -164,7 +164,7 @@ class AutoResponder:
         except KeyError:
             await ctx.send(embed=discord.Embed(
                 title="Response Manager",
-                description="The trigger `" + trigger + "` does not exist. Please create it first.",
+                description=f"The trigger `{trigger}` does not exist. Please create it first.",
                 color=Colors.DANGER
             ))
             return
@@ -199,7 +199,7 @@ class AutoResponder:
                 if not value.replace(',', '').isdigit():
                     await ctx.send(embed=discord.Embed(
                         title="Response Manager",
-                        description="Setting parameter `" + param + "` requires a comma-separated list of numbers.",
+                        description=f"Setting parameter `{param}` requires a comma-separated list of numbers.",
                         color=Colors.DANGER
                     ))
                     return
@@ -216,7 +216,7 @@ class AutoResponder:
                 except ValueError:
                     await ctx.send(embed=discord.Embed(
                         title="Response Manager",
-                        description="Modifying parameter `" + param + "` requires a single number.",
+                        description=f"Modifying parameter `{param}` requires a single number.",
                         color=Colors.DANGER
                     ))
                     return
@@ -252,7 +252,7 @@ class AutoResponder:
         # Done, let's inform the user
         confirmation = discord.Embed(
             title="Response Manager",
-            description="The response for `" + trigger + "` has been updated.",
+            description=f"The response for `{trigger}` has been updated.",
             color=Colors.SUCCESS
         )
 
@@ -277,7 +277,7 @@ class AutoResponder:
         except KeyError:
             await ctx.send(embed=discord.Embed(
                 title="Response Manager",
-                description="The trigger `" + trigger + "` does not exist, so can't delete.",
+                description=f"The trigger `{trigger}` does not exist, so can't delete.",
                 color=Colors.DANGER
             ))
             return

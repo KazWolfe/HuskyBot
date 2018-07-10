@@ -49,13 +49,13 @@ class Updater:
         current_sha = self.repo.head.object.hexsha
 
         fetch_info = remote.fetch()[0]
-        LOG.info("Got update fetch to " + str(fetch_info))
+        LOG.info("Got update fetch to %s", fetch_info)
 
         if fetch_info.commit.hexsha == current_sha:
             await ctx.send(embed=discord.Embed(
                 title="Bot Manager",
-                description="The bot is already up-to-date at version "
-                            "[`{}`]({}/commit/{})".format(current_sha[:8], GIT_URL, current_sha),
+                description=f"The bot is already up-to-date at version "
+                            f"[`{current_sha[:8]}`]({GIT_URL}/commit/{current_sha})",
                 color=Colors.INFO
             ))
             return
@@ -64,7 +64,7 @@ class Updater:
             await ctx.send(embed=discord.Embed(
                 title="Bot Manager",
                 description="The bot's code can not be fast-forwarded to the latest version. Please manually "
-                            + "update the bot.",
+                            "update the bot.",
                 color=Colors.DANGER
             ))
             return
@@ -77,9 +77,8 @@ class Updater:
         new_sha = self.repo.head.object.hexsha
         await ctx.send(embed=discord.Embed(
             title=Emojis.INBOX + " Bot Update Utility",
-            description="The bot's code has been updated from `" + current_sha[:8]
-                        + "` to [`{}`]({}/commit/{}) Please wait while the"
-                          " bot restarts...".format(new_sha[:8], GIT_URL, new_sha),
+            description=f"The bot's code has been updated from `{current_sha[:8]}` "
+                        f"to [`{new_sha[:8]}`]({GIT_URL}/commit/{new_sha}) Please wait while the bot restarts...",
             color=Colors.SUCCESS
         ))
 
@@ -104,8 +103,8 @@ class Updater:
         last_commit = self.repo.head.commit
 
         embed = discord.Embed(
-            title=Emojis.MEMO + " Changelog for version `" + str(last_commit.hexsha)[:8] + "`",
-            description="```" + last_commit.message + "```",
+            title=Emojis.MEMO + f" Changelog for version `{last_commit.hexsha[:8]}`",
+            description=f"```{last_commit.message}```",
             color=Colors.PRIMARY
         )
 
@@ -113,7 +112,7 @@ class Updater:
         embed.add_field(name="Author Date", value=datetime
                         .fromtimestamp(last_commit.authored_date).strftime(DATETIME_FORMAT) + " UTC", inline=True)
         embed.add_field(name="GitHub",
-                        value="[See Commit >]({}/commit/{})".format(GIT_URL, last_commit.hexsha),
+                        value=f"[See Commit >]({GIT_URL}/commit/{last_commit.hexsha})",
                         inline=False)
 
         await ctx.send(embed=embed)

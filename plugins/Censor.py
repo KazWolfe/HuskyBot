@@ -47,7 +47,7 @@ class Censor:
 
         global_censors = censor_config.get("global", [])
         channel_censors = censor_config.get(str(message.channel.id), [])
-        user_censors = censor_config.get("user-" + str(message.author.id), [])
+        user_censors = censor_config.get(f"user-{message.author.id}", [])
 
         censor_list = global_censors + channel_censors + user_censors
 
@@ -107,7 +107,7 @@ class Censor:
         censor_list = censor_config.setdefault(str(channel.id), [])
 
         await ctx.send(embed=discord.Embed(
-            title="Censors for " + channel.name,
+            title=f"Censors for {channel.name}",
             description="The following words are censored in the requested channel:\n\n" + ", ".join(censor_list),
             color=Colors.PRIMARY
         ))
@@ -124,7 +124,7 @@ class Censor:
         censor_list = censor_config.setdefault("global", [])
 
         await ctx.send(embed=discord.Embed(
-            title="Global Censors for " + ctx.guild.name,
+            title=f"Global Censors for {ctx.guild.name}",
             description="The following words are censored in this guild:\n\n" + ", ".join(censor_list),
             color=Colors.PRIMARY
         ))
@@ -144,8 +144,8 @@ class Censor:
 
         if censor in censor_list:
             await ctx.send(embed=discord.Embed(
-                title="Censors for " + channel.name,
-                description="The word `" + censor + "` was already in the censor list.",
+                title=f"Censors for {channel.name}",
+                description=f"The word `{censor}` was already in the censor list.",
                 color=Colors.PRIMARY
             ))
             return
@@ -155,8 +155,8 @@ class Censor:
         self._config.set("censors", censor_config)
 
         await ctx.send(embed=discord.Embed(
-            title="Censors for " + channel.name,
-            description="The word `" + censor + "` was added to the censor list for the specified channel",
+            title=f"Censors for {channel.name}",
+            description=f"The word `{censor}` was added to the censor list for the specified channel",
             color=Colors.PRIMARY
         ))
 
@@ -175,8 +175,8 @@ class Censor:
 
         if censor in censor_list:
             await ctx.send(embed=discord.Embed(
-                title="Global Censors for " + ctx.guild.name,
-                description="The word `" + censor + "` was already in the censor list.",
+                title=f"Global Censors for {ctx.guild.name}",
+                description=f"The word `{censor}` was already in the censor list.",
                 color=Colors.DANGER
             ))
             return
@@ -186,8 +186,8 @@ class Censor:
         self._config.set("censors", censor_config)
 
         await ctx.send(embed=discord.Embed(
-            title="Global Censors for " + ctx.guild.name,
-            description="The word `" + censor + "` was added to the global censor list.",
+            title=f"Global Censors for {ctx.guild.name}",
+            description=f"The word `{censor}` was added to the global censor list.",
             color=Colors.PRIMARY
         ))
 
@@ -206,8 +206,8 @@ class Censor:
 
         if censor not in censor_list:
             await ctx.send(embed=discord.Embed(
-                title="Censors for " + channel.name,
-                description="The word `" + censor + "` was not in the censor list, so not removed.",
+                title=f"Censors for {channel.name}",
+                description=f"The word `{censor}` was not in the censor list, so not removed.",
                 color=Colors.DANGER
             ))
             return
@@ -217,8 +217,8 @@ class Censor:
         self._config.set("censors", censor_config)
 
         await ctx.send(embed=discord.Embed(
-            title="Censors for " + channel.name,
-            description="The word `" + censor + "` was removed from the censor list for the specified channel",
+            title=f"Censors for {channel.name}",
+            description=f"The word `{censor}` was removed from the censor list for the specified channel",
             color=Colors.PRIMARY
         ))
 
@@ -236,8 +236,8 @@ class Censor:
 
         if censor not in censor_list:
             await ctx.send(embed=discord.Embed(
-                title="Global Censors for " + ctx.guild.name,
-                description="The word `" + censor + "` was not in the global censor list, so not removed.",
+                title=f"Global Censors for {ctx.guild.name}",
+                description=f"The word `{censor}` was not in the global censor list, so not removed.",
                 color=Colors.DANGER
             ))
             return
@@ -247,8 +247,8 @@ class Censor:
         self._config.set("censors", censor_config)
 
         await ctx.send(embed=discord.Embed(
-            title="Censors for " + ctx.guild.name,
-            description="The word `" + censor + "` was removed from the global censor list",
+            title=f"Censors for {ctx.guild.name}",
+            description=f"The word `{censor}` was removed from the global censor list",
             color=Colors.PRIMARY
         ))
 
@@ -271,19 +271,18 @@ class Censor:
         if user.top_role.position >= ctx.message.author.top_role.position:
             await ctx.send(embed=discord.Embed(
                 title="Censor Toolkit",
-                description="You may not edit censors for `{}`, as they are not below you in the role "
-                            "hierarchy.".format(user),
+                description=f"You may not edit censors for `{user}`, as they are not below you in the role hierarchy.",
                 color=Colors.DANGER
             ))
             return
 
         censor_config = self._config.get("censors", {})
-        censor_list = censor_config.setdefault("user-" + str(user.id), [])
+        censor_list = censor_config.setdefault(f"user-{user.id}", [])
 
         if censor in censor_list:
             await ctx.send(embed=discord.Embed(
-                title="Censors for {}".format(user),
-                description="The word `" + censor + "` was already in the censor list.",
+                title=f"Censors for {user}",
+                description=f"The word `{censor}` was already in the censor list.",
                 color=Colors.PRIMARY
             ))
             return
@@ -293,8 +292,8 @@ class Censor:
         self._config.set("censors", censor_config)
 
         await ctx.send(embed=discord.Embed(
-            title="Censors for " + str(user),
-            description="The word `" + censor + "` was added to the censor list for the specified user",
+            title=f"Censors for {user}",
+            description=f"The word `{censor}` was added to the censor list for the specified user",
             color=Colors.PRIMARY
         ))
 
@@ -317,19 +316,18 @@ class Censor:
         if user.top_role.position >= ctx.message.author.top_role.position:
             await ctx.send(embed=discord.Embed(
                 title="Censor Toolkit",
-                description="You may not edit censors for `{}`, as they are not below you in the role "
-                            "hierarchy.".format(user),
+                description=f"You may not edit censors for `{user}`, as they are not below you in the role hierarchy.",
                 color=Colors.DANGER
             ))
             return
 
         censor_config = self._config.get("censors", {})
-        censor_list = censor_config.setdefault("user-" + str(user.id), [])
+        censor_list = censor_config.setdefault(f"user-{user.id}", [])
 
         if censor not in censor_list:
             await ctx.send(embed=discord.Embed(
-                title="Censors for {}".format(user),
-                description="The word `" + censor + "` was not in the censor list, so not removed.",
+                title=f"Censors for {user}",
+                description=f"The word `{censor}` was not in the censor list, so not removed.",
                 color=Colors.DANGER
             ))
             return
@@ -339,8 +337,8 @@ class Censor:
         self._config.set("censors", censor_config)
 
         await ctx.send(embed=discord.Embed(
-            title="Censors for {}".format(user),
-            description="The word `" + censor + "` was removed from the censor list for the specified channel",
+            title=f"Censors for {user}",
+            description=f"The word `{censor}` was removed from the censor list for the specified channel",
             color=Colors.PRIMARY
         ))
 
@@ -360,10 +358,10 @@ class Censor:
 
         censor_config = self._config.get("censors", {})
 
-        censor_list = censor_config.get("user-" + str(user.id), [])
+        censor_list = censor_config.get(f"user-{user.id}", [])
 
         await ctx.send(embed=discord.Embed(
-            title="Censors for {}".format(user),
+            title=f"Censors for {user}",
             description="The following words are censored in the requested channel:\n\n" + ", ".join(censor_list),
             color=Colors.PRIMARY
         ))

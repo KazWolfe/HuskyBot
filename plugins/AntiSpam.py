@@ -130,8 +130,8 @@ class AntiSpam:
 
             if alert_channel is not None:
                 await alert_channel.send(embed=discord.Embed(
-                    description="User {} has pinged {} users in a single message in channel "
-                                "{}.".format(message.author, str(len(message.mentions)), message.channel.mention),
+                    description=f"User {message.author} has pinged {len(message.mentions)} users in a single message "
+                                f"in channel {message.channel.mention}.",
                     color=Colors.WARNING
                 ).set_author(name="Mass Ping Alert", icon_url=message.author.avatar_url))
 
@@ -181,12 +181,11 @@ class AntiSpam:
                     LOG.warning("Invalid message was caught and already deleted before I could handle it.")
 
                 invalid_embed = discord.Embed(
-                    description="An invalid invite with key `{}` by user {} (ID `{}`) was caught and "
-                                "filtered.".format(fragment, str(message.author), str(message.author.id)),
+                    description=f"An invalid invite with key `{fragment}` by user {message.author} "
+                                f"(ID `{message.author.id}`) was caught and filtered.",
                     color=Colors.INFO
                 )
-                invalid_embed.set_author(name="Invite from {} intercepted in {}!"
-                                         .format(str(message.author), "#" + str(message.channel)),
+                invalid_embed.set_author(name=f"Invite from {message.author} intercepted in {message.channel.mention}!",
                                          icon_url=message.author.avatar_url)
 
                 await log_channel.send(embed=invalid_embed)
@@ -217,11 +216,11 @@ class AntiSpam:
                 if not is_new_user:
                     await message.channel.send(embed=discord.Embed(
                         title=Emojis.STOP + " Discord Invite Blocked",
-                        description="Hey {}! It looks like you posted a Discord invite.\n\n"
-                                    "Here on DIY Tech, we have a strict no-invites policy in order to prevent spam and "
-                                    "advertisements. If you would like to post an invite, you may contact the admins "
-                                    "to request an invite code be whitelisted.\n\n"
-                                    "We apologize for the inconvenience.".format(message.author.mention),
+                        description=f"Hey {message.author.mention}! It looks like you posted a Discord invite.\n\n"
+                                    f"Here on DIY Tech, we have a strict no-invites policy in order to prevent spam "
+                                    f"and advertisements. If you would like to post an invite, you may contact the "
+                                    f"admins to request an invite code be whitelisted.\n\n"
+                                    f"We apologize for the inconvenience.",
                         color=Colors.WARNING
                     ), delete_after=90.0)
 
@@ -245,11 +244,11 @@ class AntiSpam:
             if log_channel is not None:
                 # We've a valid invite, so let's log that with invite data.
                 log_embed = discord.Embed(
-                    description="An invite with key `{}` by user {} (ID `{}`) was caught and filtered. Invite "
-                                "information below.".format(fragment, str(message.author), str(message.author.id)),
+                    description=f"An invite with key `{fragment}` by user {message.author} (ID `{message.author.id}`) "
+                                f"was caught and filtered. Invite information below.",
                     color=Colors.INFO
                 )
-                log_embed.set_author(name="Invite from {} intercepted!".format(str(message.author)),
+                log_embed.set_author(name=f"Invite from {message.author} intercepted!",
                                      icon_url=message.author.avatar_url)
 
                 log_embed.add_field(name="Invited Guild Name", value=invite_guild.name, inline=True)
@@ -266,20 +265,21 @@ class AntiSpam:
 
                 if invite_data.get('approximate_member_count', -1) != -1:
                     log_embed.add_field(name="Invited Guild User Count",
-                                        value="{} ({} online)".format(invite_data.get('approximate_member_count', -1),
-                                                                      invite_data.get('approximate_presence_count',
-                                                                                      -1)))
+                                        value=f"{invite_data.get('approximate_member_count', -1)} "
+                                              f"({invite_data.get('approximate_presence_count', -1)} online)",
+                                        )
 
                 if invite_data.get('inviter') is not None:
                     inviter = invite_data.get('inviter', {})  # type: dict
-                    log_embed.add_field(name="Invite Creator",
-                                        value="{}#{}".format(inviter['username'], inviter['discriminator']))
+                    log_embed.add_field(
+                        name="Invite Creator",
+                        value=f"{inviter['username']}#{inviter['discriminator']}"
+                    )
 
-                log_embed.set_footer(text="Strike {} of {}, resets {} {}"
-                                     .format(cooldown_record['offenseCount'],
-                                             COOLDOWN_SETTINGS['banLimit'],
-                                             cooldown_record[EXPIRY_FIELD_NAME].strftime(DATETIME_FORMAT),
-                                             "| User Removed" if was_kicked else ""))
+                log_embed.set_footer(text=f"Strike {cooldown_record['offenseCount']} "
+                                          f"of {COOLDOWN_SETTINGS['banLimit']}, "
+                                          f"resets {cooldown_record[EXPIRY_FIELD_NAME].strftime(DATETIME_FORMAT)} "
+                                          f"{'| User Removed' if was_kicked else ''}")
 
                 log_embed.set_thumbnail(url=invite_guild.icon_url)
 
@@ -292,9 +292,8 @@ class AntiSpam:
                     del self.INVITE_COOLDOWNS[message.author.id]
 
                     await message.author.ban(
-                        reason="[AUTOMATIC BAN - AntiSpam Plugin] User sent {} unauthorized invites "
-                               "in a {} minute period.".format(COOLDOWN_SETTINGS['banLimit'],
-                                                               COOLDOWN_SETTINGS['minutes']),
+                        reason=f"[AUTOMATIC BAN - AntiSpam Plugin] User sent {COOLDOWN_SETTINGS['banLimit']} "
+                               f"unauthorized invites in a {COOLDOWN_SETTINGS['minutes']} minute period.",
                         delete_message_days=0)
                 except KeyError:
                     LOG.warning("Attempted to delete cooldown record for user %s (ban over limit), but failed as the "
@@ -338,34 +337,34 @@ class AntiSpam:
             if COOLDOWN_CONFIG['warnLimit'] != 0 and cooldown_record['offenseCount'] == COOLDOWN_CONFIG['warnLimit']:
                 await message.channel.send(embed=discord.Embed(
                     title=Emojis.STOP + " Whoa there, pardner!",
-                    description="Hey there {}! You're sending files awfully fast. Please help us keep this chat clean "
-                                "and readable by not sending lots of files so quickly. "
-                                "Thanks!".format(message.author.mention),
+                    description=f"Hey there {message.author.mention}! You're sending files awfully fast. Please help "
+                                f"us keep this chat clean and readable by not sending lots of files so quickly. "
+                                f"Thanks!",
                     color=Colors.WARNING
                 ), delete_after=90.0)
 
                 if log_channel is not None:
                     await log_channel.send(embed=discord.Embed(
-                        description="User {} has sent {} attachments in a {}-second period in channel "
-                                    "{}.".format(message.author, cooldown_record['offenseCount'],
-                                                 COOLDOWN_CONFIG['seconds'], message.channel),
+                        description=f"User {message.author} has sent {cooldown_record['offenseCount']} attachments in "
+                                    f"a {COOLDOWN_CONFIG['seconds']}-second period in channel "
+                                    f"{message.channel.mention}.",
                         color=Colors.WARNING
                     ).set_author(name="Possible Attachment Spam", icon_url=message.author.avatar_url))
                     return
 
             # And ban their sorry ass at #5.
             if cooldown_record['offenseCount'] >= COOLDOWN_CONFIG['banLimit']:
-                await message.author.ban(reason="[AUTOMATIC BAN - AntiSpam Module] User sent {} attachments in a {} "
-                                                "second period.".format(cooldown_record['offenseCount'],
-                                                                        COOLDOWN_CONFIG['banLimit']),
+                await message.author.ban(reason=f"[AUTOMATIC BAN - AntiSpam Module] User sent "
+                                                f"{cooldown_record['offenseCount']} attachments in a "
+                                                f"{COOLDOWN_CONFIG['banLimit']} second period.",
                                          delete_message_days=1)
                 del self.ATTACHMENT_COOLDOWNS[message.author.id]
 
         else:
             # They sent a message containing text. Clear their cooldown.
             if message.author.id in self.ATTACHMENT_COOLDOWNS:
-                LOG.info("User {} previously on file cooldown warning list has sent a file-less message. Deleting "
-                         "cooldown entry.".format(message.author))
+                LOG.info(f"User {message.author} previously on file cooldown warning list has sent a file-less "
+                         f"message. Deleting cooldown entry.")
                 del self.ATTACHMENT_COOLDOWNS[message.author.id]
 
     async def prevent_link_spam(self, message: discord.Message):
@@ -389,11 +388,11 @@ class AntiSpam:
         # gen the embed here
         link_warning = discord.Embed(
             title=Emojis.STOP + "Hey! Listen!",
-            description="Hey {}! It looks like you posted a lot of links.\n\n"
-                        "In order to cut down on server spam, we have a limitation on the number of links "
-                        "you are allowed to have in a time period. Generally, you won't exceed this limit "
-                        "normally, but I'd like to give you a friendly warning to calm down on the number of "
-                        "links you have. Thanks!".format(message.author.mention),
+            description=f"Hey {message.author.mention}! It looks like you posted a lot of links.\n\n"
+                        f"In order to cut down on server spam, we have a limitation on the number of links "
+                        f"you are allowed to have in a time period. Generally, you won't exceed this limit "
+                        f"normally, but I'd like to give you a friendly warning to calm down on the number of "
+                        f"links you have. Thanks!",
             color=Colors.WARNING
         ).set_thumbnail(url="https://i.imgur.com/Z3l78Dh.gif")
 
@@ -438,25 +437,25 @@ class AntiSpam:
 
                 if log_channel is not None:
                     embed = discord.Embed(
-                        description="User {} has sent {} links recently, and as a result has been warned. If they "
-                                    "continue to post links to the currently configured value of {} links, they will "
-                                    "be automatically banned.".format(message.author, cooldown_record['totalLinks'],
-                                                                      COOLDOWN_CONFIG['totalBeforeBan'])
+                        description=f"User {message.author} has sent {cooldown_record['totalLinks']} links recently, "
+                                    f"and as a result has been warned. If they continue to post links to the currently "
+                                    f"configured value of {COOLDOWN_CONFIG['totalBeforeBan']} links, they will "
+                                    f"be automatically banned.",
                     )
 
-                    embed.set_footer(text="Cooldown resets {}"
-                                     .format(cooldown_record[EXPIRY_FIELD_NAME].strftime(DATETIME_FORMAT)))
+                    embed.set_footer(text=f"Cooldown resets "
+                                          f"{cooldown_record[EXPIRY_FIELD_NAME].strftime(DATETIME_FORMAT)}")
 
-                    embed.set_author(name="Link spam from {} detected!".format(str(message.author)),
+                    embed.set_author(name="Link spam from {message.author} detected!",
                                      icon_url=message.author.avatar_url)
 
                     await log_channel.send(embed=embed)
 
             # And then ban at max
             if cooldown_record['totalLinks'] >= COOLDOWN_CONFIG['totalBeforeBan']:
-                await message.author.ban(reason="[AUTOMATIC BAN - AntiSpam Module] User sent {} or more links in a "
-                                                "{} minute period.".format(COOLDOWN_CONFIG['totalBeforeBan'],
-                                                                           COOLDOWN_CONFIG['minutes']),
+                await message.author.ban(reason=f"[AUTOMATIC BAN - AntiSpam Module] User sent "
+                                                f"{COOLDOWN_CONFIG['totalBeforeBan']} or more links in a "
+                                                f"{COOLDOWN_CONFIG['minutes']} minute period.",
                                          delete_message_days=1)
 
                 # And purge their record, it's not needed anymore
@@ -483,8 +482,8 @@ class AntiSpam:
             # Post something to logs
             if log_channel is not None:
                 embed = discord.Embed(
-                    description="User {} has sent a message containing over {} links to a public "
-                                "channel.".format(message.author, COOLDOWN_CONFIG['linkWarnLimit']),
+                    description=f"User {message.author} has sent a message containing over "
+                                f"{COOLDOWN_CONFIG['linkWarnLimit']} links to a public channel.",
                     color=Colors.WARNING
                 )
 
@@ -494,23 +493,21 @@ class AntiSpam:
                 embed.add_field(name="Message ID", value=message.id, inline=True)
                 embed.add_field(name="Channel", value=message.channel.mention, inline=True)
 
-                embed.set_footer(text="Strike {} of {}, resets {}"
-                                 .format(cooldown_record['offenseCount'],
-                                         COOLDOWN_CONFIG['banLimit'],
-                                         cooldown_record[EXPIRY_FIELD_NAME].strftime(DATETIME_FORMAT)))
+                embed.set_footer(text=f"Strike {cooldown_record['offenseCount']} "
+                                      f"of {COOLDOWN_CONFIG['banLimit']}, "
+                                      f"resets {cooldown_record[EXPIRY_FIELD_NAME].strftime(DATETIME_FORMAT)}")
 
-                embed.set_author(name="Link spam from {} blocked.".format(str(message.author)),
+                embed.set_author(name=f"Link spam from {message.author} blocked.",
                                  icon_url=message.author.avatar_url)
 
                 await log_channel.send(embed=embed)
 
             # If the user is over the ban limit, get rid of them.
             if cooldown_record['offenseCount'] >= COOLDOWN_CONFIG['banLimit']:
-                await message.author.ban(reason="[AUTOMATIC BAN - AntiSpam Module] User sent {} messages containing "
-                                                "{} or more links in a {} minute "
-                                                "period.".format(COOLDOWN_CONFIG['banLimit'],
-                                                                 COOLDOWN_CONFIG['linkWarnLimit'],
-                                                                 COOLDOWN_CONFIG['minutes']),
+                await message.author.ban(reason=f"[AUTOMATIC BAN - AntiSpam Module] User sent "
+                                                f"{COOLDOWN_CONFIG['banLimit']} messages containing "
+                                                f"{COOLDOWN_CONFIG['linkWarnLimit']} or more links in a "
+                                                f"{COOLDOWN_CONFIG['minutes']} minute period.",
                                          delete_message_days=1)
 
                 # And purge their record, it's not needed anymore
@@ -557,19 +554,18 @@ class AntiSpam:
         if cooldown_record['offenseCount'] == 0:
             await message.channel.send(embed=discord.Embed(
                 title=Emojis.SHIELD + " Oops! Non-ASCII Message!",
-                description="Hey {}!\n\nIt looks like you posted a message containing a lot of non-ascii characters. "
-                            "In order to cut down on spam, we are a bit strict with this. We won't delete your "
-                            "message, but please keep ASCII spam off the server.\n\nContinuing to spam ASCII messages "
-                            "may result in a ban. Thank you for keeping DIY Tech clean!".format(message.author.mention)
+                description=f"Hey {message.author.mention}!\n\nIt looks like you posted a message containing a lot of "
+                            f"non-ascii characters. In order to cut down on spam, we are a bit strict with this. We "
+                            f"won't delete your message, but please keep ASCII spam off the server.\n\nContinuing to "
+                            f"spam ASCII messages may result in a ban. Thank you for keeping DIY Tech clean!"
             ), delete_after=90.0)
 
         cooldown_record['offenseCount'] += 1
 
         if log_channel is not None:
             embed = discord.Embed(
-                description="User {} has sent a message with {} non-ASCII characters (out of {} total)."
-                            "".format(message.author, len(nonascii_characters), len(message.content),
-                                      cooldown_record['offenseCount'], CHECK_CONFIG['banLimit']),
+                description=f"User {message.author} has sent a message with {len(nonascii_characters)} non-ASCII "
+                            f"characters (out of {len(message.content)} total).",
                 color=Colors.WARNING
             )
 
@@ -579,24 +575,18 @@ class AntiSpam:
             embed.add_field(name="Message ID", value=message.id, inline=True)
             embed.add_field(name="Channel", value=message.channel.mention, inline=True)
 
-            embed.set_footer(text="Strike {} of {}, resets {}"
-                             .format(cooldown_record['offenseCount'],
-                                     CHECK_CONFIG['banLimit'],
-                                     cooldown_record[EXPIRY_FIELD_NAME].strftime(DATETIME_FORMAT)))
+            embed.set_footer(text=f"Strike {cooldown_record['offenseCount']} of {CHECK_CONFIG['banLimit']}, "
+                                  f"resets {cooldown_record[EXPIRY_FIELD_NAME].strftime(DATETIME_FORMAT)}")
 
-            embed.set_author(name="Link spam from {} blocked.".format(str(message.author)),
-                             icon_url=message.author.avatar_url)
-
-            embed.set_author(name="Non-ASCII spam from {} detected!".format(str(message.author)),
+            embed.set_author(name=f"Non-ASCII spam from {message.author} detected!",
                              icon_url=message.author.avatar_url)
 
             await log_channel.send(embed=embed)
 
         if cooldown_record['offenseCount'] >= CHECK_CONFIG['banLimit']:
-            await message.author.ban(reason="[AUTOMATIC BAN - AntiSpam Module] User sent {} messages over the "
-                                            "non-ASCII threshold in a {} minute "
-                                            "period.".format(CHECK_CONFIG['banLimit'],
-                                                             CHECK_CONFIG['minutes']),
+            await message.author.ban(reason=f"[AUTOMATIC BAN - AntiSpam Module] User sent {CHECK_CONFIG['banLimit']} "
+                                            f"messages over the non-ASCII threshold in a {CHECK_CONFIG['minutes']} "
+                                            f"minute period.",
                                      delete_message_days=1)
 
             # And purge their record, it's not needed anymore
@@ -646,8 +636,8 @@ class AntiSpam:
 
         await ctx.send(embed=discord.Embed(
             title="AntiSpam Plugin",
-            description="Ping limits have been successfully updated. Warn in `{}` pings, ban in "
-                        "`{}`.".format(warn_limit, ban_limit),
+            description=f"Ping limits have been successfully updated. Warn in `{warn_limit}` pings, "
+                        f"ban in `{ban_limit}`.",
             color=Colors.SUCCESS
         ))
 
@@ -677,7 +667,7 @@ class AntiSpam:
         if guild in allowed_invites:
             await ctx.send(embed=discord.Embed(
                 title="AntiSpam Plugin",
-                description="The guild with ID `{}` is already whitelisted!".format(guild),
+                description=f"The guild with ID `{guild}` is already whitelisted!",
                 color=Colors.WARNING
             ))
             return
@@ -686,7 +676,7 @@ class AntiSpam:
         self._config.set("antiSpam", as_config)
         await ctx.send(embed=discord.Embed(
             title="AntiSpam Plugin",
-            description="The invite to guild `{}` has been added to the whitelist.".format(guild),
+            description=f"The invite to guild `{guild}` has been added to the whitelist.",
             color=Colors.SUCCESS
         ))
         return
@@ -717,7 +707,7 @@ class AntiSpam:
         if guild == ctx.guild.id:
             await ctx.send(embed=discord.Embed(
                 title="AntiSpam Plugin",
-                description="This guild may not be removed from the whitelist!".format(guild),
+                description=f"This guild may not be removed from the whitelist!",
                 color=Colors.WARNING
             ))
             return
@@ -725,7 +715,7 @@ class AntiSpam:
         if guild not in allowed_invites:
             await ctx.send(embed=discord.Embed(
                 title="AntiSpam Plugin",
-                description="The guild `{}` is not whitelisted!".format(guild),
+                description=f"The guild `{guild}` is not whitelisted!",
                 color=Colors.WARNING
             ))
             return
@@ -734,7 +724,7 @@ class AntiSpam:
         self._config.set("antiSpam", as_config)
         await ctx.send(embed=discord.Embed(
             title="AntiSpam Plugin",
-            description="The guild with ID `{}` has been removed from the whitelist.".format(guild),
+            description=f"The guild with ID `{guild}` has been removed from the whitelist.",
             color=Colors.SUCCESS
         ))
 
@@ -766,8 +756,8 @@ class AntiSpam:
 
         await ctx.send(embed=discord.Embed(
             title="AntiSpam Plugin",
-            description="The invite module of AntiSpam has been set to allow a max of **`{}`** unauthorized invites "
-                        "in a **`{}` minute** period.".format(ban_limit, cooldown_minutes),
+            description=f"The invite module of AntiSpam has been set to allow a max of **`{ban_limit}`** unauthorized "
+                        f"invites in a **`{cooldown_minutes}` minute** period.",
             color=Colors.SUCCESS
         ))
 
@@ -798,9 +788,9 @@ class AntiSpam:
 
         await ctx.send(embed=discord.Embed(
             title="AntiSpam Plugin",
-            description="The attachments module of AntiSpam has been set to allow a max of **`{}`** attachments in a "
-                        "**`{}` second** period, warning after **`{}`** "
-                        "attachments".format(ban_limit, cooldown_seconds, warn_limit),
+            description=f"The attachments module of AntiSpam has been set to allow a max of **`{ban_limit}`** "
+                        f"attachments in a **`{cooldown_seconds}` second** period, warning after **`{warn_limit}`** "
+                        f"attachments",
             color=Colors.SUCCESS
         ))
 
@@ -846,10 +836,10 @@ class AntiSpam:
 
         await ctx.send(embed=discord.Embed(
             title="AntiSpam Plugin",
-            description="The links module of AntiSpam has been set to allow a max of {} links in a single message. If "
-                        "a user posts more than {} illegal messages in a {} minute period, they will additionally be "
-                        "banned. If a user posts {} links in the same time period, they will also be "
-                        "banned.".format(links_before_warn, ban_limit, cooldown_minutes, total_link_limit),
+            description=f"The links module of AntiSpam has been set to allow a max of {links_before_warn} links in a "
+                        f"single message. If a user posts more than {ban_limit} illegal messages in a "
+                        f"{cooldown_minutes} minute period, they will additionally be banned. If a user posts "
+                        f"{total_link_limit} links in the same time period, they will also be banned.",
             color=Colors.SUCCESS
         ))
 
@@ -897,9 +887,9 @@ class AntiSpam:
 
         await ctx.send(embed=discord.Embed(
             title="AntiSpam Plugin",
-            description="The non-ASCII module of AntiSpam has been set to scan messages over **{} characters** for a "
-                        "non-ASCII **threshold of {}**. Users will be automatically banned for posting **{} messages** "
-                        "in a **{} minute** period.".format(min_length, threshold, ban_limit, min_length),
+            description=f"The non-ASCII module of AntiSpam has been set to scan messages over **{min_length} "
+                        f"characters** for a non-ASCII **threshold of {threshold}**. Users will be automatically "
+                        f"banned for posting **{ban_limit} messages** in a **{cooldown_minutes} minute** period.",
             color=Colors.SUCCESS
         ))
 

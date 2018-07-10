@@ -35,7 +35,7 @@ class OfflineUserConverter(commands.UserConverter):
         if result is None:
             LOG.error("Couldn't find offline user matching ID %s. They may have been banned system-wide or"
                       "their ID was typed wrong.", argument)
-            raise commands.BadArgument('User "{}" could not be found. Do they exist?'.format(argument))
+            raise commands.BadArgument(f'User "{argument}" could not be found. Do they exist?')
 
         return result
 
@@ -64,7 +64,7 @@ class OfflineMemberConverter(commands.MemberConverter):
         if result is None:
             LOG.error("Couldn't find offline user matching ID %s. They may have been banned system-wide or"
                       "their ID was typed wrong.", argument)
-            raise commands.BadArgument('User "{}" could not be found. Do they exist?'.format(argument))
+            raise commands.BadArgument(f'User "{argument}" could not be found. Do they exist?')
 
         return result
 

@@ -103,7 +103,7 @@ def get_config(name: str = 'config', create_if_nonexistent: bool = False):
 
     if name not in __cache__:
         # The requested store does not exist in cache.
-        __cache__[key] = WolfConfig('config/{}.json'.format(name), create_if_nonexistent=create_if_nonexistent)
+        __cache__[key] = WolfConfig(f'config/{name}.json', create_if_nonexistent=create_if_nonexistent)
 
     return __cache__[key]
 
@@ -126,7 +126,7 @@ def get_session_store(name: str = None) -> WolfConfig:
     if name is None:
         key = 'session_store'
     else:
-        key = 'session_store_{}'.format(name)
+        key = f'session_store_{name}'
 
     if key not in __cache__:
         # The requested store does not exist in cache.

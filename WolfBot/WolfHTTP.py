@@ -40,7 +40,7 @@ class WolfRouter:
         path_route = self.routes.get(path, None)
 
         if path_route is None:
-            raise ValueError("The specified path {} does not exist".format(path))
+            raise ValueError(f"The specified path {path} does not exist.")
 
         del path_route[method.upper()]
 
@@ -64,7 +64,7 @@ class WolfRouter:
                 del self.routes[p]
 
     def unload_plugin(self, instance):
-        self.remove_paths("/{}".format(type(instance).__name__.lower()))
+        self.remove_paths(f"/{type(instance).__name__.lower()}")
 
     def handle(self, bot: commands.Bot):
         async def wrapped(request: web.BaseRequest):
@@ -98,8 +98,8 @@ def register(path: str, methods: list):
         """
         for method in methods:
             plugin = f.__qualname__.split('.')[-2]
-            full_path = "/{}{}".format(plugin.lower(), path)
+            full_path = str(f"/{plugin.lower()}{path}")
             router.add_route(method, full_path, plugin, f)
-            LOG.info("Registered HTTP endpoint \"{} {}\" for plugin {}".format(method, full_path, plugin))
+            LOG.info(f'Registered HTTP endpoint "{method} {full_path}" for plugin {plugin}')
 
     return decorator

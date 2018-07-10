@@ -131,7 +131,7 @@ class Debug:
 
         await ctx.send(embed=discord.Embed(
             title="DakotaBot Debugger",
-            description="The latency to Discord's servers is currently **{} ms**.".format(ping_in_ms),
+            description=f"The latency to Discord's servers is currently **{ping_in_ms} ms**.",
             color=color
         ))
 
@@ -192,7 +192,7 @@ class Debug:
 
         await ctx.send(embed=discord.Embed(
             title="Evaluation Result",
-            description="```python\n>>> {}\n\n{}```".format(code, result),
+            description=f"```python\n>>> {code}\n\n{result}```",
             color=Colors.SECONDARY
         ))
 
@@ -221,18 +221,17 @@ class Debug:
 
         # add indentation
         split_expr = expr.splitlines()
-        cmd = "\n".join("    {}".format(i) for i in split_expr)
+        cmd = "\n".join(f"    {i}" for i in split_expr)
 
         # wrap in async def body
-        body = ("async def {}():\n".format(fn_name)
-                + cmd)
+        body = (f"async def {fn_name}():\n" + cmd)
 
         # format code for printing
         formatted_code = ""
         formatted_code += split_expr[0]
         if len(split_expr) > 1:
             for line in split_expr[1:]:
-                formatted_code += "\n... {}".format(line)
+                formatted_code += f"\n... {line}"
 
         parsed = ast.parse(body)
         body = parsed.body[0].body
@@ -252,11 +251,11 @@ class Debug:
         }
         exec(compile(parsed, filename="<ast>", mode="exec"), env)
 
-        result = await eval("{}()".format(fn_name), env)
+        result = await eval(f"{fn_name}()", env)
 
         await ctx.send(embed=discord.Embed(
             title="Evaluation Result",
-            description="```python\n>>> {}\n\n{}```".format(formatted_code, result),
+            description=f"```python\n>>> {formatted_code}\n\n{result}```",
             color=Colors.SECONDARY
         ))
 
@@ -282,7 +281,7 @@ class Debug:
                                               output['text'].replace("```", "`\u200b``"))
 
         await ctx.send(embed=discord.Embed(
-            title="Command returned code {}".format(output['status']),
+            title=f"Command returned code {output['status']}",
             description=pretty_desc,
             color=output['color']
         ))
@@ -314,15 +313,15 @@ class Debug:
                     color = Colors.DANGER
 
                 await ctx.send(embed=discord.Embed(
-                    title="HTTP Status {}".format(response.status),
+                    title=f"HTTP Status {response.status}",
                     description="```{}```".format(WolfUtils.trim_string(await response.text(), 2000)),
                     color=color
                 ))
         except aiohttp.client.ClientError as ex:
             await ctx.send(embed=discord.Embed(
                 title="Could Not Make Request",
-                description="Requestify failed to make a request due to error `{}`. "
-                            "Data has been logged.".format(type(ex).__name__),
+                description=f"Requestify failed to make a request due to error `{type(ex).__name__}`. "
+                            f"Data has been logged.",
                 color=Colors.DANGER
             ))
             LOG.warning("Requestify raised exception.", ex)
@@ -333,7 +332,7 @@ class Debug:
         if request.method == "POST":
             data = await request.json()
             target = data.get("name", "world")
-        return web.Response(text="Hello {} from {}!".format(target, self.bot.user))
+        return web.Response(text=f"Hello {target} from {self.bot.user}!")
 
 
 def setup(bot: discord.ext.commands.Bot):

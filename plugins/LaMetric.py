@@ -62,7 +62,7 @@ class LaMetric:
             if "userCount" not in device.get("enabledTasks", []):
                 continue
 
-            LOG.info("Updating usercount for LaMetric device ID {}".format(device_id))
+            LOG.info(f"Updating usercount for LaMetric device ID {device_id}")
             LaMetricApi.push_to_lametric(device['appId'], LaMetricApi.build_data("i18290", new_count),
                                          device['authToken'])
 
@@ -91,9 +91,9 @@ class LaMetric:
 
         await ctx.send(embed=discord.Embed(
             title="LaMetric Setup",
-            description="Please DM the bot with the following command:\n\n"
-                        "```/lametric authorize {} your_app_id your_auth_token```\n\n"
-                        "Be sure to include the version in your AppID (`abcdef/1`).".format(device_id.lower()),
+            description=f"Please DM the bot with the following command:\n\n"
+                        f"```/lametric authorize {device_id.lower()} your_app_id your_auth_token```\n\n"
+                        f"Be sure to include the version in your AppID (`abcdef/1`).",
             color=Colors.INFO
         ))
 
@@ -143,7 +143,7 @@ class LaMetric:
 
         await ctx.send(embed=discord.Embed(
             title="Device Registered!",
-            description="Your device ID `{}` has been registered successfully!".format(device_id.lower()),
+            description=f"Your device ID `{device_id.lower()}` has been registered successfully!",
             color=Colors.SUCCESS
         ))
 
@@ -176,7 +176,7 @@ class LaMetric:
 
         r = LaMetricApi.push_to_lametric(device['appId'], data, device['authToken'])
 
-        await ctx.send("Status code: {}".format(r.status_code))
+        await ctx.send(f"Status code: {r.status_code}")
 
     @lametric.command(name="list", brief="List registered LaMetric devices")
     @WolfChecks.has_guild_permissions(administrator=True)
@@ -193,12 +193,11 @@ class LaMetric:
 
         for i in devices.keys():
             dev = devices[i]
-            device_list += "\n- ID `{}` (owned by <@{}>), events: `{}`".format(i.lower(), dev['ownerId'],
-                                                                               dev['enabledTasks'])
+            device_list += f"\n- ID `{i.lower()}` (owned by <@{dev['ownerId']}>), events: `{dev['enabledTasks']}`"
 
         await ctx.send(embed=discord.Embed(
             title="Registered LaMetric Devices",
-            description="The following devices are registered with the bot.\n{}".format(device_list),
+            description=f"The following devices are registered with the bot.\n{device_list}",
             color=Colors.INFO
         ))
 
@@ -222,7 +221,7 @@ class LaMetric:
 
         await ctx.send(embed=discord.Embed(
             title="LaMetric Device Removed",
-            description="The LaMetric device with ID `{}` has been removed.".format(device_id.lower())
+            description=f"The LaMetric device with ID `{device_id.lower()}` has been removed."
         ))
 
 

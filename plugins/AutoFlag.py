@@ -53,8 +53,8 @@ class AutoFlag:
             if re.search(flag_term, message.content, re.IGNORECASE) is not None:
                 embed = discord.Embed(
                     title=Emojis.RED_FLAG + " Message autoflag raised!",
-                    description="A message matching term `{}` was detected and has been raised to staff. "
-                                "Please investigate.".format(flag_term),
+                    description=f"A message matching term `{flag_term}` was detected and has been raised to staff. "
+                                f"Please investigate.",
                     color=Colors.WARNING
                 )
 
@@ -88,8 +88,8 @@ class AutoFlag:
         if message.author.id in flag_users:
             embed = discord.Embed(
                 title=Emojis.RED_FLAG + " Message autoflag raised!",
-                description="A message from flagged user {} was detected and has been raised to staff. "
-                            "Please investigate.".format(message.author.mention),
+                description=f"A message from flagged user {message.author.mention} was detected and has been raised to "
+                            f"staff. Please investigate.",
                 color=Colors.WARNING
             )
 
@@ -140,7 +140,7 @@ class AutoFlag:
         if regex in flag_regexes:
             await ctx.send(embed=discord.Embed(
                 title="Autoflag Plugin",
-                description="The regex `" + regex + "` is already autoflagged.",
+                description=f"The regex `{regex}` is already autoflagged.",
                 color=Colors.WARNING
             ))
             return
@@ -151,7 +151,7 @@ class AutoFlag:
 
         await ctx.send(embed=discord.Embed(
             title="Autoflag Plugin",
-            description="The regex `" + regex + "` has been added to the autoflag list.",
+            description=f"The regex `{regex}` has been added to the autoflag list.",
             color=Colors.SUCCESS
         ))
 
@@ -169,7 +169,7 @@ class AutoFlag:
         if regex not in flag_regexes:
             await ctx.send(embed=discord.Embed(
                 title="Autoflag Plugin",
-                description="The regex `" + regex + "` is already not autoflagged.",
+                description=f"The regex `{regex}` is already not autoflagged.",
                 color=Colors.WARNING
             ))
             return
@@ -180,7 +180,7 @@ class AutoFlag:
 
         await ctx.send(embed=discord.Embed(
             title="Autoflag Plugin",
-            description="The regex `" + regex + "` has been removed from the autoflag list.",
+            description=f"The regex `{regex}` has been removed from the autoflag list.",
             color=Colors.SUCCESS
         ))
 
@@ -201,7 +201,7 @@ class AutoFlag:
 
         await ctx.send(embed=discord.Embed(
             title="Autoflag Plugin",
-            description="The following regexes are autoflagged:\n- `{}`".format(fr),
+            description=f"The following regexes are autoflagged:\n- `{fr}`",
             color=Colors.INFO
         ))
 
@@ -212,7 +212,7 @@ class AutoFlag:
         if user.id in flag_users:
             await ctx.send(embed=discord.Embed(
                 title="Autoflag Plugin",
-                description="The user {} is already autoflagged.".format(user),
+                description=f"The user {user} is already autoflagged.",
                 color=Colors.WARNING
             ))
             return
@@ -223,7 +223,7 @@ class AutoFlag:
 
         await ctx.send(embed=discord.Embed(
             title="Autoflag Plugin",
-            description="The user `{}` has been added to the autoflag list.".format(user),
+            description=f"The user `{user}` has been added to the autoflag list.",
             color=Colors.SUCCESS
         ))
 
@@ -234,7 +234,7 @@ class AutoFlag:
         if user.id not in flag_users:
             await ctx.send(embed=discord.Embed(
                 title="Autoflag Plugin",
-                description="The user {} is not autoflagged.".format(user),
+                description=f"The user {user} is not autoflagged.",
                 color=Colors.WARNING
             ))
             return
@@ -245,7 +245,7 @@ class AutoFlag:
 
         await ctx.send(embed=discord.Embed(
             title="Autoflag Plugin",
-            description="The user `{}` has been removed from the autoflag list.".format(user),
+            description=f"The user `{user}` has been removed from the autoflag list.",
             color=Colors.SUCCESS
         ))
 
@@ -266,7 +266,7 @@ class AutoFlag:
 
         await ctx.send(embed=discord.Embed(
             title="Autoflag Plugin",
-            description="The following user IDs are autoflagged:\n- `{}`".format(fr),
+            description=f"The following user IDs are autoflagged:\n- `{fr}`",
             color=Colors.INFO
         ))
 

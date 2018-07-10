@@ -42,7 +42,7 @@ class ReactionPromote:
             role_id = promotion_config[str(payload.channel_id)][str(payload.message_id)][emoji_slug]
             group_to_add = discord.utils.get(guild.roles, id=role_id)
             await user.add_roles(group_to_add)
-            LOG.info("Added user " + user.display_name + " to role " + str(group_to_add))
+            LOG.info(f"Added user {user.display_name} to role {str(group_to_add)}")
         except KeyError:
             if promotion_config.get(str(payload.channel_id)) is None:
                 # LOG.warning("Not configured for this channel. Ignoring.")
@@ -53,7 +53,7 @@ class ReactionPromote:
                 LOG.warning("Not configured for this message. Ignoring.")
                 return
 
-            LOG.warning("Got bad emoji " + emoji_slug + " (" + str(hex(ord(emoji_slug))) + ")")
+            LOG.warning(f"Got bad emoji {emoji_slug} ({str(hex(ord(emoji_slug)))})")
             self.roleRemovalBlacklist.append(str(payload.user_id) + str(payload.message_id))
             await message.remove_reaction(payload.emoji, user)
 
@@ -82,7 +82,7 @@ class ReactionPromote:
             role_id = promotion_config[str(payload.channel_id)][str(payload.message_id)][emoji_slug]
             group_to_remove = discord.utils.get(guild.roles, id=role_id)
             await user.remove_roles(group_to_remove)
-            LOG.info("Removed user " + user.display_name + " from role " + str(group_to_remove))
+            LOG.info(f"Removed user {user.display_name} from role {str(group_to_remove)}")
         except KeyError:
             if promotion_config.get(str(payload.channel_id)) is None:
                 # LOG.warning("Not configured for this channel. Ignoring.")
@@ -92,7 +92,7 @@ class ReactionPromote:
                 LOG.warning("Not configured for this message. Ignoring.")
                 return
 
-            LOG.warning("Got bad emoji " + emoji_slug + " (" + str(hex(ord(emoji_slug))) + ")")
+            LOG.warning(f"Got bad emoji {emoji_slug} ({str(hex(ord(emoji_slug)))})")
 
     @commands.group(pass_context=True, brief="Control the promotions plugin")
     @commands.has_permissions(administrator=True)
@@ -144,7 +144,7 @@ class ReactionPromote:
 
         await ctx.send(embed=discord.Embed(
             title="Reaction Promotes",
-            description="The promotion " + emoji + " => `" + role.name + "` has been registered for promotions!",
+            description=f"The promotion {emoji} => {role.mention} has been registered for promotions!",
             color=Colors.SUCCESS
         ))
 

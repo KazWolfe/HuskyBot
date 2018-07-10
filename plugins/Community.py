@@ -38,7 +38,7 @@ class Community:
 
         embed = discord.Embed(
             title=Emojis.SHIELD + " Staff List",
-            description="The following users are currently staff members on {}.".format(ctx.guild.name),
+            description=f"The following users are currently staff members on {ctx.guild.name}.",
             color=Colors.INFO
         )
 
@@ -99,14 +99,14 @@ class Community:
             except IndexError:
                 await ctx.send(embed=discord.Embed(
                     title="Guild Rules",
-                    description="A rule number {} does not exist. Please make sure you're referencing an existing "
-                                "rule.".format(rule_num),
+                    description=f"A rule number {rule_num} does not exist. Please make sure you're referencing an "
+                                f"existing rule.",
                     color=Colors.DANGER
                 ))
                 return
 
             await ctx.send(embed=discord.Embed(
-                title=Emojis.BOOKMARK2 + " Rule {}: {}".format(rule_num, rule['title']),
+                title=Emojis.BOOKMARK2 + f" Rule {rule_num}: {rule['title']}",
                 description=rule['description'],
                 color=Colors.INFO
             ))
@@ -122,7 +122,7 @@ class Community:
             return
 
         rule_embed = discord.Embed(
-            title=Emojis.BOOKMARK2 + " Guild Rules for {}".format(ctx.guild.name),
+            title=Emojis.BOOKMARK2 + f" Guild Rules for {ctx.guild.name}",
             description="The following rules have been defined by the staff members. Please make sure you understand "
                         "them before participating.",
             color=Colors.INFO
@@ -131,7 +131,7 @@ class Community:
         for i in range(len(rule_list)):
             rule = rule_list[i]
 
-            rule_embed.add_field(name="{}. {}".format(i + 1, rule['title']), value=rule['description'], inline=False)
+            rule_embed.add_field(name=f"{i + 1}. {rule['title']}", value=rule['description'], inline=False)
 
         await ctx.send(embed=rule_embed)
 
@@ -155,7 +155,7 @@ class Community:
 
         await ctx.send(embed=discord.Embed(
             title="Guild Rule Added!",
-            description="Your rule (titled **{}**) has been successfully added to the rules list.".format(title),
+            description=f"Your rule (titled **{title}**) has been successfully added to the rules list.",
             color=Colors.SUCCESS
         ))
 
@@ -178,7 +178,7 @@ class Community:
         except KeyError:
             await ctx.send(embed=discord.Embed(
                 title="Guild Rule Removal Failed",
-                description="Guild Rule number {} does not exist.".format(index),
+                description=f"Guild Rule number {index} does not exist.",
                 color=Colors.SUCCESS
             ))
             return
@@ -187,7 +187,7 @@ class Community:
 
         await ctx.send(embed=discord.Embed(
             title="Guild Rule Removed!",
-            description="Guild Rule number {} was removed from the rules list.".format(index),
+            description=f"Guild Rule number {index} was removed from the rules list.",
             color=Colors.SUCCESS
         ))
 
@@ -210,7 +210,7 @@ class Community:
         except KeyError:
             await ctx.send(embed=discord.Embed(
                 title="Guild Rule Edit Failed",
-                description="Guild Rule number {} does not exist.".format(index),
+                description=f"Guild Rule number {index} does not exist.",
                 color=Colors.SUCCESS
             ))
             return
@@ -221,7 +221,7 @@ class Community:
 
         await ctx.send(embed=discord.Embed(
             title="Guild Rule Description Updated!",
-            description="Your rule (index {}) has had its description updated.".format(index),
+            description=f"Your rule (index {index}) has had its description updated.",
             color=Colors.SUCCESS
         ))
 
@@ -244,7 +244,7 @@ class Community:
         except KeyError:
             await ctx.send(embed=discord.Embed(
                 title="Guild Rule Rename Failed",
-                description="Guild Rule number {} does not exist.".format(index),
+                description=f"Guild Rule number {index} does not exist.",
                 color=Colors.SUCCESS
             ))
             return
@@ -255,7 +255,7 @@ class Community:
 
         await ctx.send(embed=discord.Embed(
             title="Guild Rule Title Updated!",
-            description="Your rule (index {}) has had its title updated.".format(index),
+            description=f"Your rule (index {index}) has had its title updated.",
             color=Colors.SUCCESS
         ))
 
@@ -304,7 +304,7 @@ class Community:
             return
 
         embed = discord.Embed(
-            title="{} Invite Link".format(ctx.guild.name),
+            title=f"{ctx.guild.name} Invite Link",
             description="Want to invite your friends? Awesome! Share this handy invite link with them to get them into "
                         "the fun.",
             color=Colors.INFO
@@ -329,9 +329,9 @@ class Community:
                 ))
                 return
 
-            invite_url = "https://discord.gg/{}".format(invite_fragment)
+            invite_url = f"https://discord.gg/{invite_fragment}"
 
-        embed.add_field(name="Invite Link", value="[`{}`]({})".format(invite_url, invite_url), inline=False)
+        embed.add_field(name="Invite Link", value=f"[`{invite_url}`]({invite_url})", inline=False)
 
         await ctx.send(embed=embed)
 
@@ -347,7 +347,7 @@ class Community:
 
         await ctx.send(embed=discord.Embed(
             title="Invite Link Set!",
-            description="The guild invite link was set to https://discord.gg/{}.".format(fragment),
+            description=f"The guild invite link was set to https://discord.gg/{fragment}.",
             color=Colors.SUCCESS
         ))
 

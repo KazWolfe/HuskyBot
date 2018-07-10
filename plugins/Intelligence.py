@@ -122,15 +122,15 @@ class Intelligence:
 
         if isinstance(user, discord.User):
             member_details = discord.Embed(
-                title="User Information for " + user.name + "#" + user.discriminator,
+                title=f"User Information for {user}",
                 color=Colors.INFO,
                 description="Currently **not a member of any shared guild!**\nData may be limited."
             )
         elif isinstance(user, discord.Member):
             member_details = discord.Embed(
-                title="User Information for " + user.name + "#" + user.discriminator,
+                title=f"User Information for {user}",
                 color=user.color,
-                description="Currently in **" + str(user.status) + "** mode " + WolfUtils.get_fancy_game_data(user)
+                description="Currently in **{user.status}** mode " + WolfUtils.get_fancy_game_data(user)
             )
         else:
             raise ValueError("Illegal state!")
@@ -158,9 +158,8 @@ class Intelligence:
             member_details.add_field(name="Joined Guild", value=user.joined_at.strftime(DATETIME_FORMAT), inline=True)
             member_details.add_field(name="Roles", value=", ".join(roles), inline=False)
 
-            member_details.set_footer(text="Member #{} on the guild"
-                                      .format(str(sorted(ctx.guild.members,
-                                                         key=lambda m: m.joined_at).index(user) + 1)))
+            index = sorted(ctx.guild.members, key=lambda m: m.joined_at).index(user) + 1
+            member_details.set_footer(text=f"Member #{index} on the guild")
 
         await ctx.send(embed=member_details)
 
@@ -189,12 +188,12 @@ class Intelligence:
         user = user or ctx.author
 
         embed = discord.Embed(
-            title="Avatar for {}".format(user),
+            title=f"Avatar for {user}",
             color=Colors.INFO
         )
 
-        embed.add_field(name="Avatar ID", value="`{}`".format(user.avatar), inline=False)
-        embed.add_field(name="Avatar URL", value="[Open In Browser >]({})".format(user.avatar_url), inline=False)
+        embed.add_field(name="Avatar ID", value=f"`{user.avatar}`", inline=False)
+        embed.add_field(name="Avatar URL", value=f"[Open In Browser >]({user.avatar_url})", inline=False)
         embed.set_image(url=user.avatar_url)
 
         await ctx.send(embed=embed)
@@ -258,9 +257,8 @@ class Intelligence:
 
             await ctx.send(embed=discord.Embed(
                 title="Message Count Report",
-                description="Since `{} UTC`, the channel context `{}` has seen about **{} "
-                            "messages**.".format(search_start.strftime(DATETIME_FORMAT), search_context['name'],
-                                                 message_count),
+                description=f"Since `{search_start.strftime(DATETIME_FORMAT)} UTC`, the channel context "
+                            f"`{search_context['name']}` has seen about **{message_count}messages**.",
                 color=Colors.INFO
             ))
 
@@ -332,10 +330,9 @@ class Intelligence:
 
         await ctx.send(embed=discord.Embed(
             title="Active User Count Report",
-            description="Since `{} UTC`, the channel context `{}` has seen about **{}"
-                        " active users** (sending on average {} or more messages per hour)."
-                        "".format(search_start.strftime(DATETIME_FORMAT), search_context['name'], active_user_count,
-                                  threshold),
+            description=f"Since `{search_start.strftime(DATETIME_FORMAT)} UTC`, the channel context "
+                        f"`{search_context['name']}` has seen about **{active_user_count} active users** (sending on "
+                        f"average {threshold} or more messages per hour).",
             color=Colors.INFO
         ))
 
@@ -363,18 +360,18 @@ class Intelligence:
         if days == 1:
             days = "1 day"
         else:
-            days = "{} days".format(days)
+            days = f"{days} days"
 
         if prune_count == 1:
             prune_count = "1 user"
         else:
-            prune_count = "{} users".format(prune_count)
+            prune_count = f"{prune_count} users"
 
         await ctx.send(embed=discord.Embed(
             title="Simulated Prune Report",
-            description="With a simulated cutoff of {}, an estimated **{} users** will be pruned from the guild. "
-                        "\n\nThis number represents the count of members who have not spoken in the last {}, and "
-                        "do not have a role (including self-assigned roles).".format(days, prune_count, days),
+            description=f"With a simulated cutoff of {days}, an estimated **{prune_count}** will be pruned from the "
+                        f"guild. \n\nThis number represents the count of members who have not spoken in the last "
+                        f"{days}, and do not have a role (including self-assigned roles).",
             color=Colors.INFO
         ))
 
@@ -390,7 +387,7 @@ class Intelligence:
         """
         await ctx.send(embed=discord.Embed(
             title="User Count Report",
-            description="This guild currently has **{} total users**.".format(len(ctx.guild.members)),
+            description=f"This guild currently has **{len(ctx.guild.members)} total users**.",
             color=Colors.INFO
         ))
 
@@ -432,21 +429,21 @@ class Intelligence:
             return
 
         embed = discord.Embed(
-            description="Information about invite slug `{}`".format(fragment),
+            description=f"Information about invite slug `{fragment}`",
             color=Colors.INFO
         )
 
         embed.set_thumbnail(url=invite_guild.icon_url)
 
-        embed.add_field(name="Guild Name", value="**{}**".format(invite_guild.name), inline=False)
+        embed.add_field(name="Guild Name", value=f"**{invite_guild.name}**", inline=False)
 
         if invite_user is not None:
             embed.set_author(
-                name="Invite for {} by {}".format(invite_guild.name, invite_user),
+                name=f"Invite for {invite_guild.name} by {invite_user}",
                 icon_url=invite_user.avatar_url
             )
         else:
-            embed.set_author(name="Invite for {}".format(invite_guild.name))
+            embed.set_author(name=f"Invite for {invite_guild.name}")
 
         embed.add_field(name="Invited Guild ID", value=invite_guild.id, inline=True)
 
@@ -461,8 +458,9 @@ class Intelligence:
 
         if invite_data.get('approximate_member_count', -1) != -1:
             embed.add_field(name="User Count",
-                            value="{} ({} online)".format(invite_data.get('approximate_member_count', -1),
-                                                          invite_data.get('approximate_presence_count', -1)))
+                            value=f"{invite_data.get('approximate_member_count', -1)} "
+                                  f"({invite_data.get('approximate_presence_count', -1)} online)",
+                            inline=True)
 
         vl_map = {
             0: "No Verification",
@@ -471,22 +469,22 @@ class Intelligence:
             3: "Member for 10+ minutes",
             4: "Verified Phone Needed"
         }
-        embed.add_field(name="Verification Level", value=vl_map[invite_guild.verification_level])
+        embed.add_field(name="Verification Level", value=vl_map[invite_guild.verification_level], inline=True)
 
         if invite_user is not None:
             embed.add_field(name="Invite Creator", value=str(invite_user), inline=True)
 
         if len(invite_guild.features) > 0:
             embed.add_field(name="Guild Features",
-                            value=', '.join(list('`{}`'.format(f) for f in invite_guild.features)))
+                            value=', '.join(list(f'`{f}`' for f in invite_guild.features)))
 
         if invite_guild.splash is not None:
             embed.add_field(name="Splash Image",
-                            value="[Open in Browser >]({})".format(invite_guild.splash_url),
+                            value=f"[Open in Browser >]({invite_guild.splash_url})",
                             inline=False)
             embed.set_image(url=invite_guild.splash_url)
 
-        embed.set_footer(text="Report generated at {} UTC".format(WolfUtils.get_timestamp()))
+        embed.set_footer(text=f"Report generated at {WolfUtils.get_timestamp()} UTC")
 
         await ctx.send(embed=embed)
 

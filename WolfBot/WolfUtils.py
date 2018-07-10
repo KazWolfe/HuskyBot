@@ -44,14 +44,14 @@ def get_fancy_game_data(member):
             if member.activity.title is not None and member.activity.artist is not None:
                 track_url = "https://open.spotify.com/track/{}"
 
-                m += "\n\n**Now Playing:** [{} by {}]({})".format(member.activity.title, member.activity.artist,
-                                                                  track_url.format(member.activity.track_id))
+                m += f"\n\n**Now Playing:** [{member.activity.title} by " \
+                     f"{member.activity.artist}]({track_url.format(member.activity.track_id)})"
 
             return m
         elif not isinstance(member.activity, discord.Game) and member.activity.url is not None:
-            return "([{}]({}))".format(state[member.activity.type] + member.activity.name, member.activity.url)
+            return f"([{state[member.activity.type] + member.activity.name}]({member.activity.url}))"
         else:
-            return "({})".format(state[member.activity.type] + member.activity.name)
+            return f"({state[member.activity.type] + member.activity.name})"
 
     return ""
 
@@ -108,7 +108,7 @@ def get_user_id_from_arbitrary_str(guild: discord.Guild, string: str):
         potential_user = guild.get_member_named(string)
 
         if potential_user is None:
-            raise ValueError("No member by the name of {} was found.".format(string))
+            raise ValueError(f"No member by the name of {string} was found.")
 
         return potential_user.id
 

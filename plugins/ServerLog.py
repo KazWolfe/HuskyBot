@@ -47,8 +47,8 @@ class ServerLog:
             if guild.member_count % 1000 == 0:
                 await milestone_channel.send(embed=discord.Embed(
                     title=Emojis.PARTY + " Guild Member Count Milestone!",
-                    description="The guild has now reached " + str(guild.member_count) + " members! Thank you "
-                                + notif_member.display_name + " for joining!",
+                    description=f"The guild has now reached {guild.member_count} members! Thank you "
+                                f"{notif_member.mention} for joining!",
                     color=Colors.SUCCESS
                 ))
 
@@ -66,7 +66,7 @@ class ServerLog:
 
             embed = discord.Embed(
                 title=Emojis.SUNRISE + " New Member!",
-                description=str(notif_member) + " has joined the guild.",
+                description=f"{notif_member} has joined the guild.",
                 color=Colors.PRIMARY
             )
 
@@ -74,8 +74,9 @@ class ServerLog:
             embed.add_field(name="Joined Discord", value=notif_member.created_at.strftime(DATETIME_FORMAT), inline=True)
             embed.add_field(name="Joined Guild", value=notif_member.joined_at.strftime(DATETIME_FORMAT), inline=True)
             embed.add_field(name="User ID", value=notif_member.id, inline=True)
-            embed.set_footer(text="Member #{} on the guild".format(
-                str(sorted(notif_member.guild.members, key=lambda m: m.joined_at).index(member) + 1)))
+
+            member_num = sorted(notif_member.guild.members, key=lambda m: m.joined_at).index(member) + 1
+            embed.set_footer(text=f"Member #{member_num} on the guild")
 
             await channel.send(embed=embed)
 
@@ -95,7 +96,7 @@ class ServerLog:
 
         embed = discord.Embed(
             title=Emojis.DOOR + " Member left the guild",
-            description=str(member) + " has left the guild.",
+            description=f"{member} has left the guild.",
             color=Colors.PRIMARY
         )
 
@@ -127,14 +128,14 @@ class ServerLog:
 
         embed = discord.Embed(
             title=Emojis.BAN + " User banned",
-            description=str(user) + " was banned from the guild.",
+            description=f"{user} was banned from the guild.",
             color=Colors.DANGER
         )
 
         ban_entry = discord.utils.get(await guild.bans(), user=user)
 
         if ban_entry is None:
-            raise ValueError("A ban record for user {} was expected, but no entry was found".format(user.id))
+            raise ValueError(f"A ban record for user {user.id} was expected, but no entry was found")
 
         ban_reason = ban_entry.reason
 
@@ -168,7 +169,7 @@ class ServerLog:
 
         embed = discord.Embed(
             title=Emojis.UNBAN + "User unbanned",
-            description=str(user) + " was unbanned from the guild.",
+            description=f"{user} was unbanned from the guild.",
             color=Colors.PRIMARY
         )
 
@@ -211,15 +212,15 @@ class ServerLog:
             return
 
         embed = discord.Embed(
-            description="User's {} has changed! Their display name in this guild is now "
-                        "`{}`.".format(update_type, after.display_name),
+            description=f"User's {update_type} has changed! Their display name in this guild is now "
+                        f"`{after.display_name}`.",
             color=Colors.INFO
         )
 
-        embed.add_field(name="Old {}".format(update_type.capitalize()), value=old_val, inline=True)
-        embed.add_field(name="New {}".format(update_type.capitalize()), value=new_val, inline=True)
+        embed.add_field(name=f"Old {update_type.capitalize()}", value=old_val, inline=True)
+        embed.add_field(name=f"New {update_type.capitalize()}", value=new_val, inline=True)
         embed.add_field(name="User ID", value=after.id, inline=False)
-        embed.set_author(name="{}'s {} has changed!".format(after, update_type), icon_url=after.avatar_url)
+        embed.set_author(name=f"{after}'s {update_type} has changed!", icon_url=after.avatar_url)
 
         await alert_channel.send(embed=embed)
 
@@ -246,7 +247,7 @@ class ServerLog:
             color=Colors.WARNING
         )
 
-        embed.set_author(name="Deleted Message in #" + str(message.channel), icon_url=message.author.avatar_url)
+        embed.set_author(name=f"Deleted Message in {message.channel.mention}", icon_url=message.author.avatar_url)
         embed.add_field(name="Author", value=message.author, inline=True)
         embed.add_field(name="Message ID", value=message.id, inline=True)
         embed.add_field(name="Send Timestamp", value=message.created_at.strftime(DATETIME_FORMAT), inline=True)
@@ -256,7 +257,7 @@ class ServerLog:
             embed.add_field(name="Message", value=WolfUtils.trim_string(message.content, 1000, True), inline=False)
 
         if message.attachments is not None and len(message.attachments) > 1:
-            attachments_list = str("- {}\n".format(a.url) for a in message.attachments)
+            attachments_list = str(f"- {a.url}\n" for a in message.attachments)
             embed.add_field(name="Attachments",
                             value=WolfUtils.trim_string(attachments_list, 1000, True),
                             inline=False)
@@ -342,7 +343,7 @@ class ServerLog:
         if name not in self._validLoggers:
             await ctx.send(embed=discord.Embed(
                 title="Logging Manager",
-                description="The logger named `" + name + "` is not recognized as a valid logger.",
+                description=f"The logger named `{name}` is not recognized as a valid logger.",
                 color=Colors.DANGER
             ))
             return
@@ -350,7 +351,7 @@ class ServerLog:
         if name in enabled_loggers.keys():
             await ctx.send(embed=discord.Embed(
                 title="Logging Manager",
-                description="The logger named `" + name + "` is already enabled.",
+                description=f"The logger named `{name}` is already enabled.",
                 color=Colors.WARNING
             ))
             return
@@ -361,7 +362,7 @@ class ServerLog:
 
         await ctx.send(embed=discord.Embed(
             title="Logging Manager",
-            description="The logger named `" + name + "` was enabled.",
+            description=f"The logger named `{name}` was enabled.",
             color=Colors.SUCCESS
         ))
 
@@ -378,7 +379,7 @@ class ServerLog:
         if name not in self._validLoggers:
             await ctx.send(embed=discord.Embed(
                 title="Logging Manager",
-                description="The logger named `" + name + "` is not recognized as a valid logger.",
+                description=f"The logger named `{name}` is not recognized as a valid logger.",
                 color=Colors.DANGER
             ))
             return
@@ -386,7 +387,7 @@ class ServerLog:
         if name not in enabled_loggers.keys():
             await ctx.send(embed=discord.Embed(
                 title="Logging Manager",
-                description="The logger named `" + name + "` is already disabled.",
+                description=f"The logger named `{name}` is already disabled.",
                 color=Colors.WARNING
             ))
             return
@@ -397,7 +398,7 @@ class ServerLog:
 
         await ctx.send(embed=discord.Embed(
             title="Logging Manager",
-            description="The logger named `" + name + "` was disabled.",
+            description=f"The logger named `{name}` was disabled.",
             color=Colors.SUCCESS
         ))
 
@@ -429,8 +430,8 @@ class ServerLog:
             ))
             return
 
-        topic_string = "Staff server logs, starting at {}".format(ctx.message.created_at.strftime(DATETIME_FORMAT))
-        reason_string = "Log rotation requested by {}.".format(ctx.author)
+        topic_string = f"Staff server logs, starting at {ctx.message.created_at.strftime(DATETIME_FORMAT)}"
+        reason_string = f"Log rotation requested by {ctx.author}."
 
         new_channel = await ctx.guild.create_text_channel(name=old_channel.name,
                                                           overwrites=dict(old_channel.overwrites),
@@ -446,8 +447,8 @@ class ServerLog:
 
         log_embed = discord.Embed(
             title=Emojis.REFRESH + " Server log refresh!",
-            description="A message log refresh was executed at {}, and was requested by {}.".format(
-                ctx.message.created_at.strftime(DATETIME_FORMAT), ctx.message.author),
+            description=f"A message log refresh was executed at {ctx.message.created_at.strftime(DATETIME_FORMAT)}, "
+                        f"and was requested by {ctx.message.author}.",
             color=Colors.INFO
         )
 
@@ -461,8 +462,8 @@ class ServerLog:
 
         await ctx.send(embed=discord.Embed(
             title="Log refresh success!",
-            description="The server logs were successfully refreshed, and are now available at {}. The bot's config "
-                        "has been automatically updated.".format(new_channel.mention),
+            description=f"The server logs were successfully refreshed, and are now available at {new_channel.mention}. "
+                        f"The bot's config has been automatically updated.",
             color=Colors.SUCCESS
         ))
 

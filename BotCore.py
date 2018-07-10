@@ -49,7 +49,7 @@ bot = commands.Bot(command_prefix=BOT_CONFIG.get('prefix', '/'),
 webapp = web.Application()
 
 # set up logging
-LOCAL_STORAGE.set("daemonMode", "--daemon" in " ".join(sys.argv))
+LOCAL_STORAGE.set("daemonMode", os.getppid() == 1)
 LOCAL_STORAGE.set('logPath', 'logs/dakotabot.log')
 
 file_log_handler = WolfUtils.CompressingRotatingFileHandler(LOCAL_STORAGE.get('logPath'), maxBytes=(1024 ** 2) * 5,
@@ -80,12 +80,7 @@ async def initialize():
         del start_activity
         restart_reason = "start"
 
-    if LOCAL_STORAGE.get("daemonMode", False):
-        LOG.info("Bot loaded in daemon mode! Logging and certain features have been altered to better utilize daemon "
-                 "functionality.")
-
-    LOG.info("DakotaBot is online, running discord.py {}. "
-             "Initializing and loading modules...".format(discord.__version__))
+    LOG.info(f"DakotaBot is online, running discord.py {discord.__version__}. Initializing and loading modules...")
 
     # Lock the bot to a single guild
     if not BOT_CONFIG.get("developerMode", False):
@@ -171,8 +166,8 @@ async def on_command_error(ctx, error: commands.CommandError):
         if BOT_CONFIG.get("developerMode", False):
             await ctx.send(embed=discord.Embed(
                 title="Command Handler",
-                description="**You are not authorized to run `/{}`:**\n```{}```\n\nPlease ask a staff member for "
-                            "assistance".format(command_name, error_string),
+                description=f"**You are not authorized to run `/{command_name}`:**\n```{error_string}```\n\n"
+                            f"Please ask a staff member for assistance.",
                 color=Colors.DANGER
             ))
 
@@ -183,8 +178,7 @@ async def on_command_error(ctx, error: commands.CommandError):
         if BOT_CONFIG.get("developerMode", False):
             embed = discord.Embed(
                 title="Command Handler",
-                description="**The command `/{}` does not exist.** See `/help` for valid "
-                            "commands.".format(command_name),
+                description=f"**The command `/{command_name}` does not exist.** See `/help` for valid commands.",
                 color=Colors.DANGER
             )
 
@@ -197,8 +191,7 @@ async def on_command_error(ctx, error: commands.CommandError):
         if BOT_CONFIG.get("developerMode", False):
             await ctx.send(embed=discord.Embed(
                 title="Command Handler",
-                description="**The command `/{}` does not exist.** See `/help` for valid "
-                            "commands.".format(command_name),
+                description=f"**The command `/{command_name}` does not exist.** See `/help` for valid commands.",
                 color=Colors.DANGER
             ))
 
@@ -208,8 +201,8 @@ async def on_command_error(ctx, error: commands.CommandError):
     elif isinstance(error, commands.CheckFailure):
         await ctx.send(embed=discord.Embed(
             title="Command Handler",
-            description="**The command `/{}` failed an execution check.** "
-                        "Additional information may be provided below.".format(command_name),
+            description=f"**The command `/{command_name}` failed an execution check.** Additional information may be "
+                        f"provided below.",
             color=Colors.DANGER
         ).add_field(name="Error Log", value="```" + error_string + "```", inline=False))
 
@@ -219,8 +212,7 @@ async def on_command_error(ctx, error: commands.CommandError):
     elif isinstance(error, commands.NoPrivateMessage):
         await ctx.send(embed=discord.Embed(
             title="Command Handler",
-            description="**The command `/{}` may not be run in a DM.** See `/help` for valid "
-                        "commands.".format(command_name),
+            description=f"**The command `/{command_name}` may not be run in a DM.** See `/help` for valid commands.",
             color=Colors.DANGER
         ))
 
@@ -230,8 +222,8 @@ async def on_command_error(ctx, error: commands.CommandError):
     elif isinstance(error, commands.MissingRequiredArgument):
         await ctx.send(embed=discord.Embed(
             title="Command Handler",
-            description="**The command `/{}` could not run, because it is missing arguments.**\n"
-                        "See `/help {}` for the arguments required.".format(command_name, command_name),
+            description=f"**The command `/{command_name}` could not run, because it is missing arguments.**\n"
+                        f"See `/help {command_name}` for the arguments required.",
             color=Colors.DANGER
         ).add_field(name="Missing Parameter", value="`" + error_string.split(" ")[0] + "`", inline=True))
         LOG.error("Command %s was called with the wrong parameters.", command_name)
@@ -241,8 +233,8 @@ async def on_command_error(ctx, error: commands.CommandError):
     elif isinstance(error, commands.BadArgument):
         await ctx.send(embed=discord.Embed(
             title="Command Handler",
-            description="**The command `/{}` could not understand the arguments given.**\n"
-                        "See `/help {}` and the error below to fix this issue.".format(command_name, command_name),
+            description=f"**The command `/{command_name}` could not understand the arguments given.**\n"
+                        f"See `/help {command_name}` and the error below to fix this issue.",
             color=Colors.DANGER
         ).add_field(name="Error Log", value="```" + error_string + "```", inline=False))
 
@@ -252,9 +244,9 @@ async def on_command_error(ctx, error: commands.CommandError):
     elif isinstance(error, commands.BotMissingPermissions):
         await ctx.send(embed=discord.Embed(
             title="Command Handler",
-            description="**The command `/{}` could not execute successfully, as the bot does not have a required"
-                        "permission.**\nPlease make sure that the bot has the following permissions: "
-                        "`{}`".format(command_name, ', '.join(error.missing_perms)),
+            description=f"**The command `/{command_name}` could not execute successfully, as the bot does not have a "
+                        f"required permission.**\nPlease make sure that the bot has the following permissions: " +
+                        "`{}`".format(', '.join(error.missing_perms)),
             color=Colors.DANGER
         ))
 
@@ -267,8 +259,8 @@ async def on_command_error(ctx, error: commands.CommandError):
 
         await ctx.send(embed=discord.Embed(
             title="Command Handler",
-            description="**The command `/{}` has been run too much recently!**\nPlease wait **{}** until trying "
-                        "again.".format(command_name, tx),
+            description=f"**The command `/{command_name}` has been run too much recently!**\nPlease wait **{tx}** "
+                        f"until trying again.",
             color=Colors.DANGER
         ))
 
@@ -394,12 +386,16 @@ async def start_webserver():
     await runner.setup()
     site = web.TCPSite(runner, host=http_config['host'], port=http_config['port'], ssl_context=ssl_context)
     await site.start()
-    LOG.info("Started {} server at {}:{}, now listening...".format("HTTPS" if ssl_context is not None else "HTTP",
-                                                                   http_config['host'], http_config['port']))
+    LOG.info(f"Started {'HTTPS' if ssl_context is not None else 'HTTP'} server at "
+             f"{http_config['host']}:{http_config['port']}, now listening...")
 
 
 if __name__ == '__main__':
-    LOG.info("Set log path to {}".format(LOCAL_STORAGE.get('logPath')))
+    LOG.info(f"Set log path to {LOCAL_STORAGE.get('logPath')}")
+    if LOCAL_STORAGE.get("daemonMode", False):
+        LOG.info("Bot loaded in daemon mode! Logging and certain features have been altered to better utilize daemon "
+                 "functionality.")
+
     bot.run(BOT_CONFIG['apiKey'])
 
     # Auto restart if a reason is present

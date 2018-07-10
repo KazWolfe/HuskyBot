@@ -67,8 +67,7 @@ class Giveaway:
             end_time = datetime.datetime.utcfromtimestamp(g.end_time).strftime(DATETIME_FORMAT)
             channel = self.bot.get_channel(g.register_channel_id)
 
-            pretty_list += "\n{}. {} (in {}, ending {}, {} winners)".format(i + 1, g.name, channel.mention, end_time,
-                                                                            g.winner_count)
+            pretty_list += f"\n{i + 1}. {g.name} (in {channel.mention}, ending {end_time}, {g.winner_count} winners)"
 
         if len(giveaways) == 0:
             await ctx.send(embed=discord.Embed(
@@ -79,8 +78,8 @@ class Giveaway:
             return
 
         await ctx.send(embed=discord.Embed(
-            title="{} giveaways running!".format(len(giveaways)),
-            description="The following giveaways are currently running: \n{}".format(pretty_list),
+            title=f"{len(giveaways)} giveaways running!",
+            description=f"The following giveaways are currently running: \n{pretty_list}",
             color=Colors.INFO
         ))
 
@@ -135,8 +134,8 @@ class Giveaway:
         except ValueError:
             await ctx.send(embed=discord.Embed(
                 title="Giveaway doesn't exist!",
-                description="There is no giveaway with active ID `{}`! Please run `/giveaways list` to see giveaway "
-                            "IDs.".format(giveaway_id),
+                description=f"There is no giveaway with active ID `{giveaway_id}`! Please run `/giveaways list` to see "
+                            f"giveaway IDs.",
                 color=Colors.ERROR
             ))
             return
@@ -169,8 +168,8 @@ class Giveaway:
         except ValueError:
             await ctx.send(embed=discord.Embed(
                 title="Giveaway doesn't exist!",
-                description="There is no giveaway with active ID `{}`! Please run `/giveaways list` to see giveaway "
-                            "IDs.".format(giveaway_id),
+                description=f"There is no giveaway with active ID `{giveaway_id}`! Please run `/giveaways list` to see "
+                            f"giveaway IDs.",
                 color=Colors.ERROR
             ))
             return
@@ -179,9 +178,9 @@ class Giveaway:
 
         await ctx.send(embed=discord.Embed(
             title="Giveaway forcefully killed!",
-            description="A Giveaway with ID `{}` (named `{}`) has been forcefully stopped.\n\n"
-                        "**NOTE THAT THERE MAY BE SOME UNCLEAN DATA, OR THE GIVEAWAY MAY STILL RUN IF STOPPED "
-                        "TOO LATE.**".format(giveaway_id, giveaway.name),
+            description=f"A Giveaway with ID `{giveaway_id}` (named `{giveaway.name}`) has been forcefully stopped.\n\n"
+                        f"**NOTE THAT THERE MAY BE SOME UNCLEAN DATA, OR THE GIVEAWAY MAY STILL RUN IF STOPPED TOO "
+                        f"LATE.**",
             color=Colors.WARNING
         ))
 

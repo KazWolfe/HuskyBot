@@ -80,18 +80,18 @@ class ModTools:
         Note that a reason is not needed for an unban - just the user ID.
         """
         try:
-            await ctx.guild.unban(user, reason="Unbanned by {}".format(ctx.author))
+            await ctx.guild.unban(user, reason=f"Unbanned by {ctx.author}")
         except discord.NotFound:
             await ctx.send(embed=discord.Embed(
                 title="Mod Toolkit",
-                description="User `{}` is not banned on this guild, so they can not be unbanned.".format(user),
+                description=f"User `{user}` is not banned on this guild, so they can not be unbanned.",
                 color=Colors.WARNING
             ))
             return
 
         await ctx.send(embed=discord.Embed(
             title=Emojis.UNBAN + " User Pardoned!",
-            description="User `{}` was successfully pardoned.".format(user),
+            description=f"User `{user}` was successfully pardoned.",
             color=Colors.SUCCESS
         ))
 
@@ -147,8 +147,7 @@ class ModTools:
         elif user.top_role.position >= ctx.message.author.top_role.position:
             await ctx.send(embed=discord.Embed(
                 title="Moderator Toolkit",
-                description="User `{}` could not be banned, as they are not below you in the role "
-                            "hierarchy.".format(user),
+                description=f"User `{user}` could not be banned, as they are not below you in the role hierarchy.",
                 color=Colors.DANGER
             ))
             return
@@ -158,17 +157,17 @@ class ModTools:
         if ban_entry is not None:
             await ctx.send(embed=discord.Embed(
                 title="Moderator Toolkit",
-                description="User `{}` was already banned from the guild.".format(user),
+                description=f"User `{user}` was already banned from the guild.",
                 color=Colors.DANGER
             ))
             return
 
-        await ctx.guild.ban(user, reason="[{}By {}] {}".format("HACKBAN | " if not in_guild else "",
-                                                               ctx.author, reason), delete_message_days=1)
+        await ctx.guild.ban(user, reason=f"[{'HACKBAN | ' if not in_guild else ''}By {ctx.author}] {reason}",
+                            delete_message_days=1)
 
         await ctx.send(embed=discord.Embed(
             title=Emojis.BAN + " User banned!",
-            description="User `{}` was successfully banned from the guild.".format(user),
+            description=f"User `{user}` was successfully banned from the guild.",
             color=Colors.SUCCESS
         ))
 
@@ -223,8 +222,7 @@ class ModTools:
         if target.top_role.position >= ctx.message.author.top_role.position:
             await ctx.send(embed=discord.Embed(
                 title="Moderator Toolkit",
-                description="User `{}` could not be muted, as they are not below you in the role "
-                            "hierarchy.".format(target),
+                description=f"User `{target}` could not be muted, as they are not below you in the role hierarchy.",
                 color=Colors.DANGER
             ))
             return
@@ -234,7 +232,7 @@ class ModTools:
             pretty_string = ""
         else:
             mute_until = datetime.datetime.utcnow() + time
-            pretty_string = "Their mute will expire at {} UTC".format(mute_until.strftime(DATETIME_FORMAT))
+            pretty_string = f"Their mute will expire at {mute_until.strftime(DATETIME_FORMAT)} UTC"
             mute_until = int(mute_until.timestamp())
 
         # Try to find a mute from this user
@@ -244,8 +242,8 @@ class ModTools:
             await self._mute_manager.update_mute_record(existing_mute, reason, mute_until)
 
             await ctx.send(embed=discord.Embed(
-                title=Emojis.MUTE + " {}'s mute for #{} was updated!".format(target, ctx.channel),
-                description="User's mute for this channel has been updated.\n\n{}".format(pretty_string),
+                title=Emojis.MUTE + f" {target}'s mute for {ctx.channel.mention} was updated!",
+                description=f"User's mute for this channel has been updated.\n\n{pretty_string}",
                 color=Colors.WARNING
             ))
             return
@@ -253,8 +251,8 @@ class ModTools:
         await self._mute_manager.mute_user(ctx, target, ctx.channel, reason, mute_until, ctx.author)
 
         await ctx.send(embed=discord.Embed(
-            title=Emojis.MUTE + " {} muted from {}!".format(target, "#" + str(ctx.channel)),
-            description="User has been muted from this channel.\n\n{}".format(pretty_string),
+            title=Emojis.MUTE + f" {target} muted from {ctx.channel.mention}!",
+            description=f"User has been muted from this channel.\n\n{pretty_string}",
             color=Colors.WARNING
         ))
 
@@ -284,8 +282,7 @@ class ModTools:
         if target.top_role.position >= ctx.message.author.top_role.position:
             await ctx.send(embed=discord.Embed(
                 title="Moderator Toolkit",
-                description="User `{}` could not be muted, as they are not below you in the role "
-                            "hierarchy.".format(target),
+                description=f"User `{target}` could not be muted, as they are not below you in the role hierarchy.",
                 color=Colors.DANGER
             ))
             return
@@ -295,7 +292,7 @@ class ModTools:
             pretty_string = ""
         else:
             mute_until = datetime.datetime.utcnow() + time
-            pretty_string = "Their mute will expire at {} UTC".format(mute_until.strftime(DATETIME_FORMAT))
+            pretty_string = f"Their mute will expire at {mute_until.strftime(DATETIME_FORMAT)} UTC"
             mute_until = int(mute_until.timestamp())
 
         # Try to find a mute from this user
@@ -305,8 +302,8 @@ class ModTools:
             await self._mute_manager.update_mute_record(existing_mute, reason, mute_until)
 
             await ctx.send(embed=discord.Embed(
-                title=Emojis.MUTE + " {}'s guild mute was updated!".format(target),
-                description="User's mute from this guild has been updated.\n\n{}".format(pretty_string),
+                title=Emojis.MUTE + f" {target}'s guild mute was updated!",
+                description=f"User's mute from this guild has been updated.\n\n{pretty_string}",
                 color=Colors.WARNING
             ))
             return
@@ -314,8 +311,8 @@ class ModTools:
         await self._mute_manager.mute_user(ctx, target, None, reason, mute_until, ctx.author)
 
         await ctx.send(embed=discord.Embed(
-            title=Emojis.MUTE + " {} muted from the guild!".format(target),
-            description="User has been muted from the guild.\n\n{}".format(pretty_string),
+            title=Emojis.MUTE + f" {target} muted from the guild!",
+            description=f"User has been muted from the guild.\n\n{pretty_string}",
             color=Colors.WARNING
         ))
 
@@ -342,7 +339,7 @@ class ModTools:
 
         if mute is None:
             await ctx.send(embed=discord.Embed(
-                title="{} is not muted in {}.".format(target, "#" + str(ctx.channel)),
+                title=f"{target} is not muted in {ctx.channel.mention}.",
                 description="The user you have tried to mute has no existing mute records for this channel.",
                 color=Colors.WARNING
             ))
@@ -351,7 +348,7 @@ class ModTools:
         await self._mute_manager.unmute_user(mute, ctx.author.mention)
 
         await ctx.send(embed=discord.Embed(
-            title=Emojis.UNMUTE + " {} unmuted from {}!".format(target, "#" + str(ctx.channel)),
+            title=Emojis.UNMUTE + f" {target} unmuted from {ctx.channel.mention}!",
             description="User has been unmuted from this channel.",
             color=Colors.SUCCESS
         ))
@@ -378,7 +375,7 @@ class ModTools:
 
         if mute is None:
             await ctx.send(embed=discord.Embed(
-                title="{} is not muted in the guild.".format(target),
+                title=f"{target} is not muted in the guild.",
                 description="The user you have tried to mute has no existing mute records for the guild.",
                 color=Colors.WARNING
             ))
@@ -386,7 +383,7 @@ class ModTools:
 
         await self._mute_manager.unmute_user(mute, ctx.author.mention)
         await ctx.send(embed=discord.Embed(
-            title=Emojis.UNMUTE + " {} unmuted from the guild!".format(target),
+            title=Emojis.UNMUTE + f" {target} unmuted from the guild!",
             description="User has been unmuted from the guild.",
             color=Colors.SUCCESS
         ))
@@ -412,14 +409,13 @@ class ModTools:
         is_role_mentionable = target.mentionable
 
         if not is_role_mentionable:
-            await target.edit(reason="Role Ping requested by {}".format(ctx.message.author),
+            await target.edit(reason=f"Role Ping requested by {ctx.message.author}",
                               mentionable=True)
 
-        await ctx.send("{ping} <{user}> {message}".format(ping=target.mention, user=ctx.message.author,
-                                                          message=message))
+        await ctx.send(f"{target.mention} <{ctx.message.author}> {message}")
 
         if not is_role_mentionable:
-            await target.edit(reason="Role Ping requested by {} completed".format(ctx.message.author),
+            await target.edit(reason=f"Role Ping requested by {ctx.message.author} completed",
                               mentionable=False)
 
     @commands.command(name="cleanup", aliases=["mcu", "bulkdelete"], brief="Clean up many messages quickly")
@@ -471,7 +467,7 @@ class ModTools:
                 elif filter_candidate[0] in ["regex"]:
                     regex_list.append(filter_candidate[1])
                 else:
-                    raise KeyError("Filter {} is not valid!".format(filter_candidate[0]))
+                    raise KeyError(f"Filter {filter_candidate[0]} is not valid!")
 
             def dynamic_check(message: discord.Message):
                 if len(user_list) > 0 and message.author.id not in user_list:
@@ -516,7 +512,7 @@ class ModTools:
         if ban_entry is None:
             await ctx.send(embed=discord.Embed(
                 title="Moderator Toolkit",
-                description="User `{}` is not banned, so the ban can't be reworded.".format(user),
+                description=f"User `{user}` is not banned, so the ban can't be reworded.",
                 color=Colors.DANGER
             ))
             return
@@ -533,19 +529,19 @@ class ModTools:
 
         # see if this looks like a wolfbot ban message
         if re.match(r'\[.*By .*] .*', old_reason):
-            reason = old_reason.split('] ', 1)[0] + '] ' + reason + " (edited by {})".format(ctx.author)
+            reason = old_reason.split('] ', 1)[0] + f"] {reason} (edited by {ctx.author})"
         else:
-            reason = "[Non-Bot Ban] {} (edited by {})".format(reason, ctx.author)
+            reason = f"[Non-Bot Ban] {reason} (edited by {ctx.author})"
 
-        await ctx.guild.unban(user, reason="Ban reason edit by {}".format(ctx.author))
+        await ctx.guild.unban(user, reason=f"Ban reason edit by {ctx.author}")
         await ctx.guild.ban(user, reason=reason, delete_message_days=0)
 
         embed = discord.Embed(
-            description="A ban reason change was requested by {}.".format(ctx.author),
+            description=f"A ban reason change was requested by {ctx.author}.",
             color=Colors.SUCCESS
         )
 
-        embed.set_author(name="Ban Reason for {} Updated".format(user), icon_url=user.avatar_url)
+        embed.set_author(name=f"Ban Reason for {user} Updated", icon_url=user.avatar_url)
 
         embed.add_field(name="Old Ban Reason", value=old_reason, inline=False)
         embed.add_field(name="New Ban Reason", value=reason, inline=False)
@@ -604,8 +600,8 @@ class ModTools:
         if member.top_role.position >= ctx.message.author.top_role.position:
             await ctx.send(embed=discord.Embed(
                 title="Moderator Toolkit",
-                description="User `{}` could can not be nick locked, as they are not below you in the role "
-                            "hierarchy.".format(member),
+                description=f"User `{member}` could can not be nick locked, as they are not below you in the role "
+                            f"hierarchy.",
                 color=Colors.DANGER
             ))
             return
@@ -613,8 +609,8 @@ class ModTools:
         if (member.id in locked_users.keys()) and (new_nickname is None):
             await ctx.send(embed=discord.Embed(
                 title="Nickname Lock",
-                description="The user {} already has their nickname locked. If you would like to change their "
-                            "locked nickname, include it at the end of the command.".format(member),
+                description=f"The user {member} already has their nickname locked. If you would like to change their "
+                            f"locked nickname, include it at the end of the command.",
                 color=Colors.DANGER
             ))
             return
@@ -626,17 +622,17 @@ class ModTools:
         self._config.set('nicknameLocks', locked_users)
 
         if new_nickname != member.nick:
-            await member.edit(nick=new_nickname, reason="Forced nickchange (and lock) by {}".format(ctx.author))
+            await member.edit(nick=new_nickname, reason=f"Forced nickchange (and lock) by {ctx.author}")
 
         await ctx.send(embed=discord.Embed(
             title=Emojis.LOCK + " Nickname Lock",
-            description="The user {} has had their nickname locked to `{}`.".format(member, new_nickname),
+            description=f"The user {member} has had their nickname locked to `{new_nickname}`.",
             color=Colors.SUCCESS
         ))
 
         # Send to staff logs (if we can)
         log_entry = discord.Embed(
-            description="The user {} has had their nickname locked to `{}`.".format(member, new_nickname),
+            description=f"The user {member} has had their nickname locked to `{new_nickname}`.",
             color=Colors.WARNING
         )
         log_entry.set_author(name="Nickname Locked!", icon_url=member.avatar_url)
@@ -665,7 +661,7 @@ class ModTools:
         if str(member.id) not in locked_users.keys():
             await ctx.send(embed=discord.Embed(
                 title="Nickname Lock",
-                description="The user {} doesn't have their nickname locked. Can't do anything!".format(member),
+                description=f"The user {member} doesn't have their nickname locked. Can't do anything!",
                 color=Colors.DANGER
             ))
             return
@@ -673,8 +669,8 @@ class ModTools:
         if member.top_role.position >= ctx.message.author.top_role.position:
             await ctx.send(embed=discord.Embed(
                 title="Moderator Toolkit",
-                description="User `{}` can not have their nickname unlocked, as they are not below you in the role "
-                            "hierarchy.".format(member),
+                description=f"User `{member}` can not have their nickname unlocked, as they are not below you in the "
+                            f"role hierarchy.",
                 color=Colors.DANGER
             ))
             return
@@ -684,13 +680,13 @@ class ModTools:
 
         await ctx.send(embed=discord.Embed(
             title=Emojis.UNLOCK + " Nickname Lock",
-            description="The user {} has had their nickname unlocked.".format(member, member.nick),
+            description=f"The user {member} has had their nickname unlocked.",
             color=Colors.SUCCESS
         ))
 
         # Send to staff logs (if we can)
         log_entry = discord.Embed(
-            description="The user {} has had their nickname unlocked.".format(member),
+            description=f"The user {member} has had their nickname unlocked.",
             color=Colors.WARNING
         )
         log_entry.set_author(name="Nickname Unlocked!", icon_url=member.avatar_url)

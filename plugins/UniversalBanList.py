@@ -43,8 +43,8 @@ class UniversalBanList:
 
         for ubl_term in self._ubl_phrases:
             if ubl_term.lower() in message.content.lower():
-                await message.author.ban(reason="[AUTOMATIC BAN - UBL Module] User used UBL keyword `{}`"
-                                         .format(ubl_term), delete_message_days=5)
+                await message.author.ban(reason=f"[AUTOMATIC BAN - UBL Module] User used UBL keyword `{ubl_term}`",
+                                         delete_message_days=5)
                 LOG.info("Banned UBL triggering user (context %s, keyword %s, from %s in %s): %s", context,
                          message.author, ubl_term, message.channel, message.content)
 
@@ -63,8 +63,7 @@ class UniversalBanList:
 
         for ubl_term in blacklist:
             if ubl_term.lower() in member.display_name.lower():
-                await member.ban(reason="[AutoBan - UBL Module] New user's name contains UBL keyword `{}`"
-                                 .format(ubl_term),
+                await member.ban(reason=f"[AutoBan - UBL Module] New user's name contains UBL keyword `{ubl_term}`",
                                  delete_message_days=0)
                 LOG.info("Banned UBL triggering new join of user %s (matching UBL %s)", member, ubl_term)
 
@@ -85,8 +84,8 @@ class UniversalBanList:
             else:
                 continue
 
-            await after.ban(reason="[AutoBan - UBL Module] User {} changed {} to include UBL keyword {}"
-                            .format(after, u_type, ubl_term))
+            await after.ban(reason=f"[AutoBan - UBL Module] User {after} changed {u_type} to include UBL "
+                                   f"keyword {ubl_term}")
             LOG.info("Banned UBL triggering %s change of user %s (matching UBL %s)", u_type, after, ubl_term)
 
 
