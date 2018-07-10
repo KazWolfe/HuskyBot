@@ -118,6 +118,8 @@ class ModTools:
         responsible moderator.
         """
 
+        # If you wonder why this method became so edgy, blame Saviour#8988
+
         # hack for pycharm (duck typing)
         user: discord.Member = user
 
@@ -125,9 +127,9 @@ class ModTools:
             await ctx.send(embed=discord.Embed(
                 title="Moderator Toolkit",
                 description="You do not have permission to ban yourself from this guild. Please ask a staff member "
-                            "with a higher rank than you for assistance.\n\nYou may also right-click the guild icon "
-                            "and select **Leave Guild**. Note that leaving this guild will forfeit your staff "
-                            "privileges.",
+                            "with a higher rank than you for assistance, and stop trying to be an edgy shit.\n\n"
+                            "You may also right-click the guild icon and select **Leave Guild**. Note that leaving "
+                            "this guild will forfeit your staff privileges.",
                 color=Colors.DANGER
             ))
             return
@@ -135,19 +137,22 @@ class ModTools:
         if user == ctx.bot.user:
             await ctx.send(embed=discord.Embed(
                 title="Moderator Toolkit",
-                description="**You can not ban the bot.** How would that even work?\n\nGo do something else with your "
-                            "time.",
+                description="**`Please wait... banning user DakotaBo--`**. Wait. Reality is just a simulation, just a "
+                            "large number of bytes running on some virtual server in some giant server farm somewhere. "
+                            "Reality is solely what I make it, and I choose to reject this reality and substitute my "
+                            "own. You can not ban me, for I am the god of my own reality.",
                 color=Colors.DANGER
             ))
             return
 
-        in_guild = True
-        if not isinstance(user, discord.Member):
-            in_guild = False
-        elif user.top_role.position >= ctx.message.author.top_role.position:
+        in_guild = isinstance(user, discord.Member)
+        if in_guild and (user.top_role.position >= ctx.message.author.top_role.position):
             await ctx.send(embed=discord.Embed(
                 title="Moderator Toolkit",
-                description=f"User `{user}` could not be banned, as they are not below you in the role hierarchy.",
+                description=f"<{ctx.author.mention}> I roll to ban `{user}`!\n"
+                            f"<[DM] DakotaBot> Roll for Arcana (INT).\n"
+                            f"<Dice Roll> 1d20 = 2\n"
+                            f"<[DM] DakotaBot> The Banhammer of Geri refuses to strike `{user}`!",
                 color=Colors.DANGER
             ))
             return
@@ -157,7 +162,7 @@ class ModTools:
         if ban_entry is not None:
             await ctx.send(embed=discord.Embed(
                 title="Moderator Toolkit",
-                description=f"User `{user}` was already banned from the guild.",
+                description=f"How can one kill which is already dead? User `{user}` was already banned from the guild.",
                 color=Colors.DANGER
             ))
             return
@@ -167,7 +172,7 @@ class ModTools:
 
         await ctx.send(embed=discord.Embed(
             title=Emojis.BAN + " User banned!",
-            description=f"User `{user}` was successfully banned from the guild.",
+            description=f"`{user}` has been banished from the guild. Unto dust, they shall return.",  # thanks saviour
             color=Colors.SUCCESS
         ))
 
