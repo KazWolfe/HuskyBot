@@ -94,8 +94,8 @@ class GiveawayManager:
 
         wcl = "\n\nWinners will be contacted shortly."
 
-        channel = self.bot.get_channel(giveaway.register_channel_id)  # type: discord.TextChannel
-        message = await channel.get_message(giveaway.register_message_id)  # type: discord.Message
+        channel: discord.TextChannel = self.bot.get_channel(giveaway.register_channel_id)
+        message: discord.Message = await channel.get_message(giveaway.register_message_id)
 
         contending_users = []
 

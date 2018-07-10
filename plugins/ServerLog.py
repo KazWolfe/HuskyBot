@@ -110,7 +110,7 @@ class ServerLog:
         if "userBan" not in self._config.get("loggers", {}).keys():
             return
 
-        logger_ignores = self._session_store.get('loggerIgnores', {})  # type: dict
+        logger_ignores: dict = self._session_store.get('loggerIgnores', {})
         ignored_bans = logger_ignores.setdefault('ban', [])
 
         if user.id in ignored_bans:
@@ -154,7 +154,7 @@ class ServerLog:
         if "userBan" not in self._config.get("loggers", {}).keys():
             return
 
-        logger_ignores = self._session_store.get('loggerIgnores', {})  # type: dict
+        logger_ignores: dict = self._session_store.get('loggerIgnores', {})
         ignored_bans = logger_ignores.setdefault('ban', [])
 
         if user.id in ignored_bans:
@@ -183,7 +183,7 @@ class ServerLog:
         if "userRename" not in self._config.get("loggers", {}).keys():
             return
 
-        logger_ignores = self._session_store.get('loggerIgnores', {})  # type: dict
+        logger_ignores: dict = self._session_store.get('loggerIgnores', {})
         ignored_nicks = logger_ignores.setdefault('nickname', [])
 
         alert_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
@@ -420,7 +420,7 @@ class ServerLog:
         old_channel = channels_config.get(ChannelKeys.MESSAGE_LOG.value, None)
 
         if old_channel is not None:
-            old_channel = ctx.guild.get_channel(old_channel)  # type: discord.TextChannel
+            old_channel: discord.TextChannel = ctx.guild.get_channel(old_channel)
 
         if old_channel is None:
             await ctx.send(embed=discord.Embed(
@@ -433,12 +433,19 @@ class ServerLog:
         topic_string = f"Staff server logs, starting at {ctx.message.created_at.strftime(DATETIME_FORMAT)}"
         reason_string = f"Log rotation requested by {ctx.author}."
 
-        new_channel = await ctx.guild.create_text_channel(name=old_channel.name,
-                                                          overwrites=dict(old_channel.overwrites),
-                                                          category=old_channel.category,
-                                                          reason=reason_string)  # type: discord.TextChannel
+        new_channel: discord.TextChannel = await ctx.guild.create_text_channel(
+            name=old_channel.name,
+            overwrites=dict(old_channel.overwrites),
+            category=old_channel.category,
+            reason=reason_string
+        )
 
-        await new_channel.edit(reason=reason_string, position=old_channel.position, topic=topic_string, nsfw=True)
+        await new_channel.edit(
+            reason=reason_string,
+            position=old_channel.position,
+            topic=topic_string,
+            nsfw=old_channel.nsfw
+        )
 
         channels_config[ChannelKeys.MESSAGE_LOG.value] = new_channel.id
         self._config.set('specialChannels', channels_config)

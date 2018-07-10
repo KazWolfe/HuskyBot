@@ -130,7 +130,7 @@ class Giveaway:
         giveaway_id = giveaway_id - 1  # We present the ID as one-indexed, but python is zero-indexed.
 
         try:
-            giveaway = self.giveaway_manager.get_giveaways()[giveaway_id]  # type: GiveawayObject
+            giveaway: GiveawayObject = self.giveaway_manager.get_giveaways()[giveaway_id]
         except ValueError:
             await ctx.send(embed=discord.Embed(
                 title="Giveaway doesn't exist!",
@@ -164,7 +164,7 @@ class Giveaway:
         giveaway_id = giveaway_id - 1  # We present the ID as one-indexed, but python is zero-indexed.
 
         try:
-            giveaway = self.giveaway_manager.get_giveaways()[giveaway_id]  # type: GiveawayObject
+            giveaway: GiveawayObject = self.giveaway_manager.get_giveaways()[giveaway_id]
         except ValueError:
             await ctx.send(embed=discord.Embed(
                 title="Giveaway doesn't exist!",

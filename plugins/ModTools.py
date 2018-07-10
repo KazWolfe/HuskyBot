@@ -48,7 +48,7 @@ class ModTools:
             lock_entry = locked_users.get(str(before.id), -1)
 
             if lock_entry != -1 and lock_entry != after.nick:
-                logger_ignores = self._session_store.get('loggerIgnores', {})  # type: dict
+                logger_ignores: dict = self._session_store.get('loggerIgnores', {})
                 ignored_nicks = logger_ignores.setdefault('nickname', [])
                 ignored_nicks.append(before.id)
                 self._session_store.set('loggerIgnores', logger_ignores)
@@ -56,7 +56,7 @@ class ModTools:
                 await after.edit(nick=lock_entry, reason="Nickname is currently locked.")
 
                 # We get this again to reload the cache in case of changes elsewhere.
-                logger_ignores = self._session_store.get('loggerIgnores', {})  # type: dict
+                logger_ignores: dict = self._session_store.get('loggerIgnores', {})
                 ignored_nicks = logger_ignores.setdefault('nickname', [])
                 ignored_nicks.remove(before.id)
                 self._session_store.set('loggerIgnores', logger_ignores)
@@ -119,7 +119,7 @@ class ModTools:
         """
 
         # hack for pycharm (duck typing)
-        user = user  # type: discord.Member
+        user: discord.Member = user
 
         if user == ctx.author:
             await ctx.send(embed=discord.Embed(
@@ -505,7 +505,7 @@ class ModTools:
             reason - A string to be set as the new ban reason.
         """
         # hack for PyCharm (duck typing)
-        user = user  # type: discord.User
+        user: discord.User = user
 
         ban_entry = discord.utils.get(await ctx.guild.bans(), user=user)
 
@@ -517,7 +517,7 @@ class ModTools:
             ))
             return
 
-        logger_ignores = self._session_store.get('loggerIgnores', {})  # type: dict
+        logger_ignores: dict = self._session_store.get('loggerIgnores', {})
         ignored_bans = logger_ignores.setdefault('ban', [])
         ignored_bans.append(user.id)
         self._session_store.set('loggerIgnores', logger_ignores)
@@ -551,10 +551,10 @@ class ModTools:
         # send a message to logs too
         alert_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
         if alert_channel is not None:
-            alert_channel = self.bot.get_channel(alert_channel)  # type: discord.TextChannel
+            alert_channel: discord.TextChannel = self.bot.get_channel(alert_channel)
             await alert_channel.send(embed=embed)
 
-        logger_ignores = self._session_store.get('loggerIgnores', {})  # type: dict
+        logger_ignores: dict = self._session_store.get('loggerIgnores', {})
         ignored_bans = logger_ignores.setdefault('ban', [])
         ignored_bans.remove(user.id)
         self._session_store.set('loggerIgnores', logger_ignores)

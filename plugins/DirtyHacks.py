@@ -1,11 +1,10 @@
 import logging
 import os
 import re
-import uuid
-import requests
 import tempfile
 
 import discord
+import requests
 from discord.ext import commands
 
 from WolfBot import WolfConfig
@@ -24,7 +23,7 @@ class DirtyHacks:
     """
 
     def __init__(self, bot: discord.ext.commands.Bot):
-        self.bot = bot  # type: commands.Bot
+        self.bot = bot
         self._config = WolfConfig.get_config()
 
         LOG.info("Loaded plugin!")
@@ -56,23 +55,22 @@ class DirtyHacks:
             if not match.endswith('.gif'):
                 return
 
-            temp_file = tempfile.NamedTemporaryFile()
-            img_data = requests.get(match).content
+            with tempfile.NamedTemporaryFile() as f:
+                img_data = requests.get(match).content
 
-            temp_file.write(img_data)
+                f.write(img_data)
+                f.flush()
 
-            (width, height) = WolfUtils.get_image_size(temp_file.name)
+                (width, height) = WolfUtils.get_image_size(f.name)
 
-            # Image is larger than 5000 px * 5000 px but *less* than 1 MB
-            if (width > 5000) and (height > 5000) and os.path.getsize(temp_file.name) < 1000000:
-                await message.delete()
-
-            temp_file.delete()
+                # Image is larger than 5000 px * 5000 px but *less* than 1 MB
+                if (width > 5000) and (height > 5000) and os.path.getsize(f.name) < 1000000:
+                    await message.delete()
 
     @commands.command(name="disableHacks", brief="Disable DirtyHacks")
     @commands.has_permissions(manage_messages=True)
     async def disable_hacks(self, ctx: commands.Context):
-        config = self._config.get('plugins', [])  # type: list
+        config: list = self._config.get('plugins', [])
 
         if "DirtyHacks" in config:
             config.remove("DirtyHacks")

@@ -412,8 +412,8 @@ class Intelligence:
             /invitespy https://disco\u200brd.gg/someguild - Get invite data for invite someguild
         """
         try:
-            invite_data = await self.bot.http.request(
-                Route('GET', '/invite/{invite_id}?with_counts=true', invite_id=fragment))  # type: dict
+            invite_data: dict = await self.bot.http.request(
+                Route('GET', '/invite/{invite_id}?with_counts=true', invite_id=fragment))
             invite_guild = discord.Guild(state=self.bot, data=invite_data['guild'])
 
             if invite_data.get("inviter") is not None:

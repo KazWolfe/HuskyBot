@@ -4,11 +4,10 @@ import json
 import logging
 import subprocess
 
-import discord
-from discord.ext import commands
-
 import aiohttp
+import discord
 from aiohttp import web
+from discord.ext import commands
 
 from WolfBot import WolfChecks
 from WolfBot import WolfConfig

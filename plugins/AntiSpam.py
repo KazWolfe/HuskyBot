@@ -14,7 +14,7 @@ from WolfBot.WolfStatics import *
 
 LOG = logging.getLogger("DakotaBot.Plugin." + __name__)
 
-EXPIRY_FIELD_NAME = "cooldownExpiry"
+F_EXPIRY = "cooldownExpiry"
 
 # Default configuration values for the AntiSpam features.
 DEFAULTS = {
@@ -82,7 +82,7 @@ class AntiSpam:
         while not self.bot.is_closed():
             for d in [self.INVITE_COOLDOWNS, self.LINK_COOLDOWNS, self.ATTACHMENT_COOLDOWNS]:
                 for user_id in d.keys():
-                    if d[user_id][EXPIRY_FIELD_NAME] < datetime.datetime.utcnow():
+                    if d[user_id][F_EXPIRY] < datetime.datetime.utcnow():
                         LOG.info("Cleaning up expired cooldown for user %s", user_id)
                         del d[user_id]
 
@@ -135,6 +135,8 @@ class AntiSpam:
                     color=Colors.WARNING
                 ).set_author(name="Mass Ping Alert", icon_url=message.author.avatar_url))
 
+            LOG.info(f"Got message from {message.author} containing {len(message.mentions)} pings.")
+
         if PING_BAN_LIMIT is not None and len(message.mentions) >= PING_BAN_LIMIT:
             await message.author.ban(delete_message_days=0, reason="[AUTOMATIC BAN - AntiSpam Module] "
                                                                    "Multi-pinged over guild ban limit.")
@@ -152,8 +154,9 @@ class AntiSpam:
 
         # Prevent memory abuse by deleting expired cooldown records for this member
         if message.author.id in self.INVITE_COOLDOWNS \
-                and self.INVITE_COOLDOWNS[message.author.id][EXPIRY_FIELD_NAME] < datetime.datetime.utcnow():
+                and self.INVITE_COOLDOWNS[message.author.id][F_EXPIRY] < datetime.datetime.utcnow():
             del self.INVITE_COOLDOWNS[message.author.id]
+            LOG.info(f"Cleaned up stale invite cooldowns for user {message.author}")
 
         # Users with MANAGE_MESSAGES are allowed to send unauthorized invites.
         if message.author.permissions_in(message.channel).manage_messages:
@@ -168,126 +171,97 @@ class AntiSpam:
             fragment = regex_match.group('fragment')
 
             # Attempt to validate the invite, deleting invalid ones
+            invite_data = None
+            invite_guild = None
             try:
                 # discord py doesn't let us do this natively, so let's do it ourselves!
                 invite_data = await self.bot.http.request(
                     Route('GET', '/invite/{invite_id}?with_counts=true', invite_id=fragment))
                 invite_guild = discord.Guild(state=self.bot, data=invite_data['guild'])
             except discord.errors.NotFound:
-                try:
-                    await message.delete()
-                except discord.NotFound:
-                    # Message not found, let's log this
-                    LOG.warning("Invalid message was caught and already deleted before I could handle it.")
-
-                invalid_embed = discord.Embed(
-                    description=f"An invalid invite with key `{fragment}` by user {message.author} "
-                                f"(ID `{message.author.id}`) was caught and filtered.",
-                    color=Colors.INFO
-                )
-                invalid_embed.set_author(name=f"Invite from {message.author} intercepted in {message.channel.mention}!",
-                                         icon_url=message.author.avatar_url)
-
-                await log_channel.send(embed=invalid_embed)
-                break
+                LOG.warning(f"Couldn't resolve invite key {fragment}. Either it's invalid or the bot was banned.")
 
             # This guild is allowed to have invites on our guild, so we can ignore them.
-            if invite_guild.id in ALLOWED_INVITES:
+            if (invite_guild is not None) and (invite_guild.id in ALLOWED_INVITES):
                 continue
 
-            # If we reached here, we have an invite from a non-whitelisted guild. Delete it.
+            # The guild either is invalid or not on the whitelist - delete the message.
             try:
                 await message.delete()
             except discord.NotFound:
                 # Message not found, let's log this
-                LOG.warning("Message was caught and already deleted before I could handle it.")
+                LOG.warning(f"The message I was trying to delete does not exist! ID: {message.id}")
 
-            # Add the user to the cooldowns table - we're going to use this to prevent DakotaBot's spam and to ban
-            # the user if they go over a defined number of invites in a period
-            if message.author.id not in self.INVITE_COOLDOWNS.keys():
-                self.INVITE_COOLDOWNS[message.author.id] = {
-                    EXPIRY_FIELD_NAME: datetime.datetime.utcnow() + datetime.timedelta(
-                        minutes=COOLDOWN_SETTINGS['minutes']),
-                    'offenseCount': 0
-                }
+            # Grab the existing cooldown record, or make a new one if it doesn't exist.
+            record = self.INVITE_COOLDOWNS.setdefault(message.author.id, {
+                F_EXPIRY: datetime.datetime.utcnow() + datetime.timedelta(minutes=COOLDOWN_SETTINGS['minutes']),
+                'offenseCount': 0
+            })
 
-                # We're also going to be nice and inform the user on their *first offense only*. The message will
-                # self-destruct after 90 seconds. Don't show this to new users scheduled for removal.
-                if not is_new_user:
-                    await message.channel.send(embed=discord.Embed(
-                        title=Emojis.STOP + " Discord Invite Blocked",
-                        description=f"Hey {message.author.mention}! It looks like you posted a Discord invite.\n\n"
-                                    f"Here on DIY Tech, we have a strict no-invites policy in order to prevent spam "
-                                    f"and advertisements. If you would like to post an invite, you may contact the "
-                                    f"admins to request an invite code be whitelisted.\n\n"
-                                    f"We apologize for the inconvenience.",
-                        color=Colors.WARNING
-                    ), delete_after=90.0)
-
-            cooldown_record = self.INVITE_COOLDOWNS[message.author.id]
+            # Warn the user on their first offense only.
+            if not is_new_user and record['offenseCount'] == 0:
+                await message.channel.send(embed=discord.Embed(
+                    title=Emojis.STOP + " Discord Invite Blocked",
+                    description=f"Hey {message.author.mention}! It looks like you posted a Discord invite.\n\n"
+                                f"Here on DIY Tech, we have a strict no-invites policy in order to prevent spam "
+                                f"and advertisements. If you would like to post an invite, you may contact the "
+                                f"admins to request an invite code be whitelisted.\n\n"
+                                f"We apologize for the inconvenience.",
+                    color=Colors.WARNING
+                ), delete_after=90.0)
 
             # And we increment the offense counter here, and extend their expiry
-            cooldown_record['offenseCount'] += 1
-            cooldown_record[EXPIRY_FIELD_NAME] = datetime.datetime.utcnow() + datetime.timedelta(
-                minutes=COOLDOWN_SETTINGS['minutes']
-            )
+            record['offenseCount'] += 1
+            record[F_EXPIRY] = datetime.datetime.utcnow() + datetime.timedelta(minutes=COOLDOWN_SETTINGS['minutes'])
 
-            # Keep track if we're planning on removing this user.
-            was_kicked = False
-
-            if cooldown_record['offenseCount'] >= COOLDOWN_SETTINGS['banLimit']:
-                was_kicked = True
-            elif is_new_user:
-                await message.author.kick(reason="New user (less than 60 seconds old) posted invite.")
-                was_kicked = True
-
+            #  Log their offense to the server log (if it exists)
             if log_channel is not None:
                 # We've a valid invite, so let's log that with invite data.
                 log_embed = discord.Embed(
                     description=f"An invite with key `{fragment}` by user {message.author} (ID `{message.author.id}`) "
-                                f"was caught and filtered. Invite information below.",
+                                f"was caught and filtered.",
                     color=Colors.INFO
                 )
                 log_embed.set_author(name=f"Invite from {message.author} intercepted!",
                                      icon_url=message.author.avatar_url)
 
-                log_embed.add_field(name="Invited Guild Name", value=invite_guild.name, inline=True)
+                if invite_guild is not None:
+                    log_embed.add_field(name="Invited Guild Name", value=invite_guild.name, inline=True)
 
-                ch_type = {0: "#", 2: "[VC] ", 4: "[CAT] "}
-                log_embed.add_field(name="Invited Channel Name",
-                                    value=ch_type[invite_data['channel']['type']] + invite_data['channel']['name'],
-                                    inline=True)
-                log_embed.add_field(name="Invited Guild ID", value=invite_guild.id, inline=True)
+                    ch_type = {0: "#", 2: "[VC] ", 4: "[CAT] "}
+                    log_embed.add_field(name="Invited Channel Name",
+                                        value=ch_type[invite_data['channel']['type']] + invite_data['channel']['name'],
+                                        inline=True)
+                    log_embed.add_field(name="Invited Guild ID", value=invite_guild.id, inline=True)
 
-                log_embed.add_field(name="Invited Guild Creation",
-                                    value=invite_guild.created_at.strftime(DATETIME_FORMAT),
-                                    inline=True)
+                    log_embed.add_field(name="Invited Guild Creation",
+                                        value=invite_guild.created_at.strftime(DATETIME_FORMAT),
+                                        inline=True)
 
-                if invite_data.get('approximate_member_count', -1) != -1:
-                    log_embed.add_field(name="Invited Guild User Count",
-                                        value=f"{invite_data.get('approximate_member_count', -1)} "
-                                              f"({invite_data.get('approximate_presence_count', -1)} online)",
-                                        )
+                    if invite_data.get('approximate_member_count', -1) != -1:
+                        log_embed.add_field(name="Invited Guild User Count",
+                                            value=f"{invite_data.get('approximate_member_count', -1)} "
+                                                  f"({invite_data.get('approximate_presence_count', -1)} online)",
+                                            )
 
-                if invite_data.get('inviter') is not None:
-                    inviter = invite_data.get('inviter', {})  # type: dict
-                    log_embed.add_field(
-                        name="Invite Creator",
-                        value=f"{inviter['username']}#{inviter['discriminator']}"
-                    )
+                    if invite_data.get('inviter') is not None:
+                        inviter: dict = invite_data.get('inviter', {})
+                        log_embed.add_field(
+                            name="Invite Creator",
+                            value=f"{inviter['username']}#{inviter['discriminator']}"
+                        )
 
-                log_embed.set_footer(text=f"Strike {cooldown_record['offenseCount']} "
+                    log_embed.set_thumbnail(url=invite_guild.icon_url)
+
+                log_embed.set_footer(text=f"Strike {record['offenseCount']} "
                                           f"of {COOLDOWN_SETTINGS['banLimit']}, "
-                                          f"resets {cooldown_record[EXPIRY_FIELD_NAME].strftime(DATETIME_FORMAT)} "
-                                          f"{'| User Removed' if was_kicked else ''}")
-
-                log_embed.set_thumbnail(url=invite_guild.icon_url)
+                                          f"resets {record[F_EXPIRY].strftime(DATETIME_FORMAT)}")
 
                 await log_channel.send(embed=log_embed)
 
             # If the user is at the offense limit, we're going to ban their ass. In this case, this means that on
             # their fifth invalid invite, we ban 'em.
-            if COOLDOWN_SETTINGS['banLimit'] > 0 and (cooldown_record['offenseCount'] >= COOLDOWN_SETTINGS['banLimit']):
+            if COOLDOWN_SETTINGS['banLimit'] > 0 and (record['offenseCount'] >= COOLDOWN_SETTINGS['banLimit']):
                 try:
                     del self.INVITE_COOLDOWNS[message.author.id]
 
@@ -295,10 +269,19 @@ class AntiSpam:
                         reason=f"[AUTOMATIC BAN - AntiSpam Plugin] User sent {COOLDOWN_SETTINGS['banLimit']} "
                                f"unauthorized invites in a {COOLDOWN_SETTINGS['minutes']} minute period.",
                         delete_message_days=0)
+                    LOG.info(f"User {message.author} was banned for exceeding set invite thresholds.")
                 except KeyError:
                     LOG.warning("Attempted to delete cooldown record for user %s (ban over limit), but failed as the "
                                 "record count not be found.", message.author.id)
+            elif is_new_user:
+                # If we have a new user, we kick them now because they're probably a spammer.
+                await message.author.kick(reason="New user (less than 60 seconds old) posted invite.")
+                LOG.info(f"User {message.author} kicked for posting invite within 60 seconds of joining.")
+            else:
+                LOG.info(f"User {message.author} was issued an invite warning ({record['offenseCount']} / "
+                         f"{COOLDOWN_SETTINGS['banLimit']}, resetting at {record[F_EXPIRY].strftime(DATETIME_FORMAT)})")
 
+            # We don't need to process anything anymore.
             break
 
     async def attachment_cooldown(self, message: discord.Message):
@@ -310,10 +293,11 @@ class AntiSpam:
         if log_channel is not None:
             log_channel = message.guild.get_channel(log_channel)
 
-        # Clear
+        # Clear expired cooldown record for this user, if it exists.
         if message.author.id in self.ATTACHMENT_COOLDOWNS \
-                and self.ATTACHMENT_COOLDOWNS[message.author.id][EXPIRY_FIELD_NAME] < datetime.datetime.utcnow():
+                and self.ATTACHMENT_COOLDOWNS[message.author.id][F_EXPIRY] < datetime.datetime.utcnow():
             del self.ATTACHMENT_COOLDOWNS[message.author.id]
+            LOG.info(f"Cleaned up stale attachment cooldowns for user {message.author}")
 
         # Users with MANAGE_MESSAGES are allowed to bypass attachment rate limits.
         if message.author.permissions_in(message.channel).manage_messages:
@@ -321,14 +305,10 @@ class AntiSpam:
 
         if len(message.attachments) > 0:
             # User posted an attachment, and is not in the cache. Let's add them, on strike 0.
-            if message.author.id not in self.ATTACHMENT_COOLDOWNS.keys():
-                self.ATTACHMENT_COOLDOWNS[message.author.id] = {
-                    EXPIRY_FIELD_NAME: datetime.datetime.utcnow() + datetime.timedelta(
-                        seconds=COOLDOWN_CONFIG['seconds']),
-                    'offenseCount': 0
-                }
-
-            cooldown_record = self.ATTACHMENT_COOLDOWNS[message.author.id]
+            cooldown_record = self.ATTACHMENT_COOLDOWNS.setdefault(message.author.id, {
+                F_EXPIRY: datetime.datetime.utcnow() + datetime.timedelta(seconds=COOLDOWN_CONFIG['seconds']),
+                'offenseCount': 0
+            })
 
             # And we increment the offense counter here.
             cooldown_record['offenseCount'] += 1
@@ -352,13 +332,19 @@ class AntiSpam:
                     ).set_author(name="Possible Attachment Spam", icon_url=message.author.avatar_url))
                     return
 
-            # And ban their sorry ass at #5.
-            if cooldown_record['offenseCount'] >= COOLDOWN_CONFIG['banLimit']:
+                LOG.info(f"User {message.author} has been warned for posting too many attachments in a short while.")
+            elif cooldown_record['offenseCount'] >= COOLDOWN_CONFIG['banLimit']:
                 await message.author.ban(reason=f"[AUTOMATIC BAN - AntiSpam Module] User sent "
                                                 f"{cooldown_record['offenseCount']} attachments in a "
-                                                f"{COOLDOWN_CONFIG['banLimit']} second period.",
+                                                f"{COOLDOWN_CONFIG['seconds']} second period.",
                                          delete_message_days=1)
                 del self.ATTACHMENT_COOLDOWNS[message.author.id]
+                LOG.info(f"User {message.author} has been banned for posting over {COOLDOWN_CONFIG['banLimit']} "
+                         f"attachments in a {COOLDOWN_CONFIG['seconds']} period.")
+            else:
+                LOG.info(f"User {message.author} posted a message with {len(message.attachments)} attachments, "
+                         f"incident logged. User on warning {cooldown_record['offenseCount']} of "
+                         f"{COOLDOWN_CONFIG['banLimit']}.")
 
         else:
             # They sent a message containing text. Clear their cooldown.
@@ -403,7 +389,7 @@ class AntiSpam:
 
         # We can lazily delete link cooldowns on messages, instead of checking.
         if message.author.id in self.LINK_COOLDOWNS \
-                and self.LINK_COOLDOWNS[message.author.id][EXPIRY_FIELD_NAME] < datetime.datetime.utcnow():
+                and self.LINK_COOLDOWNS[message.author.id][F_EXPIRY] < datetime.datetime.utcnow():
             del self.LINK_COOLDOWNS[message.author.id]
 
         # Users with MANAGE_MESSAGES are allowed to send as many links as they want.
@@ -416,9 +402,11 @@ class AntiSpam:
         if regex_matches is None or len(regex_matches) == 0:
             return
 
+        LOG.info(f"Found a message from {message.author} containing {len(regex_matches)} links. Processing.")
+
         # We have at least one link now, make the cooldown record.
         cooldown_record = self.LINK_COOLDOWNS.setdefault(message.author.id, {
-            EXPIRY_FIELD_NAME: datetime.datetime.utcnow() + datetime.timedelta(minutes=COOLDOWN_CONFIG['minutes']),
+            F_EXPIRY: datetime.datetime.utcnow() + datetime.timedelta(minutes=COOLDOWN_CONFIG['minutes']),
             'offenseCount': 0,
             'totalLinks': 0
         })
@@ -444,7 +432,7 @@ class AntiSpam:
                     )
 
                     embed.set_footer(text=f"Cooldown resets "
-                                          f"{cooldown_record[EXPIRY_FIELD_NAME].strftime(DATETIME_FORMAT)}")
+                                          f"{cooldown_record[F_EXPIRY].strftime(DATETIME_FORMAT)}")
 
                     embed.set_author(name="Link spam from {message.author} detected!",
                                      icon_url=message.author.avatar_url)
@@ -495,7 +483,7 @@ class AntiSpam:
 
                 embed.set_footer(text=f"Strike {cooldown_record['offenseCount']} "
                                       f"of {COOLDOWN_CONFIG['banLimit']}, "
-                                      f"resets {cooldown_record[EXPIRY_FIELD_NAME].strftime(DATETIME_FORMAT)}")
+                                      f"resets {cooldown_record[F_EXPIRY].strftime(DATETIME_FORMAT)}")
 
                 embed.set_author(name=f"Link spam from {message.author} blocked.",
                                  icon_url=message.author.avatar_url)
@@ -524,7 +512,7 @@ class AntiSpam:
 
         # We can lazily delete link cooldowns on messages, instead of checking.
         if message.author.id in self.NONASCII_COOLDOWNS \
-                and self.NONASCII_COOLDOWNS[message.author.id][EXPIRY_FIELD_NAME] < datetime.datetime.utcnow():
+                and self.NONASCII_COOLDOWNS[message.author.id][F_EXPIRY] < datetime.datetime.utcnow():
             del self.NONASCII_COOLDOWNS[message.author.id]
 
         # Disable if min length is 0 or less
@@ -547,7 +535,7 @@ class AntiSpam:
 
         # Message is now over threshold, get/create their cooldown record.
         cooldown_record = self.NONASCII_COOLDOWNS.setdefault(message.author.id, {
-            EXPIRY_FIELD_NAME: datetime.datetime.utcnow() + datetime.timedelta(minutes=CHECK_CONFIG['minutes']),
+            F_EXPIRY: datetime.datetime.utcnow() + datetime.timedelta(minutes=CHECK_CONFIG['minutes']),
             'offenseCount': 0
         })
 
@@ -576,7 +564,7 @@ class AntiSpam:
             embed.add_field(name="Channel", value=message.channel.mention, inline=True)
 
             embed.set_footer(text=f"Strike {cooldown_record['offenseCount']} of {CHECK_CONFIG['banLimit']}, "
-                                  f"resets {cooldown_record[EXPIRY_FIELD_NAME].strftime(DATETIME_FORMAT)}")
+                                  f"resets {cooldown_record[F_EXPIRY].strftime(DATETIME_FORMAT)}")
 
             embed.set_author(name=f"Non-ASCII spam from {message.author} detected!",
                              icon_url=message.author.avatar_url)

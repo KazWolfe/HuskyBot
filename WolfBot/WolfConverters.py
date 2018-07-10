@@ -10,13 +10,17 @@ from WolfBot import WolfUtils, WolfConfig, WolfStatics
 LOG = logging.getLogger("DakotaBot.Utils." + __name__)
 
 
-class OfflineUserConverter(commands.UserConverter):
+class OfflineUserConverter(commands.UserConverter, discord.User):
     """
     Attempt to find a user (either on or off any guild).
 
     This is a heavy method, and should not be used outside of commands. If a user is not found, it will fail with
     BadArgument.
     """
+
+    # noinspection PyMissingConstructor
+    def __init__(self):
+        pass
 
     async def convert(self, ctx: commands.Context, argument: str) -> discord.User:
         result = None

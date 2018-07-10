@@ -89,10 +89,10 @@ class GuildSecurity:
     @guildsecurity.command(name="allowBot", brief="Allow a bot to join the guild")
     @commands.has_permissions(administrator=True)
     async def allow_bot(self, ctx: commands.Context, user: WolfConverters.OfflineUserConverter):
-        # pycharm codecomplete hack
-        user = user  # type: discord.User
+        # Hack for PyCharm (duck typing)
+        user: discord.User = user
 
-        permitted_bots = self._guildsecurity_store.get('permittedBotList', [])  # type: list
+        permitted_bots: list = self._guildsecurity_store.get('permittedBotList', [])
         permitted_bots.append(user.id)
         self._guildsecurity_store.set('permittedBotList', permitted_bots)
 
@@ -112,8 +112,8 @@ class GuildSecurity:
         if role.managed:
             raise commands.BadArgument(message="This role can not be protected - it is managed")
 
-        sec_config = self._config.get('guildSecurity', {})  # type: dict
-        protected_roles = sec_config.setdefault('protectedRoles', [])  # type: list
+        sec_config: dict = self._config.get('guildSecurity', {})
+        protected_roles: list = sec_config.setdefault('protectedRoles', [])
 
         if role.id in protected_roles:
             await ctx.send(embed=discord.Embed(
@@ -158,12 +158,12 @@ class GuildSecurity:
             ))
             return
 
-        confirm_dialog = await ctx.send(embed=discord.Embed(
+        confirm_dialog: discord.Message = await ctx.send(embed=discord.Embed(
             title="Confirm Promotion",
             description=f"You are going to promote user {member.mention} to role {role.mention}. Is this intended?\n\n"
                         f"To confirm, react with the {Emojis.CHECK} emoji. To cancel, either wait 30 seconds or press "
                         f"the {Emojis.X} emoji."
-        ))  # type: discord.Message
+        ))
 
         await confirm_dialog.add_reaction(Emojis.CHECK)
         await confirm_dialog.add_reaction(Emojis.X)

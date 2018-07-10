@@ -3,24 +3,23 @@
 # System imports
 import logging
 import os
-import sys
 import re
+import ssl
+import sys
 import traceback
 
 # discord.py imports
 import discord
-from discord.ext import commands
 import discord.ext.commands.bot as BotClass
-
 # aiohttp/web api support
 from aiohttp import web
-import ssl
+from discord.ext import commands
 
 # WolfBot related imports
 from WolfBot import WolfConfig
+from WolfBot import WolfHTTP
 from WolfBot import WolfStatics
 from WolfBot import WolfUtils
-from WolfBot import WolfHTTP
 from WolfBot.WolfStatics import *
 
 BOT_CONFIG = WolfConfig.get_config()
@@ -238,7 +237,8 @@ async def on_command_error(ctx, error: commands.CommandError):
             color=Colors.DANGER
         ).add_field(name="Error Log", value="```" + error_string + "```", inline=False))
 
-        LOG.error("Command %s was unable to parse arguments: %s.", command_name, str(error))
+        LOG.error("Command %s was unable to parse arguments: %s", command_name, str(error))
+        LOG.error(''.join(traceback.format_exception(type(error), error, error.__traceback__)))
 
     # Handle cases where the bot is missing a required execution permission.
     elif isinstance(error, commands.BotMissingPermissions):

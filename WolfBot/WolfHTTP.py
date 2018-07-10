@@ -1,9 +1,7 @@
-from aiohttp import web
-
-from discord.ext import commands
-
 import logging
 
+from aiohttp import web
+from discord.ext import commands
 
 LOG = logging.getLogger("DakotaBot.HTTPServer")
 
@@ -100,6 +98,6 @@ def register(path: str, methods: list):
             plugin = f.__qualname__.split('.')[-2]
             full_path = str(f"/{plugin.lower()}{path}")
             router.add_route(method, full_path, plugin, f)
-            LOG.info(f'Registered HTTP endpoint "{method} {full_path}" for plugin {plugin}')
+            LOG.debug(f'Registered HTTP endpoint "{method} {full_path}" for plugin {plugin}')
 
     return decorator

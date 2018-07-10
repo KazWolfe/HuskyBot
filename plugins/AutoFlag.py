@@ -34,11 +34,11 @@ class AutoFlag:
 
         alert_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_ALERTS.value, None)
         if alert_channel is not None:
-            alert_channel = self.bot.get_channel(alert_channel)  # type: discord.TextChannel
+            alert_channel: discord.TextChannel = self.bot.get_channel(alert_channel)
 
         log_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
         if log_channel is not None:
-            log_channel = self.bot.get_channel(alert_channel)  # type: discord.TextChannel
+            log_channel: discord.TextChannel = self.bot.get_channel(alert_channel)
 
         if not isinstance(message.channel, discord.TextChannel):
             return
@@ -80,7 +80,7 @@ class AutoFlag:
 
         alert_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_ALERTS.value, None)
         if alert_channel is not None:
-            alert_channel = self.bot.get_channel(alert_channel)  # type: discord.TextChannel
+            alert_channel: discord.TextChannel = self.bot.get_channel(alert_channel)
 
         if not WolfUtils.should_process_message(message):
             return
@@ -135,7 +135,7 @@ class AutoFlag:
         If the regex already exists in the autoflag list, it will be ignored.
         """
 
-        flag_regexes = self._config.get("flaggedRegexes", [])  # type: list
+        flag_regexes: list = self._config.get("flaggedRegexes", [])
 
         if regex in flag_regexes:
             await ctx.send(embed=discord.Embed(
@@ -164,7 +164,7 @@ class AutoFlag:
         the autoflag list. If it doesn't exist, this command will raise an exception.
         """
 
-        flag_regexes = self._config.get("flaggedRegexes", [])  # type: list
+        flag_regexes: list = self._config.get("flaggedRegexes", [])
 
         if regex not in flag_regexes:
             await ctx.send(embed=discord.Embed(

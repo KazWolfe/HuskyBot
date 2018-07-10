@@ -1,12 +1,11 @@
 import datetime
 import gzip
 import imghdr
+import logging
 import os
 import re
 import struct
 import subprocess
-
-import logging
 from logging import handlers
 
 import discord
@@ -194,7 +193,7 @@ def get_image_size(fname):
 async def send_to_keyed_channel(bot: discord.Client, channel: WolfStatics.ChannelKeys, embed: discord.Embed):
     log_channel = WolfBot.WolfConfig.get_config().get('specialChannels', {}).get(channel.value, None)
     if log_channel is not None:
-        log_channel = bot.get_channel(log_channel)  # type: discord.TextChannel
+        log_channel: discord.TextChannel = bot.get_channel(log_channel)
 
         await log_channel.send(embed=embed)
 
