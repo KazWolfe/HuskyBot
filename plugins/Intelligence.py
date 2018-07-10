@@ -130,7 +130,7 @@ class Intelligence:
             member_details = discord.Embed(
                 title=f"User Information for {user}",
                 color=user.color,
-                description="Currently in **{user.status}** mode " + WolfUtils.get_fancy_game_data(user)
+                description=f"Currently in **{user.status}** mode " + WolfUtils.get_fancy_game_data(user)
             )
         else:
             raise ValueError("Illegal state!")

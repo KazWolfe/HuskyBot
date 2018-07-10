@@ -40,7 +40,7 @@ class Fun:
         """
 
         if user is None:
-            await ctx.send("\uD83D\uDC1F  ***{ctx.author.mention}*** *tried to slap someone with a large trout, but "
+            await ctx.send(f"\uD83D\uDC1F  ***{ctx.author.mention}*** *tried to slap someone with a large trout, but "
                            "missed and hit themselves!*")
             return
 
@@ -256,11 +256,12 @@ class Fun:
             "REBEL THREAT"
         ]
 
-        secret_fates = ["UNKNOWN", "<REDACTED DUE TO NSFW FILTER>"]
+        secret_fates = ["UNKNOWN", "<REDACTED DUE TO NSFW FILTER>", "EATEN BY WILD HOUSECAT", "IN ROBOT COSTUME",
+                        "IRL BATTLE ROYALE"]
 
         fixed_users = {
-            self.bot.user.id: "GOD OF THE WORLD",
-            142494680158961664: "SECURITY TEAM"
+            self.bot.user.id: "GOD OF THE WORLD",  # The bot
+            142494680158961664: "SECURITY TEAM"  # Kaz
         }
 
         rng = random.Random((user.id + datetime.utcnow().toordinal()) ^ self._master_rng_seed)
