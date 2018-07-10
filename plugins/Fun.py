@@ -267,7 +267,7 @@ class Fun:
         rng = random.Random((user.id + datetime.utcnow().toordinal()) ^ self._master_rng_seed)
 
         result_table = {}
-        all_fates = fates + secret_fates
+        all_fates = fates + rng.sample(secret_fates, rng.randint(0, 3))
 
         # generate random table here
         r = [rng.random() for _ in range(len(all_fates))]
@@ -295,7 +295,7 @@ class Fun:
         embed.set_thumbnail(url=user.avatar_url)
         embed.set_footer(text="Fates recalculate at midnight UTC. Only the top five fates are listed.")
 
-        if (final_fate != "UNKNOWN") and (final_fate in fates or final_fate in secret_fates):
+        if (final_fate != "UNKNOWN") and (final_fate in all_fates):
             table = []
             visible_sum = 0
 
