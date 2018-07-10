@@ -267,13 +267,16 @@ class Fun:
         rng = random.Random((user.id + datetime.utcnow().toordinal()) ^ self._master_rng_seed)
 
         result_table = {}
-
         all_fates = fates + secret_fates
-        rng.shuffle(all_fates)
 
-        for f in all_fates:
-            sev = sum(result_table.values())
-            result_table[f] = round(rng.uniform(0, 100 - sev), 3)
+        # generate random table here
+        r = [rng.random() for _ in range(len(all_fates))]
+        s = sum(r)
+        r = [i / s for i in r]
+
+        for i in range(len(all_fates)):
+            f = all_fates[i]
+            result_table[f] = round(100 * r[i], 3)
 
         result_table = sorted(result_table.items(), key=lambda kv: kv[1], reverse=True)
 
@@ -290,29 +293,26 @@ class Fun:
         )
 
         embed.set_thumbnail(url=user.avatar_url)
-        embed.set_footer(text="Fates recalculate at midnight UTC.")
+        embed.set_footer(text="Fates recalculate at midnight UTC. Only the top five fates are listed.")
 
         if (final_fate != "UNKNOWN") and (final_fate in fates or final_fate in secret_fates):
-            ta = []
-            sev = 0
+            table = []
+            visible_sum = 0
 
             for f in result_table:
-                if len(ta) >= 5:
+                if len(table) >= 5:
                     break
 
                 if (f[0] not in fates) and (f[0] != final_fate):
                     continue
 
-                sev += f[1]
-                ta.append("{0:30} {1:>6.3f}%".format(f[0], float(f[1])))
+                table.append("{0:30} {1:>6.3f}%".format(f[0], float(f[1])))
+                visible_sum += float(f[1])
 
-            ta.append("-" * 38)
-            ta.append("{0:30} {1:>6.3f}%".format("OTHER", 100 - sev))
+            table.append("-" * 38)
+            table.append("{0:30} {1:>6.3f}%".format("OTHER", 100 - visible_sum))
 
-            str_table = "\n".join(ta)
-            # str_table = str_table.replace("OTHER", "\nOTHER")
-
-            embed.add_field(name="Fate Table", value=f"```{str_table}```")
+            embed.add_field(name="Fate Table", value="```{}```".format('\n'.join(table)))
 
         await ctx.send(embed=embed)
 
