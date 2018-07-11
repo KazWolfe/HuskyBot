@@ -247,9 +247,10 @@ class ServerLog:
             color=Colors.WARNING
         )
 
-        embed.set_author(name=f"Deleted Message in {message.channel.mention}", icon_url=message.author.avatar_url)
+        embed.set_author(name=f"Deleted Message in #{message.channel.name}", icon_url=message.author.avatar_url)
         embed.add_field(name="Author", value=message.author, inline=True)
         embed.add_field(name="Message ID", value=message.id, inline=True)
+        embed.add_field(name="Channel", value=message.channel.mention, inline=True)
         embed.add_field(name="Send Timestamp", value=message.created_at.strftime(DATETIME_FORMAT), inline=True)
         embed.add_field(name="Delete Timestamp", value=WolfUtils.get_timestamp(), inline=True)
 

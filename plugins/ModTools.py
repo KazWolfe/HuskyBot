@@ -247,7 +247,7 @@ class ModTools:
             await self._mute_manager.update_mute_record(existing_mute, reason, mute_until)
 
             await ctx.send(embed=discord.Embed(
-                title=Emojis.MUTE + f" {target}'s mute for {ctx.channel.mention} was updated!",
+                title=Emojis.MUTE + f" {target}'s mute for #{ctx.channel.name} was updated!",
                 description=f"User's mute for this channel has been updated.\n\n{pretty_string}",
                 color=Colors.WARNING
             ))
@@ -256,7 +256,7 @@ class ModTools:
         await self._mute_manager.mute_user(ctx, target, ctx.channel, reason, mute_until, ctx.author)
 
         await ctx.send(embed=discord.Embed(
-            title=Emojis.MUTE + f" {target} muted from {ctx.channel.mention}!",
+            title=Emojis.MUTE + f" {target} muted from #{ctx.channel.name}!",
             description=f"User has been muted from this channel.\n\n{pretty_string}",
             color=Colors.WARNING
         ))
@@ -344,7 +344,7 @@ class ModTools:
 
         if mute is None:
             await ctx.send(embed=discord.Embed(
-                title=f"{target} is not muted in {ctx.channel.mention}.",
+                title=f"{target} is not muted in #{ctx.channel.name}.",
                 description="The user you have tried to mute has no existing mute records for this channel.",
                 color=Colors.WARNING
             ))
@@ -353,7 +353,7 @@ class ModTools:
         await self._mute_manager.unmute_user(mute, ctx.author.mention)
 
         await ctx.send(embed=discord.Embed(
-            title=Emojis.UNMUTE + f" {target} unmuted from {ctx.channel.mention}!",
+            title=Emojis.UNMUTE + f" {target} unmuted from #{ctx.channel.name}!",
             description="User has been unmuted from this channel.",
             color=Colors.SUCCESS
         ))
