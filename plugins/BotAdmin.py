@@ -61,9 +61,9 @@ class BotAdmin:
 
         await ctx.send(embed=embed)
 
-    @commands.group(pass_context=True, brief="Administrative bot control commands.")
+    @commands.group(pass_context=True, brief="Manage the bot plugin subsystem")
     @commands.has_permissions(administrator=True)
-    async def admin(self, ctx: discord.ext.commands.Context):
+    async def plugin(self, ctx: discord.ext.commands.Context):
         """
         Parent command for the BotAdmin module.
 
@@ -72,24 +72,7 @@ class BotAdmin:
 
         pass
 
-    @admin.command(name="reloadConfig", brief="Reload the bot's configuration files from disk.")
-    async def reload_config(self, ctx: discord.ext.commands.Context):
-        """
-        Dump the bot's existing in-memory configuration and reload the config from the disk.
-
-        ANY UNSAVED CHANGES TO THE CONFIGURATION WILL BE DISCARDED! (Note: this is a rare incidence - the bot generally
-        saves its config on any change)
-        """
-
-        self._config.load()
-        LOG.info("Bot configuration reloaded.")
-        await ctx.send(embed=discord.Embed(
-            title="Bot Manager",
-            description="The bot configuration has been reloaded.",
-            color=Colors.INFO
-        ))
-
-    @admin.command(name="load", brief="Temporarily load a plugin into the bot.")
+    @plugin.command(name="load", brief="Temporarily load a plugin into the bot.")
     async def load(self, ctx: discord.ext.commands.Context, plugin_name: str):
         """
         Load a plugin (temporarily) into the bot.
@@ -134,7 +117,7 @@ class BotAdmin:
             color=Colors.INFO
         ))
 
-    @admin.command(name="unload", brief="Temporarily unload a plugin from the bot.")
+    @plugin.command(name="unload", brief="Temporarily unload a plugin from the bot.")
     async def unload(self, ctx: discord.ext.commands.Context, plugin_name: str):
         """
         (Temporarily) unload a plugin from the bot.
@@ -189,7 +172,7 @@ class BotAdmin:
             color=Colors.INFO
         ))
 
-    @admin.command(name="reload", brief="Unload and reload a plugin.")
+    @plugin.command(name="reload", brief="Unload and reload a plugin.")
     async def reload(self, ctx: discord.ext.commands.Context, plugin_name: str):
         """
         Unload and reload a plugin from the bot.
@@ -231,7 +214,7 @@ class BotAdmin:
             color=Colors.INFO
         ))
 
-    @admin.command(name="enable", brief="Enable a plugin to run now and at bot load.")
+    @plugin.command(name="enable", brief="Enable a plugin to run now and at bot load.")
     async def enable(self, ctx: discord.ext.commands.Context, plugin_name: str):
         """
         Load a plugin into the bot, and mark it as auto-load.
@@ -280,7 +263,7 @@ class BotAdmin:
             color=Colors.SUCCESS
         ))
 
-    @admin.command(name="disable", brief="Disable a plugin from running at bot load. Also stops the plugin.")
+    @plugin.command(name="disable", brief="Disable a plugin from running at bot load. Also stops the plugin.")
     async def disable(self, ctx: discord.ext.commands.Context, plugin_name: str):
         """
         Unload a plugin from the bot, and prevent it from auto-loading
@@ -337,40 +320,44 @@ class BotAdmin:
             color=Colors.WARNING
         ))
 
-    @admin.command(name="log", aliases=["logs"], brief="See the bot's current log.")
-    async def log(self, ctx: discord.ext.commands.Context, lines: int = 10):
+    @commands.group(pass_context=True, brief="Alter and handle bot configurations")
+    @commands.has_permissions(administrator=True)
+    async def config(self, ctx: discord.ext.commands.Context):
         """
-        Extract a segment of the bot's current log file.
-
-        This command takes an optional parameter (lines) which can be used to seek back in the bot's log file by a
-        certain number of lines.
-
-        This command has a limited output of 2000 characters, so the log may be trimmed. This allows for administrators
-        to creatively abuse the lines function to get basic pagination.
-
-        WARNING: The log command may reveal some sensitive information about bot execution!
+        Manage and edit certain aspects of the bot configuration.
         """
 
-        log_file = self._session_store.get('logPath')
+        pass
 
-        if log_file is None:
-            await ctx.send(embed=discord.Embed(
-                title="Bot Manager",
-                description="A log file was expected, but was not found or configured. This suggests a *serious* "
-                            "problem with the bot.",
-                color=Colors.DANGER
-            ))
-            return
+    @config.command(name="reload", brief="Reload the bot's configuration files from disk.")
+    async def reload_config(self, ctx: discord.ext.commands.Context):
+        """
+        Dump the bot's existing in-memory configuration and reload the config from the disk.
 
-        logs = WolfUtils.tail(log_file, lines)
+        ANY UNSAVED CHANGES TO THE CONFIGURATION WILL BE DISCARDED! (Note: this is a rare incidence - the bot generally
+        saves its config on any change)
+        """
 
+        self._config.load()
+        LOG.info("Bot configuration reloaded.")
         await ctx.send(embed=discord.Embed(
-            title="Log Entries from " + log_file,
-            description="```" + WolfUtils.trim_string(logs, 2042, True).replace('```', '`\u200b`\u200b`') + "```",
-            color=Colors.SECONDARY
+            title="Bot Manager",
+            description="The bot configuration has been reloaded.",
+            color=Colors.INFO
         ))
 
-    @admin.command(name="presence", brief="Set the bot's presence mode.")
+    # @config.command(name="save", brief="Save the config's current state")
+    # async def save_config(self, ctx: discord.ext.commands.Context):
+    #     """
+    #     Force a save of the current configuration.
+    #
+    #     This command will immediately save and dump the configuration to disk. This command is *usually* not necessary,
+    #     as config changes are always written to disk on write.
+    #     """
+    #
+    #     for config in WolfConfig.__cache__:
+
+    @config.command(name="presence", brief="Set the bot's presence mode.")
     async def presence(self, ctx: discord.ext.commands.Context, presence_type: str, name: str, status: str):
         """
         Set a new Presence for the bot.
@@ -425,7 +412,7 @@ class BotAdmin:
             color=Colors.SUCCESS
         ))
 
-    @admin.command(name="reloadpresence", brief="Reload a Presence from the config file", aliases=["rpresence"])
+    @config.command(name="reloadPresence", brief="Reload a Presence from the config file")
     async def reload_presence(self, ctx: discord.ext.commands.Context):
         """
         Debug commands have no help. If you need help running a debug command, just don't.
@@ -435,24 +422,8 @@ class BotAdmin:
         await ctx.bot.change_presence(activity=discord.Activity(name=bot_presence['game'], type=bot_presence['type']),
                                       status=discord.Status[bot_presence['status']])
 
-    @admin.command(name="restart", brief="Restart the bot.")
-    async def restart(self, ctx: discord.ext.commands.Context):
-        """
-        Trigger a manual restart of the bot.
-
-        This command triggers an immediate restart of the bot. This will attempt to gracefully kill the bot and then
-        shut down. The bot will inform the channel upon restart.
-        """
-        await ctx.bot.change_presence(activity=discord.Activity(name="Restarting...", type=0),
-                                      status=discord.Status.idle)
-        LOG.info("Bot is going down for admin requested restart!")
-        self._config.set("restartNotificationChannel", ctx.channel.id)
-        self._config.set("restartReason", "admin")
-        await ctx.trigger_typing()
-        await ctx.bot.logout()
-
-    @admin.command(name="ignoreCommand", brief="Add a command to the ignore list.", enabled=False)
-    async def ignore(self, ctx: commands.Context, command: str):
+    @config.command(name="ignoreCommand", brief="Add a command to the ignore list.", enabled=False)
+    async def ignore_command(self, ctx: commands.Context, command: str):
         """
         [DEPRECATED COMMAND] Add a new command to the ignore list.
 
@@ -491,8 +462,8 @@ class BotAdmin:
             color=Colors.SUCCESS
         ))
 
-    @admin.command(name="unignoreCommand", brief="Remove a command from the ignore list.", enabled=False)
-    async def unignore(self, ctx: commands.Context, command: str):
+    @config.command(name="unignoreCommand", brief="Remove a command from the ignore list.", enabled=False)
+    async def unignore_command(self, ctx: commands.Context, command: str):
         """
         [DEPRECATED COMMAND] Remove a command from the ignore list.
 
@@ -525,7 +496,7 @@ class BotAdmin:
             color=Colors.SUCCESS
         ))
 
-    @admin.command(name="setChannel", brief="Configure a channel binding for the bot.")
+    @config.command(name="bindChannel", brief="Configure a channel binding for the bot.")
     async def set_channel(self, ctx: commands.Context, name: str, channel: discord.TextChannel):
         """
         Set a channel binding for the bot.
@@ -564,7 +535,7 @@ class BotAdmin:
             color=Colors.SUCCESS
         ))
 
-    @admin.command(name="setRole", brief="Configure a role binding for the bot.")
+    @config.command(name="bindRole", brief="Configure a role binding for the bot.")
     async def set_role(self, ctx: commands.Context, name: str, role: discord.Role):
         """
         Set a role binding for the bot.
@@ -602,7 +573,7 @@ class BotAdmin:
 
         self._config.set('specialRoles', config)
 
-    @admin.command(name="blockUser", brief="Block a user from interacting with the bot over messages.")
+    @config.command(name="ignoreUser", brief="Block a user from interacting with the bot over messages.")
     async def block_user(self, ctx: commands.Context, user: WolfConverters.OfflineUserConverter):
         """
         Block a user from interacting with the bot.
@@ -646,7 +617,7 @@ class BotAdmin:
             color=Colors.SUCCESS
         ))
 
-    @admin.command(name="unblockUser", brief="Unblock a blocked user from bot interactions.")
+    @config.command(name="unignoreUser", brief="Unblock a blocked user from bot interactions.")
     async def unblock_user(self, ctx: commands.Context, user: WolfConverters.OfflineUserConverter):
         """
         Unblock a user blocked from interacting with the bot.
@@ -677,7 +648,70 @@ class BotAdmin:
             color=Colors.SUCCESS
         ))
 
-    @admin.command(name="lockdown", brief="Toggle the bot's LOCKDOWN mode.")
+    @commands.group(name="system", pass_context=True, brief="Manage the bot itself", aliases=["admin"])
+    @commands.has_permissions(administrator=True)
+    async def system(self, ctx: discord.ext.commands.Context):
+        """
+        Control and send system-level commands to the bot itself.
+
+        This command group contains primarily commands that will either get privileged system information (like logs) or
+        take heavy actions on the bot itself.
+
+        Available commands:
+        """
+
+        pass
+
+    @system.command(name="log", aliases=["logs"], brief="See the bot's current log.")
+    async def log(self, ctx: discord.ext.commands.Context, lines: int = 10):
+        """
+        Extract a segment of the bot's current log file.
+
+        This command takes an optional parameter (lines) which can be used to seek back in the bot's log file by a
+        certain number of lines.
+
+        This command has a limited output of 2000 characters, so the log may be trimmed. This allows for administrators
+        to creatively abuse the lines function to get basic pagination.
+
+        WARNING: The log command may reveal some sensitive information about bot execution!
+        """
+
+        log_file = self._session_store.get('logPath')
+
+        if log_file is None:
+            await ctx.send(embed=discord.Embed(
+                title="Bot Manager",
+                description="A log file was expected, but was not found or configured. This suggests a *serious* "
+                            "problem with the bot.",
+                color=Colors.DANGER
+            ))
+            return
+
+        logs = WolfUtils.tail(log_file, lines)
+
+        await ctx.send(embed=discord.Embed(
+            title="Log Entries from " + log_file,
+            description="```" + WolfUtils.trim_string(logs, 2042, True).replace('```', '`\u200b`\u200b`') + "```",
+            color=Colors.SECONDARY
+        ))
+
+    @system.command(name="restart", brief="Restart the bot.")
+    async def restart(self, ctx: discord.ext.commands.Context):
+        """
+        Trigger a manual restart of the bot.
+
+        This command triggers an immediate restart of the bot. This will attempt to gracefully kill the bot and then
+        shut down. The bot will inform the channel upon restart.
+        """
+        await ctx.bot.change_presence(activity=discord.Activity(name="Restarting...", type=0),
+                                      status=discord.Status.idle)
+        LOG.info("Bot is going down for admin requested restart!")
+        self._config.set("restartNotificationChannel", ctx.channel.id)
+        self._config.set("restartReason", "admin")
+        await ctx.trigger_typing()
+        await ctx.bot.logout()
+
+    @system.command(name="lockdown", brief="Toggle the bot's LOCKDOWN mode.")
     @WolfChecks.is_developer()
     async def lockdown(self, ctx: commands.Context, state: bool = None):
         """

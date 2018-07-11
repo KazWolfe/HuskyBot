@@ -142,6 +142,11 @@ class AntiSpam:
                                                                    "Multi-pinged over guild ban limit.")
 
     async def prevent_discord_invites(self, message: discord.Message):
+        class UserFate:
+            WARN = 0
+            KICK_NEW = 50
+            BAN = 100
+
         ANTISPAM_CONFIG = self._config.get('antiSpam', {})
 
         ALLOWED_INVITES = ANTISPAM_CONFIG.get('allowedInvites', [message.guild.id])
@@ -162,8 +167,8 @@ class AntiSpam:
         if message.author.permissions_in(message.channel).manage_messages:
             return
 
-        # Determine if this is a "new user"
-        is_new_user = (message.author.joined_at > datetime.datetime.utcnow() - datetime.timedelta(seconds=60))
+        # Determine user's fate right now.
+        new_user = (message.author.joined_at > datetime.datetime.utcnow() - datetime.timedelta(seconds=60))
 
         regex_matches = re.finditer(Regex.INVITE_REGEX, message.content, flags=re.IGNORECASE)
 
@@ -199,7 +204,7 @@ class AntiSpam:
             })
 
             # Warn the user on their first offense only.
-            if not is_new_user and record['offenseCount'] == 0:
+            if (not new_user) and (record['offenseCount'] == 0):
                 await message.channel.send(embed=discord.Embed(
                     title=Emojis.STOP + " Discord Invite Blocked",
                     description=f"Hey {message.author.mention}! It looks like you posted a Discord invite.\n\n"
@@ -213,6 +218,23 @@ class AntiSpam:
             # And we increment the offense counter here, and extend their expiry
             record['offenseCount'] += 1
             record[F_EXPIRY] = datetime.datetime.utcnow() + datetime.timedelta(minutes=COOLDOWN_SETTINGS['minutes'])
+
+            user_fate = UserFate.WARN
+
+            # Kick the user if necessary (performance)
+            if new_user:
+                await message.author.kick(reason="New user (less than 60 seconds old) posted invite.")
+                LOG.info(f"User {message.author} kicked for posting invite within 60 seconds of joining.")
+                user_fate = UserFate.KICK_NEW
+
+            # Ban the user if necessary (performance)
+            if COOLDOWN_SETTINGS['banLimit'] > 0 and (record['offenseCount'] >= COOLDOWN_SETTINGS['banLimit']):
+                await message.author.ban(
+                    reason=f"[AUTOMATIC BAN - AntiSpam Plugin] User sent {COOLDOWN_SETTINGS['banLimit']} "
+                           f"unauthorized invites in a {COOLDOWN_SETTINGS['minutes']} minute period.",
+                    delete_message_days=0)
+                LOG.info(f"User {message.author} was banned for exceeding set invite thresholds.")
+                user_fate = UserFate.BAN
 
             #  Log their offense to the server log (if it exists)
             if log_channel is not None:
@@ -255,28 +277,18 @@ class AntiSpam:
 
                 log_embed.set_footer(text=f"Strike {record['offenseCount']} "
                                           f"of {COOLDOWN_SETTINGS['banLimit']}, "
-                                          f"resets {record[F_EXPIRY].strftime(DATETIME_FORMAT)}")
+                                          f"resets {record[F_EXPIRY].strftime(DATETIME_FORMAT)}"
+                                          f"{' | User Removed' if user_fate > UserFate.WARN else ''}")
 
                 await log_channel.send(embed=log_embed)
 
-            # If the user is at the offense limit, we're going to ban their ass. In this case, this means that on
-            # their fifth invalid invite, we ban 'em.
-            if COOLDOWN_SETTINGS['banLimit'] > 0 and (record['offenseCount'] >= COOLDOWN_SETTINGS['banLimit']):
+            # If the user got banned, we can go and clean up their mess
+            if user_fate == UserFate.BAN:
                 try:
                     del self.INVITE_COOLDOWNS[message.author.id]
-
-                    await message.author.ban(
-                        reason=f"[AUTOMATIC BAN - AntiSpam Plugin] User sent {COOLDOWN_SETTINGS['banLimit']} "
-                               f"unauthorized invites in a {COOLDOWN_SETTINGS['minutes']} minute period.",
-                        delete_message_days=0)
-                    LOG.info(f"User {message.author} was banned for exceeding set invite thresholds.")
                 except KeyError:
                     LOG.warning("Attempted to delete cooldown record for user %s (ban over limit), but failed as the "
-                                "record count not be found.", message.author.id)
-            elif is_new_user:
-                # If we have a new user, we kick them now because they're probably a spammer.
-                await message.author.kick(reason="New user (less than 60 seconds old) posted invite.")
-                LOG.info(f"User {message.author} kicked for posting invite within 60 seconds of joining.")
+                                "record count not be found. The user was probably already banned.", message.author.id)
             else:
                 LOG.info(f"User {message.author} was issued an invite warning ({record['offenseCount']} / "
                          f"{COOLDOWN_SETTINGS['banLimit']}, resetting at {record[F_EXPIRY].strftime(DATETIME_FORMAT)})")
