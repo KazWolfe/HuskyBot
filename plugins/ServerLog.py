@@ -30,14 +30,14 @@ class ServerLog:
                               "messageDelete", "messageDelete.logIntegrity",
                               "messageEdit"]
 
-    async def on_member_join(self, member):
+    async def on_member_join(self, member: discord.Member):
         # Send milestones to the moderator alerts channel
-        async def milestone_notifier(notif_member):
+        async def milestone_notifier():
             if "userJoin.milestones" not in self._config.get("loggers", {}).keys():
                 return
 
             milestone_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_ALERTS.value, None)
-            guild = notif_member.guild
+            guild = member.guild
 
             if milestone_channel is None:
                 return
@@ -48,12 +48,12 @@ class ServerLog:
                 await milestone_channel.send(embed=discord.Embed(
                     title=Emojis.PARTY + " Guild Member Count Milestone!",
                     description=f"The guild has now reached {guild.member_count} members! Thank you "
-                                f"{notif_member.mention} for joining!",
+                                f"{member.mention} for joining!",
                     color=Colors.SUCCESS
                 ))
 
         # Send all joins to the logging channel
-        async def general_notifier(notif_member):
+        async def general_notifier():
             if "userJoin" not in self._config.get("loggers", {}).keys():
                 return
 
@@ -62,26 +62,27 @@ class ServerLog:
             if channel is None:
                 return
 
-            channel = notif_member.guild.get_channel(channel)
+            channel = member.guild.get_channel(channel)
 
             embed = discord.Embed(
                 title=Emojis.SUNRISE + " New Member!",
-                description=f"{notif_member} has joined the guild.",
+                description=f"{member} has joined the guild.",
                 color=Colors.PRIMARY
             )
 
-            embed.set_thumbnail(url=notif_member.avatar_url)
-            embed.add_field(name="Joined Discord", value=notif_member.created_at.strftime(DATETIME_FORMAT), inline=True)
-            embed.add_field(name="Joined Guild", value=notif_member.joined_at.strftime(DATETIME_FORMAT), inline=True)
-            embed.add_field(name="User ID", value=notif_member.id, inline=True)
+            embed.set_thumbnail(url=member.avatar_url)
+            embed.add_field(name="Joined Discord", value=member.created_at.strftime(DATETIME_FORMAT), inline=True)
+            embed.add_field(name="Joined Guild", value=member.joined_at.strftime(DATETIME_FORMAT), inline=True)
+            embed.add_field(name="User ID", value=member.id, inline=True)
 
-            member_num = sorted(notif_member.guild.members, key=lambda m: m.joined_at).index(member) + 1
+            member_num = sorted(member.guild.members, key=lambda m: m.joined_at).index(member) + 1
             embed.set_footer(text=f"Member #{member_num} on the guild")
 
+            LOG.info(f"User {member} ({member.id}) has joined {member.guild.name}.")
             await channel.send(embed=embed)
 
-        await milestone_notifier(member)
-        await general_notifier(member)
+        await milestone_notifier()
+        await general_notifier()
 
     async def on_member_remove(self, member: discord.Member):
         if "userLeave" not in self._config.get("loggers", {}).keys():
@@ -104,6 +105,7 @@ class ServerLog:
         embed.add_field(name="User ID", value=member.id)
         embed.add_field(name="Leave Timestamp", value=WolfUtils.get_timestamp())
 
+        LOG.info(f"User {member} has left {member.guild.name}.")
         await alert_channel.send(embed=embed)
 
     async def on_member_ban(self, guild: discord.Guild, user: discord.User):
@@ -147,6 +149,7 @@ class ServerLog:
         embed.add_field(name="Ban Timestamp", value=timestamp, inline=True)
         embed.add_field(name="Ban Reason", value=ban_reason, inline=False)
 
+        LOG.info(f"User {user} was banned from {guild.name} for '{ban_reason}'.")
         await alert_channel.send(embed=embed)
 
     # noinspection PyUnusedLocal
@@ -177,6 +180,7 @@ class ServerLog:
         embed.add_field(name="User ID", value=user.id)
         embed.add_field(name="Unban Timestamp", value=WolfUtils.get_timestamp())
 
+        LOG.info(f"User {user} was unbanned from {guild.name}.")
         await alert_channel.send(embed=embed)
 
     async def on_member_update(self, before: discord.Member, after: discord.Member):
