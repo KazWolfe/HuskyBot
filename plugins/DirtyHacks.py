@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import random
@@ -66,7 +67,7 @@ class DirtyHacks:
                     await message.delete()
 
     async def calculate_entropy(self, message: discord.Message):
-        if message.content is None:
+        if message.content is None or message.content == "":
             return
 
         # run on about 20% of messages
@@ -76,14 +77,17 @@ class DirtyHacks:
         entropy = WolfUtils.calculate_str_entropy(message.content)
 
         clean_content = message.content.replace('\n', ' // ')
-
         s = clean_content if len(clean_content) < 20 else f"{clean_content[:20]}..."
 
         LOG.info(f"[EntropyCalc] Message {message.id} in #{message.channel.name} ({s}) has "
                  f"length={len(message.content)} and entropy {entropy}.")
 
         with open("logs/entropy.log", 'a') as f:
-            f.write(f"{clean_content} - len={len(message.content)}, ent={entropy}\n")
+            f.write(json.dumps({
+                "text": message.content,
+                "entropy": entropy,
+                "length": len(message.content)
+            }) + "\n")
 
     @commands.command(name="disableHacks", brief="Disable DirtyHacks")
     @commands.has_permissions(manage_messages=True)
