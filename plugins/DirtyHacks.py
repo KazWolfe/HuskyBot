@@ -1,5 +1,6 @@
 import logging
 import os
+import random
 import re
 import tempfile
 
@@ -32,11 +33,8 @@ class DirtyHacks:
         if not WolfUtils.should_process_message(message):
             return
 
-        # noinspection PyBroadException
-        try:
-            await self.kill_crashing_gifs(message)
-        except:
-            return
+        await self.kill_crashing_gifs(message)
+        await self.calculate_entropy(message)
 
     async def kill_crashing_gifs(self, message: discord.Message):
         matches = re.findall(Regex.URL_REGEX, message.content, re.IGNORECASE)
@@ -66,6 +64,26 @@ class DirtyHacks:
                 # Image is larger than 5000 px * 5000 px but *less* than 1 MB
                 if (width > 5000) and (height > 5000) and os.path.getsize(f.name) < 1000000:
                     await message.delete()
+
+    async def calculate_entropy(self, message: discord.Message):
+        if message.content is None:
+            return
+
+        # run on about 20% of messages
+        if random.randint(1, 5) != 3:
+            return
+
+        entropy = WolfUtils.calculate_str_entropy(message.content)
+
+        clean_content = message.content.replace('\n', ' // ')
+
+        s = clean_content if len(clean_content) < 20 else f"{clean_content[:20]}..."
+
+        LOG.info(f"[EntropyCalc] Message {message.id} in #{message.channel.name} ({s}) has "
+                 f"length={len(message.content)} and entropy {entropy}.")
+
+        with open("logs/entropy.log", 'a') as f:
+            f.write(f"{clean_content} - len={len(message.content)}, ent={entropy}\n")
 
     @commands.command(name="disableHacks", brief="Disable DirtyHacks")
     @commands.has_permissions(manage_messages=True)

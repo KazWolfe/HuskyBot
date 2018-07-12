@@ -1,7 +1,9 @@
+import collections
 import datetime
 import gzip
 import imghdr
 import logging
+import math
 import os
 import re
 import struct
@@ -231,6 +233,12 @@ def confirm_dialog_check(triggering_user: discord.Member):
             return False
 
     return wrap
+
+
+def calculate_str_entropy(string):
+    probabilities = [n_x / len(string) for x, n_x in collections.Counter(string).items()]
+    e_x = [-p_x * math.log(p_x, 2) for p_x in probabilities]
+    return sum(e_x)
 
 
 class CompressingRotatingFileHandler(logging.handlers.RotatingFileHandler):
