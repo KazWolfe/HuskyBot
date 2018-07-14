@@ -216,14 +216,14 @@ class ServerLog:
             return
 
         embed = discord.Embed(
-            description=f"User's {update_type} has changed! Their display name in this guild is now "
-                        f"`{after.display_name}`.",
+            description=f"User's {update_type} has been changed. Information below.",
             color=Colors.INFO
         )
 
         embed.add_field(name=f"Old {update_type.capitalize()}", value=old_val, inline=True)
         embed.add_field(name=f"New {update_type.capitalize()}", value=new_val, inline=True)
-        embed.add_field(name="User ID", value=after.id, inline=False)
+        embed.add_field(name="User Mention", value=after.mention, inline=True)
+        embed.add_field(name="User ID", value=after.id, inline=True)
         embed.set_author(name=f"{after}'s {update_type} has changed!", icon_url=after.avatar_url)
 
         await alert_channel.send(embed=embed)

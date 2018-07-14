@@ -284,31 +284,36 @@ async def on_command_error(ctx, error: commands.CommandError):
 # noinspection PyUnusedLocal
 @bot.event
 async def on_error(event_method, *args, **kwargs):
-    LOG.error('Exception in method %s:\n%s', event_method, traceback.format_exc())
+    exception = sys.exc_info()
 
-    try:
-        channel = BOT_CONFIG.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
+    if isinstance(exception, discord.HTTPException) and exception.code == 502:
+        LOG.error(f"Got HTTP status code {exception.code} for method {event_method} - Discord is likely borked now.")
+    else:
+        LOG.error('Exception in method %s:\n%s', event_method, traceback.format_exc())
 
-        if channel is None:
-            LOG.warning('A logging channel is not set up! Error messages will not be forwarded to Discord.')
-            return
+        try:
+            channel = BOT_CONFIG.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
 
-        channel = bot.get_channel(channel)
+            if channel is None:
+                LOG.warning('A logging channel is not set up! Error messages will not be forwarded to Discord.')
+                return
 
-        embed = discord.Embed(
-            title="Bot Exception Handler",
-            description="Exception in method `{}`:\n```{}```".format(
-                event_method,
-                WolfUtils.trim_string(traceback.format_exc().replace('```', '`\u200b`\u200b`'), 1500)
-            ),
-            color=Colors.DANGER
-        )
+            channel = bot.get_channel(channel)
 
-        await channel.send("<@{}>, an error has occurred with the bot. See attached "
-                           "embed.".format(WolfStatics.DEVELOPERS[0]),
-                           embed=embed)
-    except Exception as e:
-        LOG.critical("There was an error sending an error to the error channel.\n " + str(e))
+            embed = discord.Embed(
+                title="Bot Exception Handler",
+                description="Exception in method `{}`:\n```{}```".format(
+                    event_method,
+                    WolfUtils.trim_string(traceback.format_exc().replace('```', '`\u200b`\u200b`'), 1500)
+                ),
+                color=Colors.DANGER
+            )
+
+            await channel.send("<@{}>, an error has occurred with the bot. See attached "
+                               "embed.".format(WolfStatics.DEVELOPERS[0]),
+                               embed=embed)
+        except Exception as e:
+            LOG.critical("There was an error sending an error to the error channel.\n " + str(e))
 
 
 @bot.event

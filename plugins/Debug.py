@@ -325,7 +325,7 @@ class Debug:
             ))
             LOG.warning("Requestify raised exception.", ex)
 
-    @WolfHTTP.register("/hello", ["GET", "POST"])
+    @WolfHTTP.register("/debug/hello", ["GET", "POST"])
     async def say_hello(self, request: web.BaseRequest):
         target = "world"
         if request.method == "POST":

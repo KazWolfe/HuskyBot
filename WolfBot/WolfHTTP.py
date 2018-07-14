@@ -3,7 +3,7 @@ import logging
 from aiohttp import web
 from discord.ext import commands
 
-LOG = logging.getLogger("DakotaBot.HTTPServer")
+LOG = logging.getLogger("DakotaBot.HttpServer")
 
 
 class WolfRouter:
@@ -25,8 +25,11 @@ class WolfRouter:
         path_route = self.routes.setdefault(path, {})
         path_route[method.upper()] = {}
 
-        path_route[method.upper()]['cog'] = plugin
         path_route[method.upper()]['func'] = handler
+
+        # This is discordpy related bullshit, because we need to be able to
+        # pass a self()
+        path_route[method.upper()]['cog'] = plugin
 
     def remove_method(self, path: str, method: str):
         """
@@ -96,8 +99,7 @@ def register(path: str, methods: list):
         """
         for method in methods:
             plugin = f.__qualname__.split('.')[-2]
-            full_path = str(f"/{plugin.lower()}{path}")
-            router.add_route(method, full_path, plugin, f)
-            LOG.debug(f'Registered HTTP endpoint "{method} {full_path}" for plugin {plugin}')
+            router.add_route(method, path, plugin, f)
+            LOG.debug(f'Registered HTTP endpoint "{method} {path}" for plugin {plugin}')
 
     return decorator
