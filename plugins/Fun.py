@@ -139,8 +139,14 @@ class Fun:
             118559596284608512: {"a": 6.41, "c": 2.74, "i": 9.44, "otp": "Whiskey"},  # Carl
             237569958903545857: {"a": 7.01, "c": 3.0, "i": 8.74},  # Squeegee
             143435198145626112: {"a": 6.75, "c": 9.03, "i": 7.82, "otp": "VFR800F 2014"},  # Alice
-            128882954343546880: {"a": 0, "c": 0, "i": 0}  # Marahute
+            128882954343546880: {"a": 0, "c": 0, "i": 0},  # Marahute
+            255802794244571136: {"disabled": True}
         }
+
+        entry = hardcoded_users.get(member.id, {})
+
+        if entry.get('disabled', False):
+            return
 
         seed = self._master_rng_seed  # I love you, woof <3
         master_rng = random.Random((member.id + seed + datetime.utcnow().toordinal()) % seed)
@@ -148,8 +154,8 @@ class Fun:
         def get_value(mode: str, user_value: int, imin: int, imax: int, dev: float):
             rng = random.Random(user_value - seed)
 
-            if member.id in hardcoded_users.keys() and mode in hardcoded_users[member.id]:
-                base = hardcoded_users[member.id][mode]
+            if mode in entry:
+                base = entry[mode]
             else:
                 base = rng.randint(imin, imax)
 
@@ -189,9 +195,10 @@ class Fun:
                         value=str(Emojis.BOOK * round(intelligence / 2)) + f" ({intelligence})",
                         inline=False)
 
-        if member.id in hardcoded_users.keys() and hardcoded_users[member.id].get('otp') is not None:
+        otp = entry.get('otp')
+        if otp is not None:
             embed.add_field(name="Detected OTP",
-                            value=f"User is shipped with ***{hardcoded_users[member.id]['otp']}***",
+                            value=f"User is shipped with ***{otp}***",
                             inline=False
                             )
 
