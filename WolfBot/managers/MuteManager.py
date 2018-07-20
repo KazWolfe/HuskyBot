@@ -38,7 +38,8 @@ class MuteManager:
         while not self._bot.is_closed():
             for mute in self.__cache__:
                 if mute.is_expired():
-                    LOG.info(f"Found a scheduled unmute - [{mute.user_id}, {mute.channel}]. Triggering...")
+                    LOG.info(f"Found a scheduled unmute - [user_id={mute.user_id}, channel_id={mute.channel}]. "
+                             f"Triggering...")
                     await self.unmute_user(mute, "System - Scheduled")
 
                 # Because mutes are sorted by expiry, we can just exit the loop if we encounter a mute that's not yet
@@ -60,6 +61,7 @@ class MuteManager:
         if mute.channel is None:
             mute_role = discord.utils.get(guild.roles, id=self._bot_config.get("specialRoles", {}).get("muted"))
             mute_context = "the guild"
+            channel = None
 
             if mute_role is None:
                 raise ValueError("A muted role is not set!")
@@ -91,10 +93,10 @@ class MuteManager:
                     color=Colors.WARNING
                 )
 
-                embed.set_author(name=f"{member} was muted from "
-                                      f"{'the guild' if mute.channel is None else mute.channel.mention}!",
+                ms = f"#{channel}" if mute.channel is not None else "the guild"
+                embed.set_author(name=f"{member} was muted from {ms}!",
                                  icon_url=member.avatar_url)
-                embed.add_field(name="Responsible User", value=str(staff_member), inline=True)
+                embed.add_field(name="Responsible User", value=staff_member, inline=True)
                 embed.add_field(name="Timestamp", value=WolfUtils.get_timestamp(), inline=True)
                 embed.add_field(name="Expires At", value=datetime.datetime.fromtimestamp(mute.expiry)
                                 .strftime(DATETIME_FORMAT) if mute.expiry is not None else "Never", inline=True)
@@ -175,9 +177,9 @@ class MuteManager:
             )
 
             embed.set_author(
-                name=f"{member} was unmuted from {'the guild' if mute.channel is None else '#' + str(channel)}!",
+                name=f"{member} was unmuted from {'the guild' if mute.channel is None else '#' + channel}!",
                 icon_url=member.avatar_url),
-            embed.add_field(name="Responsible User", value=str(staff_member), inline=True)
+            embed.add_field(name="Responsible User", value=staff_member, inline=True)
 
             await alert_channel.send(embed=embed)
 
@@ -231,7 +233,7 @@ class MuteManager:
 
             member = self._bot.get_guild(mute.guild).get_member(mute.user_id)
 
-            mute_context = "the guild" if mute.channel is None else str(self._bot.get_channel(mute.channel))
+            mute_context = "the guild" if mute.channel is None else f'#{self._bot.get_channel(mute.channel)}'
 
             embed = discord.Embed(
                 description=f"User ID `{mute.user_id}`'s mute from {mute_context} was updated.",

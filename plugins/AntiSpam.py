@@ -138,8 +138,10 @@ class AntiSpam:
             LOG.info(f"Got message from {message.author} containing {len(message.mentions)} pings.")
 
         if PING_BAN_LIMIT is not None and len(message.mentions) >= PING_BAN_LIMIT:
-            await message.author.ban(delete_message_days=0, reason="[AUTOMATIC BAN - AntiSpam Module] "
-                                                                   "Multi-pinged over guild ban limit.")
+            await message.author.ban(
+                delete_message_days=0,
+                reason="[AUTOMATIC BAN - AntiSpam Module] Multi-pinged over guild ban limit."
+            )
 
     async def prevent_discord_invites(self, message: discord.Message):
         class UserFate:
