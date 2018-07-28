@@ -83,7 +83,7 @@ class WolfConfig:
 __cache__ = {}
 
 
-def get_config(name: str = 'config', create_if_nonexistent: bool = False):
+def get_config(name: str = 'config', create_if_nonexistent: bool = False) -> WolfConfig:
     """
     Get the bot's current persistent configuration (thread-safe).
 

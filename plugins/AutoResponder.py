@@ -170,14 +170,6 @@ class AutoResponder:
             return
 
         if param == 'response':
-            if response.get('isEmbed', False):
-                await ctx.send(embed=discord.Embed(
-                    title="Response Manager",
-                    description="Unable to edit embedded responses after creation!",
-                    color=Colors.DANGER
-                ))
-                return
-
             if action.lower() == 'set':
                 response['isEmbed'] = False
                 response['response'] = value
@@ -257,7 +249,11 @@ class AutoResponder:
         )
 
         for k in response.keys():
-            confirmation.add_field(name=k, value=response[k], inline=True)
+            v = response[k]
+            if k == "response" and response.get('isEmbed', False):
+                v = "< Embedded JSON >"
+
+            confirmation.add_field(name=k, value=WolfUtils.trim_string(v, 1000), inline=True)
 
         await ctx.send(embed=confirmation)
 
@@ -287,7 +283,7 @@ class AutoResponder:
 
         await ctx.send(embed=discord.Embed(
             title="Response Manager",
-            description="The response named `" + trigger + "` has been deleted.",
+            description=f"The response named `{trigger}` has been deleted.",
             color=Colors.SUCCESS
         ))
 
@@ -307,6 +303,35 @@ class AutoResponder:
             description="The following responses are available:\n```- " + "\n- ".join(responses.keys()) + "```",
             color=Colors.SUCCESS
         ))
+
+    @responses.command(name="get", brief="Get the configuration for a specified response")
+    @commands.has_permissions(manage_messages=True)
+    async def get_response(self, ctx: commands.Context, *, trigger: str):
+        responses = self._config.get("responses", {})
+
+        try:
+            response = responses[trigger.lower()]
+        except KeyError:
+            await ctx.send(embed=discord.Embed(
+                title="Response Manager",
+                description=f"The trigger `{trigger}` does not exist.",
+                color=Colors.DANGER
+            ))
+            return
+
+        embed = discord.Embed(
+            color=Colors.INFO,
+            title=f"Response Data for {trigger.lower()}"
+        )
+
+        for k in response.keys():
+            v = response[k]
+            if k == "response" and response.get('isEmbed', False):
+                v = "< Embedded JSON >"
+
+            embed.add_field(name=k, value=WolfUtils.trim_string(v, 1000), inline=True)
+
+        await ctx.send(embed=embed)
 
     @responses.command(name="deleteAll", hidden=True)
     @commands.has_permissions(administrator=True)

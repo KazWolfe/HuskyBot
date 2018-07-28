@@ -118,7 +118,7 @@ class GiveawayManager:
         elif len(winning_users) > 2:
             win_csb = [u.mention for u in winning_users]
 
-            win_text = f"Congratulations to our winners: {' ,'.join(win_csb[:-1])}, and {win_csb[-1:][0]}! {wcl}"
+            win_text = f"Congratulations to our winners: {', '.join(win_csb[:-1])}, and {win_csb[-1:][0]}! {wcl}"
         else:
             win_text = "Unfortunately, nobody entered this giveaway... :sob:"
 

@@ -1,5 +1,6 @@
 import asyncio
 import datetime
+import difflib
 import logging
 import math
 import re
@@ -42,6 +43,13 @@ DEFAULTS = {
         'nonAsciiThreshold': 0.5,  # Threshold (0 to 1) before marking the message as spam
         'banLimit': 3,  # Number of spam messages before banning
         'minutes': 5  # Cooldown timer (minutes)
+    },
+    "nonUnique": {
+        "threshold": 0.25,  # Diff threshold before considering a message "similar"
+        "cacheSize": 3,  # The number of "mostly unique" messages to keep in cache.
+        "minutes": 30,  # Cooldown time (in minutes)
+        "warnLimit": 5,  # number of matching non-uniques before issuing a warning
+        "banLimit": 10  # number of matching non-uniques before issuing a ban
     }
 }
 
@@ -64,6 +72,7 @@ class AntiSpam:
         self.ATTACHMENT_COOLDOWNS = {}
         self.LINK_COOLDOWNS = {}
         self.NONASCII_COOLDOWNS = {}
+        self.NONUNIQUE_COOLDOWNS = {}
 
         # Tasks
         self.__cleanup_task__ = self.bot.loop.create_task(self.cleanup_expired_cooldowns())
@@ -80,7 +89,8 @@ class AntiSpam:
         Ugly as fuck.
         """
         while not self.bot.is_closed():
-            for d in [self.INVITE_COOLDOWNS, self.LINK_COOLDOWNS, self.ATTACHMENT_COOLDOWNS]:
+            for d in [self.INVITE_COOLDOWNS, self.LINK_COOLDOWNS, self.ATTACHMENT_COOLDOWNS,
+                      self.NONASCII_COOLDOWNS, self.NONUNIQUE_COOLDOWNS]:
                 for user_id in d.keys():
                     if d[user_id][F_EXPIRY] < datetime.datetime.utcnow():
                         LOG.info("Cleaning up expired cooldown for user %s", user_id)
@@ -593,6 +603,40 @@ class AntiSpam:
 
             # And purge their record, it's not needed anymore
             del self.NONASCII_COOLDOWNS[message.author.id]
+
+    async def nonunique_cooldown(self, message: discord.Message):
+        ANTISPAM_CONFIG = self._config.get('antiSpam', {})
+        CHECK_CONFIG = ANTISPAM_CONFIG.get('cooldowns', {}).get('nonUnique', DEFAULTS['nonUnique'])
+
+        # Prepare the logger
+        log_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
+        if log_channel is not None:
+            log_channel = message.guild.get_channel(log_channel)
+
+        # We can lazily delete cooldowns on messages, instead of checking.
+        if message.author.id in self.NONUNIQUE_COOLDOWNS \
+                and self.NONUNIQUE_COOLDOWNS[message.author.id][F_EXPIRY] < datetime.datetime.utcnow():
+            del self.NONUNIQUE_COOLDOWNS[message.author.id]
+
+        # Disable if min length is 0 or less
+        if CHECK_CONFIG['minMessageLength'] <= 0:
+            return
+
+        # Users with MANAGE_MESSAGES aren't restricted by nonunique processing
+        if message.author.permissions_in(message.channel).manage_messages:
+            return
+
+        user_record = self.NONUNIQUE_COOLDOWNS.setdefault(message.author.id, {
+            "cache": {},
+            F_EXPIRY: None
+        })
+        cache = user_record['cache']
+
+        scores = []
+
+        for cached_text in cache:
+            diff = difflib.SequenceMatcher(None, message.content, cached_text).ratio()
+            scores.append(diff)
 
     @commands.group(name="antispam", aliases=['as'], brief="Manage the Antispam configuration for the bot")
     @commands.has_permissions(manage_messages=True)

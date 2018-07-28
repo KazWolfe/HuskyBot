@@ -258,7 +258,7 @@ class Intelligence:
             await ctx.send(embed=discord.Embed(
                 title="Message Count Report",
                 description=f"Since `{search_start.strftime(DATETIME_FORMAT)} UTC`, the channel context "
-                            f"`{search_context['name']}` has seen about **{message_count}messages**.",
+                            f"`{search_context['name']}` has seen about **{message_count} messages**.",
                 color=Colors.INFO
             ))
 
