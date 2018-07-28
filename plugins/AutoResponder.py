@@ -253,7 +253,7 @@ class AutoResponder:
             if k == "response" and response.get('isEmbed', False):
                 v = "< Embedded JSON >"
 
-            confirmation.add_field(name=k, value=WolfUtils.trim_string(v, 1000), inline=True)
+            confirmation.add_field(name=k, value=WolfUtils.trim_string(str(v), 1000), inline=True)
 
         await ctx.send(embed=confirmation)
 
@@ -329,7 +329,7 @@ class AutoResponder:
             if k == "response" and response.get('isEmbed', False):
                 v = "< Embedded JSON >"
 
-            embed.add_field(name=k, value=WolfUtils.trim_string(v, 1000), inline=True)
+            embed.add_field(name=k, value=WolfUtils.trim_string(str(v), 1000), inline=True)
 
         await ctx.send(embed=embed)
 
