@@ -16,7 +16,7 @@ class Fun:
     """
     Useless plugin.
 
-    // ToDo: Delete this.
+    ToDo: Delete this.
     """
 
     def __init__(self, bot: discord.ext.commands.Bot):
@@ -284,9 +284,10 @@ class Fun:
             f = all_fates[i]
             result_table[f] = round(100 * r[i], 3)
 
-        result_table = sorted(result_table.items(), key=lambda kv: kv[1], reverse=True)
+        result_table = list(sorted(result_table.items(), key=lambda kv: kv[1], reverse=True))
 
-        final_fate = fixed_users.get(user.id, result_table[0][0])
+        result_table[0] = (fixed_users.get(user.id, result_table[0][0]), result_table[0][1])
+        final_fate = result_table[0][0]
 
         if user.bot and user.id not in fixed_users.keys():
             final_fate = "BOT OVERLORD"
@@ -301,7 +302,7 @@ class Fun:
         embed.set_thumbnail(url=user.avatar_url)
         embed.set_footer(text="Fates recalculate at midnight UTC. Only the top five fates are listed.")
 
-        if (final_fate != "UNKNOWN") and (final_fate in all_fates):
+        if (final_fate != "UNKNOWN") and (not user.bot):
             table = []
             visible_sum = 0
 

@@ -286,20 +286,20 @@ async def on_command_error(ctx, error: commands.CommandError):
 async def on_error(event_method, *args, **kwargs):
     exception = sys.exc_info()
 
+    channel = BOT_CONFIG.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
+
+    if channel is None:
+        LOG.warning('A logging channel is not set up! Error messages will not be forwarded to Discord.')
+        return
+
+    channel = bot.get_channel(channel)
+
     if isinstance(exception, discord.HTTPException) and exception.code == 502:
         LOG.error(f"Got HTTP status code {exception.code} for method {event_method} - Discord is likely borked now.")
     else:
         LOG.error('Exception in method %s:\n%s', event_method, traceback.format_exc())
 
         try:
-            channel = BOT_CONFIG.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
-
-            if channel is None:
-                LOG.warning('A logging channel is not set up! Error messages will not be forwarded to Discord.')
-                return
-
-            channel = bot.get_channel(channel)
-
             embed = discord.Embed(
                 title="Bot Exception Handler",
                 description="Exception in method `{}`:\n```{}```".format(
@@ -314,6 +314,7 @@ async def on_error(event_method, *args, **kwargs):
                                embed=embed)
         except Exception as e:
             LOG.critical("There was an error sending an error to the error channel.\n " + str(e))
+            raise e
 
 
 @bot.event

@@ -222,7 +222,7 @@ class ServerLog:
 
         embed.add_field(name=f"Old {update_type.capitalize()}", value=old_val, inline=True)
         embed.add_field(name=f"New {update_type.capitalize()}", value=new_val, inline=True)
-        embed.add_field(name="User Mention", value=after.mention, inline=True)
+        embed.add_field(name="Display Name", value=after.display_name, inline=True)
         embed.add_field(name="User ID", value=after.id, inline=True)
         embed.set_author(name=f"{after}'s {update_type} has changed!", icon_url=after.avatar_url)
 
