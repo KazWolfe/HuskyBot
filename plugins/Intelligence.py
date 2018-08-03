@@ -392,8 +392,8 @@ class Intelligence:
             breakdown[u.status] = breakdown.get(u.status, 0) + 1
 
         embed = discord.Embed(
-            title="User Count Report",
-            description=f"This guild currently has **{sum(breakdown.values())} total users**\n\n"
+            title=Emojis.WAVE + " User Count Report",
+            description=f"{ctx.guild.name} currently has **{sum(breakdown.values())} total users**.\n\n"
                         f"**Online Users:** {breakdown[discord.Status.online]}\n"
                         f"**Idle Users:** {breakdown[discord.Status.idle]}\n"
                         f"**DND Users:** {breakdown[discord.Status.dnd]}\n"

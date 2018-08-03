@@ -97,7 +97,7 @@ class GuildSecurity:
         self._guildsecurity_store.set('permittedBotList', permitted_bots)
 
         await ctx.send(embed=discord.Embed(
-            title=Emojis.CHECK + "Bot allowed to join guild.",
+            title=Emojis.CHECK + " Bot allowed to join guild.",
             description="The bot `{}` has been given permission to join the guild. This permission will be valid until "
                         "DakotaBot restarts.",
             color=Colors.SUCCESS
@@ -127,7 +127,7 @@ class GuildSecurity:
         self._config.set('guildSecurity', sec_config)
 
         await ctx.send(embed=discord.Embed(
-            title=Emojis.LOCK + "Role Protected!",
+            title=Emojis.LOCK + " Role Protected!",
             description=f"The role {role.mention} may now only be granted by using `/promote`.",
             color=Colors.SUCCESS
         ))

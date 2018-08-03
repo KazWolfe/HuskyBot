@@ -71,6 +71,7 @@ class Emojis:
     INBOX = "\U0001F4E5"
     MEMO = "\U0001F4DD"
     REFRESH = "\U0001F504"
+    WAVE = "\U0001F44B"
 
     # Mod shortcuts
     BAN = NO_ENTRY

@@ -171,7 +171,7 @@ class ServerLog:
         alert_channel = self.bot.get_channel(alert_channel)
 
         embed = discord.Embed(
-            title=Emojis.UNBAN + "User unbanned",
+            title=Emojis.UNBAN + " User unbanned",
             description=f"{user} was unbanned from the guild.",
             color=Colors.PRIMARY
         )

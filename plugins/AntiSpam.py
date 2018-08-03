@@ -396,7 +396,7 @@ class AntiSpam:
 
         # gen the embed here
         link_warning = discord.Embed(
-            title=Emojis.STOP + "Hey! Listen!",
+            title=Emojis.STOP + " Hey! Listen!",
             description=f"Hey {message.author.mention}! It looks like you posted a lot of links.\n\n"
                         f"In order to cut down on server spam, we have a limitation on the number of links "
                         f"you are allowed to have in a time period. Generally, you won't exceed this limit "
