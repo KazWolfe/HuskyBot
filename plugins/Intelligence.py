@@ -385,11 +385,23 @@ class Intelligence:
         See also:
             /help activeusercount - Get a count of active users on the guild.
         """
-        await ctx.send(embed=discord.Embed(
+
+        breakdown = {}
+
+        for u in ctx.guild.members:  # type: discord.Member
+            breakdown[u.status] = breakdown.get(u.status, 0) + 1
+
+        embed = discord.Embed(
             title="User Count Report",
-            description=f"This guild currently has **{len(ctx.guild.members)} total users**.",
+            description=f"This guild currently has **{sum(breakdown.values())} total users**\n\n"
+                        f"**Online Users:** {breakdown[discord.Status.online]}\n"
+                        f"**Idle Users:** {breakdown[discord.Status.idle]}\n"
+                        f"**DND Users:** {breakdown[discord.Status.dnd]}\n"
+                        f"**Offline Users:** {breakdown[discord.Status.offline]}",
             color=Colors.INFO
-        ))
+        )
+
+        await ctx.send(embed=embed)
 
     @commands.command(name="invitespy", brief="Find information about Guild invite", aliases=["invspy"])
     @commands.has_permissions(view_audit_log=True)

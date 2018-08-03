@@ -25,7 +25,7 @@ class BotAdmin:
         self.bot = bot
         self._config = WolfConfig.get_config()
         self._session_store = WolfConfig.get_session_store()
-        self._debugmode = self._config.get("developerMode", False)
+        self._devmode = self._config.get("developerMode", False)
 
         self._critical_plugins = ["BotAdmin"]
 
@@ -42,8 +42,10 @@ class BotAdmin:
         repo = git.Repo(search_parent_directories=True)
         sha = repo.head.object.hexsha
 
+        debug_str = '| Developer Build' if self._devmode else ''
+
         embed = discord.Embed(
-            title=self.bot.user.name + (" [DEBUG MODE]" if self._debugmode else ""),
+            title=f"About {self.bot.user.name} {debug_str}",
             description="This bot (known in code as **DakotaBot**) is a custom-made Discord moderation and management "
                         "utility bot. It's an implementation of the WolfBot platform for Discord, built on the popular "
                         "[discord.py rewrite](https://github.com/Rapptz/discord.py). It features seamless integration "
@@ -148,7 +150,7 @@ class BotAdmin:
             LOG.warning("A request was made to unload %s. Blocked.", plugin_name)
             return
 
-        if plugin_name == "Debug" and self._debugmode:
+        if plugin_name == "Debug" and self._devmode:
             await ctx.send(embed=discord.Embed(
                 title="Plugin Manager",
                 description="The `Debug` plugin may not be unloaded while Developer Mode is enabled."
@@ -293,7 +295,7 @@ class BotAdmin:
             LOG.warning("The %s module was requested to be disabled. Blocked.", plugin_name)
             return
 
-        if plugin_name == "Debug" and self._debugmode:
+        if plugin_name == "Debug" and self._devmode:
             await ctx.send(embed=discord.Embed(
                 title="Plugin Manager",
                 description="The `Debug` plugin may not be disabled while Developer Mode is enabled."
