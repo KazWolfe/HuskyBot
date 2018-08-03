@@ -1,10 +1,17 @@
-config/*.json
+# Ignore python's incessence to generate files
 *.py[cod]
 __pycache__/
-logs/
-.idea/*
-.idea
-*.iml
+
+# Prevent leaking things
+config/*.json
 *.db
 *.log
-venv
+logs/
+
+# Prevent IntelliJ from polluting everything
+idea/*
+.idea
+*.iml
+
+# Used for guild CTF challenges
+ctf

@@ -43,20 +43,25 @@ class BotAdmin:
         sha = repo.head.object.hexsha
 
         embed = discord.Embed(
-            title="DakotaBot" + (" [DEBUG MODE]" if self._debugmode else ""),
-            description="This is DakotaBot, a fork of the WolfBot core Discord bot platform. It is responsible for "
-                        "managing and assisting the moderators on the DIY Tech subreddit.",
+            title=self.bot.user.name + (" [DEBUG MODE]" if self._debugmode else ""),
+            description="This bot (known in code as **DakotaBot**) is a custom-made Discord moderation and management "
+                        "utility bot. It's an implementation of the WolfBot platform for Discord, built on the popular "
+                        "[discord.py rewrite](https://github.com/Rapptz/discord.py). It features seamless integration "
+                        "with any workflow, and some of the most powerful plugin management and integration features "
+                        "available in any commercial Discord bot. DakotaBot is built for speed and reliability for "
+                        "guilds of any size, as well as easy and intuitive administration.",
             color=Colors.INFO
         )
 
-        embed.add_field(name="Authors", value="KazWolfe, Clover", inline=False)
+        embed.add_field(name="Authors", value="[KazWolfe](https://github.com/KazWolfe), "
+                                              "[Clover](https://github.com/cclover550)", inline=False)
         embed.add_field(name="Bot Version", value=f"[`{sha[:8]}`]({GIT_URL}/commit/{sha})", inline=True)
         embed.add_field(name="Library Version", value=f"discord.py {discord.__version__}", inline=True)
         embed.add_field(name="Python Version", value=f"Python {platform.python_version()}")
         embed.add_field(name="Current Host", value=f"`{socket.gethostname()}`", inline=True)
 
-        embed.set_thumbnail(url=f"https://cdn.discordapp.com/avatars/{ctx.bot.user.id}/{ctx.bot.user.avatar}.png")
-        embed.set_footer(text="(c) 2018, KazWolfe | Rooooooo!",
+        embed.set_thumbnail(url=ctx.bot.user.avatar_url)
+        embed.set_footer(text="(c) 2018, KazWolfe | Andwooooooo!",
                          icon_url="https://avatars3.githubusercontent.com/u/5192145")
 
         await ctx.send(embed=embed)
@@ -345,17 +350,6 @@ class BotAdmin:
             description="The bot configuration has been reloaded.",
             color=Colors.INFO
         ))
-
-    # @config.command(name="save", brief="Save the config's current state")
-    # async def save_config(self, ctx: discord.ext.commands.Context):
-    #     """
-    #     Force a save of the current configuration.
-    #
-    #     This command will immediately save and dump the configuration to disk. This command is *usually* not necessary,
-    #     as config changes are always written to disk on write.
-    #     """
-    #
-    #     for config in WolfConfig.__cache__:
 
     @config.command(name="presence", brief="Set the bot's presence mode.")
     async def presence(self, ctx: discord.ext.commands.Context, presence_type: str, name: str, status: str):

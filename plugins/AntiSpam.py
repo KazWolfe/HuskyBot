@@ -1,6 +1,5 @@
 import asyncio
 import datetime
-import difflib
 import logging
 import math
 import re
@@ -220,8 +219,8 @@ class AntiSpam:
                 await message.channel.send(embed=discord.Embed(
                     title=Emojis.STOP + " Discord Invite Blocked",
                     description=f"Hey {message.author.mention}! It looks like you posted a Discord invite.\n\n"
-                                f"Here on DIY Tech, we have a strict no-invites policy in order to prevent spam "
-                                f"and advertisements. If you would like to post an invite, you may contact the "
+                                f"Here on {message.guild.name}, we have a strict no-invites policy in order to prevent "
+                                f"spam and advertisements. If you would like to post an invite, you may contact the "
                                 f"admins to request an invite code be whitelisted.\n\n"
                                 f"We apologize for the inconvenience.",
                     color=Colors.WARNING
@@ -534,7 +533,7 @@ class AntiSpam:
         if log_channel is not None:
             log_channel = message.guild.get_channel(log_channel)
 
-        # We can lazily delete link cooldowns on messages, instead of checking.
+        # We can lazily delete cooldowns on messages, instead of checking.
         if message.author.id in self.NONASCII_COOLDOWNS \
                 and self.NONASCII_COOLDOWNS[message.author.id][F_EXPIRY] < datetime.datetime.utcnow():
             del self.NONASCII_COOLDOWNS[message.author.id]
@@ -543,7 +542,7 @@ class AntiSpam:
         if CHECK_CONFIG['minMessageLength'] <= 0:
             return
 
-        # Users with MANAGE_MESSAGES are allowed to send as many links as they want.
+        # Users with MANAGE_MESSAGES are allowed to send as many nonascii things as they want.
         if message.author.permissions_in(message.channel).manage_messages:
             return
 
@@ -569,7 +568,8 @@ class AntiSpam:
                 description=f"Hey {message.author.mention}!\n\nIt looks like you posted a message containing a lot of "
                             f"non-ascii characters. In order to cut down on spam, we are a bit strict with this. We "
                             f"won't delete your message, but please keep ASCII spam off the server.\n\nContinuing to "
-                            f"spam ASCII messages may result in a ban. Thank you for keeping DIY Tech clean!"
+                            f"spam ASCII messages may result in a ban. Thank you for keeping {message.guild.name} "
+                            f"clean!"
             ), delete_after=90.0)
 
         cooldown_record['offenseCount'] += 1
@@ -603,40 +603,6 @@ class AntiSpam:
 
             # And purge their record, it's not needed anymore
             del self.NONASCII_COOLDOWNS[message.author.id]
-
-    async def nonunique_cooldown(self, message: discord.Message):
-        ANTISPAM_CONFIG = self._config.get('antiSpam', {})
-        CHECK_CONFIG = ANTISPAM_CONFIG.get('cooldowns', {}).get('nonUnique', DEFAULTS['nonUnique'])
-
-        # Prepare the logger
-        log_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
-        if log_channel is not None:
-            log_channel = message.guild.get_channel(log_channel)
-
-        # We can lazily delete cooldowns on messages, instead of checking.
-        if message.author.id in self.NONUNIQUE_COOLDOWNS \
-                and self.NONUNIQUE_COOLDOWNS[message.author.id][F_EXPIRY] < datetime.datetime.utcnow():
-            del self.NONUNIQUE_COOLDOWNS[message.author.id]
-
-        # Disable if min length is 0 or less
-        if CHECK_CONFIG['minMessageLength'] <= 0:
-            return
-
-        # Users with MANAGE_MESSAGES aren't restricted by nonunique processing
-        if message.author.permissions_in(message.channel).manage_messages:
-            return
-
-        user_record = self.NONUNIQUE_COOLDOWNS.setdefault(message.author.id, {
-            "cache": {},
-            F_EXPIRY: None
-        })
-        cache = user_record['cache']
-
-        scores = []
-
-        for cached_text in cache:
-            diff = difflib.SequenceMatcher(None, message.content, cached_text).ratio()
-            scores.append(diff)
 
     @commands.group(name="antispam", aliases=['as'], brief="Manage the Antispam configuration for the bot")
     @commands.has_permissions(manage_messages=True)

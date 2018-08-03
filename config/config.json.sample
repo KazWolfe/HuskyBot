@@ -1,10 +1,4 @@
 {
   "apiKey": "<PLACE API KEY HERE>",
-  "plugins": [
-    "Debug"
-  ],
-  "specialChannels": {
-    "logs": 12341234,
-    "staff-notifications": 12341234
-  }
+  "guildId": <PLACE GUILD ID HERE>
 }

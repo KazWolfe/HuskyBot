@@ -1,6 +1,0 @@
-[submodule "libs/discord.py"]
-	path = libs/discord.py
-	url = https://github.com/Rapptz/discord.py.git
-[submodule "libs/discordpy"]
-	path = libs/discordpy
-	url = https://github.com/Rapptz/discord.py.git

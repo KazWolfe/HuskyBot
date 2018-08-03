@@ -1,4 +1,5 @@
 import json
+import os
 from threading import Lock
 
 
@@ -63,6 +64,9 @@ class WolfConfig:
         if self._path is None:
             return
 
+        if create_if_nonexistent:
+            os.makedirs(os.path.dirname(self._path), exist_ok=True)
+
         try:
             with open(self._path, 'r') as f:
                 self._config = json.loads(f.read())
@@ -76,14 +80,14 @@ class WolfConfig:
         if self._path is None:
             return
 
-        with open(self._path, 'w') as f:
-            f.write(json.dumps(self._config, sort_keys=True, default=override_dumper))
+        with open(self._path, 'w') as config_file:
+            json.dump(self._config, config_file, sort_keys=True, default=override_dumper)
 
 
 __cache__ = {}
 
 
-def get_config(name: str = 'config', create_if_nonexistent: bool = False) -> WolfConfig:
+def get_config(name: str = 'config', create_if_nonexistent: bool = True) -> WolfConfig:
     """
     Get the bot's current persistent configuration (thread-safe).
 

@@ -29,7 +29,7 @@ class WolfRouter:
 
         # This is discordpy related bullshit, because we need to be able to
         # pass a self()
-        path_route[method.upper()]['cog'] = plugin
+        path_route[method.upper()]['plugin'] = plugin
 
     def remove_method(self, path: str, method: str):
         """
@@ -65,7 +65,19 @@ class WolfRouter:
                 del self.routes[p]
 
     def unload_plugin(self, instance):
-        self.remove_paths(f"/{type(instance).__name__.lower()}")
+        plugin_name = instance.__qualname__.split('.')[-2]
+
+        for path in list(self.routes.keys()):
+            path_o = self.routes[path]
+
+            for method in path_o.keys():
+                method_o = path_o[method]
+
+                if method_o['plugin'] == plugin_name:
+                    del self.routes[path]
+
+            if len(path_o.keys()) == 0:
+                del self.routes[path]
 
     def handle(self, bot: commands.Bot):
         async def wrapped(request: web.BaseRequest):

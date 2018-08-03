@@ -10,7 +10,6 @@ import traceback
 
 # discord.py imports
 import discord
-import discord.ext.commands.bot as BotClass
 # aiohttp/web api support
 from aiohttp import web
 from discord.ext import commands
@@ -26,7 +25,6 @@ BOT_CONFIG = WolfConfig.get_config()
 LOCAL_STORAGE = WolfConfig.get_session_store()
 
 initialized = False
-
 
 # Determine restart reason (pretty mode) - HACK FOR BOT INIT
 restart_reason = BOT_CONFIG.get("restartReason", "start")
@@ -83,13 +81,15 @@ async def initialize():
 
     # Lock the bot to a single guild
     if not BOT_CONFIG.get("developerMode", False):
-        if BOT_CONFIG.get("guildId") is None:
-            LOG.error("No Guild ID specified! Quitting.")
-            exit(127)
-
-        for guild in bot.guilds:
-            if guild.id != BOT_CONFIG.get("guildId"):
-                guild.leave()
+        if BOT_CONFIG.get("guildId") is not None:
+            for guild in bot.guilds:
+                if guild.id != BOT_CONFIG.get("guildId"):
+                    LOG.warning(f"Bot was a member of unauthorized guild {guild.name} (ID {guild.id}). Leaving...")
+                    await guild.leave()
+        else:
+            if len(bot.guilds) > 0:
+                LOG.error("Bot is bound to multiple guilds without being in developer mode. Can not continue.")
+                exit(127)
 
     # Disable help, and register our own
     bot.remove_command("help")
@@ -148,10 +148,16 @@ async def on_ready():
 
 
 @bot.event
-async def on_guild_join(guild):
+async def on_guild_join(guild: discord.Guild):
+    if BOT_CONFIG.get("guildId") is None:
+        BOT_CONFIG.set("guildId", guild.id)
+        LOG.info(f"This bot has been locked to {guild.name} (ID {guild.id})!")
+        return
+
     if not BOT_CONFIG.get("developerMode", False):
         if guild.id != BOT_CONFIG.get("guildId"):
-            guild.leave()
+            LOG.warning(f"The bot has joined an unauthorized guild {guild.name} (ID {guild.id})! Leaving.")
+            await guild.leave()
 
 
 @bot.event
@@ -363,7 +369,7 @@ async def help_command(ctx: commands.Context, *command: str):
         command = command.split()
 
     # noinspection PyProtectedMember
-    await BotClass._default_help_command(ctx, *command)
+    await discord.ext.commands.bot._default_help_command(ctx, *command)
 
 
 def get_developers():
@@ -382,9 +388,9 @@ async def start_webserver():
 
     ssl_context = None
     if http_config.get('ssl_cert', None) is not None:
-        with open(http_config.get('ssl_cert', 'certs/cert.pem'), 'rb') as cert:
+        with open(http_config.get('ssl_cert', 'certs/cert.pem'), 'r') as cert:
             ssl_context = ssl.SSLContext()
-            ssl_context.load_cert_chain(cert)
+            ssl_context.load_cert_chain(cert.read())
 
     for method in ["GET", "HEAD", "POST", "PATCH", "PUT", "DELETE", "VIEW"]:
         webapp.router.add_route(method, '/{tail:.*}', WolfHTTP.get_router().handle(bot))
@@ -397,6 +403,19 @@ async def start_webserver():
 
 
 if __name__ == '__main__':
+    # prompt for api key if necessary
+    if BOT_CONFIG.get('apiKey') is None:
+        if LOCAL_STORAGE.get('daemonMode', False):
+            LOG.error("The bot does not have an API key assigned to it. Please run the bot without a daemon to set the "
+                      "API key.")
+            exit(1)
+        else:
+            print("The bot does not have an API key defined. Please enter one below...")
+            key = input("Discord API Key? ")
+
+            BOT_CONFIG.set('apiKey', key)
+            print("The API key has been set!")
+
     LOG.info(f"Set log path to {LOCAL_STORAGE.get('logPath')}")
     if LOCAL_STORAGE.get("daemonMode", False):
         LOG.info("Bot loaded in daemon mode! Logging and certain features have been altered to better utilize daemon "

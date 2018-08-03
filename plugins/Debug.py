@@ -165,7 +165,7 @@ class Debug:
 
         # Block *everyone* except Kaz from running eval
         if ctx.author.id != 142494680158961664:
-            ctx.send(embed=discord.Embed(
+            await ctx.send(embed=discord.Embed(
                 title="Access denied!",
                 description="Due to the danger of this command, access to it has been blocked for this account.",
                 color=Colors.DANGER
@@ -204,7 +204,7 @@ class Debug:
 
         # Block *everyone* except Kaz from running feval
         if ctx.author.id != 142494680158961664:
-            ctx.send(embed=discord.Embed(
+            await ctx.send(embed=discord.Embed(
                 title="Access denied!",
                 description="Due to the danger of this command, access to it has been blocked for this account.",
                 color=Colors.DANGER
