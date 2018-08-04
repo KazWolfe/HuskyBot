@@ -1,5 +1,6 @@
 import datetime
 import logging
+import random
 import re
 
 import discord
@@ -122,3 +123,61 @@ class ChannelContextConverter(dict, commands.Converter):
                 name = str(list(c.name for c in channels))
 
         return {"name": name, "channels": channels}
+
+
+# noinspection PyMethodMayBeStatic
+class NicknameConverter(str, commands.Converter):
+    async def convert(self, ctx, argument):
+        providers = {
+            "pony": self.pony,
+            "animal": self.animal
+        }
+
+        # If this doesn't look like a provider, just pass it through.
+        if not (argument.startswith("%") and argument.endswith("%")):
+            return argument
+
+        provider_name = argument[1:-1].lower()  # remove the %s
+
+        try:
+            return providers[provider_name]()
+        except KeyError:
+            raise commands.BadArgument(f"\"{argument}\" is not a valid Nickname Provider.")
+
+    # NICKNAME PROVIDERS BELOW THIS LINE #
+    def pony(self):
+        styles = [
+            "{character} {suffix}",
+            "{prefix} {character}"
+        ]
+        characters = ["Rainbow Dash", "Princess Celestia", "Applejack", "Twilight Sparkle", "Fluttershy", "Rarity",
+                      "Pinkie Pie", "Spike", "Princess Luna", "Channcelor Neighsay", "Nightmare Moon"]
+        suffixes = ["Is Cute", "Is Pretty", "Is Nice", "Is Awesome", "Is Perfect", "Is Fun", "Is Great", "Rocks",
+                    "Rules", "Wins"]
+        prefixes = ["Sleepy", "Funny", "Pretty", "I Love", "In Love With"]
+
+        pd_nick: str = random.choice(styles).format(**{
+            "character": random.choice(characters),
+            "suffix": random.choice(suffixes),
+            "prefix": random.choice(prefixes)
+        })
+
+        nick_mode = random.randint(1, 3)
+        if nick_mode >= 2:
+            pd_nick = pd_nick.replace(" ", "")
+        if nick_mode >= 3:
+            pd_nick += str(random.randint(1, 9999))
+
+        return pd_nick
+
+    def animal(self):
+        adjective = ["angry", "beautiful", "big", "black", "blue", "brown", "crazy", "golden", "green", "happy",
+                     "heavy", "lazy", "orange", "organic", "purple", "red", "sad", "silver", "small", "ticklish",
+                     "tiny", "white", "yellow"]
+        species = ["bear", "bird", "butterfly", "cat", "dog", "duck", "elephant", "fish", "frog", "goose", "gorilla",
+                   "koala", "ladybug", "leopard", "lion", "meercat", "mouse", "ostrich", "panda", "peacock", "rabbit",
+                   "snake", "swan", "tiger", "wolf", "zebra"]
+
+        number = random.randint(1, 9999)
+
+        return f"{random.choice(adjective).capitalize()}{random.choice(species).capitalize()}{number}"

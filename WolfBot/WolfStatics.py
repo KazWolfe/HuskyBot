@@ -67,11 +67,12 @@ class Emojis:
     ROBOT = "\U0001F916"
     CHECK = "\U00002705"
     X = "\U0000274C"
-    LOCK = "\U0001F582"
+    LOCK = "\U0001F512"
     INBOX = "\U0001F4E5"
     MEMO = "\U0001F4DD"
     REFRESH = "\U0001F504"
     WAVE = "\U0001F44B"
+    NAMETAG = "\U0001F4DB"
 
     # Mod shortcuts
     BAN = NO_ENTRY

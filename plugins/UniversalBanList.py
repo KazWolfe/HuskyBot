@@ -1,9 +1,10 @@
 import logging
+import re
 
 import discord
 from discord.ext import commands
 
-from WolfBot import WolfUtils
+from WolfBot import WolfUtils, WolfStatics
 
 LOG = logging.getLogger("DakotaBot.Plugin." + __name__)
 
@@ -29,7 +30,8 @@ class UniversalBanList:
 
         # UBL list of phrases to target *just usernames*.
         self._ubl_usernames = [
-            "hitler"
+            "hitler",
+            WolfStatics.Regex.INVITE_REGEX
         ]
 
         LOG.info("Loaded plugin!")
@@ -42,7 +44,7 @@ class UniversalBanList:
             return
 
         for ubl_term in self._ubl_phrases:
-            if ubl_term.lower() in message.content.lower():
+            if re.search(ubl_term, message.content, re.IGNORECASE) is not None:
                 await message.author.ban(reason=f"[AUTOMATIC BAN - UBL Module] User used UBL keyword `{ubl_term}`",
                                          delete_message_days=5)
                 LOG.info("Banned UBL triggering user (context %s, keyword %s, from %s in %s): %s", context,
@@ -62,7 +64,7 @@ class UniversalBanList:
         blacklist = self._ubl_phrases + self._ubl_usernames
 
         for ubl_term in blacklist:
-            if ubl_term.lower() in member.display_name.lower():
+            if re.search(ubl_term, member.display_name, re.IGNORECASE) is not None:
                 await member.ban(reason=f"[AutoBan - UBL Module] New user's name contains UBL keyword `{ubl_term}`",
                                  delete_message_days=0)
                 LOG.info("Banned UBL triggering new join of user %s (matching UBL %s)", member, ubl_term)
@@ -77,9 +79,9 @@ class UniversalBanList:
         blacklist = self._ubl_phrases + self._ubl_usernames
 
         for ubl_term in blacklist:
-            if after.nick is not None and ubl_term.lower() in after.nick.lower():
+            if after.nick is not None and re.search(ubl_term, after.nick, re.IGNORECASE) is not None:
                 u_type = 'nickname'
-            elif after.name is not None and ubl_term.lower() in after.name.lower():
+            elif after.name is not None and re.search(ubl_term, after.name, re.IGNORECASE):
                 u_type = 'username'
             else:
                 continue
