@@ -2,6 +2,7 @@ import datetime
 import logging
 import random
 import re
+import uuid
 
 import discord
 from discord.ext import commands
@@ -130,7 +131,8 @@ class NicknameConverter(str, commands.Converter):
     async def convert(self, ctx, argument):
         providers = {
             "pony": self.pony,
-            "animal": self.animal
+            "animal": self.animal,
+            "deleted": self.deleted
         }
 
         # If this doesn't look like a provider, just pass it through.
@@ -181,3 +183,6 @@ class NicknameConverter(str, commands.Converter):
         number = random.randint(1, 9999)
 
         return f"{random.choice(adjective).capitalize()}{random.choice(species).capitalize()}{number}"
+
+    def deleted(self):
+        return "Deleted User {}".format(str(uuid.uuid4())[:8])

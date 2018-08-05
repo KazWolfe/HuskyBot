@@ -578,6 +578,7 @@ class ModTools:
         Valid Providers:
             - PONY: Generate a My Little Pony nickname for this user.
             - ANIMAL: Generate an <adjective><species> nickname for this user.
+            - DELETED: Generate a Deleted User nickname, like those in network banned accounts
 
         Parameters:
             member - The member whose nickname to alter
