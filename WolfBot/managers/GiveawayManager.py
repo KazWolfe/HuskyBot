@@ -103,11 +103,15 @@ class GiveawayManager:
             if reaction.emoji != Emojis.GIVEAWAY:
                 continue
 
-            async for user in reaction.users():
-                if user == self.bot.user:
-                    continue
+            contending_users += await reaction.users().flatten()
 
-                contending_users += user
+        LOG.info(f"{len(contending_users)} joined {giveaway.name}")
+
+        # Remove the bot
+        try:
+            contending_users.remove(self.bot.user)
+        except ValueError as _:
+            pass
 
         winning_users = self._rng.sample(contending_users, min(giveaway.winner_count, len(contending_users)))
 
