@@ -105,7 +105,7 @@ class GiveawayManager:
 
             contending_users += await reaction.users().flatten()
 
-        LOG.info(f"{len(contending_users)} joined {giveaway.name}")
+        LOG.info(f"{len(contending_users)} users joined the giveaway {giveaway.name}")
 
         # Remove the bot
         try:
@@ -114,6 +114,7 @@ class GiveawayManager:
             pass
 
         winning_users = self._rng.sample(contending_users, min(giveaway.winner_count, len(contending_users)))
+        LOG.info(f"Winners for \"{name}\": {winning_users}")
 
         if len(winning_users) == 1:
             win_text = f"{f'Congratulations to our winner, {winning_users[0].mention}!'}{wcl}"

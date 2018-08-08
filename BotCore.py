@@ -283,6 +283,10 @@ async def on_command_error(ctx, error: commands.CommandError):
         LOG.error("Error running command %s. See below for trace.\n%s",
                   ctx.message.content, ''.join(traceback.format_exception(type(error), error, error.__traceback__)))
 
+        if command_name.lower() in ["eval", "feval", "requestify"]:
+            LOG.info(f"Suppressed critical error reporting for command {command_name}")
+            return
+
         # Send it over to the main error logger as well.
         raise error
 
