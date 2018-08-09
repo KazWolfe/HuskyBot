@@ -4,7 +4,7 @@ import discord
 from discord.ext import commands
 
 from WolfBot import WolfConfig
-from WolfBot.WolfStatics import Colors
+from WolfBot.WolfStatics import *
 
 LOG = logging.getLogger("DakotaBot.Plugin." + __name__)
 
@@ -61,7 +61,7 @@ class ReactionPromote:
         promotion_config = self._config.get('promotions', {})
 
         if (str(payload.user_id) + str(payload.message_id)) in self.roleRemovalBlacklist:
-            LOG.warning("Removal throttled.")
+            # LOG.warning("Removal throttled.")
             self.roleRemovalBlacklist.remove(str(payload.user_id) + str(payload.message_id))
             return
 
@@ -110,7 +110,7 @@ class ReactionPromote:
             ))
             return
 
-    @rpromote.command(name="addPromotion", brief="Add a new promotion to the configs")
+    @rpromote.command(name="add", brief="Add a new promotion to the configs")
     async def add_promotion(self, ctx: discord.ext.commands.Context, channel: discord.TextChannel, message_id: int,
                             emoji: str, role: discord.Role):
         """
@@ -137,6 +137,35 @@ class ReactionPromote:
         """
         promotion_config = self._config.get('promotions', {})
 
+        try:
+            message: discord.Message = await channel.get_message(message_id)
+        except discord.NotFound:
+            await ctx.send(embed=discord.Embed(
+                title=Emojis.WARNING + " Error Adding ReactionPromote",
+                description="The message you specified could not be found. Please double-check all message IDs.",
+                color=Colors.ERROR
+            ))
+            return
+
+        try:
+            await message.add_reaction(emoji)
+        except discord.Forbidden:
+            await ctx.send(embed=discord.Embed(
+                title=Emojis.WARNING + " Error Adding ReactionPromote",
+                description="The bot does not have permission to add a reaction to the specified message. Please "
+                            "check channel permissions.",
+                color=Colors.ERROR
+            ))
+            return
+        except (discord.NotFound, discord.InvalidArgument):
+            await ctx.send(embed=discord.Embed(
+                title=Emojis.WARNING + " Error Adding ReactionPromote",
+                description="The emoji specified is invalid or could otherwise not be processed. Please double-check "
+                            "that you are using a valid emoji.",
+                color=Colors.ERROR
+            ))
+            return
+
         message_config = promotion_config.setdefault(str(channel.id), {}).setdefault(str(message_id), {})
 
         message_config[emoji] = role.id
@@ -144,7 +173,42 @@ class ReactionPromote:
 
         await ctx.send(embed=discord.Embed(
             title="Reaction Promotes",
-            description=f"The promotion {emoji} => {role.mention} has been registered for promotions!",
+            description=f"Users reacting to the specified message with {emoji} will now receive "
+                        f"the role {role.mention}.",
+            color=Colors.SUCCESS
+        ))
+
+    @rpromote.command(name="remove", brief="Remove a promotion to the configs")
+    async def remove_promotion(self, ctx: discord.ext.commands.Context, channel: discord.TextChannel, message_id: int,
+                               emoji: str):
+
+        promotion_config = self._config.get('promotions', {})
+
+        try:
+            del promotion_config[str(channel.id)][str(message_id)][emoji]
+        except KeyError:
+            await ctx.send(embed=discord.Embed(
+                title="Reaction Promotes",
+                description="Could not delete the specified promotion, because it does not exist.",
+                color=Colors.DANGER
+            ))
+            return
+        self._config.set('promotions', promotion_config)
+
+        # Clean up the entry as well.
+        try:
+            message: discord.Message = await channel.get_message(message_id)
+            reaction: discord.Reaction = discord.utils.get(message.reactions, emoji=emoji)
+            async for user in reaction.users():
+                self.roleRemovalBlacklist.append(str(user.id) + str(message_id))
+                await message.remove_reaction(emoji, user)
+
+        except discord.NotFound as _:
+            pass
+
+        await ctx.send(embed=discord.Embed(
+            title="Reaction Promotes",
+            description=f"The specified promotion has been successfully deleted.",
             color=Colors.SUCCESS
         ))
 
