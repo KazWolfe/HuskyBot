@@ -3,6 +3,7 @@ import datetime
 import logging
 import math
 import re
+from difflib import SequenceMatcher
 
 import discord
 from discord.ext import commands
@@ -44,11 +45,11 @@ DEFAULTS = {
         'minutes': 5  # Cooldown timer (minutes)
     },
     "nonUnique": {
-        "threshold": 0.25,  # Diff threshold before considering a message "similar"
+        "threshold": 0.75,  # Diff threshold before considering a message "similar"
         "cacheSize": 3,  # The number of "mostly unique" messages to keep in cache.
-        "minutes": 30,  # Cooldown time (in minutes)
+        "minutes": 5,  # Cooldown time (in minutes)
         "warnLimit": 5,  # number of matching non-uniques before issuing a warning
-        "banLimit": 10  # number of matching non-uniques before issuing a ban
+        "banLimit": 15  # number of matching non-uniques before issuing a ban
     }
 }
 
@@ -106,7 +107,8 @@ class AntiSpam:
             self.prevent_discord_invites(message),
             self.attachment_cooldown(message),
             self.prevent_link_spam(message),
-            self.block_nonascii_spam(message)
+            self.block_nonascii_spam(message),
+            self.block_nonunique_spam(message)
         ]
 
         for event in events:
@@ -604,6 +606,81 @@ class AntiSpam:
             # And purge their record, it's not needed anymore
             del self.NONASCII_COOLDOWNS[message.author.id]
 
+    async def block_nonunique_spam(self, message: discord.message):
+        ANTISPAM_CONFIG = self._config.get('antiSpam', {})
+        CHECK_CONFIG = ANTISPAM_CONFIG.get('cooldowns', {}).get('nonUnique', DEFAULTS['nonUnique'])
+
+        # Prepare the logger
+        log_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
+        if log_channel is not None:
+            log_channel = message.guild.get_channel(log_channel)
+
+        # Users with MANAGE_MESSAGES are allowed to send as much spam as they want
+        if message.author.permissions_in(message.channel).manage_messages:
+            return
+
+        # Setting threshold to 0 disables this check.
+        if CHECK_CONFIG['threshold'] == 0:
+            return
+
+        # get cooldown object for this user
+        cooldown_record: dict = self.NONUNIQUE_COOLDOWNS.setdefault(message.author.id, {
+            F_EXPIRY: datetime.datetime.utcnow() + datetime.timedelta(minutes=CHECK_CONFIG['minutes']),
+            "messageCache": {}
+        })
+        message_cache = cooldown_record['messageCache']  # type: dict
+
+        for s_message in message_cache.keys():
+            diff = SequenceMatcher(None, s_message.lower(), message.content.lower()).ratio()
+
+            if diff >= CHECK_CONFIG['threshold']:
+                LOG.info(f"Message from {message.author} is too similar to past message, strike added. "
+                         f"Similarity = {diff:.3f}")
+                message_cache[s_message] += 1
+                break
+        else:
+            while len(message_cache) >= CHECK_CONFIG['cacheSize']:
+                # Delete the first item in the cache, until the cache is under min size.
+                del message_cache[list(message_cache.keys())[0]]
+
+            message_cache[message.content.lower()] = 0
+
+        total_infractions = sum(message_cache.values())
+
+        if total_infractions == CHECK_CONFIG['warnLimit'] and cooldown_record.get('wasntWarned', True):
+            await message.channel.send(embed=discord.Embed(
+                title=Emojis.STOP + " Calm your jets!",
+                description=f"Hey there {message.author.mention}!\n\nIt looks like you're sending a bunch of "
+                            f"similar messages very quickly. Please calm down on the spam there! Someone will be "
+                            f"around to help you soon.\n\nPatience is a virtue!",
+                color=Colors.WARNING
+            ), delete_after=90.0)
+
+            log_embed = discord.Embed(
+                description=f"User {message.author} has posted a high number of non-unique messages in a short "
+                            f"timespan. Please investigate.",
+                color=Colors.WARNING
+            )
+
+            log_embed.add_field(name="Timestamp", value=WolfUtils.get_timestamp(), inline=True)
+            log_embed.add_field(name="Most Recent Channel", value=message.channel.mention, inline=True)
+
+            log_embed.set_author(name="Possible non-unique spam!", icon_url=message.author.avatar_url)
+
+            log_embed.set_footer(text=f"Strike {total_infractions} of {CHECK_CONFIG['banLimit']}, "
+                                      f"resets {cooldown_record[F_EXPIRY].strftime(DATETIME_FORMAT)}")
+
+            await log_channel.send(embed=log_embed)
+
+            cooldown_record['wasntWarned'] = False
+
+        elif total_infractions == CHECK_CONFIG['banLimit']:
+            await message.author.ban(reason=f"[AUTOMATIC BAN - AntiSpam Module] User sent {CHECK_CONFIG['banLimit']} "
+                                            f"nonunique messages in a {CHECK_CONFIG['minutes']} minute period.",
+                                     delete_message_days=1)
+
+            del self.NONUNIQUE_COOLDOWNS[message.author.id]
+
     @commands.group(name="antispam", aliases=['as'], brief="Manage the Antispam configuration for the bot")
     @commands.has_permissions(manage_messages=True)
     async def asp(self, ctx: commands.Context):
@@ -889,6 +966,7 @@ class AntiSpam:
                 description="The `threshold` value must be between 0 and 1!",
                 color=Colors.DANGER
             ))
+            return
 
         nonascii_config['minutes'] = cooldown_minutes
         nonascii_config['banLimit'] = ban_limit
@@ -902,6 +980,62 @@ class AntiSpam:
             description=f"The non-ASCII module of AntiSpam has been set to scan messages over **{min_length} "
                         f"characters** for a non-ASCII **threshold of {threshold}**. Users will be automatically "
                         f"banned for posting **{ban_limit} messages** in a **{cooldown_minutes} minute** period.",
+            color=Colors.SUCCESS
+        ))
+
+    @asp.command(name="nonUniqueCooldown", brief="Set non-unique message cooldown limits/thresholds")
+    @commands.has_permissions(manage_guild=True)
+    async def nonuniqe_cooldown(self, ctx: commands.Context, threshold: int, cache_size: int, cooldown_minutes: int,
+                                warn_limit: int, ban_limit: int):
+        """
+        Configure cooldowns/antispam system for non-unique messages.
+
+        When a message is received by DakotaBot, the system checks it for uniqueness against a cache of previous
+        messages from that user. If a message is found to already be in that cache, a "strike" is added. Once a user
+        accrues a set number of strikes in the configured time period, the user will either be warned publicly, or
+        banned from the guild.
+
+        Parameters:
+            threshold - A number between zero and one that determines how "similar" a message needs to be before being
+                        considered a duplicate. Set to 0 to disable this check. Default: 0.75
+            cache_size - The number of back messages to keep in cache for any given user. This value must be above one
+                         to prevent issues. The cache can not exceed 20 messages. Default: 3
+            cooldown_minutes - The number of minutes to keep a cooldown period active. Like most other antispam
+                               commands, this counts from the first message sent. Default: 5
+            warn_limit - The number of non-unique messages to tolerate before issuing a warning to a user. Default: 5
+            ban_limit - The number of non-unique messages to tolerate before banning a user. Default: 15
+        """
+
+        as_config = self._config.get('antiSpam', {})
+        nonunique_config = as_config.setdefault('cooldowns', {}).setdefault('nonUnique', DEFAULTS['nonUnique'])
+
+        if not 0 <= threshold <= 1:
+            await ctx.send(embed=discord.Embed(
+                title="Configuration Error",
+                description="The `threshold` value must be between 0 and 1!",
+                color=Colors.DANGER
+            ))
+            return
+
+        if not 1 <= threshold <= 20:
+            await ctx.send(embed=discord.Embed(
+                title="Configuration Error",
+                description="The `cache_size` value must be between 1 and 20!",
+                color=Colors.DANGER
+            ))
+            return
+
+        nonunique_config['minutes'] = cooldown_minutes
+        nonunique_config['threshold'] = threshold
+        nonunique_config['cacheSize'] = cache_size
+        nonunique_config['warnLimit'] = warn_limit
+        nonunique_config['banLimit'] = ban_limit
+
+        self._config.set('antiSpam', as_config)
+
+        await ctx.send(embed=discord.Embed(
+            title="AntiSpam Non-Unique Configuration Updated!",
+            description="The configuration has been successfully saved. Changes have been applied.",
             color=Colors.SUCCESS
         ))
 
