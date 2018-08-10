@@ -1,6 +1,6 @@
 from enum import Enum, IntEnum
 
-DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
+DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S UTC"
 
 GIT_URL = "https://www.github.com/KazWolfe/DakotaBot"
 

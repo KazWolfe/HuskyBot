@@ -1,9 +1,8 @@
 import asyncio
+import discord
 import logging
 import random
 from datetime import datetime
-
-import discord
 from discord.ext import commands
 
 from WolfBot import WolfConfig
@@ -136,9 +135,7 @@ class Fun:
             84374504964358144: {"a": 4.94, "c": 6.17, "i": 7.79, "otp": "DIY Tech"},  # Clover
             336301511942340608: {"a": 6.97, "c": 5.99, "i": 7.50, "otp": "<@418530320707747868> \U0001f49e"},  # Court
             418530320707747868: {"a": 10, "c": 10, "i": 10, "otp": "<@336301511942340608> \U0001f49e"},  # DakotaBot
-            118559596284608512: {"a": 6.41, "c": 2.74, "i": 9.44, "otp": "Whiskey"},  # Carl
             237569958903545857: {"a": 7.01, "c": 3.0, "i": 8.74},  # Squeegee
-            143435198145626112: {"a": 6.75, "c": 9.03, "i": 7.82, "otp": "VFR800F 2014"},  # Alice
             128882954343546880: {"a": 0, "c": 0, "i": 0}  # Marahute
         }
 
@@ -267,7 +264,8 @@ class Fun:
 
         fixed_users = {
             self.bot.user.id: "GOD OF THE WORLD",  # The bot
-            142494680158961664: "SECURITY TEAM"  # Kaz
+            142494680158961664: "SECURITY TEAM",  # Kaz
+            255802794244571136: "BITCH SLAPPED BY JROC WHILE ENTERING SHELTER"  # CritZ
         }
 
         rng = random.Random((user.id + datetime.utcnow().toordinal()) ^ self._master_rng_seed)
