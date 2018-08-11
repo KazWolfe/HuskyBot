@@ -197,8 +197,6 @@ class GuildSecurity:
 
         await member.add_roles(role, reason=f"Promoted by {confirming_user}")
 
-        await self.bot.wait_for('member_update', timeout=10.0, check=lambda b, a: role in a.roles)
-
         allowed_promotions = self._guildsecurity_store.get("allowedPromotions", {})
         allowed_promotions[member.id].remove(role.id)
         self._guildsecurity_store.set("allowedPromotions", allowed_promotions)
