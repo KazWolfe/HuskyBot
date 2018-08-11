@@ -229,10 +229,15 @@ class ServerLog:
         await alert_channel.send(embed=embed)
 
     async def on_message_delete(self, message: discord.Message):
+        logger_config = self._config.get("loggers", {})
+
         if message.guild is None:
             return
 
-        if "messageDelete" not in self._config.get("loggers", {}).keys():
+        if "messageDelete" not in logger_config.keys():
+            return
+
+        if message.channel.id in logger_config.get('__global__', {}).get("ignoredChannels", []):
             return
 
         server_log_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, -1)
@@ -273,10 +278,15 @@ class ServerLog:
         await alert_channel.send(embed=embed)
 
     async def on_message_edit(self, before: discord.Message, after: discord.Message):
+        logger_config = self._config.get('loggers', {})
+
         if after.guild is None:
             return
 
-        if "messageEdit" not in self._config.get("loggers", {}).keys():
+        if "messageEdit" not in logger_config.keys():
+            return
+
+        if after.channel.id in logger_config.get('__global__', {}).get("ignoredChannels", []):
             return
 
         alert_channel = self._config.get('specialChannels', {}).get(ChannelKeys.MESSAGE_LOG.value, None)
@@ -476,6 +486,82 @@ class ServerLog:
             title="Log refresh success!",
             description=f"The server logs were successfully refreshed, and are now available at {new_channel.mention}. "
                         f"The bot's config has been automatically updated.",
+            color=Colors.SUCCESS
+        ))
+
+    @logger.command(name="ignoreChannel", brief="Ignore certain log events for a channel")
+    async def ignore_channel(self, ctx: commands.Context, channel: discord.TextChannel):
+        """
+        Exclude a channel from generating logging events.
+
+        This command may be used to mark certain channels as "sensitive", and therefore not appear in server logs. This
+        is often used to block information leaks from restricted channels, as well as other possible security holes.
+
+        Parameters:
+            channel - The channel reference (ID, mention, name) to add to the exclusion list.
+
+        Example Commands:
+            /logger ignoreChannel #secret-admins - Block "#secret-admins" from generating log events.
+
+        See also:
+            /logger unignoreChannel - Remove a channel from the exclusion list.
+        """
+
+        logger_settings: dict = self._config.get('loggers', {})
+        global_settings: dict = logger_settings.setdefault("__global__", {})
+        ignored_channels: list = global_settings.setdefault("ignoredChannels", [])
+
+        if channel.id in ignored_channels:
+            await ctx.send(embed=discord.Embed(
+                title="Channel Already Excluded!",
+                description=f"The channel {channel.mention} has already been excluded from logging events.",
+                colors=Colors.WARNING
+            ))
+
+        ignored_channels.append(channel.id)
+        self._config.set('loggers', logger_settings)
+
+        await ctx.send(embed=discord.Embed(
+            title="Channel Excluded!",
+            description=f"The channel {channel.mention} will no longer generate log events for loggers that support "
+                        f"the channel blacklist feature.",
+            color=Colors.SUCCESS
+        ))
+
+    @logger.command(name="unignoreChannel", brief="Remove a logging ignore on a specified channel.")
+    async def unignore_channel(self, ctx: commands.Context, channel: discord.TextChannel):
+        """
+        Remove a channel exclusion on logging events.
+
+        This command may be used to remove exclusions put in place by /logger ingoreChannel.
+
+        Parameters:
+            channel - The channel reference (ID, mention, name) to add to the exclusion list.
+
+        Example Commands:
+            /logger unignoreChannel #secret-admins - Allow "#secert-admins" to generate log events again.
+
+        See also:
+            /logger ignoreChannel - Add a channel to the exclusion list.
+        """
+
+        logger_settings: dict = self._config.get('loggers', {})
+        global_settings: dict = logger_settings.setdefault("__global__", {})
+        ignored_channels: list = global_settings.setdefault("ignoredChannels", [])
+
+        if channel.id not in ignored_channels:
+            await ctx.send(embed=discord.Embed(
+                title="Channel Not Excluded!",
+                description=f"The channel {channel.mention} is currently not excluded from generating logging events.",
+                colors=Colors.WARNING
+            ))
+
+        ignored_channels.remove(channel.id)
+        self._config.set('loggers', logger_settings)
+
+        await ctx.send(embed=discord.Embed(
+            title="Channel Exclusion Removed!",
+            description=f"The channel {channel.mention} will generate logging events again.",
             color=Colors.SUCCESS
         ))
 
