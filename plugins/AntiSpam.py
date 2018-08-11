@@ -67,12 +67,18 @@ class AntiSpam:
         self.bot = bot
         self._config = WolfConfig.get_config()
 
+        # Code-level configs
+        self.__cache_time__ = 60 * 60 * 4  # Cache time is universally 4 hours (in seconds)
+
         # Statics
         self.INVITE_COOLDOWNS = {}
         self.ATTACHMENT_COOLDOWNS = {}
         self.LINK_COOLDOWNS = {}
         self.NONASCII_COOLDOWNS = {}
         self.NONUNIQUE_COOLDOWNS = {}
+
+        # Caches
+        self.__guild_invite_cache__ = {}
 
         # Tasks
         self.__cleanup_task__ = self.bot.loop.create_task(self.cleanup_expired_cooldowns())
@@ -96,7 +102,7 @@ class AntiSpam:
                         LOG.info("Cleaning up expired cooldown for user %s", user_id)
                         del d[user_id]
 
-            await asyncio.sleep(60 * 60 * 4)  # sleep for four hours
+            await asyncio.sleep(self.__cache_time__)  # sleep for four hours
 
     async def on_message(self, message):
         if not WolfUtils.should_process_message(message):
@@ -192,10 +198,25 @@ class AntiSpam:
             invite_data = None
             invite_guild = None
             try:
-                # discord py doesn't let us do this natively, so let's do it ourselves!
-                invite_data = await self.bot.http.request(
-                    Route('GET', '/invite/{invite_id}?with_counts=true', invite_id=fragment))
+                # We're going to be caching guild invite data to prevent discord from getting too mad at us, especially
+                # during raids.
+
+                # ToDo: Fix the memory leak caused by this. This will require the AS rewrite to be finished.
+                cache_item = self.__guild_invite_cache__.get(fragment, None)
+
+                if (cache_item is not None) and (datetime.datetime.utcnow() <= cache_item['__cache_expiry']):
+                    invite_data = self.__guild_invite_cache__[fragment]
+                else:
+                    # discord py doesn't let us do this natively, so let's do it ourselves!
+                    invite_data = await self.bot.http.request(
+                        Route('GET', '/invite/{invite_id}?with_counts=true', invite_id=fragment))
+
+                    LOG.debug(f"Fragment {fragment} was not in the invite cache. Downloaded and added.")
+                    invite_data['__cache_expiry'] = datetime.datetime.utcnow() + datetime.timedelta(hours=4)
+                    self.__guild_invite_cache__[fragment] = invite_data
+
                 invite_guild = discord.Guild(state=self.bot, data=invite_data['guild'])
+
             except discord.errors.NotFound:
                 LOG.warning(f"Couldn't resolve invite key {fragment}. Either it's invalid or the bot was banned.")
 
