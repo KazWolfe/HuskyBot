@@ -685,11 +685,10 @@ class BotAdmin:
 
         logs = WolfUtils.tail(log_file, lines)
 
-        await ctx.send(embed=discord.Embed(
-            title="Log Entries from " + log_file,
-            description="```" + WolfUtils.trim_string(logs, 2042, True).replace('```', '`\u200b`\u200b`') + "```",
-            color=Colors.SECONDARY
-        ))
+        log_title = f"**Log Entries from {log_file}**"
+        log_data = WolfUtils.trim_string(logs.replace('```', '`\u200b`\u200b`'), 2000 - (len(log_title) + 15), True)
+
+        await ctx.send(log_title + "\n" + f"```{log_data}```")
 
     @system.command(name="restart", brief="Restart the bot.")
     async def restart(self, ctx: discord.ext.commands.Context):
