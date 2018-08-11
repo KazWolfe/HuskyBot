@@ -36,6 +36,7 @@ class SpecialRoleKeys(Enum):
     MUTED = "muted"
     MODS = "moderators"
     ADMINS = "administrators"
+    BOT_DEVS = "botDevelopers"
 
 
 class Emojis:

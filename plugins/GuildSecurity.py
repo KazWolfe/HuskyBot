@@ -171,8 +171,9 @@ class GuildSecurity:
         reaction, confirming_user = None, None
 
         try:
-            reaction, confirming_user = \
-                await self.bot.wait_for('reaction_add', timeout=30.0, check=WolfUtils.confirm_dialog_check(ctx.author))
+            reaction, confirming_user = await self.bot.wait_for('reaction_add',
+                                                                timeout=30.0,
+                                                                check=WolfUtils.confirm_dialog_check(ctx.author))
         except asyncio.TimeoutError as _:
             pass
 

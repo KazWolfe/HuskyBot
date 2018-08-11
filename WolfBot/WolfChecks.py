@@ -30,13 +30,18 @@ def is_developer():
     """
 
     def predicate(ctx: commands.Context):
+        failure_reasons = []
+
         # Devs must have admin, or must be in a DM context
         if (ctx.guild is not None) and (not ctx.author.guild_permissions.administrator):
-            raise commands.MissingPermissions(["Administrator", "Bot Developer"])
+            failure_reasons.append("Administrator")
 
-        if ctx.author.id in DEVELOPERS:
+        if ctx.author.id not in DEVELOPERS:
+            failure_reasons.append("Bot Developer (Code Grant)")
+
+        if len(failure_reasons) == 0:
             return True
-
-        raise commands.MissingPermissions(["Bot Developer"])
+        else:
+            raise commands.MissingPermissions(failure_reasons)
 
     return commands.check(predicate)

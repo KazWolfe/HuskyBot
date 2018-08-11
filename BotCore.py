@@ -319,8 +319,15 @@ async def on_error(event_method, *args, **kwargs):
                 color=Colors.DANGER
             )
 
+            dev_ping = BOT_CONFIG.get("specialRoles", {}).get(SpecialRoleKeys.BOT_DEVS.value)
+
+            if dev_ping is not None:
+                dev_ping = f"&{dev_ping}"
+            else:
+                dev_ping = WolfStatics.DEVELOPERS[0]
+
             await channel.send("<@{}>, an error has occurred with the bot. See attached "
-                               "embed.".format(WolfStatics.DEVELOPERS[0]),
+                               "embed.".format(dev_ping),
                                embed=embed)
         except Exception as e:
             LOG.critical("There was an error sending an error to the error channel.\n " + str(e))
