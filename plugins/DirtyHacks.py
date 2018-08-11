@@ -35,7 +35,7 @@ class DirtyHacks:
             return
 
         await self.kill_crashing_gifs(message)
-        await self.calculate_entropy(message)
+        # await self.calculate_entropy(message)
 
     async def kill_crashing_gifs(self, message: discord.Message):
         matches = re.findall(Regex.URL_REGEX, message.content, re.IGNORECASE)
