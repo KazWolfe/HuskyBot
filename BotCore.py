@@ -326,6 +326,8 @@ async def on_error(event_method, *args, **kwargs):
             else:
                 dev_ping = WolfStatics.DEVELOPERS[0]
 
+            return
+
             await channel.send("<@{}>, an error has occurred with the bot. See attached "
                                "embed.".format(dev_ping),
                                embed=embed)
