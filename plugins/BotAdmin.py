@@ -6,7 +6,6 @@ import discord
 import git
 from discord.ext import commands
 
-from BotCore import get_developers
 from WolfBot import WolfChecks, WolfConfig, WolfConverters, WolfUtils
 from WolfBot.WolfStatics import *
 
@@ -595,7 +594,7 @@ class BotAdmin:
             ))
             return
 
-        if user.id in get_developers():
+        if user.id in DEVELOPERS:
             await ctx.send(embed=discord.Embed(
                 title="Bot Manager",
                 description=f"The user `{user}` is a bot developer, and may not be ignored.",
