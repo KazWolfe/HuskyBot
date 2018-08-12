@@ -543,6 +543,7 @@ class ServerLog:
 
         See also:
             /logger ignoreChannel - Add a channel to the exclusion list.
+
         """
 
         logger_settings: dict = self._config.get('loggers', {})

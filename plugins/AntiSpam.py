@@ -43,10 +43,12 @@ class AntiSpam:
     def __unload(self):
         self.__cleanup_task__.cancel()
 
-        for mod_name in self.__modules__.keys():
+        for mod_name in list(self.__modules__.keys()):
             self.unload_module(mod_name)
 
     def load_module(self, module_name):
+        importlib.invalidate_caches()
+
         module = importlib.import_module(f".{module_name}", package=f"WolfBot.antispam")
         clazz = getattr(module, module_name)
 
@@ -89,6 +91,31 @@ class AntiSpam:
     @asp.command(name="enable", brief="Enable an AntiSpam module")
     @commands.has_permissions(administrator=True)
     async def enable_module(self, ctx: commands.Context, name: str):
+        """
+        Enable an AntiSpam module, and load it into the bot.
+
+        AntiSpam Modules are similar to plugins, except they only will target the AntiSpam plugin. They generally exist
+        to isolate anti-spam processes from each other, and give them (powerful) control over their own data management.
+
+        When an AntiSpam Module is enabled, it will load immediately as well as on every bot execution. Configuration
+        changes made to a module will persist after it is disabled.
+
+        Commands to control a module will only be visible if that module is loaded.
+
+        Available Modules:
+            AttachmentFilter - Restrict the number of attachments/files a user can post in a certain time
+            InviteFilter - Block unauthorized Discord invites to other guilds
+            LinkFilter - Block messages that contain excessive links, or link-spamming users.
+            MentionFilter - Block users from "mention-spamming" over set thresholds.
+            NonAsciiFilter - Block messages composed of non-ASCII characters, like Zalgo
+            NonUniqueFilter - Monitor and take action against users who post the same messages over and over again.
+
+        Parameters:
+            name - The module name (case sensitive) to enable.
+
+        See Also:
+            /as disable - Disable a loaded module.
+        """
         as_conf = self._config.get('antiSpam', {})
         mod_config = as_conf.setdefault(name, {"enabled": False})
 
@@ -130,6 +157,22 @@ class AntiSpam:
     @asp.command(name="disable", brief="Disable an AntiSpam module")
     @commands.has_permissions(administrator=True)
     async def disable_module(self, ctx: commands.Context, name: str):
+        """
+        Disable an AntiSpam Module, and stop it from automatically loading.
+
+        AntiSpam modules are dynamic, meaning they can be started and stopped at will, depending on guild configuration
+        and active state. To facilitate easy removal of unnecessary modules, this command can be used.
+
+        A disabled module will preserve its configuration, *but not its state*.
+
+        See `/help as enable` for a list of available modules.
+
+        Parameters:
+            name - The name of the module to disable
+
+        See Also:
+            /as enable - Enable an AntiSpam Module.
+        """
         as_conf = self._config.get('antiSpam', {})
         mod_config = as_conf.setdefault(name, {"enabled": False})
 

@@ -326,8 +326,6 @@ async def on_error(event_method, *args, **kwargs):
             else:
                 dev_ping = WolfStatics.DEVELOPERS[0]
 
-            return
-
             await channel.send("<@{}>, an error has occurred with the bot. See attached "
                                "embed.".format(dev_ping),
                                embed=embed)
@@ -372,14 +370,35 @@ async def help_command(ctx: commands.Context, *command: str):
     an error.
     """
     content = ctx.message.content
+    permitted = False
 
     # Evil parse magic is evil, I hate this code.
     if len(command) == 0:
         command = ''
+        permitted = True
     elif len(command) > 0:
+        command_obj = bot.get_command(' '.join(command))
         content = content.split(None, 1)[1]
         command = re.sub(r'[_*`~]', '', content, flags=re.M)
         command = command.split()
+
+        if command_obj is not None:
+            try:
+                permitted = await command_obj.can_run(ctx)
+            except commands.CommandError as _:
+                pass
+        else:
+            permitted = ' '.join(command) in bot.cogs
+
+    if not permitted:
+        await ctx.send(embed=discord.Embed(
+            title=Emojis.BOOK + " DakotaBot Help Utility",
+            description=f"I have looked everywhere, but I could not find any help documentation for your query!\n\n"
+                        f"Please make sure that you don't have any typographical errors, and that you are not trying "
+                        f"to pass in arguments here.",
+            color=Colors.WARNING
+        ))
+        return
 
     # noinspection PyProtectedMember
     await discord.ext.commands.bot._default_help_command(ctx, *command)

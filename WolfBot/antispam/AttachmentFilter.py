@@ -18,9 +18,24 @@ defaults = {
 
 
 class AttachmentFilter(AntiSpamModule):
+    """
+    The Attachment Filter is one of the modules that makes up the AntiSpam system.
+
+    It will block users who post excessive numbers of messages in short timespans. Users who post over the specified
+    amount of attachments (without a text-only message breaking things up) will be issued a warning, and then banned.
+
+    This antispam module is specifically geared towards raids and image dumps. Multiple images on one message will not
+    trigger this filter.
+
+    Default Parameters:
+        Time to Cooldown: 15 Seconds
+        Warning Limit: 3 Attachments
+        Ban Limit: 5 Attachments
+    """
+
     def __init__(self, plugin):
         super().__init__(name="attachFilter", callback=self.base, brief="Control the attachment filter's settings",
-                         checks=[super().has_permissions(manage_guild=True)])
+                         checks=[super().has_permissions(manage_guild=True)], help=self.classhelp())
 
         self.bot = plugin.bot
         self._config = WolfConfig.get_config()

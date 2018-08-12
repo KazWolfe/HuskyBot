@@ -1,9 +1,14 @@
+import inspect
+
 import discord
 from discord.ext import commands
 from discord.ext.commands import MissingPermissions
 
 
 class AntiSpamModule(commands.Group):
+    """
+    Base module for AntiSpam Modules.
+    """
     def cleanup(self):
         raise NotImplementedError
 
@@ -27,3 +32,6 @@ class AntiSpamModule(commands.Group):
             raise MissingPermissions(missing)
 
         return predicate
+
+    def classhelp(self):
+        return inspect.cleandoc(self.__doc__)

@@ -16,6 +16,7 @@ class Community:
     This plugin is meant to inform users about staff, policies, rules, changes, etc. Basically, it answers questions to
     keep mods from actually talking to users.
     """
+
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
         self._config = WolfConfig.get_config()
@@ -69,9 +70,10 @@ class Community:
 
         await ctx.send(embed=embed)
 
-    @commands.group(name="rules", brief="Get a copy of the guild rules", usage="[number|subcommand]")
+    @commands.group(name="rules", brief="Get a copy of the guild rules", usage="[number|subcommand]",
+                    invoke_without_command=True)
     @commands.guild_only()
-    async def rules(self, ctx: commands.Context):
+    async def rules(self, ctx: commands.Context, rule_num: str = None):
         """
         Retrieve the current rules list for the Discord guild.
 
@@ -81,14 +83,10 @@ class Community:
         This command takes an optional rule number as an argument. If this is specified, the bot will return only that
         rule.
         """
-        if ctx.invoked_subcommand is not None:
-            return
 
-        try:
-            rule_num = int(ctx.message.content.split(' ')[1])
-        except IndexError:
-            rule_num = None
-        except ValueError:
+        if rule_num is not None and rule_num.isnumeric():
+            rule_num = int(rule_num)
+        else:
             rule_num = None
 
         rule_list = self._config.get("guildRules", [])

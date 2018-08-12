@@ -221,6 +221,6 @@ class GiveawayManager:
         self.__cache__.remove(giveaway)
         self._giveaway_config.set(GIVEAWAY_CONFIG_KEY, self.__cache__)
 
-    async def cleanup(self):
+    def cleanup(self):
         if self.__task__ is not None:
             self.__task__.cancel()
