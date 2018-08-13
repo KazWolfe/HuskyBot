@@ -23,7 +23,7 @@ defaults = {
 class NonUniqueFilter(AntiSpamModule):
     def __init__(self, plugin):
         super().__init__(name="nonUniqueFilter", callback=self.base, brief="Control the non-unique filter's settings",
-                         checks=[super().has_permissions(manage_guild=True)])
+                         checks=[super().has_permissions(manage_guild=True)], aliases=["nuf"])
 
         self.bot = plugin.bot
         self._config = WolfConfig.get_config()
@@ -31,6 +31,7 @@ class NonUniqueFilter(AntiSpamModule):
         self._events = {}
 
         self.add_command(self.nonuniqe_cooldown)
+        self.add_command(self.test_strings)
 
         LOG.info("Filter initialized.")
 
@@ -169,4 +170,40 @@ class NonUniqueFilter(AntiSpamModule):
             title="AntiSpam Non-Unique Configuration Updated!",
             description="The configuration has been successfully saved. Changes have been applied.",
             color=Colors.SUCCESS
+        ))
+
+    @commands.command(name="test", brief="Get the difference between two messages")
+    async def test_strings(self, ctx: commands.Context, text_a: str, text_b: str):
+        """
+        Test the difference between two strings to NonUniqueFilter.
+
+        This command will compare two strings and determine their similarity ratio (used to determine if a message is
+        above the threshold or not). Additionally, it will also time the calculation for profiling purposes.
+
+        Note that if the strings you are comparing have spaces, *both must be surrounded by quotes*.
+
+        Parameters:
+            text_a - The first text string to compare to.
+            text_b - The text string to compare to text_a.
+
+        Example Commands:
+            /as nuf test hello henlo - Compare strings "hello" and "henlo"
+        """
+        as_config = self._config.get('antiSpam', {})
+        nonunique_config = as_config.get('cooldowns', {}).get('nonUnique', defaults)
+
+        calc_start = datetime.datetime.utcnow()
+        diff = SequenceMatcher(None, text_a.lower(), text_b.lower()).ratio()
+        calc_end = datetime.datetime.utcnow()
+
+        calc_time = calc_end - calc_start
+
+        is_spam = (diff > nonunique_config['threshold'])
+
+        await ctx.send(embed=discord.Embed(
+            title="Non-Unique Tester",
+            description=f"The difference between the two provided strings is **`{diff:.3f}`**.\n\n"
+                        f"This message **WOULD {'' if is_spam else 'NOT'}** trigger a warning.\n\n"
+                        f"Calculation Time: `{calc_time.total_seconds() * 1000} ms`.",
+            color=Colors.WARNING if is_spam else Colors.INFO
         ))

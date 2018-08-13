@@ -22,7 +22,7 @@ defaults = {
 class NonAsciiFilter(AntiSpamModule):
     def __init__(self, plugin):
         super().__init__(name="nonAsciiFilter", callback=self.base, brief="Control the non-ascii filter's settings",
-                         checks=[super().has_permissions(manage_guild=True)])
+                         checks=[super().has_permissions(manage_guild=True)], aliases=["naf"])
 
         self.bot = plugin.bot
         self._config = WolfConfig.get_config()

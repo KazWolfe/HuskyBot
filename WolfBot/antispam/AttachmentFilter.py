@@ -35,7 +35,7 @@ class AttachmentFilter(AntiSpamModule):
 
     def __init__(self, plugin):
         super().__init__(name="attachFilter", callback=self.base, brief="Control the attachment filter's settings",
-                         checks=[super().has_permissions(manage_guild=True)], help=self.classhelp())
+                         checks=[super().has_permissions(manage_guild=True)], help=self.classhelp(), aliases=["af"])
 
         self.bot = plugin.bot
         self._config = WolfConfig.get_config()

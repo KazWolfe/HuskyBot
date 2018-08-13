@@ -23,7 +23,7 @@ defaults = {
 class LinkFilter(AntiSpamModule):
     def __init__(self, plugin):
         super().__init__(name="linkFilter", callback=self.base, brief="Control the link filter's settings",
-                         checks=[super().has_permissions(manage_guild=True)])
+                         checks=[super().has_permissions(manage_guild=True)], aliases=["lf"])
 
         self.bot = plugin.bot
         self._config = WolfConfig.get_config()

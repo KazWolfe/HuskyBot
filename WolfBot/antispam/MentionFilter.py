@@ -19,7 +19,7 @@ defaults = {
 class MentionFilter(AntiSpamModule):
     def __init__(self, plugin):
         super().__init__(name="mentionFilter", callback=self.base, brief="Control the mention filter's settings",
-                         checks=[super().has_permissions(mention_everyone=True)])
+                         checks=[super().has_permissions(mention_everyone=True)], aliases=["mf"])
 
         self.bot = plugin.bot
         self._config = WolfConfig.get_config()

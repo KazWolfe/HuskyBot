@@ -22,7 +22,7 @@ class InviteFilter(AntiSpamModule):
 
     def __init__(self, plugin):
         super().__init__(name="inviteFilter", callback=self.base, brief="Control the invite filter's settings",
-                         checks=[super().has_permissions(manage_guild=True)])
+                         checks=[super().has_permissions(manage_guild=True)], aliases=["if"])
 
         self.bot = plugin.bot
         self._config = WolfConfig.get_config()
