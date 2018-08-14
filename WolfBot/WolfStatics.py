@@ -40,7 +40,7 @@ class ChannelKeys(Enum):
     STAFF_ALERTS = "staffAlerts"
     PUBLIC_LOG = "audit"
     MESSAGE_LOG = "messageLogs"
-
+    USER_LOG = "userLogs"
 
 class SpecialRoleKeys(Enum):
     BOTS = "bots"
