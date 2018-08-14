@@ -57,7 +57,7 @@ class ServerLog:
             if "userJoin" not in self._config.get("loggers", {}).keys():
                 return
 
-            channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
+            channel = self._config.get('specialChannels', {}).get(ChannelKeys.USER_LOG.value, None)
 
             if channel is None:
                 return
@@ -88,7 +88,7 @@ class ServerLog:
         if "userLeave" not in self._config.get("loggers", {}).keys():
             return
 
-        alert_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
+        alert_channel = self._config.get('specialChannels', {}).get(ChannelKeys.USER_LOG.value, None)
 
         if alert_channel is None:
             return
@@ -190,7 +190,7 @@ class ServerLog:
         logger_ignores: dict = self._session_store.get('loggerIgnores', {})
         ignored_nicks = logger_ignores.setdefault('nickname', [])
 
-        alert_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
+        alert_channel = self._config.get('specialChannels', {}).get(ChannelKeys.USER_LOG.value, None)
 
         if alert_channel is None:
             return

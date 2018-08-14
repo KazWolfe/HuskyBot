@@ -87,8 +87,9 @@ class NonUniqueFilter(AntiSpamModule):
             await message.channel.send(embed=discord.Embed(
                 title=Emojis.STOP + " Calm your jets!",
                 description=f"Hey there {message.author.mention}!\n\nIt looks like you're sending a bunch of "
-                            f"similar messages very quickly. Please calm down on the spam there! Someone will be "
-                            f"around to help you soon.\n\nPatience is a virtue!",
+                            f"similar messages very quickly. Please calm down on the spam there! If you have a "
+                            f"question, someone will answer it shortly. Otherwise, unnecessary spam is unnecessary.\n\n"
+                            f"Patience is a virtue!",
                 color=Colors.WARNING
             ), delete_after=90.0)
 

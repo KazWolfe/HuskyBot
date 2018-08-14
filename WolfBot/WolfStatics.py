@@ -24,6 +24,17 @@ class Colors(IntEnum):
 
 
 class ChannelKeys(Enum):
+    """
+    Quick reference for channels used internally.
+
+    STAFF_LOG - Automatic log for moderative actions taken by users or the bot. Generic log.
+    STAFF_HUB - The channel used for internal moderator discussion, non-urgent.
+    STAFF_ALERTS - Urgent notifications for immediate review by active staff members.
+    PUBLIC_LOG - Publicly-available log used to track guild events and display them for transparency.
+    MESSAGE_LOG - Message-based event tracking (e.g. deletions or edits)
+    USER_LOG - User-based event tracking (e.g. join/leave/rename)
+    """
+
     STAFF_LOG = "logs"
     STAFF_HUB = "modChannel"
     STAFF_ALERTS = "staffAlerts"
