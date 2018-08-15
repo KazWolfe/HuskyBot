@@ -43,8 +43,8 @@ class NonUniqueFilter(AntiSpamModule):
                 del self._events[user_id]
 
     async def on_message(self, message: discord.message):
-        ANTISPAM_CONFIG = self._config.get('antiSpam', {})
-        CHECK_CONFIG = ANTISPAM_CONFIG.get('cooldowns', {}).get('nonUnique', defaults)
+        as_config = self._config.get('antiSpam', {})
+        nonunique_config = as_config.get('NonUniqueFilter', {}).get('config', defaults)
 
         # Prepare the logger
         log_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
@@ -56,12 +56,12 @@ class NonUniqueFilter(AntiSpamModule):
             return
 
         # Setting threshold to 0 disables this check.
-        if CHECK_CONFIG['threshold'] == 0:
+        if nonunique_config['threshold'] == 0:
             return
 
         # get cooldown object for this user
         cooldown_record: dict = self._events.setdefault(message.author.id, {
-            'expiry': datetime.datetime.utcnow() + datetime.timedelta(minutes=CHECK_CONFIG['minutes']),
+            'expiry': datetime.datetime.utcnow() + datetime.timedelta(minutes=nonunique_config['minutes']),
             "messageCache": {}
         })
         message_cache = cooldown_record['messageCache']  # type: dict
@@ -69,13 +69,13 @@ class NonUniqueFilter(AntiSpamModule):
         for s_message in message_cache.keys():
             diff = SequenceMatcher(None, s_message.lower(), message.content.lower()).ratio()
 
-            if diff >= CHECK_CONFIG['threshold']:
+            if diff >= nonunique_config['threshold']:
                 LOG.info(f"Message from {message.author} is too similar to past message, strike added. "
                          f"Similarity = {diff:.3f}")
                 message_cache[s_message] += 1
                 break
         else:
-            while len(message_cache) >= CHECK_CONFIG['cacheSize']:
+            while len(message_cache) >= nonunique_config['cacheSize']:
                 # Delete the first item in the cache, until the cache is under min size.
                 del message_cache[list(message_cache.keys())[0]]
 
@@ -83,7 +83,7 @@ class NonUniqueFilter(AntiSpamModule):
 
         total_infractions = sum(message_cache.values())
 
-        if total_infractions == CHECK_CONFIG['warnLimit'] and cooldown_record.get('wasntWarned', True):
+        if total_infractions == nonunique_config['warnLimit'] and cooldown_record.get('wasntWarned', True):
             await message.channel.send(embed=discord.Embed(
                 title=Emojis.STOP + " Calm your jets!",
                 description=f"Hey there {message.author.mention}!\n\nIt looks like you're sending a bunch of "
@@ -104,16 +104,17 @@ class NonUniqueFilter(AntiSpamModule):
 
             log_embed.set_author(name="Possible non-unique spam!", icon_url=message.author.avatar_url)
 
-            log_embed.set_footer(text=f"Strike {total_infractions} of {CHECK_CONFIG['banLimit']}, "
+            log_embed.set_footer(text=f"Strike {total_infractions} of {nonunique_config['banLimit']}, "
                                       f"resets {cooldown_record['expiry'].strftime(DATETIME_FORMAT)}")
 
             await log_channel.send(embed=log_embed)
 
             cooldown_record['wasntWarned'] = False
 
-        elif total_infractions == CHECK_CONFIG['banLimit']:
-            await message.author.ban(reason=f"[AUTOMATIC BAN - AntiSpam Module] User sent {CHECK_CONFIG['banLimit']} "
-                                            f"nonunique messages in a {CHECK_CONFIG['minutes']} minute period.",
+        elif total_infractions == nonunique_config['banLimit']:
+            await message.author.ban(reason=f"[AUTOMATIC BAN - AntiSpam Module] User sent "
+                                            f"{nonunique_config['banLimit']} nonunique messages in a "
+                                            f"{nonunique_config['minutes']} minute period.",
                                      delete_message_days=1)
 
             del self._events[message.author.id]
@@ -141,7 +142,7 @@ class NonUniqueFilter(AntiSpamModule):
         """
 
         as_config = self._config.get('antiSpam', {})
-        nonunique_config = as_config.setdefault('cooldowns', {}).setdefault('nonUnique', defaults)
+        nonunique_config = as_config.setdefault('NonUniqueFilter', {}).setdefault('config', defaults)
 
         if not 0 <= threshold <= 1:
             await ctx.send(embed=discord.Embed(
@@ -191,7 +192,7 @@ class NonUniqueFilter(AntiSpamModule):
             /as nuf test hello henlo - Compare strings "hello" and "henlo"
         """
         as_config = self._config.get('antiSpam', {})
-        nonunique_config = as_config.get('cooldowns', {}).get('nonUnique', defaults)
+        nonunique_config = as_config.get('NonUniqueFilter', {}).get('config', defaults)
 
         calc_start = datetime.datetime.utcnow()
         diff = SequenceMatcher(None, text_a.lower(), text_b.lower()).ratio()

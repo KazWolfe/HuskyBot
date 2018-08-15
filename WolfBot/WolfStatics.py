@@ -42,6 +42,7 @@ class ChannelKeys(Enum):
     MESSAGE_LOG = "messageLogs"
     USER_LOG = "userLogs"
 
+
 class SpecialRoleKeys(Enum):
     BOTS = "bots"
     MUTED = "muted"

@@ -176,13 +176,13 @@ class NicknameConverter(str, commands.Converter):
         adjective = ["angry", "beautiful", "big", "black", "blue", "brown", "crazy", "golden", "green", "happy",
                      "heavy", "lazy", "orange", "organic", "purple", "red", "sad", "silver", "small", "ticklish",
                      "tiny", "white", "yellow", "bionic", "xenial", "trusty", "cosmic", "artful", "zesty", "wily",
-                    "utopic", "vivid", "saucy", "raring", "precise", "natty", "maverick", "lucid", "karmic", "jaunty",
-                    "intrepid", "hardy", "gusty", "feisty", "edgy", "dapper", "breezy", "warty"]
+                     "utopic", "vivid", "saucy", "raring", "precise", "natty", "maverick", "lucid", "karmic", "jaunty",
+                     "intrepid", "hardy", "gusty", "feisty", "edgy", "dapper", "breezy", "warty"]
         species = ["bear", "bird", "butterfly", "cat", "dog", "duck", "elephant", "fish", "frog", "goose", "gorilla",
                    "koala", "ladybug", "leopard", "lion", "meercat", "mouse", "ostrich", "panda", "peacock", "rabbit",
-                   "snake", "swan", "tiger", "wolf", "zebra", "horse", "crab", "peguin", "dove", "aardvark", "zapus", 
-                   "werewolf", "salamander", "ocelot", "narwhal", "lynx", "jackalope", "heron", "gibbon", "fawn", "drake",
-                  "badger," "hedgehog," "cuttlefish", "beaver"]
+                   "snake", "swan", "tiger", "wolf", "zebra", "horse", "crab", "peguin", "dove", "aardvark", "zapus",
+                   "werewolf", "salamander", "ocelot", "narwhal", "lynx", "jackalope", "heron", "gibbon", "fawn",
+                   "drake", "badger," "hedgehog," "cuttlefish", "beaver"]
 
         number = random.randint(1, 9999)
 

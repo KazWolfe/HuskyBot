@@ -30,6 +30,7 @@ class NonAsciiFilter(AntiSpamModule):
         self._events = {}
 
         self.add_command(self.set_ascii_cooldown)
+        self.add_command(self.test_strings)
 
         LOG.info("Filter initialized.")
 
@@ -39,6 +40,12 @@ class NonAsciiFilter(AntiSpamModule):
             if self._events[user_id]['expiry'] < datetime.datetime.utcnow():
                 LOG.info("Cleaning up expired cooldown for user %s", user_id)
                 del self._events[user_id]
+
+    @staticmethod
+    def calculate_nonascii_value(text: str):
+        nonascii_characters = re.sub('[ -~]', '', text)
+
+        return len(nonascii_characters) / float(len(text))
 
     async def on_message(self, message: discord.Message):
         ANTISPAM_CONFIG = self._config.get('antiSpam', {})
@@ -66,10 +73,10 @@ class NonAsciiFilter(AntiSpamModule):
         if len(message.content) < CHECK_CONFIG['minMessageLength']:
             return
 
-        nonascii_characters = re.sub('[ -~]', '', message.content)
+        nonascii_percentage = self.calculate_nonascii_value(message.content)
 
         # Message doesn't have enough non-ascii characters, we can ignore it.
-        if len(nonascii_characters) < (len(message.content) * CHECK_CONFIG['nonAsciiThreshold']):
+        if nonascii_percentage < CHECK_CONFIG['nonAsciiThreshold']:
             return
 
         # Message is now over threshold, get/create their cooldown record.
@@ -92,7 +99,7 @@ class NonAsciiFilter(AntiSpamModule):
 
         if log_channel is not None:
             embed = discord.Embed(
-                description=f"User {message.author} has sent a message with {len(nonascii_characters)} non-ASCII "
+                description=f"User {message.author} has sent a message with {100 * nonascii_percentage:.1f}% non-ASCII "
                             f"characters (out of {len(message.content)} total).",
                 color=Colors.WARNING
             )
@@ -168,4 +175,40 @@ class NonAsciiFilter(AntiSpamModule):
                         f"characters** for a non-ASCII **threshold of {threshold}**. Users will be automatically "
                         f"banned for posting **{ban_limit} messages** in a **{cooldown_minutes} minute** period.",
             color=Colors.SUCCESS
+        ))
+
+    @commands.command(name="test", brief="Get the non-ascii percentage of a string")
+    async def test_strings(self, ctx: commands.Context, *, text: str):
+        """
+        Test the difference between two strings to NonUniqueFilter.
+
+        This command will compare two strings and determine their similarity ratio (used to determine if a message is
+        above the threshold or not). Additionally, it will also time the calculation for profiling purposes.
+
+        Note that if the strings you are comparing have spaces, *both must be surrounded by quotes*.
+
+        Parameters:
+            text_a - The first text string to compare to.
+            text_b - The text string to compare to text_a.
+
+        Example Commands:
+            /as nuf test hello henlo - Compare strings "hello" and "henlo"
+        """
+        as_config = self._config.get('antiSpam', {})
+        nonascii_config = as_config.get('NonAsciiFilter', {}).get('config', defaults)
+
+        calc_start = datetime.datetime.utcnow()
+        percentage = self.calculate_nonascii_value(text)
+        calc_end = datetime.datetime.utcnow()
+
+        calc_time = calc_end - calc_start
+
+        is_spam = (percentage >= nonascii_config['nonAsciiThreshold'])
+
+        await ctx.send(embed=discord.Embed(
+            title="Non-Ascii Tester",
+            description=f"The passed message is **`{100 * percentage:.1f}%` non-ascii**.\n\n"
+                        f"This message **WOULD {'' if is_spam else 'NOT'}** trigger a warning.\n\n"
+                        f"Calculation Time: `{calc_time.total_seconds() * 1000} ms`.",
+            color=Colors.WARNING if is_spam else Colors.INFO
         ))

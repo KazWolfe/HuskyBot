@@ -114,7 +114,7 @@ class GiveawayManager:
             pass
 
         winning_users = self._rng.sample(contending_users, min(giveaway.winner_count, len(contending_users)))
-        LOG.info(f"Winners for \"{name}\": {winning_users}")
+        LOG.info(f"Winners for \"{giveaway.name}\": {winning_users}")
 
         if len(winning_users) == 1:
             win_text = f"{f'Congratulations to our winner, {winning_users[0].mention}!'}{wcl}"

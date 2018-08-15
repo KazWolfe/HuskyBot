@@ -403,6 +403,7 @@ async def help_command(ctx: commands.Context, *command: str):
     # noinspection PyProtectedMember
     await discord.ext.commands.bot._default_help_command(ctx, *command)
 
+
 async def start_webserver():
     http_config = BOT_CONFIG.get('httpConfig', {
         "host": "localhost",
