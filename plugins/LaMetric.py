@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import os
 
@@ -42,6 +43,8 @@ class LaMetric:
         self.bot = bot
         self._config = WolfConfig.get_config()
 
+        self._api = LaMetricApi.LaMetricApi()
+
         self._pending_registrations = {}
         '''
         {
@@ -50,11 +53,14 @@ class LaMetric:
 
         LOG.info("Loaded plugin!")
 
-    def update_lametric_counts(self, guild: discord.Guild):
+    async def update_lametric_counts(self, guild: discord.Guild):
         lametric_conf = self._config.get('lametric', {})
         devices = lametric_conf.setdefault('devices', {})
 
         new_count = str(guild.member_count)
+
+        # icon = "i18290"
+        icon = "i5582"
 
         for device_id in devices.keys():
             device = devices[device_id]
@@ -63,14 +69,13 @@ class LaMetric:
                 continue
 
             LOG.info(f"Updating usercount for LaMetric device ID {device_id}")
-            LaMetricApi.push_to_lametric(device['appId'], LaMetricApi.build_data("i18290", new_count),
-                                         device['authToken'])
+            await self._api.push(device['appId'], LaMetricApi.build_data(icon, new_count), device['authToken'])
 
     async def on_member_join(self, member: discord.Member):
-        self.update_lametric_counts(member.guild)
+        await self.update_lametric_counts(member.guild)
 
     async def on_member_remove(self, member: discord.Member):
-        self.update_lametric_counts(member.guild)
+        await self.update_lametric_counts(member.guild)
 
     @commands.group(name="lametric", brief="Base command for LaMetric interfaces", hidden=True)
     async def lametric(self, ctx: commands.Context):
@@ -87,7 +92,50 @@ class LaMetric:
         """
         device_id = os.urandom(4).hex()
 
-        self._pending_registrations[device_id.lower()] = ctx.author.id
+        await ctx.author.send("Thanks for requesting a setup for your LaMetric device! Before I can start sending "
+                              "messages to your device, I'll need to get a bit of information about your device first. "
+                              "If you haven't already, you'll need to make an [indicator app]("
+                              "https://lametric-documentation.readthedocs.io/en/latest/guides/first-steps/"
+                              "first-lametric-indicator-app.html). I will need your **Application ID** and "
+                              "**Authentication Token** to register your device.")
+
+        await ctx.author.send("Let's start with your **Application ID**. This will be a string like `XXXXXXXXX/1`, and "
+                              "will be preceded by `com.lametric` as part of the URL. An example Application ID will "
+                              "look like this: `22e45a6407da88c0c938a8aaf8f7406f/1`. Once you have it, send it here.")
+
+        try:
+            app_id = await self.bot.wait_for('message', check=lambda m: m.channel == ctx.author.dm_channel, timeout=30)
+        except asyncio.TimeoutError:
+            await ctx.author.send("Hello? I didn't get a response. When you have your **Application ID** and **Access "
+                                  "Token**, run `/lametric register` again.")
+            return
+
+        await ctx.author.send("Alright, great! Next, I'll need your **Access Token**.  This will be a relatively long "
+                              "Base-64 string, and will be on the developer panel. Please send it here.")
+
+        try:
+            app_auth = await self.bot.wait_for('message', check=lambda m: m.channel == ctx.author.dm_channel,
+                                               timeout=30)
+        except asyncio.TimeoutError:
+            await ctx.author.send("Hello? I didn't get a response. When you have your **Application ID** and **Access "
+                                  "Token**, run `/lametric register` again.")
+            return
+
+        verification_key = os.urandom(2).hex().upper()
+
+        await ctx.author.send("Great! Thank you for that. I'm going to send four characters to your LaMetric device "
+                              "right now. Please enter these four characters here so I can verify everything is set "
+                              "up correctly.")
+
+        await self._api.push(app_id, LaMetricApi.build_data("i59", verification_key), app_auth)
+
+        try:
+            verification_resp = await self.bot.wait_for('message', check=lambda m: m.channel == ctx.author.dm_channel,
+                                                        timeout=90)
+        except asyncio.TimeoutError:
+            await ctx.author.send("Hello? I didn't get a response. I couldn't verify your device works. Please double "
+                                  "check your App ID and Access Token, and try again.")
+            return
 
         await ctx.send(embed=discord.Embed(
             title="LaMetric Setup",
@@ -174,9 +222,9 @@ class LaMetric:
             ]
         }
 
-        r = LaMetricApi.push_to_lametric(device['appId'], data, device['authToken'])
+        r = await self._api.push(device['appId'], data, device['authToken'])
 
-        await ctx.send(f"Status code: {r.status_code}")
+        await ctx.send(f"Status code: {r.status}")
 
     @lametric.command(name="list", brief="List registered LaMetric devices")
     @WolfChecks.has_guild_permissions(administrator=True)

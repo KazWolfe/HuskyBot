@@ -1,18 +1,23 @@
-import json
-
-import requests
+import aiohttp
 
 APP_BASE = "https://developer.lametric.com/api/v1/dev/widget/update/com.lametric.{app_id}"
 
 
-def push_to_lametric(app_id: str, data: dict, access_token: str):
-    headers = {
-        "Accept": "application/json",
-        "X-Access-Token": access_token,
-        "Cache-Control": "no-cache"
-    }
+class LaMetricApi:
+    def __init__(self):
+        self._http_client = aiohttp.ClientSession()
 
-    return requests.post(url=APP_BASE.format(app_id=app_id), data=json.dumps(data), headers=headers)
+    def cleanup(self):
+        self._http_client.close()
+
+    async def push(self, app_id: str, data: dict, access_token: str):
+        headers = {
+            "Accept": "application/json",
+            "X-Access-Token": access_token,
+            "Cache-Control": "no-cache"
+        }
+
+        return await self._http_client.post(APP_BASE.format(app_id=app_id), json=data, headers=headers)
 
 
 def build_data(icon: str, text: str) -> dict:

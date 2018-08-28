@@ -5,8 +5,8 @@ import random
 import re
 import tempfile
 
+import aiohttp
 import discord
-import requests
 from discord.ext import commands
 
 from WolfBot import WolfConfig
@@ -28,7 +28,12 @@ class DirtyHacks:
         self.bot = bot
         self._config = WolfConfig.get_config()
 
+        self._http_session = aiohttp.ClientSession()
+
         LOG.info("Loaded plugin!")
+
+    def __unload(self):
+        self._http_session.close()
 
     async def on_message(self, message: discord.Message):
         if not WolfUtils.should_process_message(message):
@@ -55,7 +60,14 @@ class DirtyHacks:
                 return
 
             with tempfile.NamedTemporaryFile() as f:
-                img_data = requests.get(match).content
+                async with self._http_session.get(match) as r:  # type: aiohttp.ClientResponse
+                    if r.status != 200:
+                        return
+
+                    if not r.headers.get('content-type', 'application/octet-stream').startswith('image'):
+                        return
+
+                    img_data = await r.read()
 
                 f.write(img_data)
                 f.flush()

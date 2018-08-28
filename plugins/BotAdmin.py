@@ -417,28 +417,22 @@ class BotAdmin:
         await ctx.bot.change_presence(activity=discord.Activity(name=bot_presence['game'], type=bot_presence['type']),
                                       status=discord.Status[bot_presence['status']])
 
+        await ctx.send("OK.")
+
     @config.command(name="ignoreCommand", brief="Add a command to the ignore list.", enabled=False)
     async def ignore_command(self, ctx: commands.Context, command: str):
         """
-        [DEPRECATED COMMAND] Add a new command to the ignore list.
+        Add a new command to the ignore list.
 
         This command will allow administrators to add commands that are silently ignored by the bot. This command takes
         only a single string as an argument. Do not include a slash when specifying a command name to ignore.
 
         See also:
-            /help admin unignoreCommand - Remove a command from the ignore list
+            /config unignoreCommand - Remove a command from the ignore list
         """
         command = command.lower()
 
         ignored_commands = self._config.get('ignoredCommands', [])
-
-        if ctx.bot.get_command(command) is not None:
-            await ctx.send(embed=discord.Embed(
-                title="Bot Manager",
-                description="Real commands may not be added to the ignore list!",
-                color=Colors.DANGER
-            ))
-            return
 
         if command in ignored_commands:
             await ctx.send(embed=discord.Embed(
