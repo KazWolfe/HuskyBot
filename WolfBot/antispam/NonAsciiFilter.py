@@ -14,6 +14,7 @@ LOG = logging.getLogger("DakotaBot.Plugin.AntiSpam." + __name__.split('.')[-1])
 defaults = {
     'minMessageLength': 40,  # Minimum length of messages to check
     'nonAsciiThreshold': 0.5,  # Threshold (0 to 1) before marking the message as spam
+    'nonAsciiDelete': 0.75,  # Threshold (0 to 1) before marking the message as spam *and* deleting it.
     'banLimit': 3,  # Number of spam messages before banning
     'minutes': 5  # Cooldown timer (minutes)
 }
@@ -44,13 +45,13 @@ class NonAsciiFilter(AntiSpamModule):
     @staticmethod
     def calculate_nonascii_value(text: str):
         text = text.replace(' ', '')
-        nonascii_characters = re.sub('[ -~]', '', text)
+        nonascii_characters = re.sub('[!-~]', '', text)
 
         return len(nonascii_characters) / float(len(text))
 
     async def on_message(self, message: discord.Message):
         ANTISPAM_CONFIG = self._config.get('antiSpam', {})
-        CHECK_CONFIG = ANTISPAM_CONFIG.get('NonAsciiFilter', {}).get('config', defaults)
+        CHECK_CONFIG = {**defaults, **ANTISPAM_CONFIG.get('NonAsciiFilter', {}).get('config', {})}
 
         # Prepare the logger
         log_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
@@ -77,8 +78,12 @@ class NonAsciiFilter(AntiSpamModule):
         nonascii_percentage = self.calculate_nonascii_value(message.content)
 
         # Message doesn't have enough non-ascii characters, we can ignore it.
-        if nonascii_percentage < CHECK_CONFIG['nonAsciiThreshold']:
+        if nonascii_percentage < min(CHECK_CONFIG['nonAsciiThreshold'], CHECK_CONFIG['nonAsciiDelete']):
             return
+
+        if nonascii_percentage < CHECK_CONFIG['nonAsciiDelete']:
+            LOG.info("Deleted message containing more than threshold ")
+            await message.delete()
 
         # Message is now over threshold, get/create their cooldown record.
         cooldown_record = self._events.setdefault(message.author.id, {
@@ -90,10 +95,9 @@ class NonAsciiFilter(AntiSpamModule):
             await message.channel.send(embed=discord.Embed(
                 title=Emojis.SHIELD + " Oops! Non-ASCII Message!",
                 description=f"Hey {message.author.mention}!\n\nIt looks like you posted a message containing a lot of "
-                            f"non-ascii characters. In order to cut down on spam, we are a bit strict with this. We "
-                            f"won't delete your message, but please keep ASCII spam off the server.\n\nContinuing to "
-                            f"spam ASCII messages may result in a ban. Thank you for keeping {message.guild.name} "
-                            f"clean!"
+                            f"non-ascii characters. In order to cut down on spam, we are a bit strict with this.\n\n"
+                            f"Continuing to spam ASCII messages may result in a ban. Thank you for keeping "
+                            f"{message.guild.name} clean!"
             ), delete_after=90.0)
 
         cooldown_record['offenseCount'] += 1
@@ -130,7 +134,7 @@ class NonAsciiFilter(AntiSpamModule):
 
     @commands.command(name="configure", brief="Configure thresholds for NonAsciiFilter")
     async def set_ascii_cooldown(self, ctx: commands.Context, cooldown_minutes: int, ban_limit: int, min_length: int,
-                                 threshold: float):
+                                 warn_threshold: float, delete_threshold: float):
         """
         Set cooldowns/ban thresholds on non-ASCII spam.
 
@@ -148,17 +152,27 @@ class NonAsciiFilter(AntiSpamModule):
             cooldown_minutes - The number of minutes before a given cooldown expires (default: 5)
             ban_limit - The number of warnings before a user is autobanned (default: 3)
             min_length - The minimum total number of characters to process a message (default: 40)
-            threshold - A value (between 0 and 1) that represents the percentage of characters that need to be
-                       non-ASCII before a warning is fired. (default: 0.5)
+            warn_threshold - A value (between 0 and 1) that represents the percentage of characters that need to be
+                             non-ASCII before a warning is fired. (default: 0.5)
+            delete_threshold - A value (between 0 and 1) that represents the percentage of characters that need to be
+                               non-ASCII before the message is deleted as well as warned (default: 0.75)
         """
 
         as_config = self._config.get('antiSpam', {})
         nonascii_config = as_config.setdefault('NonAsciiFilter', {}).setdefault('config', defaults)
 
-        if not 0 <= threshold <= 1:
+        if not 0 <= warn_threshold <= 1:
             await ctx.send(embed=discord.Embed(
                 title="Configuration Error",
-                description="The `threshold` value must be between 0 and 1!",
+                description="The `warn_threshold` value must be between 0 and 1!",
+                color=Colors.DANGER
+            ))
+            return
+
+        if not 0 <= delete_threshold <= 1:
+            await ctx.send(embed=discord.Embed(
+                title="Configuration Error",
+                description="The `delete_threshold` value must be between 0 and 1!",
                 color=Colors.DANGER
             ))
             return
@@ -166,7 +180,8 @@ class NonAsciiFilter(AntiSpamModule):
         nonascii_config['minutes'] = cooldown_minutes
         nonascii_config['banLimit'] = ban_limit
         nonascii_config['minMessageLength'] = min_length
-        nonascii_config['nonAsciiThreshold'] = threshold
+        nonascii_config['nonAsciiThreshold'] = warn_threshold
+        nonascii_config['nonAsciiDelete'] = delete_threshold
 
         self._config.set('antiSpam', as_config)
 
@@ -181,22 +196,20 @@ class NonAsciiFilter(AntiSpamModule):
     @commands.command(name="test", brief="Get the non-ascii percentage of a string")
     async def test_strings(self, ctx: commands.Context, *, text: str):
         """
-        Test the difference between two strings to NonUniqueFilter.
+        Test a string for non-ascii percentage.
 
-        This command will compare two strings and determine their similarity ratio (used to determine if a message is
-        above the threshold or not). Additionally, it will also time the calculation for profiling purposes.
-
-        Note that if the strings you are comparing have spaces, *both must be surrounded by quotes*.
+        This command allows a moderator to directly call the NAF to determine the fate and status of any given message.
+        This command will list the percentage of non-ascii characters detected in the string, as well as return what the
+        system will do with the message in question.
 
         Parameters:
-            text_a - The first text string to compare to.
-            text_b - The text string to compare to text_a.
+            text - The text to process.
 
         Example Commands:
-            /as nuf test hello henlo - Compare strings "hello" and "henlo"
+            /as naf test hello - Get NAF percentage of "hello"
         """
         as_config = self._config.get('antiSpam', {})
-        nonascii_config = as_config.get('NonAsciiFilter', {}).get('config', defaults)
+        nonascii_config = {**defaults, **as_config.get('NonAsciiFilter', {}).get('config', {})}
 
         calc_start = datetime.datetime.utcnow()
         percentage = self.calculate_nonascii_value(text)
@@ -205,11 +218,12 @@ class NonAsciiFilter(AntiSpamModule):
         calc_time = calc_end - calc_start
 
         is_spam = (percentage >= nonascii_config['nonAsciiThreshold'])
+        is_deleted = (percentage >= nonascii_config['nonAsciiDelete'])
 
         await ctx.send(embed=discord.Embed(
             title="Non-Ascii Tester",
             description=f"The passed message is **`{100 * percentage:.1f}%` non-ascii**.\n\n"
-                        f"This message **WOULD {'' if is_spam else 'NOT'}** trigger a warning.\n\n"
-                        f"Calculation Time: `{calc_time.total_seconds() * 1000} ms`.",
-            color=Colors.WARNING if is_spam else Colors.INFO
+                        f"Message result: `{'DELETED' if is_deleted else 'FLAGGED' if is_spam else 'IGNORED'}`\n\n"
+                        f"Calculation Time: `{round(calc_time.total_seconds() * 1000, 3)} ms`.",
+            color=Colors.DANGER if is_deleted else (Colors.WARNING if is_spam else Colors.INFO)
         ))
