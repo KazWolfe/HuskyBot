@@ -43,6 +43,7 @@ class NonAsciiFilter(AntiSpamModule):
 
     @staticmethod
     def calculate_nonascii_value(text: str):
+        text = text.replace(' ', '')
         nonascii_characters = re.sub('[ -~]', '', text)
 
         return len(nonascii_characters) / float(len(text))
