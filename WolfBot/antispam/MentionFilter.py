@@ -1,4 +1,3 @@
-import datetime
 import logging
 
 import discord
@@ -24,18 +23,18 @@ class MentionFilter(AntiSpamModule):
         self.bot = plugin.bot
         self._config = WolfConfig.get_config()
 
-        self._events = {}
-
         self.add_command(self.set_ping_limit)
 
         LOG.info("Filter initialized.")
 
     def cleanup(self):
-        # Purge expired events/cooldowns.
-        for user_id in self._events.keys():
-            if self._events[user_id]['expiry'] < datetime.datetime.utcnow():
-                LOG.info("Cleaning up expired cooldown for user %s", user_id)
-                del self._events[user_id]
+        return
+
+    def clear_for_user(self, user: discord.Member):
+        return
+
+    def clear_all(self):
+        return
 
     async def on_message(self, message):
         as_config = self._config.get('antiSpam', {})

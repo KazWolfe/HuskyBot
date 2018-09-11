@@ -43,6 +43,8 @@ class AttachmentFilter(AntiSpamModule):
         self._events = {}
 
         self.add_command(self.set_attach_cooldown)
+        self.add_command(self.clear_cooldown)
+        self.add_command(self.clear_all_cooldowns)
 
         LOG.info("Filter initialized.")
 
@@ -52,6 +54,15 @@ class AttachmentFilter(AntiSpamModule):
             if self._events[user_id]['expiry'] < datetime.datetime.utcnow():
                 LOG.info("Cleaning up expired cooldown for user %s", user_id)
                 del self._events[user_id]
+
+    def clear_for_user(self, user: discord.Member):
+        if user.id not in self._events.keys():
+            raise KeyError("The user requested does not have a record for this filter.")
+
+        del self._events[user.id]
+
+    def clear_all(self):
+        self._events = {}
 
     async def on_message(self, message: discord.Message):
         as_config = self._config.get('antiSpam', {})
@@ -151,5 +162,68 @@ class AttachmentFilter(AntiSpamModule):
             description=f"The attachments module of AntiSpam has been set to allow a max of **`{ban_limit}`** "
                         f"attachments in a **`{cooldown_seconds}` second** period, warning after **`{warn_limit}`** "
                         f"attachments",
+            color=Colors.SUCCESS
+        ))
+
+    @commands.command(name="clear", brief="Clear a cooldown record for a specific user")
+    async def clear_cooldown(self, ctx: commands.Context, user: discord.Member):
+        """
+        Clear a user's cooldown record for this filter.
+
+        This command allows moderators to override the antispam expiry system, and clear a user's cooldowns/strikes/
+        warnings early. Any accrued warnings for the selected user are discarded and the user starts with a clean slate.
+
+        Parameters:
+            user - A user object (ID, mention, etc) to target for clearing.
+
+        See also:
+            /as <filter_name> clearAll - Clear all cooldowns for all users for a single filter.
+            /as clear - Clear cooldowns on all filters for a single user.
+            /as clearAll - Clear all cooldowns globally for all users (reset).
+        """
+
+        try:
+            self.clear_for_user(user)
+            LOG.info(f"The attachment cooldown record for {user} was cleared by {ctx.author}.")
+        except KeyError:
+            await ctx.send(embed=discord.Embed(
+                title="Attachment Filter",
+                description=f"There is no cooldown record present for `{user}`. Either this user does not exist, they "
+                            f"do not have a cooldown record, or it has already been cleared.",
+                color=Colors.DANGER
+            ))
+            return
+
+        await ctx.send(embed=discord.Embed(
+            title=Emojis.SPARKLES + " Attachment Filter | Cooldown Record Cleared!",
+            description=f"The attachment record for `{user}` has been cleared. There are now no warnings on this "
+                        f"user's record.",
+            color=Colors.SUCCESS
+        ))
+
+    @commands.command(name="clearAll", brief="Clear all cooldown records for this filter.")
+    @commands.has_permissions(administrator=True)
+    async def clear_all_cooldowns(self, ctx: commands.Context):
+        """
+        Clear cooldown records for all users for this filter.
+
+        This command will clear all cooldowns for the current filter, effectively resetting its internal state. No users
+        will have any warnings for this filter after this command is executed.
+
+        See also:
+            /as <filter_name> clear - Clear cooldowns on a single filter for a single user.
+            /as clear - Clear cooldowns on all filters for a single user.
+            /as clearAll - Clear all cooldowns globally for all users (reset).
+        """
+
+        record_count = len(self._events)
+
+        self.clear_all()
+        LOG.info(f"{ctx.author} cleared {record_count} cooldown records from the attachment filter.")
+
+        await ctx.send(embed=discord.Embed(
+            title=Emojis.SPARKLES + " Attachment Filter | Cooldown Record Cleared!",
+            description=f"All cooldown records for the attachment filter have been successfully cleared. No warnings "
+                        f"currently exist in the system.",
             color=Colors.SUCCESS
         ))

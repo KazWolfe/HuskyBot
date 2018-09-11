@@ -93,10 +93,7 @@ async def initialize():
 
     # Disable help, and register our own
     bot.remove_command("help")
-    bot.add_command(commands.Command(name="help",
-                                     brief="Get help with the bot",
-                                     aliases=["?"],
-                                     callback=help_command))
+    bot.add_command(commands.Command(name="help", brief="Get help with the bot", aliases=["?"], callback=help_command))
 
     # Initialize our HTTP server
     await start_webserver()

@@ -32,6 +32,8 @@ class NonAsciiFilter(AntiSpamModule):
 
         self.add_command(self.set_ascii_cooldown)
         self.add_command(self.test_strings)
+        self.add_command(self.clear_cooldown)
+        self.add_command(self.clear_all_cooldowns)
 
         LOG.info("Filter initialized.")
 
@@ -41,6 +43,15 @@ class NonAsciiFilter(AntiSpamModule):
             if self._events[user_id]['expiry'] < datetime.datetime.utcnow():
                 LOG.info("Cleaning up expired cooldown for user %s", user_id)
                 del self._events[user_id]
+
+    def clear_for_user(self, user: discord.Member):
+        if user.id not in self._events.keys():
+            raise KeyError("The user requested does not have a record for this filter.")
+
+        del self._events[user.id]
+
+    def clear_all(self):
+        self._events = {}
 
     @staticmethod
     def calculate_nonascii_value(text: str):
@@ -81,8 +92,9 @@ class NonAsciiFilter(AntiSpamModule):
         if nonascii_percentage < min(CHECK_CONFIG['nonAsciiThreshold'], CHECK_CONFIG['nonAsciiDelete']):
             return
 
-        if nonascii_percentage < CHECK_CONFIG['nonAsciiDelete']:
-            LOG.info("Deleted message containing more than threshold ")
+        if nonascii_percentage > CHECK_CONFIG['nonAsciiDelete']:
+            LOG.info(f"Deleted message containing non-ascii percentage over threshold of "
+                     f"{CHECK_CONFIG['nonAsciiDelete']}: {nonascii_percentage}")
             await message.delete()
 
         # Message is now over threshold, get/create their cooldown record.
@@ -99,8 +111,11 @@ class NonAsciiFilter(AntiSpamModule):
                             f"Continuing to spam ASCII messages may result in a ban. Thank you for keeping "
                             f"{message.guild.name} clean!"
             ), delete_after=90.0)
+            LOG.info(f"Warned user {message.author} for non-ascii spam publicly. A cooldown record has been created.")
 
         cooldown_record['offenseCount'] += 1
+        LOG.info(f"Offense record for {message.author} incremented. User has "
+                 f"{cooldown_record['offenseCount']} / {CHECK_CONFIG['banLimit']} warnings.")
 
         if log_channel is not None:
             embed = discord.Embed(
@@ -188,7 +203,7 @@ class NonAsciiFilter(AntiSpamModule):
         await ctx.send(embed=discord.Embed(
             title="AntiSpam Plugin",
             description=f"The non-ASCII module of AntiSpam has been set to scan messages over **{min_length} "
-                        f"characters** for a non-ASCII **threshold of {threshold}**. Users will be automatically "
+                        f"characters** for a non-ASCII **threshold of {warn_threshold}**. Users will be automatically "
                         f"banned for posting **{ban_limit} messages** in a **{cooldown_minutes} minute** period.",
             color=Colors.SUCCESS
         ))
@@ -226,4 +241,67 @@ class NonAsciiFilter(AntiSpamModule):
                         f"Message result: `{'DELETED' if is_deleted else 'FLAGGED' if is_spam else 'IGNORED'}`\n\n"
                         f"Calculation Time: `{round(calc_time.total_seconds() * 1000, 3)} ms`.",
             color=Colors.DANGER if is_deleted else (Colors.WARNING if is_spam else Colors.INFO)
+        ))
+
+    @commands.command(name="clear", brief="Clear a cooldown record for a specific user")
+    async def clear_cooldown(self, ctx: commands.Context, user: discord.Member):
+        """
+        Clear a user's cooldown record for this filter.
+
+        This command allows moderators to override the antispam expiry system, and clear a user's cooldowns/strikes/
+        warnings early. Any accrued warnings for the selected user are discarded and the user starts with a clean slate.
+
+        Parameters:
+            user - A user object (ID, mention, etc) to target for clearing.
+
+        See also:
+            /as <filter_name> clearAll - Clear all cooldowns for all users for a single filter.
+            /as clear - Clear cooldowns on all filters for a single user.
+            /as clearAll - Clear all cooldowns globally for all users (reset).
+        """
+
+        try:
+            self.clear_for_user(user)
+            LOG.info(f"The non-ascii cooldown record for {user} was cleared by {ctx.author}.")
+        except KeyError:
+            await ctx.send(embed=discord.Embed(
+                title="Non-Ascii Filter",
+                description=f"There is no cooldown record present for `{user}`. Either this user does not exist, they "
+                            f"do not have a cooldown record, or it has already been cleared.",
+                color=Colors.DANGER
+            ))
+            return
+
+        await ctx.send(embed=discord.Embed(
+            title=Emojis.SPARKLES + " Non-Ascii Filter | Cooldown Record Cleared!",
+            description=f"The cooldown record for `{user}` has been cleared. There are now no warnings on this user's "
+                        f"record.",
+            color=Colors.SUCCESS
+        ))
+
+    @commands.command(name="clearAll", brief="Clear all cooldown records for this filter.")
+    @commands.has_permissions(administrator=True)
+    async def clear_all_cooldowns(self, ctx: commands.Context):
+        """
+        Clear cooldown records for all users for this filter.
+
+        This command will clear all cooldowns for the current filter, effectively resetting its internal state. No users
+        will have any warnings for this filter after this command is executed.
+
+        See also:
+            /as <filter_name> clear - Clear cooldowns on a single filter for a single user.
+            /as clear - Clear cooldowns on all filters for a single user.
+            /as clearAll - Clear all cooldowns globally for all users (reset).
+        """
+
+        record_count = len(self._events)
+
+        self.clear_all()
+        LOG.info(f"{ctx.author} cleared {record_count} cooldown records from the non-ascii filter.")
+
+        await ctx.send(embed=discord.Embed(
+            title=Emojis.SPARKLES + " Non-Ascii Filter | Cooldown Records Cleared!",
+            description=f"All cooldown records for the non-ascii filter have been successfully cleared. No warnings "
+                        f"currently exist in the system.",
+            color=Colors.SUCCESS
         ))

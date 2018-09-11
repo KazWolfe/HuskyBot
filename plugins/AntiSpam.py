@@ -193,6 +193,61 @@ class AntiSpam:
             description=f"The anti-spam module `{name}` has been disabled. It will not run with the bot."
         ))
 
+    @asp.command(name="clear", brief="Clear cooldowns across all filters for a user.")
+    async def clear_cooldowns(self, ctx: commands.Context, user: discord.Member):
+        """
+        Clear all cooldowns for a single user, on all filters.
+
+        This command allows moderators to immediately reset user filter states across all actively loaded filters,
+        without affecting other records. When this command is finished, the user targeted will have *no* warnings on
+        their AntiSpam record.
+
+        Parameters:
+            user - A user object (ID, mention, etc) to target for clearing.
+
+        See also:
+            /as <filter_name> clear - Clear cooldowns on a single filter for a single user.
+            /as <filter_name> clearAll - Clear all cooldowns for all users for a single filter.
+            /as clearAll - Clear all cooldowns globally for all users (reset).
+        """
+        for f in self.__modules__.values():  # type: antispam.AntiSpamModule
+            try:
+                f.clear_for_user(user)
+            except KeyError as _:
+                # If we get a KeyError, that means the user has no record. Move on with our lives.
+                pass
+
+        await ctx.send(embed=discord.Embed(
+            title=Emojis.SPARKLES + " AntiSpam | Cooldowns Cleared",
+            description=f"All cooldowns for {user} across all antispam filters have been successfully cleared. "
+                        f"{user} no longer has any antispam-related warnings on their profile.",
+            color=Colors.SUCCESS
+        ))
+
+    @asp.command(name="clearAll", brief="Clear cooldowns across all filters for all users.")
+    @commands.has_permissions(administrator=True)
+    async def clear_all_cooldowns(self, ctx: commands.Context):
+        """
+        Clear all cooldowns for all users, on all filters.
+
+        This command effectively resets the AntiSpam cooldown system entirely, and is equivalent to reloading the entire
+        AntiSpam module.
+
+        See also:
+            /as clear - Clear cooldowns on all filters for a single user.
+            /as <filter_name> clear - Clear cooldowns on a single filter for a single user.
+            /as <filter_name> clearAll - Clear all cooldowns for all users for a single filter.
+        """
+
+        for f in self.__modules__.values():  # type: antispam.AntiSpamModule
+            f.clear_all()
+
+        await ctx.send(embed=discord.Embed(
+            title=Emojis.SPARKLES + " AntiSpam | Cooldowns Cleared",
+            description=f"All cooldowns for all users across all antispam filters have been successfully cleared.",
+            color=Colors.SUCCESS
+        ))
+
 
 def setup(bot: discord.ext.commands.Bot):
     bot.add_cog(AntiSpam(bot))

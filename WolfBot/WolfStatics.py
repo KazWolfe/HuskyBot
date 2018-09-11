@@ -86,6 +86,7 @@ class Emojis:
     REFRESH = "\U0001F504"
     WAVE = "\U0001F44B"
     NAMETAG = "\U0001F4DB"
+    SPARKLES = "\U00002728"
 
     # Mod shortcuts
     BAN = NO_ENTRY

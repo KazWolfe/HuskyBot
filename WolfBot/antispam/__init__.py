@@ -1,18 +1,30 @@
 import inspect
+from abc import abstractmethod, ABCMeta
 
 import discord
 from discord.ext import commands
 from discord.ext.commands import MissingPermissions
 
 
-class AntiSpamModule(commands.Group):
+class AntiSpamModule(commands.Group, metaclass=ABCMeta):
     """
     Base module for AntiSpam Modules.
     """
+
+    @abstractmethod
     def cleanup(self):
         raise NotImplementedError
 
+    @abstractmethod
     async def on_message(self, message: discord.Message):
+        raise NotImplementedError
+
+    @abstractmethod
+    def clear_for_user(self, user: discord.Member):
+        raise NotImplementedError
+
+    @abstractmethod
+    def clear_all(self):
         raise NotImplementedError
 
     async def base(self, ctx: commands.Context):
