@@ -237,7 +237,7 @@ class ModTools:
             pretty_string = ""
         else:
             mute_until = datetime.datetime.utcnow() + time
-            pretty_string = f"Their mute will expire at {mute_until.strftime(DATETIME_FORMAT)} UTC"
+            pretty_string = f"Their mute will expire at {mute_until.strftime(DATETIME_FORMAT)}"
             mute_until = int(mute_until.timestamp())
 
         # Try to find a mute from this user
@@ -297,7 +297,7 @@ class ModTools:
             pretty_string = ""
         else:
             mute_until = datetime.datetime.utcnow() + time
-            pretty_string = f"Their mute will expire at {mute_until.strftime(DATETIME_FORMAT)} UTC"
+            pretty_string = f"Their mute will expire at {mute_until.strftime(DATETIME_FORMAT)}"
             mute_until = int(mute_until.timestamp())
 
         # Try to find a mute from this user

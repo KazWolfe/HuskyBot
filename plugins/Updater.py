@@ -110,7 +110,7 @@ class Updater:
 
         embed.add_field(name="Author", value=last_commit.author, inline=True)
         embed.add_field(name="Author Date", value=datetime
-                        .fromtimestamp(last_commit.authored_date).strftime(DATETIME_FORMAT) + " UTC", inline=True)
+                        .fromtimestamp(last_commit.authored_date).strftime(DATETIME_FORMAT), inline=True)
         embed.add_field(name="GitHub",
                         value=f"[See Commit >]({GIT_URL}/commit/{last_commit.hexsha})",
                         inline=False)

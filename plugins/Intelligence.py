@@ -257,7 +257,7 @@ class Intelligence:
 
             await ctx.send(embed=discord.Embed(
                 title="Message Count Report",
-                description=f"Since `{search_start.strftime(DATETIME_FORMAT)} UTC`, the channel context "
+                description=f"Since `{search_start.strftime(DATETIME_FORMAT)}`, the channel context "
                             f"`{search_context['name']}` has seen about **{message_count} messages**.",
                 color=Colors.INFO
             ))
@@ -330,7 +330,7 @@ class Intelligence:
 
         await ctx.send(embed=discord.Embed(
             title="Active User Count Report",
-            description=f"Since `{search_start.strftime(DATETIME_FORMAT)} UTC`, the channel context "
+            description=f"Since `{search_start.strftime(DATETIME_FORMAT)}`, the channel context "
                         f"`{search_context['name']}` has seen about **{active_user_count} active users** (sending on "
                         f"average {threshold} or more messages per hour).",
             color=Colors.INFO
@@ -496,7 +496,7 @@ class Intelligence:
                             inline=False)
             embed.set_image(url=invite_guild.splash_url)
 
-        embed.set_footer(text=f"Report generated at {WolfUtils.get_timestamp()} UTC")
+        embed.set_footer(text=f"Report generated at {WolfUtils.get_timestamp()}")
 
         await ctx.send(embed=embed)
 

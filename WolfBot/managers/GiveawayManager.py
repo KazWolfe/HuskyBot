@@ -168,7 +168,7 @@ class GiveawayManager:
             title=f"{Emojis.GIVEAWAY} New Giveaway: {title}!",
             description=f"A giveaway has been started for **{title}**!\n\nAnyone may enter, and up to {winner_str} "
                         f"will be selected for the final prize. React with the {Emojis.GIVEAWAY} emoji to enter."
-                        f"\n\nThis giveaway will end at {end_time.strftime(DATETIME_FORMAT)} UTC",
+                        f"\n\nThis giveaway will end at {end_time.strftime(DATETIME_FORMAT)}",
             color=Colors.INFO
         )
 
