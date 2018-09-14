@@ -25,7 +25,7 @@ class Math:
         self.bot.loop.create_task(self._http_session.close())
 
     @commands.command(name="latex", brief="Generate and render some LaTeX code")
-    @commands.cooldown(1, 30, commands.BucketType.user)
+    @commands.cooldown(1, 10, commands.BucketType.user)
     async def render_tex(self, ctx: commands.Context, *, latex: str):
         """
         Send off some LaTeX for rendering. [EXPERIMENTAL]
@@ -79,10 +79,15 @@ class Math:
         )
 
         if was_successful:
-            embed.set_footer(text="LaTeX rendered by rTEX: rtex.probablyaweb.site")
+            embed.set_footer(text="Rendered by rTEX API",
+                             icon_url="http://rtex.probablyaweb.site/static/favicon.png")
             embed.set_image(url=api_url + "/" + response_data['filename'])
         else:
-            embed.add_field(name="Rendering Error", value=response_data['description'])
+            embed.add_field(
+                name="Rendering Error",
+                value="There was an issue rendering your TeX. Please check your code to ensure that it is error-free. "
+                      "You may use [the online implementation](http://rtex.probablyaweb.site/) to try out your TeX "
+                      "code.\n\nThe rendering service may also be offline or experiencing difficulties.")
 
         await ctx.send(embed=embed)
 
