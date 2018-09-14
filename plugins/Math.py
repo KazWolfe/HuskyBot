@@ -17,12 +17,12 @@ class Math:
         self.bot = bot
         self._config = WolfConfig.get_config()
 
-        self._http_session = aiohttp.ClientSession()
+        self._http_session = aiohttp.ClientSession(loop=bot.loop)
 
         LOG.info("Loaded plugin!")
 
     def __unload(self):
-        self._http_session.close()
+        self.bot.loop.create_task(self._http_session.close())
 
     @commands.command(name="latex", brief="Generate and render some LaTeX code")
     @commands.cooldown(1, 30, commands.BucketType.user)
@@ -30,8 +30,22 @@ class Math:
         """
         Send off some LaTeX for rendering. [EXPERIMENTAL]
 
-        Take some LaTeX code (assuming a document), render it, and send it back to the chat. This command uses the rtex
-        renderer by DXSmiley: https://github.com/DXsmiley/rtex.
+        The LaTeX command allows you to write descriptive/advanced mathematical equations and information, and have the
+        bot display it as an image in a response.
+
+        All LaTeX code is wrapped in the following template before being sent:
+
+            \\documentclass{article}
+
+            \\usepackage{color} \\color{white}
+            \\begin{document}
+
+            <your latex here>
+
+            \\pagenumbering{gobble}
+            \\end{document}
+
+        TeX rendering is handled by DXSmiley's rtex (https://github.com/DXsmiley/rtex) - http://rtex.probablyaweb.site/
         """
 
         api_url = "http://rtex.probablyaweb.site/api/v2"
@@ -42,11 +56,10 @@ class Math:
             if latex.startswith('tex'):
                 latex = latex[3:]
 
-        latex_wrapped = f"\\documentclass{{article}}\n" \
-                        f"\\usepackage{{color}}\n" \
-                        f"\\color{{white}}\n" \
-                        f"\\begin{{document}}\n" \
-                        f"{latex}\n" \
+        latex_wrapped = f"\\documentclass{{article}}\n\n" \
+                        f"\\usepackage{{color}} \\color{{white}}\n" \
+                        f"\\begin{{document}}\n\n" \
+                        f"{latex}\n\n" \
                         f"\\pagenumbering{{gobble}}\n" \
                         f" \\end{{document}}"
 
@@ -57,6 +70,8 @@ class Math:
 
         response_data = json.loads(await response.text())
         was_successful = response.status == 200 and response_data.get('status') == 'success'
+
+        response.close()
 
         embed = discord.Embed(
             title="Rendered LaTeX",

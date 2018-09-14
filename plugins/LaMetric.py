@@ -43,7 +43,7 @@ class LaMetric:
         self.bot = bot
         self._config = WolfConfig.get_config()
 
-        self._api = LaMetricApi.LaMetricApi()
+        self._api = LaMetricApi.LaMetricApi(loop=bot.loop)
 
         self._pending_registrations = {}
         '''
@@ -52,6 +52,9 @@ class LaMetric:
         '''
 
         LOG.info("Loaded plugin!")
+
+    def __cleanup(self):
+        self._api.cleanup()
 
     async def update_lametric_counts(self, guild: discord.Guild):
         lametric_conf = self._config.get('lametric', {})

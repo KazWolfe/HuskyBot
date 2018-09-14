@@ -4,11 +4,13 @@ APP_BASE = "https://developer.lametric.com/api/v1/dev/widget/update/com.lametric
 
 
 class LaMetricApi:
-    def __init__(self):
-        self._http_client = aiohttp.ClientSession()
+    def __init__(self, loop):
+        self.__async_loop__ = loop
+
+        self._http_client = aiohttp.ClientSession(loop=loop)
 
     def cleanup(self):
-        self._http_client.close()
+        self.__async_loop__.create_task(self._http_client.close())
 
     async def push(self, app_id: str, data: dict, access_token: str):
         headers = {

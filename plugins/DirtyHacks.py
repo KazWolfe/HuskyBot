@@ -28,12 +28,12 @@ class DirtyHacks:
         self.bot = bot
         self._config = WolfConfig.get_config()
 
-        self._http_session = aiohttp.ClientSession()
+        self._http_session = aiohttp.ClientSession(loop=bot.loop)
 
         LOG.info("Loaded plugin!")
 
     def __unload(self):
-        self._http_session.close()
+        self.bot.loop.create_task(self._http_session.close())
 
     async def on_message(self, message: discord.Message):
         if not WolfUtils.should_process_message(message):
