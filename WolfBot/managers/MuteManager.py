@@ -177,7 +177,7 @@ class MuteManager:
             )
 
             embed.set_author(
-                name=f"{member} was unmuted from {'the guild' if mute.channel is None else '#' + channel}!",
+                name=f"{member} was unmuted from {'the guild' if mute.channel is None else f'#{channel}'}!",
                 icon_url=member.avatar_url),
             embed.add_field(name="Responsible User", value=staff_member, inline=True)
 

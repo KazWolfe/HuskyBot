@@ -1,3 +1,4 @@
+import datetime
 import logging
 
 import discord
@@ -11,7 +12,8 @@ LOG = logging.getLogger("DakotaBot.Plugin.AntiSpam." + __name__.split('.')[-1])
 
 defaults = {
     "soft": 6,  # Number of unique pings in a message before deleting the message
-    "hard": 15  # Number of unique pings in a message before banning the user
+    "hard": 15,  # Number of unique pings in a message before banning the user
+    "seconds": 30  # Number of seconds (from first ping) to track.
 }
 
 
@@ -22,25 +24,33 @@ class MentionFilter(AntiSpamModule):
 
         self.bot = plugin.bot
         self._config = WolfConfig.get_config()
+        self._events = {}
 
         self.add_command(self.set_ping_limit)
+        self.add_command(self.clear_cooldown)
+        self.add_command(self.clear_all_cooldowns)
 
         LOG.info("Filter initialized.")
 
     def cleanup(self):
-        return
+        # Purge expired events/cooldowns.
+        for user_id in self._events.keys():
+            if self._events[user_id]['expiry'] < datetime.datetime.utcnow():
+                LOG.info("Cleaning up expired cooldown for user %s", user_id)
+                del self._events[user_id]
 
     def clear_for_user(self, user: discord.Member):
-        return
+        if user.id not in self._events.keys():
+            raise KeyError("The user requested does not have a record for this filter.")
+
+        del self._events[user.id]
 
     def clear_all(self):
-        return
+        self._events = {}
 
     async def on_message(self, message):
-        as_config = self._config.get('antiSpam', {})
-        ping_config = as_config.get('MentionSpamFilter', {}).get('config', defaults)
-        PING_WARN_LIMIT = ping_config['soft']
-        PING_BAN_LIMIT = ping_config['hard']
+        ANTISPAM_CONFIG = self._config.get('antiSpam', {})
+        ping_config = {**defaults, **ANTISPAM_CONFIG.get('MentionFilter', {}).get('config', {})}
 
         alert_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_ALERTS.value, None)
         if alert_channel is not None:
@@ -49,13 +59,22 @@ class MentionFilter(AntiSpamModule):
         if message.author.permissions_in(message.channel).mention_everyone:
             return
 
-        if PING_WARN_LIMIT is not None and len(message.mentions) >= PING_WARN_LIMIT:
+        if len(message.mentions) == 0:
+            return
+
+        cooldown_record = self._events.setdefault(message.author.id, {
+            "expiry": datetime.datetime.utcnow() + datetime.timedelta(seconds=ping_config['seconds']),
+            "offenseCount": 0
+        })
+
+        cooldown_record['offenseCount'] += len(message.mentions)
+
+        if ping_config['soft'] is not None and len(message.mentions) >= ping_config['soft']:
             try:
                 await message.delete()
             except discord.NotFound:
                 LOG.warning("Message already deleted before AS could handle it (censor?).")
 
-            # ToDo: Issue actual warning through Punishment (once made available)
             await message.channel.send(embed=discord.Embed(
                 title=Emojis.NO_ENTRY + " Mass Ping Blocked",
                 description="A mass-ping message was blocked in the current channel.\n"
@@ -72,11 +91,23 @@ class MentionFilter(AntiSpamModule):
 
             LOG.info(f"Got message from {message.author} containing {len(message.mentions)} pings.")
 
-        if PING_BAN_LIMIT is not None and len(message.mentions) >= PING_BAN_LIMIT:
-            await message.author.ban(
-                delete_message_days=0,
-                reason="[AUTOMATIC BAN - AntiSpam Module] Multi-pinged over guild ban limit."
-            )
+        if ping_config['hard'] is not None:
+            if len(message.mentions) >= ping_config['hard']:
+                await message.author.ban(
+                    delete_message_days=0,
+                    reason="[AUTOMATIC BAN - AntiSpam Module] Multi-pinged over guild ban limit."
+                )
+                del self._events[message.author.id]
+                return
+
+            if cooldown_record['offenseCount'] >= ping_config['hard']:
+                await message.author.ban(
+                    delete_message_days=0,
+                    reason=f"[AUTOMATIC BAN - AntiSpam Module] Pinged over guild ban limit in {ping_config['seconds']} "
+                           f"seconds."
+                )
+                del self._events[message.author.id]
+                return
 
     @commands.command(name="setPingLimit", brief="Set the number of pings required before AntiSpam takes action")
     async def set_ping_limit(self, ctx: commands.Context, warn_limit: int, ban_limit: int):
@@ -114,5 +145,68 @@ class MentionFilter(AntiSpamModule):
             title="AntiSpam Plugin",
             description=f"Ping limits have been successfully updated. Warn in `{warn_limit}` pings, "
                         f"ban in `{ban_limit}`.",
+            color=Colors.SUCCESS
+        ))
+
+    @commands.command(name="clear", brief="Clear a cooldown record for a specific user")
+    async def clear_cooldown(self, ctx: commands.Context, user: discord.Member):
+        """
+        Clear a user's cooldown record for this filter.
+
+        This command allows moderators to override the antispam expiry system, and clear a user's cooldowns/strikes/
+        warnings early. Any accrued warnings for the selected user are discarded and the user starts with a clean slate.
+
+        Parameters:
+            user - A user object (ID, mention, etc) to target for clearing.
+
+        See also:
+            /as <filter_name> clearAll - Clear all cooldowns for all users for a single filter.
+            /as clear - Clear cooldowns on all filters for a single user.
+            /as clearAll - Clear all cooldowns globally for all users (reset).
+        """
+
+        try:
+            self.clear_for_user(user)
+            LOG.info(f"The mention cooldown record for {user} was cleared by {ctx.author}.")
+        except KeyError:
+            await ctx.send(embed=discord.Embed(
+                title="Mention Filter",
+                description=f"There is no cooldown record present for `{user}`. Either this user does not exist, they "
+                            f"do not have a cooldown record, or it has already been cleared.",
+                color=Colors.DANGER
+            ))
+            return
+
+        await ctx.send(embed=discord.Embed(
+            title=Emojis.SPARKLES + " Mention Filter | Cooldown Record Cleared!",
+            description=f"The cooldown record for `{user}` has been cleared. There are now no warnings on this user's "
+                        f"record.",
+            color=Colors.SUCCESS
+        ))
+
+    @commands.command(name="clearAll", brief="Clear all cooldown records for this filter.")
+    @commands.has_permissions(administrator=True)
+    async def clear_all_cooldowns(self, ctx: commands.Context):
+        """
+        Clear cooldown records for all users for this filter.
+
+        This command will clear all cooldowns for the current filter, effectively resetting its internal state. No users
+        will have any warnings for this filter after this command is executed.
+
+        See also:
+            /as <filter_name> clear - Clear cooldowns on a single filter for a single user.
+            /as clear - Clear cooldowns on all filters for a single user.
+            /as clearAll - Clear all cooldowns globally for all users (reset).
+        """
+
+        record_count = len(self._events)
+
+        self.clear_all()
+        LOG.info(f"{ctx.author} cleared {record_count} cooldown records from the mention filter.")
+
+        await ctx.send(embed=discord.Embed(
+            title=Emojis.SPARKLES + " Mention Filter | Cooldown Records Cleared!",
+            description=f"All cooldown records for the mention filter have been successfully cleared. No warnings "
+                        f"currently exist in the system.",
             color=Colors.SUCCESS
         ))
