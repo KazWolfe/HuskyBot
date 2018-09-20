@@ -242,7 +242,7 @@ def calculate_str_entropy(string):
 
 
 def escape_markdown(string):
-    markdown_characters = ["~", "`", "*", "_", "["]
+    markdown_characters = ["\\", "~", "`", "*", "_", "["]
 
     for c in markdown_characters:
         string = string.replace(c, "\\" + c)
