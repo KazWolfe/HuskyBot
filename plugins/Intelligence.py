@@ -47,7 +47,8 @@ class Intelligence:
 
         guild_details.set_thumbnail(url=guild.icon_url)
         guild_details.add_field(name="Guild ID", value=guild.id, inline=True)
-        guild_details.add_field(name="Owner", value=guild.owner.display_name + "#" + guild.owner.discriminator,
+        guild_details.add_field(name="Owner", value=f"{WolfUtils.escape_markdown(guild.owner.display_name)}"
+                                                    f"#{guild.owner.discriminator}",
                                 inline=True)
         guild_details.add_field(name="Members", value=str(len(guild.members)) + " users", inline=True)
         guild_details.add_field(name="Text Channels", value=str(len(guild.text_channels)) + " channels", inline=True)
@@ -149,7 +150,8 @@ class Intelligence:
         member_details.add_field(name="User ID", value=user.id, inline=True)
 
         if isinstance(user, discord.Member) and ctx.guild is not None:
-            member_details.add_field(name="Display Name", value=user.display_name, inline=True)
+            member_details.add_field(name="Display Name", value=WolfUtils.escape_markdown(user.display_name),
+                                     inline=True)
 
         member_details.add_field(name="Joined Discord", value=user.created_at.strftime(DATETIME_FORMAT), inline=True)
         member_details.set_thumbnail(url=user.avatar_url)

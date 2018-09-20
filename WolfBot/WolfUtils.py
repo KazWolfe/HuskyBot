@@ -241,6 +241,15 @@ def calculate_str_entropy(string):
     return sum(e_x)
 
 
+def escape_markdown(string):
+    markdown_characters = ["~", "`", "*", "_", "["]
+
+    for c in markdown_characters:
+        string.replace(c, "\\" + c)
+
+    return string
+
+
 class CompressingRotatingFileHandler(logging.handlers.RotatingFileHandler):
     # Code source: https://stackoverflow.com/a/35547094/1817097
     # Modified by Kaz Wolfe
