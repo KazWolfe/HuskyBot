@@ -27,7 +27,23 @@ class HamRadio:
         self.bot.loop.create_task(self._http_session.close())
 
     @commands.command(name="callsign", brief="Get information about a callsign")
+    @commands.cooldown(1, 10, commands.BucketType.user)
     async def get_callsign_data(self, ctx: commands.Context, callsign: str):
+        """
+        Retrieve information about a ham radio callsign.
+
+        This command allows radio amateurs to query the FCC callsign database (via callook.info) to get basic
+        information about radio amateurs. It only works (for now) for US callsigns, and is slightly delayed from the
+        official FCC record due to download and processing times.
+
+        In order to prevent API abuse, this command is restricted to one lookup every ten seconds.
+
+        Parameters:
+            callsign - The callsign (W1AW) to look up.
+
+        Example Commands:
+            /callsign W1AW - Get information for the callsign W1AW.
+        """
 
         async with self._http_session.get(self.CALLSIGN_LOOKUP_URL.format(callsign=callsign)) as r:
             if r.status != 200:
