@@ -219,8 +219,8 @@ class AntiSpam:
 
         await ctx.send(embed=discord.Embed(
             title=Emojis.SPARKLES + " AntiSpam | Cooldowns Cleared",
-            description=f"All cooldowns for {user.mention} across all antispam filters have been successfully cleared. "
-                        f"They no longer have any antispam-related warnings on their profile.",
+            description=f"All cooldowns for {user} across all antispam filters have been successfully cleared. "
+                        f"{user} no longer has any antispam-related warnings on their profile.",
             color=Colors.SUCCESS
         ))
 

@@ -6,7 +6,7 @@ from datetime import datetime
 import discord
 from discord.ext import commands
 
-from WolfBot import WolfConfig
+from WolfBot import WolfConfig, WolfUtils
 from WolfBot.WolfStatics import *
 
 LOG = logging.getLogger("DakotaBot.Plugin." + __name__)
@@ -177,9 +177,9 @@ class Fun:
         average_score = round((attractiveness + (10.0 - craziness) + intelligence) / 3, 2)
 
         embed = discord.Embed(
-            title=f"{Emojis.FIRE} Hotness Calculator",
-            description=f"The rating for {member.mention} is ready. They have an overall hotness score of "
-                        f"{average_score}.",
+            title=f"{Emojis.FIRE} {WolfUtils.escape_markdown(member.display_name)} has an overall rating of "
+                  f"{average_score}!",
+            description=f"The rating for {member.mention} is ready!",
             color=Colors.INFO
         )
 
@@ -293,9 +293,9 @@ class Fun:
             final_fate = "BOT OVERLORD"
 
         embed = discord.Embed(
-            title=f"{Emojis.ROBOT} Robopocalypse Simulation Engine",
-            description=f"According to my current algorithms, {user.mention}'s fate in the robopocalypse will be: "
-                        f"**`{final_fate}`**",
+            title=Emojis.ROBOT + f" {user}'s Survivability",
+            description=f"According to my current algorithms, {WolfUtils.escape_markdown(user.display_name)}'s fate in "
+                        f"the robopocalypse will be: **`{final_fate}`**",
             color=Colors.INFO
         )
 

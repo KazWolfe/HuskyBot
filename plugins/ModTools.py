@@ -149,10 +149,10 @@ class ModTools:
         if in_guild and (user.top_role.position >= ctx.message.author.top_role.position):
             await ctx.send(embed=discord.Embed(
                 title="Moderator Toolkit",
-                description=f"<{ctx.author.mention}> I roll to ban `{user.mention}`!\n"
+                description=f"<{ctx.author.mention}> I roll to ban `{user}`!\n"
                             f"<[DM] DakotaBot> Roll for Arcana (INT).\n"
                             f"<Dice Roll> 1d20 = 2\n"
-                            f"<[DM] DakotaBot> The Banhammer of Geri refuses to strike `{user.mention}`!",
+                            f"<[DM] DakotaBot> The Banhammer of Geri refuses to strike `{user}`!",
                 color=Colors.DANGER
             ))
             return

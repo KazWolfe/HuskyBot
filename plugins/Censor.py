@@ -271,8 +271,7 @@ class Censor:
         if user.top_role.position >= ctx.message.author.top_role.position:
             await ctx.send(embed=discord.Embed(
                 title="Censor Toolkit",
-                description=f"You may not edit censors for {user.mention}, as they are not below you in the role "
-                            f"hierarchy.",
+                description=f"You may not edit censors for `{user}`, as they are not below you in the role hierarchy.",
                 color=Colors.DANGER
             ))
             return
@@ -317,8 +316,7 @@ class Censor:
         if user.top_role.position >= ctx.message.author.top_role.position:
             await ctx.send(embed=discord.Embed(
                 title="Censor Toolkit",
-                description=f"You may not edit censors for {user.mention}, as they are not below you in the role "
-                            f"hierarchy.",
+                description=f"You may not edit censors for `{user}`, as they are not below you in the role hierarchy.",
                 color=Colors.DANGER
             ))
             return
