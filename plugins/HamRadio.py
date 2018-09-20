@@ -72,7 +72,8 @@ class HamRadio:
         notes = "\n".join(notes)
         embed = discord.Embed(
             title=f"{Emojis.RADIO} Callsign Database Lookup",
-            description=f"Data for the callsign `{callsign.callsign}` was successfully retrieved from the server.\n"
+            description=f"Data for {callsign.name} (callsign `{callsign.callsign}`) was successfully retrieved from "
+                        f"the server.\n"
                         f"{notes}".strip(),
             color=Colors.WARNING if callsign.is_expired() else Colors.INFO
         )
