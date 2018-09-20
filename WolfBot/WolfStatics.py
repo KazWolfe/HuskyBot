@@ -87,6 +87,7 @@ class Emojis:
     WAVE = "\U0001F44B"
     NAMETAG = "\U0001F4DB"
     SPARKLES = "\U00002728"
+    RADIO = "\U0001F4FB"
 
     # Mod shortcuts
     BAN = NO_ENTRY
