@@ -245,7 +245,7 @@ def escape_markdown(string):
     markdown_characters = ["~", "`", "*", "_", "["]
 
     for c in markdown_characters:
-        string.replace(c, "\\" + c)
+        string = string.replace(c, "\\" + c)
 
     return string
 
