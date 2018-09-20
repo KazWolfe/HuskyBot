@@ -271,16 +271,16 @@ class LinkFilter(AntiSpamModule):
         except KeyError:
             await ctx.send(embed=discord.Embed(
                 title="Link Filter",
-                description=f"There is no cooldown record present for `{user}`. Either this user does not exist, they "
-                            f"do not have a cooldown record, or it has already been cleared.",
+                description=f"There is no cooldown record present for {user.mention}. Either this user does not exist, "
+                            f"they do not have a cooldown record, or it has already been cleared.",
                 color=Colors.DANGER
             ))
             return
 
         await ctx.send(embed=discord.Embed(
             title=Emojis.SPARKLES + " Link Filter | Cooldown Record Cleared!",
-            description=f"The cooldown record for `{user}` has been cleared. There are now no warnings on this user's "
-                        f"record.",
+            description=f"The cooldown record for {user.mention} has been cleared. There are now no warnings on this "
+                        f"user's record.",
             color=Colors.SUCCESS
         ))
 

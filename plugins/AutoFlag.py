@@ -212,7 +212,7 @@ class AutoFlag:
         if user.id in flag_users:
             await ctx.send(embed=discord.Embed(
                 title="Autoflag Plugin",
-                description=f"The user {user} is already autoflagged.",
+                description=f"The user {user.mention} is already autoflagged.",
                 color=Colors.WARNING
             ))
             return
@@ -223,7 +223,7 @@ class AutoFlag:
 
         await ctx.send(embed=discord.Embed(
             title="Autoflag Plugin",
-            description=f"The user `{user}` has been added to the autoflag list.",
+            description=f"The user `{user.mention}` has been added to the autoflag list.",
             color=Colors.SUCCESS
         ))
 
@@ -234,7 +234,7 @@ class AutoFlag:
         if user.id not in flag_users:
             await ctx.send(embed=discord.Embed(
                 title="Autoflag Plugin",
-                description=f"The user {user} is not autoflagged.",
+                description=f"The user {user.mention} is not autoflagged.",
                 color=Colors.WARNING
             ))
             return
@@ -245,7 +245,7 @@ class AutoFlag:
 
         await ctx.send(embed=discord.Embed(
             title="Autoflag Plugin",
-            description=f"The user `{user}` has been removed from the autoflag list.",
+            description=f"The user `{user.mention}` has been removed from the autoflag list.",
             color=Colors.SUCCESS
         ))
 
