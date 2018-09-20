@@ -266,8 +266,7 @@ class Fun:
 
         fixed_users = {
             self.bot.user.id: "GOD OF THE WORLD",  # The bot
-            142494680158961664: "SECURITY TEAM",  # Kaz
-            255802794244571136: "REPEATEDLY SLAPPED BY JROC"  # CritZ
+            142494680158961664: "SECURITY TEAM"  # Kaz
         }
 
         rng = random.Random((user.id + datetime.utcnow().toordinal()) ^ self._master_rng_seed)
