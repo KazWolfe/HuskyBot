@@ -74,8 +74,7 @@ class AttachmentFilter(AntiSpamModule):
             log_channel = message.guild.get_channel(log_channel)
 
         # Clear expired cooldown record for this user, if it exists.
-        if message.author.id in self._events \
-                and self._events[message.author.id]['expiry'] < datetime.datetime.utcnow():
+        if message.author.id in self._events and self._events[message.author.id]['expiry'] < datetime.datetime.utcnow():
             del self._events[message.author.id]
             LOG.info(f"Cleaned up stale attachment cooldowns for user {message.author}")
 

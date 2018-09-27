@@ -151,7 +151,8 @@ class AntiSpam:
         self._config.set('antiSpam', as_conf)
         await ctx.send(embed=discord.Embed(
             title="AntiSpam Module Enabled",
-            description=f"The anti-spam module `{name}` has been enabled. It will run every time the bot starts."
+            description=f"The anti-spam module `{name}` has been enabled. It will run every time the bot starts.",
+            color=Colors.SUCCESS
         ))
 
     @asp.command(name="disable", brief="Disable an AntiSpam module")
@@ -189,8 +190,9 @@ class AntiSpam:
 
         self._config.set('antiSpam', as_conf)
         await ctx.send(embed=discord.Embed(
-            title="AntiSpam Module Enabled",
-            description=f"The anti-spam module `{name}` has been disabled. It will not run with the bot."
+            title="AntiSpam Module Disabled",
+            description=f"The anti-spam module `{name}` has been disabled. It will not run with the bot.",
+            color=Colors.SUCCESS
         ))
 
     @asp.command(name="clear", brief="Clear cooldowns across all filters for a user.")

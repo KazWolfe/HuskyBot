@@ -62,6 +62,10 @@ class NonUniqueFilter(AntiSpamModule):
         if log_channel is not None:
             log_channel = message.guild.get_channel(log_channel)
 
+        # Actively/lazily find and delete expired cooldowns instead of waiting for event
+        if message.author.id in self._events and self._events[message.author.id]['expiry'] < datetime.datetime.utcnow():
+            del self._events[message.author.id]
+
         # Users with MANAGE_MESSAGES are allowed to send as much spam as they want
         if message.author.permissions_in(message.channel).manage_messages:
             return

@@ -56,6 +56,10 @@ class MentionFilter(AntiSpamModule):
         if alert_channel is not None:
             alert_channel = message.guild.get_channel(alert_channel)
 
+        # Actively (lazily) delete expired cooldowns, if any.
+        if message.author.id in self._events and self._events[message.author.id]['expiry'] < datetime.datetime.utcnow():
+            del self._events[message.author.id]
+
         if message.author.permissions_in(message.channel).mention_everyone:
             return
 

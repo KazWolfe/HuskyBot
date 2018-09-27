@@ -87,8 +87,7 @@ class LinkFilter(AntiSpamModule):
             log_channel = message.guild.get_channel(log_channel)
 
         # We can lazily delete link cooldowns on messages, instead of checking.
-        if message.author.id in self._events \
-                and self._events[message.author.id]['expiry'] < datetime.datetime.utcnow():
+        if message.author.id in self._events and self._events[message.author.id]['expiry'] < datetime.datetime.utcnow():
             del self._events[message.author.id]
 
         # Users with MANAGE_MESSAGES are allowed to send as many links as they want.

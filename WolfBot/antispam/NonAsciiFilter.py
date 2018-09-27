@@ -70,8 +70,7 @@ class NonAsciiFilter(AntiSpamModule):
             log_channel = message.guild.get_channel(log_channel)
 
         # We can lazily delete cooldowns on messages, instead of checking.
-        if message.author.id in self._events \
-                and self._events[message.author.id]['expiry'] < datetime.datetime.utcnow():
+        if message.author.id in self._events and self._events[message.author.id]['expiry'] < datetime.datetime.utcnow():
             del self._events[message.author.id]
 
         # Disable if min length is 0 or less
