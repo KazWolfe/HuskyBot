@@ -59,7 +59,7 @@ class MuteManager:
             expiry_string = f" (muted until {datetime.datetime.fromtimestamp(mute.expiry).strftime(DATETIME_FORMAT)})"
 
         if mute.channel is None:
-            mute_role = discord.utils.get(guild.roles, id=self._bot_config.get("specialRoles", {}).get("muted"))
+            mute_role = guild.get_role(self._bot_config.get("specialRoles", {}).get("muted"))
             mute_context = "the guild"
             channel = None
 
@@ -152,8 +152,7 @@ class MuteManager:
             unmute_context = "the guild"
             channel = None
 
-            mute_role = discord.utils.get(guild.roles, id=self._bot_config.get("specialRoles", {})
-                                          .get(SpecialRoleKeys.MUTED.value))
+            mute_role = guild.get_role(self._bot_config.get("specialRoles", {}).get(SpecialRoleKeys.MUTED.value))
 
             if mute_role is None:
                 raise ValueError("A muted role is not set!")

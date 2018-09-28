@@ -67,9 +67,10 @@ class GuildSecurity:
             if special_roles.get('bots') is None:
                 return
 
-            bot_role = discord.utils.get(after.roles, id=int(special_roles.get('bots')))
+            bot_role = after.guild.get_role(int(special_roles.get('bots')))
 
-            if (bot_role is not None) and (bot_role not in before.roles) and (not before.bot):
+            if (bot_role is not None) and (bot_role in after.roles) and (bot_role not in before.roles) \
+                    and (not before.bot):
                 await after.remove_roles(bot_role, reason="User is not an authorized bot.")
                 LOG.info(f"User {after} was granted bot role, but was not a bot. Removing.")
 

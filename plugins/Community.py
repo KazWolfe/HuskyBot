@@ -32,10 +32,8 @@ class Community:
         re-run at any time to get a new list of staff members.
         """
 
-        mod_role = discord.utils.get(ctx.guild.roles, id=self._config.get("specialRoles", {})
-                                     .get(SpecialRoleKeys.MODS.value))
-        admin_role = discord.utils.get(ctx.guild.roles, id=self._config.get("specialRoles", {})
-                                       .get(SpecialRoleKeys.ADMINS.value))
+        mod_role = ctx.guild.get_role(self._config.get("specialRoles", {}).get(SpecialRoleKeys.MODS.value))
+        admin_role = ctx.guild.get_role(self._config.get("specialRoles", {}).get(SpecialRoleKeys.ADMINS.value))
 
         embed = discord.Embed(
             title=Emojis.SHIELD + " Staff List",

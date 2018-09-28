@@ -40,7 +40,7 @@ class ReactionPromote:
 
         try:
             role_id = promotion_config[str(payload.channel_id)][str(payload.message_id)][emoji_slug]
-            group_to_add = discord.utils.get(guild.roles, id=role_id)
+            group_to_add = guild.get_role(role_id)
             await user.add_roles(group_to_add)
             LOG.info(f"Added user {user.display_name} to role {str(group_to_add)}")
         except KeyError:
@@ -80,7 +80,7 @@ class ReactionPromote:
 
         try:
             role_id = promotion_config[str(payload.channel_id)][str(payload.message_id)][emoji_slug]
-            group_to_remove = discord.utils.get(guild.roles, id=role_id)
+            group_to_remove = guild.get_role(role_id)
             await user.remove_roles(group_to_remove)
             LOG.info(f"Removed user {user.display_name} from role {str(group_to_remove)}")
         except KeyError:
