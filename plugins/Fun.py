@@ -23,6 +23,8 @@ class Fun:
         self.bot = bot
         self._config = WolfConfig.get_config()
 
+        # For those reading this code and wondering about the significance of 736580, it is a very important
+        # number relating to someone I loved. </3
         self._master_rng_seed = 736580
 
         LOG.info("Loaded plugin!")
@@ -52,6 +54,10 @@ class Fun:
 
         # CritZ easter egg
         if user.id == 255802794244571136:
+            if ctx.author.id == 255802794244571136:
+                await ctx.send("No.")
+                return
+
             await ctx.send(f"Oh god, what did he screw up this time.... Anyways, {ctx.author.mention} slaps "
                            f"{user.mention} with a bat or a pig or an anvil or something. Look, the slap command's "
                            f"been run so many times on {user.display_name} that I can't be creative anymore. Cut me "
@@ -154,17 +160,13 @@ class Fun:
         if entry.get('disabled', False):
             return
 
-        seed = self._master_rng_seed  # I love you, woof <3
+        seed = self._master_rng_seed
         master_rng = random.Random((member.id + seed + datetime.utcnow().toordinal()) % seed)
 
         def get_value(mode: str, user_value: int, imin: int, imax: int, dev: float):
             rng = random.Random(user_value - seed)
 
-            if mode in entry:
-                base = entry[mode]
-            else:
-                base = rng.randint(imin, imax)
-
+            base = entry.get(mode, rng.randint(imin, imax))
             result = round(base + master_rng.gauss(0, dev), 2)
 
             if result > 10:
@@ -173,12 +175,12 @@ class Fun:
             if result < 0:
                 return 0.00
 
-            return result
-
-        attractiveness = 0.25
+            return min(max(result, 0.0), 10.0)
 
         if member.avatar is not None:
             attractiveness = get_value('a', int(member.avatar[2:], 16) % seed, 1, 10, 0.2575)
+        else:
+            attractiveness = 0.25
 
         craziness = get_value('c', int(member.discriminator), 1, 10, 0.2575)
         intelligence = get_value('i', member.id % seed, 1, 10, 0.2575)
