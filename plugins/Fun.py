@@ -50,6 +50,14 @@ class Fun:
                                          f"critical damage!*")
             return
 
+        # CritZ easter egg
+        if user.id == 255802794244571136:
+            await ctx.send(f"Oh god, what did he screw up this time.... Anyways, {ctx.author.mention} slaps "
+                           f"{user.mention} with a bat or a pig or an anvil or something. Look, the slap command's "
+                           f"been run so many times on {user.display_name} that I can't be creative anymore. Cut me "
+                           f"some slack here.")
+            return
+
         victim = user.mention
 
         if user == ctx.author:

@@ -46,7 +46,8 @@ class BotAdmin:
         embed = discord.Embed(
             title=f"About {self.bot.user.name} {debug_str}",
             description="This bot (known in code as **DakotaBot**) is a custom-made Discord moderation and management "
-                        "utility bot. It's an implementation of the WolfBot platform for Discord, built on the popular "
+                        "utility bot initially for [DIY Tech](https://discord.gg/diytech). It's an implementation of "
+                        "the WolfBot platform for Discord, built on the popular "
                         "[discord.py rewrite](https://github.com/Rapptz/discord.py). It features seamless integration "
                         "with any workflow, and some of the most powerful plugin management and integration features "
                         "available in any commercial Discord bot. DakotaBot is built for speed and reliability for "
