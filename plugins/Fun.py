@@ -140,12 +140,13 @@ class Fun:
             member = ctx.author
 
         hardcoded_users = {
-            142494680158961664: {"a": 2.24, "c": 4.81, "i": 2.95, "otp": "a wolfgirl"},  # Kaz
+            142494680158961664: {"disabled": True},  # Kaz
             84374504964358144: {"a": 4.94, "c": 6.17, "i": 7.79, "otp": "DIY Tech"},  # Clover
             336301511942340608: {"a": 6.97, "c": 5.99, "i": 7.50, "otp": "<@418530320707747868> \U0001f49e"},  # Court
             418530320707747868: {"a": 10, "c": 10, "i": 10, "otp": "<@336301511942340608> \U0001f49e"},  # DakotaBot
             237569958903545857: {"a": 7.01, "c": 3.0, "i": 8.74},  # Squeegee
-            128882954343546880: {"a": 0, "c": 0, "i": 0}  # Marahute
+            128882954343546880: {"a": 0, "c": 0, "i": 0},  # Marahute
+            255802794244571136: {"otp": "slap marks"}  # CritZ
         }
 
         entry = hardcoded_users.get(member.id, {})
