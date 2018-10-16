@@ -106,6 +106,7 @@ async def initialize():
     plugin_list = BOT_CONFIG.get('plugins', [])
 
     if BOT_CONFIG.get("developerMode", False):
+        MASTER_LOGGER.setLevel(logging.DEBUG)
         plugin_list = ["Debug"] + plugin_list
 
     for plugin in plugin_list:
@@ -297,7 +298,7 @@ async def on_error(event_method, *args, **kwargs):
 
     if channel is None:
         LOG.warning('A logging channel is not set up! Error messages will not be forwarded to Discord.')
-        return
+        raise exception
 
     channel = bot.get_channel(channel)
 

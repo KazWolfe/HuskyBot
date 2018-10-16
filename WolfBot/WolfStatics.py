@@ -88,6 +88,7 @@ class Emojis:
     NAMETAG = "\U0001F4DB"
     SPARKLES = "\U00002728"
     RADIO = "\U0001F4FB"
+    PIN = "\U0001F4CC"
 
     # Mod shortcuts
     BAN = NO_ENTRY

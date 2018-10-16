@@ -190,3 +190,11 @@ class NicknameConverter(str, commands.Converter):
 
     def deleted(self):
         return "Deleted User {}".format(str(uuid.uuid4())[:8])
+
+
+class PartialEmojiConverter(commands.PartialEmojiConverter):
+    async def convert(self, ctx, argument):
+        try:
+            return await super().convert(ctx, argument)
+        except commands.BadArgument:
+            return argument
