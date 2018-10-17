@@ -270,12 +270,13 @@ class Intelligence:
     async def active_user_count(self, ctx: commands.Context,
                                 search_context: WolfConverters.ChannelContextConverter = "all",
                                 delta: WolfConverters.DateDiffConverter = "24h",
-                                threshold: int = 20):
+                                threshold: int = 10):
         """
         Get an active user count for the current guild.
 
         This command will look back through message history and attempt to find the number of active users in the guild.
-        By default, it will look for all users with (on average) 20 or more messages per hour.
+        By default, it will look for all users that spoke in the specified search context. By default, it will only find
+        users who have sent at least ten messages in the specified search time
 
         This command operates on "context" logic, much like /msgcount. Context are the same as there - either a channel,
         the word "public", or the word "all".
@@ -289,8 +290,8 @@ class Intelligence:
 
         Parameters:
             search_context - A string (or channel ID) that resolves to a channel ctx. See /help msgcount. Default "all"
-            delta          -  A string in ##d##h##m##s format to capture. Default 24h.
-            threshold      -  The minimum number of messages a user should send per hour (on average). Default 20.
+            delta          - A string in ##d##h##m##s format to capture. Default 24h.
+            threshold      - The minimum number of messages a user needs to send.
 
         See also:
             /help usercount - Get a count of users on the guild
@@ -309,8 +310,6 @@ class Intelligence:
         now = datetime.datetime.utcnow()
         search_start = now - delta
 
-        min_messages = max(threshold * (delta.seconds // 3600), threshold)
-
         async with ctx.typing():
             for channel in search_context['channels']:
                 if not channel.permissions_for(ctx.me).read_message_history:
@@ -327,14 +326,15 @@ class Intelligence:
                     message_counts[m.author.id] = message_counts.get(m.author.id, 0) + 1
 
             for user in message_counts:
-                if message_counts[user] >= min_messages:
+                if message_counts[user] >= threshold:
                     active_user_count += 1
 
         await ctx.send(embed=discord.Embed(
             title="Active User Count Report",
             description=f"Since `{search_start.strftime(DATETIME_FORMAT)}`, the channel context "
-                        f"`{search_context['name']}` has seen about **{active_user_count} active users** (sending on "
-                        f"average {threshold} or more messages per hour).",
+                        f"`{search_context['name']}` has seen about **{active_user_count} active "
+                        f"{'users' if threshold > 1 else 'user'}** (sending at least {threshold} "
+                        f"{'messages' if threshold > 1 else 'message'}).",
             color=Colors.INFO
         ))
 
