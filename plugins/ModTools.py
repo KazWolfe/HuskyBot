@@ -150,9 +150,9 @@ class ModTools:
             await ctx.send(embed=discord.Embed(
                 title="Moderator Toolkit",
                 description=f"<{ctx.author.mention}> I roll to ban `{user}`!\n"
-                            f"<[DM] DakotaBot> Roll for Arcana (INT).\n"
+                            f"<[DM] {self.bot.user.name}> Roll for Arcana (INT).\n"
                             f"<Dice Roll> 1d20 = 2\n"
-                            f"<[DM] DakotaBot> The Banhammer of Geri refuses to strike `{user}`!",
+                            f"<[DM] {self.bot.user.name}> The Banhammer of Geri refuses to strike `{user}`!",
                 color=Colors.DANGER
             ))
             return
@@ -497,7 +497,7 @@ class ModTools:
         If a ban reason needs to be amended or altered, this command will allow a moderator to change a ban reason
         without risking the user re-joining.
 
-        Ban reasons will be updated to DakotaBot format if not already updated, and all ban reasons will contain the
+        Ban reasons will be updated to the bot's format if not already updated, and all ban reasons will contain the
         username of the last editor:
 
             [By SomeMod#1234] Posting rule-breaking content (edited by OtherMod#9876)

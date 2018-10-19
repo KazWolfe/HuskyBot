@@ -51,7 +51,7 @@ class Leaderboards:
                     responsible_user = "Unknown"
 
                     if ("AUTOMATIC BAN" in ban_reason) or ("AutoBan" in ban_reason):
-                        responsible_user = "DakotaBot AutoBan"
+                        responsible_user = f"{self.bot.user.name} AutoBan"
 
                     ban_count = cache.setdefault(responsible_user, 0)
                     ban_count += 1

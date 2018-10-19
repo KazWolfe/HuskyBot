@@ -377,7 +377,7 @@ class BotAdmin:
         """
         Debug commands have no help. If you need help running a debug command, just don't.
         """
-        bot_presence = self._config.get('presence', {"game": "DakotaBot", "type": 2, "status": "dnd"})
+        bot_presence = self._config.get('presence', {"game": f"{self.bot.user.name}", "type": 2, "status": "dnd"})
 
         await ctx.bot.change_presence(activity=discord.Activity(name=bot_presence['game'], type=bot_presence['type']),
                                       status=discord.Status[bot_presence['status']])

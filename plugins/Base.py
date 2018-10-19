@@ -16,7 +16,7 @@ LOG = logging.getLogger("DakotaBot.Plugin." + __name__)
 # noinspection PyMethodMayBeStatic
 class Base:
     """
-    The Base plugin provides the very core of DakotaBot. It is a permanent plugin and will always be executed with the
+    The Base plugin provides the very core of the bot. It is a permanent plugin and will always be executed with the
     bot.
     """
 
@@ -29,12 +29,13 @@ class Base:
         # Prevent unloading
         self.block_unload = True
 
-        # Prepare Base for load
+        # Unload the conflicting /help that comes built in to DiscordPy. We hate it.
         bot.remove_command("help")
+        LOG.info("The builtin help command has been unloaded and has been replaced with this plugin's version.")
 
         LOG.info("Loaded plugin!")
 
-    @commands.command(name="help", brief="Get help for DakotaBot", aliases=["?"])
+    @commands.command(name="help", brief="Get help with this bot's commands", aliases=["?"])
     async def help_command(self, ctx: commands.Context, *command: str):
         """
         Get help information from the bot database.
@@ -72,7 +73,7 @@ class Base:
 
         if not permitted:
             await ctx.send(embed=discord.Embed(
-                title=Emojis.BOOK + " DakotaBot Help Utility",
+                title=Emojis.BOOK + f" {self.bot.user.name} Help Utility",
                 description=f"I have looked everywhere, but I could not find any help documentation for your query!\n\n"
                             f"Please make sure that you don't have any typographical errors, and that you are not "
                             f"trying to pass in arguments here.",

@@ -137,9 +137,10 @@ class Debug:
             color = 0x4854AF
 
         embed = discord.Embed(
-            title=f"{Emojis.TIMER} DakotaBot Debugger - Latency Report",
-            description=f"This test determines how long is takes the current instance of DakotaBot to reach Discord. "
-                        f"High results may indicate network or processing issues with Discord or DakotaBot.",
+            title=f"{Emojis.TIMER} {self.bot.user.name} Debugger - Latency Report",
+            description=f"This test determines how long is takes the current instance of {self.bot.user.name} "
+                        f"to reach Discord. High results may indicate network or processing issues with Discord "
+                        f"or {self.bot.user.name}.",
             color=color
         )
 
@@ -299,7 +300,7 @@ class Debug:
             color=output['color']
         ))
 
-    @commands.command(name='requestify', brief="Make a HTTP request through DakotaBot")
+    @commands.command(name='requestify', brief="Make a HTTP request through the bot")
     @WolfChecks.is_developer()
     async def requestify(self, ctx: commands.Context, url: str, method: str = "GET", *, data: str = None):
         method = method.upper()

@@ -224,8 +224,7 @@ class Fun:
 
         This command takes two arguments, a Channel (ID, mention, or name) and a message to send.
 
-        The targeted channel will receive a message from DakotaBot containing exactly the text as entered in the
-            message.
+        The targeted channel will receive a message from the bot containing exactly the text as entered in the message.
         """
 
         await channel.send(message)
@@ -248,14 +247,14 @@ class Fun:
         """
         Simulate the robopocalypse, and find a fate.
 
-        This command will activate DakotaBot's simulation system to attempt to look into the future and determine
+        This command will activate the bot's simulation system to attempt to look into the future and determine
         the fate of a target user during the inevitable robot apocalypse.
 
         Note that this simulator will cache results until midnight UTC, at which point a new simulation will be
         generated.
 
         Caveats:
-            - This simulator assumes DakotaBot is the leader of the robopocalypse. If this is not the case, these
+            - This simulator assumes that this bot is the leader of the robopocalypse. If this is not the case, these
               results may not be accurate.
             - Fates calculated are not a guarantee, and may change from day to day. Fates listed here are not promises,
               and any attempts to use the output of this command as a plea chip will result in death when the

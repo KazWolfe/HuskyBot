@@ -99,8 +99,8 @@ class GuildSecurity:
 
         await ctx.send(embed=discord.Embed(
             title=Emojis.CHECK + " Bot allowed to join guild.",
-            description="The bot `{}` has been given permission to join the guild. This permission will be valid until "
-                        "DakotaBot restarts.",
+            description=f"The bot `{user}` has been given permission to join the guild. This permission will be valid "
+                        f"until {self.bot.user.name} restarts.",
             color=Colors.SUCCESS
         ))
 

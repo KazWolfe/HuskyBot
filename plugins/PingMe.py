@@ -12,7 +12,7 @@ LOG = logging.getLogger("DakotaBot.Plugin." + __name__)
 # noinspection PyMethodMayBeStatic
 class PingMe:
     """
-    A very simple method responsible for handling cases where DakotaBot is pinged (in non-commands).
+    A very simple method responsible for handling cases where the bot is pinged (in non-commands).
     """
 
     def __init__(self, bot: discord.ext.commands.Bot):

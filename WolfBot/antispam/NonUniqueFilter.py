@@ -140,7 +140,7 @@ class NonUniqueFilter(AntiSpamModule):
         """
         Configure cooldowns/antispam system for non-unique messages.
 
-        When a message is received by DakotaBot, the system checks it for uniqueness against a cache of previous
+        When a message is received by the bot, the system checks it for uniqueness against a cache of previous
         messages from that user. If a message is found to already be in that cache, a "strike" is added. Once a user
         accrues a set number of strikes in the configured time period, the user will either be warned publicly, or
         banned from the guild.
