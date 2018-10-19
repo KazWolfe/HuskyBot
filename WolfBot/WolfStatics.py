@@ -89,6 +89,8 @@ class Emojis:
     SPARKLES = "\U00002728"
     RADIO = "\U0001F4FB"
     PIN = "\U0001F4CC"
+    TIMER = "\U000023F2"
+    PINGPONG = "\U0001F3D3"
 
     # Mod shortcuts
     BAN = NO_ENTRY

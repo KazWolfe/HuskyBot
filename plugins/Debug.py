@@ -3,6 +3,7 @@ import inspect
 import json
 import logging
 import subprocess
+import time
 
 import aiohttp
 import discord
@@ -13,7 +14,7 @@ from WolfBot import WolfChecks
 from WolfBot import WolfConfig
 from WolfBot import WolfHTTP
 from WolfBot import WolfUtils
-from WolfBot.WolfStatics import Colors
+from WolfBot.WolfStatics import *
 
 LOG = logging.getLogger("DakotaBot.Plugin." + __name__)
 
@@ -110,29 +111,42 @@ class Debug:
         Help documentation is not available for this plugin.
         """
 
-        ping_in_ms = round(self.bot.latency * 1000, 2)
+        # Grab the latency for the websocket
+        websocket_lantency_ms = round(self.bot.latency * 1000, 1)
 
-        if 0 < ping_in_ms < 50:
+        # Grab the message/event latency
+        time_pre = time.perf_counter()
+        await ctx.trigger_typing()
+        time_post = time.perf_counter()
+        message_latency_ms = round((time_post - time_pre) * 1000, 1)
+
+        if 0 < websocket_lantency_ms < 50:
             color = 0x368C23
-        elif 50 <= ping_in_ms < 100:
+        elif 50 <= websocket_lantency_ms < 100:
             color = 0x9BBF30
-        elif 100 <= ping_in_ms < 150:
+        elif 100 <= websocket_lantency_ms < 150:
             color = 0xD7DE38
-        elif 150 <= ping_in_ms < 200:
+        elif 150 <= websocket_lantency_ms < 200:
             color = 0xF4D43C
-        elif 200 <= ping_in_ms < 250:
+        elif 200 <= websocket_lantency_ms < 250:
             color = 0xD8732E
-        elif ping_in_ms >= 250:
+        elif websocket_lantency_ms >= 250:
             color = 0xBB2B2E
         else:
             # what the fuck negative ping should not be possible
             color = 0x4854AF
 
-        await ctx.send(embed=discord.Embed(
-            title="DakotaBot Debugger",
-            description=f"The latency to Discord's servers is currently **{ping_in_ms} ms**.",
+        embed = discord.Embed(
+            title=f"{Emojis.TIMER} DakotaBot Debugger - Latency Report",
+            description=f"This test determines how long is takes the current instance of DakotaBot to reach Discord. "
+                        f"High results may indicate network or processing issues with Discord or DakotaBot.",
             color=color
-        ))
+        )
+
+        embed.add_field(name="Websocket Latency", value=f"{websocket_lantency_ms} ms", inline=False)
+        embed.add_field(name="Message Latency", value=f"{message_latency_ms} ms", inline=False)
+
+        await ctx.send(embed=embed)
 
     @debug.command(name="repost", brief="Copy a specified message to the current channel")
     async def repost(self, ctx: commands.Context, channel: discord.TextChannel, message_id: int):
