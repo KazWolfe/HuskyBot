@@ -1,9 +1,6 @@
 import logging
-import platform
-import socket
 
 import discord
-import git
 from discord.ext import commands
 
 from WolfBot import WolfChecks, WolfConfig, WolfConverters, WolfUtils
@@ -26,47 +23,10 @@ class BotAdmin:
         self._session_store = WolfConfig.get_session_store()
         self._devmode = self._config.get("developerMode", False)
 
-        self._critical_plugins = ["BotAdmin"]
+        # Prevent unloading
+        self.block_unload = True
 
         LOG.info("Loaded plugin!")
-
-    @commands.command(name="about", aliases=["version"], brief="Get basic information about the bot.")
-    async def about(self, ctx: discord.ext.commands.Context):
-        """
-        Get basic information about the current running instance of this bot.
-
-        This command returns a quick summary of this bot and its current state.
-        """
-
-        repo = git.Repo(search_parent_directories=True)
-        sha = repo.head.object.hexsha
-
-        debug_str = '| Developer Build' if self._devmode else ''
-
-        embed = discord.Embed(
-            title=f"About {self.bot.user.name} {debug_str}",
-            description="This bot (known in code as **DakotaBot**) is a custom-made Discord moderation and management "
-                        "utility bot initially for [DIY Tech](https://discord.gg/diytech). It's an implementation of "
-                        "the WolfBot platform for Discord, built on the popular "
-                        "[discord.py rewrite](https://github.com/Rapptz/discord.py). It features seamless integration "
-                        "with any workflow, and some of the most powerful plugin management and integration features "
-                        "available in any commercial Discord bot. DakotaBot is built for speed and reliability for "
-                        "guilds of any size, as well as easy and intuitive administration.",
-            color=Colors.INFO
-        )
-
-        embed.add_field(name="Authors", value="[KazWolfe](https://github.com/KazWolfe), "
-                                              "[Clover](https://github.com/cclover550)", inline=False)
-        embed.add_field(name="Bot Version", value=f"[`{sha[:8]}`]({GIT_URL}/commit/{sha})", inline=True)
-        embed.add_field(name="Library Version", value=f"discord.py {discord.__version__}", inline=True)
-        embed.add_field(name="Python Version", value=f"Python {platform.python_version()}")
-        embed.add_field(name="Current Host", value=f"`{socket.gethostname()}`", inline=True)
-
-        embed.set_thumbnail(url=ctx.bot.user.avatar_url)
-        embed.set_footer(text="(c) 2018, KazWolfe | Andwooooooo!",
-                         icon_url="https://avatars3.githubusercontent.com/u/5192145")
-
-        await ctx.send(embed=embed)
 
     @commands.group(pass_context=True, brief="Manage the bot plugin subsystem")
     @commands.has_permissions(administrator=True)
@@ -141,15 +101,6 @@ class BotAdmin:
             /help admin disable  - Permanently disable a plugin (unload + disallow startup execution)
         """
 
-        if plugin_name in self._critical_plugins:
-            await ctx.send(embed=discord.Embed(
-                title="Plugin Manager",
-                description=f"The plugin `{plugin_name}` could not be unloaded, as it is a critical plugin. ",
-                color=Colors.DANGER
-            ))
-            LOG.warning("A request was made to unload %s. Blocked.", plugin_name)
-            return
-
         if plugin_name == "Debug" and self._devmode:
             await ctx.send(embed=discord.Embed(
                 title="Plugin Manager",
@@ -168,6 +119,17 @@ class BotAdmin:
                 color=Colors.WARNING
             ))
             LOG.warning("Attempted to unload already-unloaded plugin %s", plugin_name)
+            return
+
+        plugin_instance = ctx.bot.cogs[plugin_name]
+
+        if hasattr(plugin_instance, 'block_unload') and plugin_instance.block_unload:
+            await ctx.send(embed=discord.Embed(
+                title="Plugin Manager",
+                description=f"The plugin `{plugin_name}` could not be unloaded. See the log for more details.",
+                color=Colors.DANGER
+            ))
+            LOG.warning("A request was made to unload %s, but it requested it not be unloaded.", plugin_name)
             return
 
         """Unloads an extension."""
@@ -286,15 +248,6 @@ class BotAdmin:
             /help admin reload   - Unload and reload a plugin from the bot.
             /help admin enable   - Permanently enable a plugin (load + run on start)
         """
-        if plugin_name in self._critical_plugins:
-            await ctx.send(embed=discord.Embed(
-                title="Plugin Manager",
-                description=f"The plugin `{plugin_name}` could not be disabled, as it is a critical module.",
-                color=Colors.DANGER
-            ))
-            LOG.warning("The %s module was requested to be disabled. Blocked.", plugin_name)
-            return
-
         if plugin_name == "Debug" and self._devmode:
             await ctx.send(embed=discord.Embed(
                 title="Plugin Manager",
@@ -303,6 +256,17 @@ class BotAdmin:
                 color=Colors.DANGER
             ))
             LOG.warning("A request was made to disable Debug while in DevMode. Blocked.")
+            return
+
+        plugin_instance = ctx.bot.cogs[plugin_name]
+
+        if hasattr(plugin_instance, 'block_unload') and plugin_instance.block_unload:
+            await ctx.send(embed=discord.Embed(
+                title="Plugin Manager",
+                description=f"The plugin `{plugin_name}` could not be disabled. See the log for more details.",
+                color=Colors.DANGER
+            ))
+            LOG.warning("A request was made to disable %s, but it requested it not be unloaded.", plugin_name)
             return
 
         config = self._config.get('plugins', [])

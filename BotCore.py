@@ -3,7 +3,6 @@
 # System imports
 import logging
 import os
-import re
 import ssl
 import sys
 import traceback
@@ -91,16 +90,13 @@ async def initialize():
                 LOG.error("Bot is bound to multiple guilds without being in developer mode. Can not continue.")
                 exit(127)
 
-    # Disable help, and register our own
-    bot.remove_command("help")
-    bot.add_command(commands.Command(name="help", brief="Get help with the bot", aliases=["?"], callback=help_command))
-
     # Initialize our HTTP server
     await start_webserver()
 
     # Load plugins
     sys.path.insert(1, os.getcwd() + "/plugins/")
 
+    bot.load_extension('Base')
     bot.load_extension('BotAdmin')
 
     plugin_list = BOT_CONFIG.get('plugins', [])
@@ -358,48 +354,6 @@ async def on_message(message):
         LOG.info("User %s ran %s", author, message.content)
 
         await bot.process_commands(message)
-
-
-async def help_command(ctx: commands.Context, *command: str):
-    """
-    Get help information from the bot database.
-
-    This command takes a string (command) as an argument to look up. If a command does not exist, the bot will throw
-    an error.
-    """
-    content = ctx.message.content
-    permitted = False
-
-    # Evil parse magic is evil, I hate this code.
-    if len(command) == 0:
-        command = ''
-        permitted = True
-    elif len(command) > 0:
-        command_obj = bot.get_command(' '.join(command))
-        content = content.split(None, 1)[1]
-        command = re.sub(r'[_*`~]', '', content, flags=re.M)
-        command = command.split()
-
-        if command_obj is not None:
-            try:
-                permitted = await command_obj.can_run(ctx)
-            except commands.CommandError as _:
-                pass
-        else:
-            permitted = ' '.join(command) in bot.cogs
-
-    if not permitted:
-        await ctx.send(embed=discord.Embed(
-            title=Emojis.BOOK + " DakotaBot Help Utility",
-            description=f"I have looked everywhere, but I could not find any help documentation for your query!\n\n"
-                        f"Please make sure that you don't have any typographical errors, and that you are not trying "
-                        f"to pass in arguments here.",
-            color=Colors.WARNING
-        ))
-        return
-
-    # noinspection PyProtectedMember
-    await discord.ext.commands.bot._default_help_command(ctx, *command)
 
 
 async def start_webserver():
