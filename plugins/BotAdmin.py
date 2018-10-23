@@ -61,15 +61,29 @@ class BotAdmin:
         unloaded_plugins.sort()
         loaded_plugins.sort()
 
-        await ctx.send(embed=discord.Embed(
+        embed = discord.Embed(
             title=Emojis.PLUG + f" {self.bot.user.name} Plugins",
             description=f"Currently, there are {len(loaded_plugins)} plugins loaded in this instance of "
                         f"{self.bot.user.name}. See `/help plugin` to get instructions on how to load and unload "
-                        f"plugins.\n\n"
-                        f"**Loaded Plugins**\n```diff\n+ {', '.join(loaded_plugins)}```\n\n"
-                        f"**Unloaded Plugins**\n```diff\n- {', '.join(unloaded_plugins)}```",
+                        f"plugins.",
             color=Colors.INFO
-        ))
+        )
+
+        if len(loaded_plugins) > 0:
+            embed.add_field(
+                name="Loaded Plugins",
+                value=f"```diff\n+ {', '.join(loaded_plugins)}```",
+                inline=False
+            )
+
+        if len(unloaded_plugins) > 0:
+            embed.add_field(
+                name="Unloaded Plugins",
+                value=f"```diff\n- {', '.join(unloaded_plugins)}```",
+                inline=False
+            )
+
+        await ctx.send(embed=embed)
 
     @plugin.command(name="load", brief="Temporarily load a plugin into the bot.")
     async def load(self, ctx: discord.ext.commands.Context, plugin_name: WolfConverters.CIPluginConverter):
