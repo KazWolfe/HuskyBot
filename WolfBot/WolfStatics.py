@@ -91,6 +91,7 @@ class Emojis:
     PIN = "\U0001F4CC"
     TIMER = "\U000023F2"
     PINGPONG = "\U0001F3D3"
+    PLUG = "\U0001F50C"
 
     # Mod shortcuts
     BAN = NO_ENTRY

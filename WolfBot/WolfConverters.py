@@ -1,5 +1,6 @@
 import datetime
 import logging
+import os
 import random
 import re
 import uuid
@@ -198,3 +199,28 @@ class PartialEmojiConverter(commands.PartialEmojiConverter):
             return await super().convert(ctx, argument)
         except commands.BadArgument:
             return argument
+
+
+class CIPluginConverter(str, commands.Converter):
+    """
+    Get a plugin name and ignore case sensitivity.
+    """
+
+    async def convert(self, ctx, argument):
+        all_plugins = {}
+        plugin_dir = os.listdir('plugins/')
+
+        # Regrettably, we can't cache this as plugindir is dynamic.
+        for plugin in plugin_dir:  # type: str
+            if not plugin.endswith('.py'):
+                continue
+
+            plugin_name = plugin.split('.')[0]
+
+            all_plugins[plugin_name.lower()] = plugin_name
+
+        try:
+            return all_plugins[argument.lower()]
+        except KeyError:
+            raise commands.BadArgument(f"A plugin named {argument} could not be found. Check that the plugin exists. "
+                                       f"If a plugin was renamed, please restart the bot to reload the plugin.")

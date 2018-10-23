@@ -1,4 +1,5 @@
 import logging
+import os
 
 import discord
 from discord.ext import commands
@@ -28,7 +29,7 @@ class BotAdmin:
 
         LOG.info("Loaded plugin!")
 
-    @commands.group(pass_context=True, brief="Manage the bot plugin subsystem")
+    @commands.group(pass_context=True, brief="Manage the bot plugin subsystem", aliases=["plugins"])
     @commands.has_permissions(administrator=True)
     async def plugin(self, ctx: discord.ext.commands.Context):
         """
@@ -37,10 +38,41 @@ class BotAdmin:
         This command does nothing, but it instead acts as the parent to all other commands.
         """
 
-        pass
+        if ctx.invoked_subcommand is not None:
+            return
+
+        unloaded_plugins = []
+        loaded_plugins = list(self.bot.extensions.keys())
+
+        plugin_dir = os.listdir('plugins/')
+
+        for plugin in plugin_dir:  # type: str
+            if not plugin.endswith('.py'):
+                continue
+
+            plugin_name = plugin.split('.')[0]
+
+            if plugin_name in loaded_plugins:
+                continue
+
+            unloaded_plugins.append(plugin_name)
+
+        # Get everything into alphabetical order.
+        unloaded_plugins.sort()
+        loaded_plugins.sort()
+
+        await ctx.send(embed=discord.Embed(
+            title=Emojis.PLUG + f" {self.bot.user.name} Plugins",
+            description=f"Currently, there are {len(loaded_plugins)} plugins loaded in this instance of "
+                        f"{self.bot.user.name}. See `/help plugin` to get instructions on how to load and unload "
+                        f"plugins.\n\n"
+                        f"**Loaded Plugins**\n```diff\n+ {', '.join(loaded_plugins)}```\n\n"
+                        f"**Unloaded Plugins**\n```diff\n- {', '.join(unloaded_plugins)}```",
+            color=Colors.INFO
+        ))
 
     @plugin.command(name="load", brief="Temporarily load a plugin into the bot.")
-    async def load(self, ctx: discord.ext.commands.Context, plugin_name: str):
+    async def load(self, ctx: discord.ext.commands.Context, plugin_name: WolfConverters.CIPluginConverter):
         """
         Load a plugin (temporarily) into the bot.
 
@@ -85,7 +117,7 @@ class BotAdmin:
         ))
 
     @plugin.command(name="unload", brief="Temporarily unload a plugin from the bot.")
-    async def unload(self, ctx: discord.ext.commands.Context, plugin_name: str):
+    async def unload(self, ctx: discord.ext.commands.Context, plugin_name: WolfConverters.CIPluginConverter):
         """
         (Temporarily) unload a plugin from the bot.
 
@@ -142,7 +174,7 @@ class BotAdmin:
         ))
 
     @plugin.command(name="reload", brief="Unload and reload a plugin.")
-    async def reload(self, ctx: discord.ext.commands.Context, plugin_name: str):
+    async def reload(self, ctx: discord.ext.commands.Context, plugin_name: WolfConverters.CIPluginConverter):
         """
         Unload and reload a plugin from the bot.
 
@@ -184,7 +216,7 @@ class BotAdmin:
         ))
 
     @plugin.command(name="enable", brief="Enable a plugin to run now and at bot load.")
-    async def enable(self, ctx: discord.ext.commands.Context, plugin_name: str):
+    async def enable(self, ctx: discord.ext.commands.Context, plugin_name: WolfConverters.CIPluginConverter):
         """
         Load a plugin into the bot, and mark it as auto-load.
 
@@ -233,7 +265,7 @@ class BotAdmin:
         ))
 
     @plugin.command(name="disable", brief="Disable a plugin from running at bot load. Also stops the plugin.")
-    async def disable(self, ctx: discord.ext.commands.Context, plugin_name: str):
+    async def disable(self, ctx: discord.ext.commands.Context, plugin_name: WolfConverters.CIPluginConverter):
         """
         Unload a plugin from the bot, and prevent it from auto-loading
 
