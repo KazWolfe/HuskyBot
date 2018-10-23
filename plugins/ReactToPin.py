@@ -9,15 +9,15 @@ from WolfBot.WolfStatics import *
 LOG = logging.getLogger("DakotaBot.Plugin." + __name__)
 
 
-class PinVote:
+class ReactToPin:
     """
-    PinVote allows users to pin their own posts, after a set number of reactions are added to any given post.
+    ReactToPin allows users to pin their own posts, after a set number of reactions are added to any given post.
 
     This is often useful for posts with images and other similar threads, where a guild would want to use pins as a
     "featured" section.
 
-    If a channel is "full" of pins, PinVote will attempt to intelligently remove the oldest pin from the system. It will
-    not delete pins marked as "permanent" through the `/pinvote permapin` command.
+    If a channel is "full" of pins, ReactToPin will attempt to intelligently remove the oldest pin from the system.
+    It will not delete pins marked as "permanent" through the `/react2pin permapin` command.
 
     Pins may be removed from the permanent list by deletion or unpinning.
     """
@@ -28,7 +28,7 @@ class PinVote:
 
         {
            ...
-           "pinVote": {
+           "reactToPin": {
                "channel_id": {
                    "enabled": False,
                    "emoji": "EMOJI_HASH",
@@ -64,7 +64,7 @@ class PinVote:
         return count
 
     async def smart_unpin_oldest(self, channel: discord.TextChannel):
-        persistent_pinned_messages = self._config.get('pinVote', {}).get(str(channel.id), {}).get('permanent', [])
+        persistent_pinned_messages = self._config.get('reactToPin', {}).get(str(channel.id), {}).get('permanent', [])
 
         pin_list = reversed(await channel.pins())
 
@@ -83,7 +83,7 @@ class PinVote:
         channel = self.bot.get_channel(payload.channel_id)  # type: discord.TextChannel
         message = await channel.get_message(payload.message_id)  # type: discord.Message
 
-        channel_config = self._config.get('pinVote', {}).get(str(channel.id))  # type: dict
+        channel_config = self._config.get('reactToPin', {}).get(str(channel.id))  # type: dict
 
         LOG.debug("Got react event, processing.")
 
@@ -135,7 +135,7 @@ class PinVote:
         channel = self.bot.get_channel(payload.channel_id)  # type: discord.TextChannel
         message = await channel.get_message(payload.message_id)  # type: discord.Message
 
-        channel_config = self._config.get('pinVote', {}).get(str(channel.id))  # type: dict
+        channel_config = self._config.get('reactToPin', {}).get(str(channel.id))  # type: dict
 
         if not WolfUtils.should_process_message(message):
             return
@@ -172,7 +172,7 @@ class PinVote:
         channel = self.bot.get_channel(event.channel_id)  # type: discord.TextChannel
         message = await channel.get_message(event.message_id)  # type: discord.Message
 
-        channel_config = self._config.get('pinVote', {}).get(str(channel.id))  # type: dict
+        channel_config = self._config.get('reactToPin', {}).get(str(channel.id))  # type: dict
 
         if not WolfUtils.should_process_message(message):
             return
@@ -192,7 +192,7 @@ class PinVote:
         message_id = event.message_id
         channel_id = event.data.get('channel_id', None)
 
-        plugin_config = self._config.get('pinVote', {})  # type: dict
+        plugin_config = self._config.get('reactToPin', {})  # type: dict
         channel_config = plugin_config.get(str(channel_id), {})
         permapinned = channel_config.setdefault('permanent', [])
 
@@ -208,13 +208,13 @@ class PinVote:
         LOG.info(f"Removed permanently pinned message {message_id} from channel {channel_id} as it's no longer "
                  f"pinned.")
 
-        self._config.set('pinVote', plugin_config)
+        self._config.set('reactToPin', plugin_config)
 
     async def on_raw_message_delete(self, event: discord.RawMessageDeleteEvent):
         message_id = event.message_id
         channel_id = event.channel_id
 
-        plugin_config = self._config.get('pinVote', {})  # type: dict
+        plugin_config = self._config.get('reactToPin', {})  # type: dict
         channel_config = plugin_config.get(str(channel_id), {})
         permapinned = channel_config.setdefault('permanent', [])
 
@@ -225,12 +225,12 @@ class PinVote:
         permapinned.remove(message_id)
         LOG.info(f"Removed permanently pinned message {message_id} from channel {channel_id} as it's deleted.")
 
-        self._config.set('pinVote', plugin_config)
+        self._config.set('reactToPin', plugin_config)
 
     async def on_raw_bulk_message_delete(self, event: discord.RawBulkMessageDeleteEvent):
         channel_id = event.channel_id
 
-        plugin_config = self._config.get('pinVote', {})  # type: dict
+        plugin_config = self._config.get('reactToPin', {})  # type: dict
         channel_config = plugin_config.get(str(channel_id), {})
         permapinned = channel_config.setdefault('permanent', [])
 
@@ -245,16 +245,16 @@ class PinVote:
             permapinned.remove(message_id)
             LOG.info(f"Removed permanently pinned message {message_id} from channel {channel_id} as it's deleted.")
 
-        self._config.set('pinVote', plugin_config)
+        self._config.set('reactToPin', plugin_config)
 
-    @commands.group(name="pinvote", brief="Automatically pin posts that get reactions.")
+    @commands.group(name="react2pin", brief="Automatically pin posts that get reactions.")
     @commands.has_permissions(manage_channels=True)
-    async def pinvote(self, ctx: commands.Context):
+    async def react2pin(self, ctx: commands.Context):
         pass
 
-    @pinvote.command(name="enable", brief="Enable PinVote for a channel")
+    @react2pin.command(name="enable", brief="Enable ReactToPin for a channel")
     async def enable(self, ctx: commands.Context, channel: discord.TextChannel = None):
-        plugin_config = self._config.get('pinVote', {})  # type: dict
+        plugin_config = self._config.get('reactToPin', {})  # type: dict
 
         if channel is None:
             channel = ctx.channel
@@ -267,25 +267,25 @@ class PinVote:
 
         if channel_config.get('enabled', False):
             await ctx.send(embed=discord.Embed(
-                title=Emojis.PIN + " PinVote Already Enabled!",
-                description=f"PinVote has already been enabled for {channel.mention}. No changes were made.",
+                title=Emojis.PIN + " ReactToPin Already Enabled!",
+                description=f"ReactToPin has already been enabled for {channel.mention}. No changes were made.",
                 color=Colors.WARNING
             ))
             return
 
         channel_config['enabled'] = True
-        self._config.set('pinVote', plugin_config)
+        self._config.set('reactToPin', plugin_config)
 
         await ctx.send(embed=discord.Embed(
-            title=Emojis.PIN + " PinVote Enabled!",
-            description=f"PinVote has been enabled for {channel.mention} with default settings. Use `/pinvote config` "
-                        "in the defined channel to configure it.",
+            title=Emojis.PIN + " ReactToPin Enabled!",
+            description=f"ReactToPin has been enabled for {channel.mention} with default settings. Use "
+                        f"`/reactToPin config` in the defined channel to configure it.",
             color=Colors.SUCCESS
         ))
 
-    @pinvote.command(name="disable", brief="Disable PinVote for a channel.")
+    @react2pin.command(name="disable", brief="Disable ReactToPin for a channel.")
     async def disable(self, ctx: commands.Context, channel: discord.TextChannel = None):
-        plugin_config = self._config.get('pinVote', {})  # type: dict
+        plugin_config = self._config.get('reactToPin', {})  # type: dict
 
         if channel is None:
             channel = ctx.channel
@@ -298,34 +298,34 @@ class PinVote:
 
         if not channel_config.get('enabled', False):
             await ctx.send(embed=discord.Embed(
-                title=Emojis.PIN + " PinVote Already Disabled!",
-                description=f"PinVote has already been disabled for {channel.mention}. No changes were made.",
+                title=Emojis.PIN + " ReactToPin Already Disabled!",
+                description=f"ReactToPin has already been disabled for {channel.mention}. No changes were made.",
                 color=Colors.WARNING
             ))
             return
 
         channel_config['enabled'] = False
-        self._config.set('pinVote', plugin_config)
+        self._config.set('reactToPin', plugin_config)
 
         await ctx.send(embed=discord.Embed(
-            title=Emojis.PIN + " PinVote Disabled!",
-            description=f"PinVote has been disabled for {channel.mention} with default settings. Settings are "
+            title=Emojis.PIN + " ReactToPin Disabled!",
+            description=f"ReactToPin has been disabled for {channel.mention} with default settings. Settings are "
                         "preserved.",
             color=Colors.SUCCESS
         ))
 
-    @pinvote.command(name="configure", aliases=["config"], brief="Configure PinVote for the current channel")
+    @react2pin.command(name="configure", aliases=["config"], brief="Configure ReactToPin for the current channel")
     async def config(self, ctx: commands.Context, emoji: WolfConverters.PartialEmojiConverter, min_reacts: int):
         # pycharm duck hack
         emoji = emoji  # type: discord.PartialEmoji
 
-        plugin_config = self._config.get('pinVote', {})  # type: dict
+        plugin_config = self._config.get('reactToPin', {})  # type: dict
         channel_config = plugin_config.get(str(ctx.channel.id))
 
         if channel_config is None or not channel_config.get('enabled', False):
             await ctx.send(embed=discord.Embed(
-                title=Emojis.PIN + " PinVote Disabled!",
-                description=f"PinVote is disabled, so changes to its configuration are not permitted.",
+                title=Emojis.PIN + " ReactToPin Disabled!",
+                description=f"ReactToPin is disabled, so changes to its configuration are not permitted.",
                 color=Colors.WARNING
             ))
             return
@@ -333,19 +333,19 @@ class PinVote:
         channel_config['emoji'] = emoji
         channel_config['requiredToPin'] = min_reacts
 
-        self._config.set('pinVote', plugin_config)
+        self._config.set('reactToPin', plugin_config)
 
         await ctx.send(embed=discord.Embed(
-            title=Emojis.PIN + " PinVote Configured!",
-            description=f"PinVote will now automatically pin messages in this channel that have {min_reacts} minimum "
-                        f"reactions with emoji {emoji}",
+            title=Emojis.PIN + " ReactToPin Configured!",
+            description=f"ReactToPin will now automatically pin messages in this channel that have {min_reacts} "
+                        f"minimum reactions with emoji {emoji}",
             color=Colors.SUCCESS
         ))
 
-    @pinvote.command(name="permapin", brief="Permanently pin a message", aliases=["pin"])
+    @react2pin.command(name="permapin", brief="Permanently pin a message", aliases=["pin"])
     @commands.has_permissions(manage_messages=True)
     async def permapin(self, ctx: commands.Context, message: int):
-        plugin_config = self._config.get('pinVote', {})  # type: dict
+        plugin_config = self._config.get('reactToPin', {})  # type: dict
         channel_config = plugin_config.get(str(ctx.channel.id), {})  # type: dict
 
         message = await ctx.channel.get_message(message)
@@ -363,9 +363,9 @@ class PinVote:
 
         perm_pins.append(message.id)
 
-        self._config.set('pinVote', plugin_config)
+        self._config.set('reactToPin', plugin_config)
         await ctx.send("Message pinned permanently.")
 
 
 def setup(bot: discord.ext.commands.Bot):
-    bot.add_cog(PinVote(bot))
+    bot.add_cog(ReactToPin(bot))
