@@ -6,10 +6,10 @@ from datetime import datetime
 import discord
 from discord.ext import commands
 
-from WolfBot import WolfConfig, WolfUtils
-from WolfBot.WolfStatics import *
+from libhusky import HuskyConfig, HuskyUtils
+from libhusky.HuskyStatics import *
 
-LOG = logging.getLogger("DakotaBot.Plugin." + __name__)
+LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 
 class Fun:
@@ -21,7 +21,7 @@ class Fun:
 
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
-        self._config = WolfConfig.get_config()
+        self._config = HuskyConfig.get_config()
 
         # For those reading this code and wondering about the significance of 736580, it is a very important
         # number relating to someone I loved. </3
@@ -149,7 +149,7 @@ class Fun:
             142494680158961664: {"disabled": True},  # Kaz
             84374504964358144: {"a": 4.94, "c": 6.17, "i": 7.79, "otp": "DIY Tech"},  # Clover
             336301511942340608: {"a": 6.97, "c": 5.99, "i": 7.50, "otp": "<@418530320707747868> \U0001f49e"},  # Court
-            418530320707747868: {"a": 10, "c": 10, "i": 10, "otp": "<@336301511942340608> \U0001f49e"},  # DakotaBot
+            418530320707747868: {"a": 10, "c": 10, "i": 10, "otp": "<@336301511942340608> \U0001f49e"},  # HuskyBot
             237569958903545857: {"a": 7.01, "c": 3.0, "i": 8.74},  # Squeegee
             128882954343546880: {"a": 0, "c": 0, "i": 0},  # Marahute
             255802794244571136: {"otp": "slap marks"}  # CritZ
@@ -189,7 +189,7 @@ class Fun:
 
         embed = discord.Embed(
             title=f"{Emojis.FIRE} Hotness Calculator",
-            description=f"The rating for {WolfUtils.escape_markdown(member.display_name)} is ready. They have an "
+            description=f"The rating for {HuskyUtils.escape_markdown(member.display_name)} is ready. They have an "
                         f"overall hotness score of {average_score}.",
             color=Colors.INFO
         )
@@ -303,7 +303,7 @@ class Fun:
 
         embed = discord.Embed(
             title=f"{Emojis.ROBOT} Robopocalypse Simulation Engine",
-            description=f"According to my current algorithms, {WolfUtils.escape_markdown(user.display_name)}'s fate in "
+            description=f"According to my current algorithms, {HuskyUtils.escape_markdown(user.display_name)}'s fate in "
                         f"the robopocalypse will be: **`{final_fate}`**",
             color=Colors.INFO
         )

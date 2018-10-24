@@ -6,11 +6,11 @@ import random
 import discord
 from discord.ext import commands
 
-from WolfBot import WolfConfig, WolfData, WolfUtils
-from WolfBot.WolfStatics import *
+from libhusky import HuskyConfig, HuskyData, HuskyUtils
+from libhusky.HuskyStatics import *
 
 GIVEAWAY_CONFIG_KEY = 'giveaways'
-LOG = logging.getLogger("DakotaBot.Managers.GiveawayManager")
+LOG = logging.getLogger("HuskyBot.Managers.GiveawayManager")
 
 
 class GiveawayManager:
@@ -28,8 +28,8 @@ class GiveawayManager:
         """
 
         self.bot = bot
-        self._config = WolfConfig.get_config()
-        self._giveaway_config = WolfConfig.get_config('giveaways', create_if_nonexistent=True)
+        self._config = HuskyConfig.get_config()
+        self._giveaway_config = HuskyConfig.get_config('giveaways', create_if_nonexistent=True)
 
         # Random number generator
         self._rng = random.SystemRandom()
@@ -52,7 +52,7 @@ class GiveawayManager:
         giveaway_list = self._giveaway_config.get(GIVEAWAY_CONFIG_KEY, [])
 
         for giveaway_raw in giveaway_list:
-            giveaway = WolfData.GiveawayObject(data=giveaway_raw)
+            giveaway = HuskyData.GiveawayObject(data=giveaway_raw)
 
             self.__cache__.append(giveaway)
 
@@ -81,7 +81,7 @@ class GiveawayManager:
             # Check again every half second
             await asyncio.sleep(0.5)
 
-    async def finish_giveaway(self, giveaway: WolfData.GiveawayObject) -> None:
+    async def finish_giveaway(self, giveaway: HuskyData.GiveawayObject) -> None:
         """
         Finish an arbitrary giveaway.
 
@@ -143,7 +143,7 @@ class GiveawayManager:
         self._giveaway_config.set(GIVEAWAY_CONFIG_KEY, self.__cache__)
 
     async def start_giveaway(self, ctx: commands.Context, title: str, end_time: datetime.datetime,
-                             winners: int) -> WolfData.GiveawayObject:
+                             winners: int) -> HuskyData.GiveawayObject:
 
         """
         Begin a new Giveaway.
@@ -175,14 +175,14 @@ class GiveawayManager:
         message = await ctx.send(embed=giveaway_embed)
         await message.add_reaction(Emojis.GIVEAWAY)
 
-        giveaway = WolfData.GiveawayObject()
+        giveaway = HuskyData.GiveawayObject()
         giveaway.name = title
         giveaway.end_time = end_time.timestamp()  # All timestamps are UTC.
         giveaway.winner_count = winners
         giveaway.register_channel_id = channel.id
         giveaway.register_message_id = message.id
 
-        pos = WolfUtils.get_sort_index(self.__cache__, giveaway, 'end_time')
+        pos = HuskyUtils.get_sort_index(self.__cache__, giveaway, 'end_time')
 
         # note, we insert the giveaway, and sort. this is a rare operation, so a sort is "acceptable"
         # Null-ending giveaways (usually impossible) will be placed at the very end.
@@ -206,7 +206,7 @@ class GiveawayManager:
 
         return self.__cache__
 
-    def kill_giveaway(self, giveaway: WolfData.GiveawayObject):
+    def kill_giveaway(self, giveaway: HuskyData.GiveawayObject):
         """
         Kill a giveaway non-gracefully, immediately purging it from cache.
 

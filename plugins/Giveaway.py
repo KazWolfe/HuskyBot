@@ -4,13 +4,13 @@ import logging
 import discord
 from discord.ext import commands
 
-from WolfBot import WolfConfig
-from WolfBot import WolfConverters
-from WolfBot.WolfData import GiveawayObject
-from WolfBot.WolfStatics import *
-from WolfBot.managers.GiveawayManager import GiveawayManager
+from libhusky import HuskyConfig
+from libhusky import HuskyConverters
+from libhusky.HuskyData import GiveawayObject
+from libhusky.HuskyStatics import *
+from libhusky.managers.GiveawayManager import GiveawayManager
 
-LOG = logging.getLogger("DakotaBot.Plugin." + __name__)
+LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 GIVEAWAY_CONFIG_KEY = "giveaways"
 
@@ -27,8 +27,8 @@ class Giveaway:
 
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
-        self._config = WolfConfig.get_config()
-        self._session_store = WolfConfig.get_session_store()
+        self._config = HuskyConfig.get_config()
+        self._session_store = HuskyConfig.get_session_store()
         self.giveaway_manager = GiveawayManager(bot)
         LOG.info("Loaded plugin!")
 
@@ -84,7 +84,7 @@ class Giveaway:
         ))
 
     @ga.command(name="start", brief="Start a new Giveaway on the guild")
-    async def start(self, ctx: commands.Context, name: str, timedelta: WolfConverters.DateDiffConverter, winners: int):
+    async def start(self, ctx: commands.Context, name: str, timedelta: HuskyConverters.DateDiffConverter, winners: int):
         """
         Start a new Giveaway on the guild.
 

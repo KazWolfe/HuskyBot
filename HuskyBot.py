@@ -13,15 +13,15 @@ import discord
 from aiohttp import web
 from discord.ext import commands
 
-# WolfBot related imports
-from WolfBot import WolfConfig
-from WolfBot import WolfHTTP
-from WolfBot import WolfStatics
-from WolfBot import WolfUtils
-from WolfBot.WolfStatics import *
+# HuskyBot related imports
+from libhusky import HuskyConfig
+from libhusky import HuskyHTTP
+from libhusky import HuskyStatics
+from libhusky import HuskyUtils
+from libhusky.HuskyStatics import *
 
-BOT_CONFIG = WolfConfig.get_config()
-LOCAL_STORAGE = WolfConfig.get_session_store()
+BOT_CONFIG = HuskyConfig.get_config()
+LOCAL_STORAGE = HuskyConfig.get_session_store()
 
 initialized = False
 
@@ -46,10 +46,10 @@ webapp = web.Application()
 
 # set up logging
 LOCAL_STORAGE.set("daemonMode", os.getppid() == 1)
-LOCAL_STORAGE.set('logPath', 'logs/dakotabot.log')
+LOCAL_STORAGE.set('logPath', 'logs/huskyBot.log')
 
-file_log_handler = WolfUtils.CompressingRotatingFileHandler(LOCAL_STORAGE.get('logPath'), maxBytes=(1024 ** 2) * 5,
-                                                            backupCount=5, encoding='utf-8')
+file_log_handler = HuskyUtils.CompressingRotatingFileHandler(LOCAL_STORAGE.get('logPath'), maxBytes=(1024 ** 2) * 5,
+                                                             backupCount=5, encoding='utf-8')
 file_log_handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s"))
 
 stream_log_handler = logging.StreamHandler(sys.stdout)
@@ -60,7 +60,7 @@ logging.basicConfig(level=logging.WARNING, format="%(asctime)s [%(levelname)s] %
                     datefmt="%Y-%m-%d %H:%M:%S",
                     handlers=[file_log_handler, stream_log_handler])
 # WolfUtils.configure_loggers()
-MASTER_LOGGER = logging.getLogger("DakotaBot")
+MASTER_LOGGER = logging.getLogger("HuskyBot")
 MASTER_LOGGER.setLevel(logging.INFO)
 LOG = MASTER_LOGGER.getChild('Core')
 
@@ -76,7 +76,7 @@ async def initialize():
         del start_activity
         restart_reason = "start"
 
-    LOG.info(f"DakotaBot is online, running discord.py {discord.__version__}. Initializing and loading modules...")
+    LOG.info(f"HuskyBot is online, running discord.py {discord.__version__}. Initializing and loading modules...")
 
     # Lock the bot to a single guild
     if not BOT_CONFIG.get("developerMode", False):
@@ -133,7 +133,7 @@ async def on_ready():
     else:
         LOG.warning("A new on_ready() was called after initialization. Did the network die?")
 
-    bot_presence = BOT_CONFIG.get('presence', {"game": "DakotaBot", "type": 2, "status": "dnd"})
+    bot_presence = BOT_CONFIG.get('presence', {"game": "HuskyBot", "type": 2, "status": "dnd"})
 
     await bot.change_presence(
         activity=discord.Activity(name=bot_presence['game'], type=bot_presence['type']),
@@ -158,7 +158,7 @@ async def on_guild_join(guild: discord.Guild):
 async def on_command_error(ctx, error: commands.CommandError):
     command_name = ctx.message.content.split(' ')[0][1:]
 
-    error_string = WolfUtils.trim_string(str(error).replace('```', '`\u200b`\u200b`'), 128)
+    error_string = HuskyUtils.trim_string(str(error).replace('```', '`\u200b`\u200b`'), 128)
 
     # Handle cases where the calling user is missing a required permission.
     if isinstance(error, commands.MissingPermissions):
@@ -308,7 +308,7 @@ async def on_error(event_method, *args, **kwargs):
                 title="Bot Exception Handler",
                 description="Exception in method `{}`:\n```{}```".format(
                     event_method,
-                    WolfUtils.trim_string(traceback.format_exc().replace('```', '`\u200b`\u200b`'), 1500)
+                    HuskyUtils.trim_string(traceback.format_exc().replace('```', '`\u200b`\u200b`'), 1500)
                 ),
                 color=Colors.DANGER
             )
@@ -318,7 +318,7 @@ async def on_error(event_method, *args, **kwargs):
             if dev_ping is not None:
                 dev_ping = f"&{dev_ping}"
             else:
-                dev_ping = WolfStatics.DEVELOPERS[0]
+                dev_ping = HuskyStatics.DEVELOPERS[0]
 
             await channel.send("<@{}>, an error has occurred with the bot. See attached "
                                "embed.".format(dev_ping),
@@ -331,11 +331,11 @@ async def on_error(event_method, *args, **kwargs):
 @bot.event
 async def on_message(message):
     author = message.author
-    if not WolfUtils.should_process_message(message):
+    if not HuskyUtils.should_process_message(message):
         return
 
     if message.content.startswith(bot.command_prefix):
-        if (author.id in BOT_CONFIG.get('userBlacklist', [])) and (author.id not in WolfStatics.DEVELOPERS):
+        if (author.id in BOT_CONFIG.get('userBlacklist', [])) and (author.id not in HuskyStatics.DEVELOPERS):
             LOG.info("Blacklisted user %s attempted to run command %s", message.author, message.content)
             return
 
@@ -347,7 +347,7 @@ async def on_message(message):
             LOG.info("User %s linked to subreddit %s, ignoring command", message.author, message.content)
             return
 
-        if LOCAL_STORAGE.get('lockdown', False) and (author.id not in WolfStatics.DEVELOPERS):
+        if LOCAL_STORAGE.get('lockdown', False) and (author.id not in HuskyStatics.DEVELOPERS):
             LOG.info("Lockdown mode is enabled for the bot. Command blocked.")
             return
 
@@ -370,7 +370,7 @@ async def start_webserver():
             ssl_context.load_cert_chain(cert.read())
 
     for method in ["GET", "HEAD", "POST", "PATCH", "PUT", "DELETE", "VIEW"]:
-        webapp.router.add_route(method, '/{tail:.*}', WolfHTTP.get_router().handle(bot))
+        webapp.router.add_route(method, '/{tail:.*}', HuskyHTTP.get_router().handle(bot))
     runner = web.AppRunner(webapp)
     await runner.setup()
     site = web.TCPSite(runner, host=http_config['host'], port=http_config['port'], ssl_context=ssl_context)

@@ -7,10 +7,10 @@ import discord
 import git
 from discord.ext import commands
 
-from WolfBot import WolfConfig
-from WolfBot.WolfStatics import *
+from libhusky import HuskyConfig
+from libhusky.HuskyStatics import *
 
-LOG = logging.getLogger("DakotaBot.Plugin." + __name__)
+LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 
 # noinspection PyMethodMayBeStatic
@@ -22,8 +22,8 @@ class Base:
 
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
-        self._config = WolfConfig.get_config()
-        self._session_store = WolfConfig.get_session_store()
+        self._config = HuskyConfig.get_config()
+        self._session_store = HuskyConfig.get_session_store()
         self._devmode = self._config.get("developerMode", False)
 
         # Prevent unloading
@@ -99,12 +99,12 @@ class Base:
 
         embed = discord.Embed(
             title=f"About {self.bot.user.name} {debug_str}",
-            description="This bot (known in code as **DakotaBot**) is a custom-made Discord moderation and management "
+            description="This bot (known in code as **HuskyBot**) is a custom-made Discord moderation and management "
                         "utility bot initially for [DIY Tech](https://discord.gg/diytech). It's an implementation of "
                         "the WolfBot platform for Discord, built on the popular "
                         "[discord.py rewrite](https://github.com/Rapptz/discord.py). It features seamless integration "
                         "with any workflow, and some of the most powerful plugin management and integration features "
-                        "available in any commercial Discord bot. DakotaBot is built for speed and reliability for "
+                        "available in any commercial Discord bot. HuskyBot is built for speed and reliability for "
                         "guilds of any size, as well as easy and intuitive administration.",
             color=Colors.INFO
         )

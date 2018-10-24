@@ -5,12 +5,12 @@ import logging
 import discord
 from discord.ext import commands
 
-from WolfBot import WolfConfig
-from WolfBot import WolfUtils
-from WolfBot import antispam
-from WolfBot.WolfStatics import *
+from libhusky import HuskyConfig
+from libhusky import HuskyUtils
+from libhusky import antispam
+from libhusky.HuskyStatics import *
 
-LOG = logging.getLogger("DakotaBot.Plugin." + __name__)
+LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 
 # noinspection PyMethodMayBeStatic
@@ -24,7 +24,7 @@ class AntiSpam:
 
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
-        self._config = WolfConfig.get_config()
+        self._config = HuskyConfig.get_config()
         self._cleanup_time = 60 * 60 * 4  # four hours (in seconds)
 
         # AS Modules
@@ -49,7 +49,7 @@ class AntiSpam:
     def load_module(self, module_name):
         importlib.invalidate_caches()
 
-        module = importlib.import_module(f".{module_name}", package=f"WolfBot.antispam")
+        module = importlib.import_module(f".{module_name}", package=f"HuskyBot.antispam")
         clazz = getattr(module, module_name)
 
         impl = clazz(self)
@@ -71,7 +71,7 @@ class AntiSpam:
             await asyncio.sleep(self._cleanup_time)  # sleep for four hours
 
     async def on_message(self, message):
-        if not WolfUtils.should_process_message(message):
+        if not HuskyUtils.should_process_message(message):
             return
 
         for module in self.__modules__.values():

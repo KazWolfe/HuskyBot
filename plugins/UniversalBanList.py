@@ -4,9 +4,9 @@ import re
 import discord
 from discord.ext import commands
 
-from WolfBot import WolfUtils, WolfStatics
+from libhusky import HuskyUtils, HuskyStatics
 
-LOG = logging.getLogger("DakotaBot.Plugin." + __name__)
+LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 
 # noinspection PyMethodMayBeStatic
@@ -31,13 +31,13 @@ class UniversalBanList:
         # UBL list of phrases to target *just usernames*.
         self._ubl_usernames = [
             "hitler",
-            WolfStatics.Regex.INVITE_REGEX
+            HuskyStatics.Regex.INVITE_REGEX
         ]
 
         LOG.info("Loaded plugin!")
 
     async def filter_message(self, message: discord.Message, context: str = "new_message"):
-        if not WolfUtils.should_process_message(message):
+        if not HuskyUtils.should_process_message(message):
             return
 
         if message.author.permissions_in(message.channel).manage_messages:

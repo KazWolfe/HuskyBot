@@ -10,13 +10,13 @@ import discord
 from aiohttp import web
 from discord.ext import commands
 
-from WolfBot import WolfChecks
-from WolfBot import WolfConfig
-from WolfBot import WolfHTTP
-from WolfBot import WolfUtils
-from WolfBot.WolfStatics import *
+from libhusky import HuskyChecks
+from libhusky import HuskyConfig
+from libhusky import HuskyHTTP
+from libhusky import HuskyUtils
+from libhusky.HuskyStatics import *
 
-LOG = logging.getLogger("DakotaBot.Plugin." + __name__)
+LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 
 # noinspection PyMethodMayBeStatic
@@ -27,12 +27,12 @@ class Debug:
 
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
-        self._config = WolfConfig.get_config()
-        self._session_store = WolfConfig.get_session_store()
+        self._config = HuskyConfig.get_config()
+        self._session_store = HuskyConfig.get_session_store()
         LOG.info("Loaded plugin!")
 
     def __unload(self):
-        WolfHTTP.get_router().unload_plugin(self)
+        HuskyHTTP.get_router().unload_plugin(self)
 
     @commands.group(name="debug")
     @commands.has_permissions(administrator=True)
@@ -172,7 +172,7 @@ class Debug:
         await ctx.send("OK")
 
     @commands.command(name="eval", brief="Execute an eval() statement on the bot")
-    @WolfChecks.is_developer()
+    @HuskyChecks.is_developer()
     async def evalcmd(self, ctx: discord.ext.commands.Context, *, expr: str):
         """
         Help documentation is not available for this plugin.
@@ -211,7 +211,7 @@ class Debug:
         ))
 
     @commands.command(name="exec", brief="Execute an eval as a function/method", aliases=["feval"])
-    @WolfChecks.is_developer()
+    @HuskyChecks.is_developer()
     async def func_exec(self, ctx: discord.ext.commands.Context, *, expr: str):
         """
         Help documentation is not available for this plugin.
@@ -274,7 +274,7 @@ class Debug:
         ))
 
     @commands.command(name="shell", brief="Run a command through the shell")
-    @WolfChecks.is_developer()
+    @HuskyChecks.is_developer()
     async def run_command(self, ctx: commands.Context, *, command: str):
         command = command.strip('`')
 
@@ -301,7 +301,7 @@ class Debug:
         ))
 
     @commands.command(name='requestify', brief="Make a HTTP request through the bot")
-    @WolfChecks.is_developer()
+    @HuskyChecks.is_developer()
     async def requestify(self, ctx: commands.Context, url: str, method: str = "GET", *, data: str = None):
         method = method.upper()
         supported_methods = ["GET", "POST", "PUT", "DELETE", "PATCH"]
@@ -328,7 +328,7 @@ class Debug:
 
                 await ctx.send(embed=discord.Embed(
                     title=f"HTTP Status {response.status}",
-                    description="```{}```".format(WolfUtils.trim_string(await response.text(), 2000)),
+                    description="```{}```".format(HuskyUtils.trim_string(await response.text(), 2000)),
                     color=color
                 ))
         except aiohttp.client.ClientError as ex:
@@ -340,7 +340,7 @@ class Debug:
             ))
             LOG.warning("Requestify raised exception.", ex)
 
-    @WolfHTTP.register("/debug/hello", ["GET", "POST"])
+    @HuskyHTTP.register("/debug/hello", ["GET", "POST"])
     async def say_hello(self, request: web.BaseRequest):
         target = "world"
         if request.method == "POST":

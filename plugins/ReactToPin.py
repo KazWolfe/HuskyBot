@@ -3,10 +3,10 @@ import logging
 import discord
 from discord.ext import commands
 
-from WolfBot import WolfConfig, WolfUtils, WolfConverters
-from WolfBot.WolfStatics import *
+from libhusky import HuskyConfig, HuskyUtils, HuskyConverters
+from libhusky.HuskyStatics import *
 
-LOG = logging.getLogger("DakotaBot.Plugin." + __name__)
+LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 
 class ReactToPin:
@@ -41,7 +41,7 @@ class ReactToPin:
         }
         """
         self.bot = bot
-        self._config = WolfConfig.get_config()
+        self._config = HuskyConfig.get_config()
 
         LOG.info("Loaded plugin!")
 
@@ -87,7 +87,7 @@ class ReactToPin:
 
         LOG.debug("Got react event, processing.")
 
-        if not WolfUtils.should_process_message(message):
+        if not HuskyUtils.should_process_message(message):
             return
 
         if channel_config is None or not channel_config.get('enabled', False):
@@ -137,7 +137,7 @@ class ReactToPin:
 
         channel_config = self._config.get('reactToPin', {}).get(str(channel.id))  # type: dict
 
-        if not WolfUtils.should_process_message(message):
+        if not HuskyUtils.should_process_message(message):
             return
 
         if channel_config is None or not channel_config.get('enabled', False):
@@ -174,7 +174,7 @@ class ReactToPin:
 
         channel_config = self._config.get('reactToPin', {}).get(str(channel.id))  # type: dict
 
-        if not WolfUtils.should_process_message(message):
+        if not HuskyUtils.should_process_message(message):
             return
 
         if message.id in channel_config.get('permanent', []):
@@ -315,7 +315,7 @@ class ReactToPin:
         ))
 
     @react2pin.command(name="configure", aliases=["config"], brief="Configure ReactToPin for the current channel")
-    async def config(self, ctx: commands.Context, emoji: WolfConverters.PartialEmojiConverter, min_reacts: int):
+    async def config(self, ctx: commands.Context, emoji: HuskyConverters.PartialEmojiConverter, min_reacts: int):
         # pycharm duck hack
         emoji = emoji  # type: discord.PartialEmoji
 

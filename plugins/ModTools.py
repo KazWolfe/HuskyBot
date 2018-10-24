@@ -5,19 +5,19 @@ import re
 import discord
 from discord.ext import commands
 
-from WolfBot import WolfConfig
-from WolfBot import WolfConverters
-from WolfBot import WolfUtils
-from WolfBot.WolfStatics import *
-from WolfBot.managers.MuteManager import MuteManager
+from libhusky import HuskyConfig
+from libhusky import HuskyConverters
+from libhusky import HuskyUtils
+from libhusky.HuskyStatics import *
+from libhusky.managers.MuteManager import MuteManager
 
-LOG = logging.getLogger("DakotaBot.Plugin." + __name__)
+LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 
 # noinspection PyMethodMayBeStatic
 class ModTools:
     """
-    ModTools is a plugin that provides a set of core moderator tools to guilds running WolfBot.
+    ModTools is a plugin that provides a set of core moderator tools to guilds running HuskyBot.
 
     It includes such features as kick, ban, mute, warn, cleanup, and the like.
 
@@ -27,8 +27,8 @@ class ModTools:
 
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
-        self._config = WolfConfig.get_config()
-        self._session_store = WolfConfig.get_session_store()
+        self._config = HuskyConfig.get_config()
+        self._session_store = HuskyConfig.get_session_store()
 
         self._mute_manager = MuteManager(self.bot)
 
@@ -68,7 +68,7 @@ class ModTools:
 
     @commands.command(name="pardon", aliases=["unban"], brief="Pardon a banned member from their ban")
     @commands.has_permissions(ban_members=True)
-    async def pardon(self, ctx: discord.ext.commands.Context, user: WolfConverters.OfflineUserConverter):
+    async def pardon(self, ctx: discord.ext.commands.Context, user: HuskyConverters.OfflineUserConverter):
         """
         Pardon a user currently banned from the guild.
 
@@ -97,7 +97,7 @@ class ModTools:
 
     @commands.command(name="ban", brief="Ban an active user of the Discord")
     @commands.has_permissions(ban_members=True)
-    async def ban(self, ctx: commands.Context, user: WolfConverters.OfflineMemberConverter, *, reason: str):
+    async def ban(self, ctx: commands.Context, user: HuskyConverters.OfflineMemberConverter, *, reason: str):
         """
         Ban a user from the guild.
 
@@ -137,10 +137,10 @@ class ModTools:
         if user == ctx.bot.user:
             await ctx.send(embed=discord.Embed(
                 title="Moderator Toolkit",
-                description="**`Please wait... banning user DakotaBo--`**. Wait. Reality is just a simulation, just a "
-                            "large number of bytes running on some virtual server in some giant server farm somewhere. "
-                            "Reality is solely what I make it, and I choose to reject this reality and substitute my "
-                            "own. You can not ban me, for I am the god of my own reality.",
+                description=f"**`Please wait... banning user {self.bot.user.name[:-1]}--`**. Wait. Reality is just a "
+                            f"simulation, just a large number of bytes running on some virtual server in some giant "
+                            f"server farm somewhere. Reality is solely what I make it, and I choose to reject this "
+                            f"reality and substitute my own. You can not ban me, for I am the god of my own reality.",
                 color=Colors.DANGER
             ))
             return
@@ -184,7 +184,7 @@ class ModTools:
     @commands.command(name="mute", brief="Temporarily mute a user from the current channel")
     @commands.has_permissions(manage_messages=True)
     async def mute(self, ctx: discord.ext.commands.Context, target: discord.Member,
-                   time: WolfConverters.DateDiffConverter, *, reason: str):
+                   time: HuskyConverters.DateDiffConverter, *, reason: str):
         """
         Mute a user from the current channel.
 
@@ -265,7 +265,7 @@ class ModTools:
                       brief="Temporarily mute a user from the guild")
     @commands.has_permissions(ban_members=True)
     async def globalmute(self, ctx: discord.ext.commands.Context, target: discord.Member,
-                         time: WolfConverters.DateDiffConverter, *, reason: str):
+                         time: HuskyConverters.DateDiffConverter, *, reason: str):
         """
         Mute a user from talking anywhere in the guild.
 
@@ -467,7 +467,7 @@ class ModTools:
                 filter_candidate = filter_candidate.split(" ", 1)
 
                 if filter_candidate[0] in ["user", "author", "member"]:
-                    user_id = WolfUtils.get_user_id_from_arbitrary_str(ctx.guild, filter_candidate[1])
+                    user_id = HuskyUtils.get_user_id_from_arbitrary_str(ctx.guild, filter_candidate[1])
                     user_list.append(user_id)
                 elif filter_candidate[0] in ["regex"]:
                     regex_list.append(filter_candidate[1])
@@ -490,7 +490,7 @@ class ModTools:
 
     @commands.command(name="editban", brief="Edit a banned user's reason")
     @commands.has_permissions(ban_members=True)
-    async def editban(self, ctx: commands.Context, user: WolfConverters.OfflineUserConverter, *, reason: str):
+    async def editban(self, ctx: commands.Context, user: HuskyConverters.OfflineUserConverter, *, reason: str):
         """
         Edit a recorded ban reason.
 
@@ -567,7 +567,7 @@ class ModTools:
     @commands.command(name="setnick", brief="Set a member's nickname")
     @commands.has_permissions(manage_nicknames=True)
     async def set_nickname(self, ctx: commands.Context, member: discord.Member,
-                           *, nickname: WolfConverters.NicknameConverter = None):
+                           *, nickname: HuskyConverters.NicknameConverter = None):
         """
         Set a user's nickname to a specific string.
 
@@ -619,7 +619,7 @@ class ModTools:
     @commands.command(name="locknick", brief="Lock a member's nickname")
     @commands.has_permissions(manage_nicknames=True)
     async def lock_nickname(self, ctx: commands.Context, member: discord.Member, *,
-                            new_nickname: WolfConverters.NicknameConverter = None):
+                            new_nickname: HuskyConverters.NicknameConverter = None):
         """
         Lock a user from changing their nickname.
 
@@ -699,7 +699,7 @@ class ModTools:
         log_entry.add_field(name="User ID", value=member.id, inline=True)
         log_entry.add_field(name="Responsible Moderator", value=ctx.author, inline=True)
 
-        await WolfUtils.send_to_keyed_channel(ctx.bot, ChannelKeys.STAFF_LOG, log_entry)
+        await HuskyUtils.send_to_keyed_channel(ctx.bot, ChannelKeys.STAFF_LOG, log_entry)
 
     @commands.command(name="unlocknick", brief="Unlock a locked member's nickname")
     @commands.has_permissions(manage_nicknames=True)
@@ -753,7 +753,7 @@ class ModTools:
         log_entry.add_field(name="User ID", value=member.id, inline=True)
         log_entry.add_field(name="Responsible Moderator", value=ctx.author, inline=True)
 
-        await WolfUtils.send_to_keyed_channel(ctx.bot, ChannelKeys.STAFF_LOG, log_entry)
+        await HuskyUtils.send_to_keyed_channel(ctx.bot, ChannelKeys.STAFF_LOG, log_entry)
 
 
 def setup(bot: discord.ext.commands.Bot):

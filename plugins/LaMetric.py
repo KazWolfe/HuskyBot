@@ -5,12 +5,12 @@ import os
 import discord
 from discord.ext import commands
 
-from WolfBot import WolfChecks
-from WolfBot import WolfConfig
-from WolfBot.WolfStatics import *
-from WolfBot.apis import LaMetric as LaMetricApi
+from libhusky import HuskyChecks
+from libhusky import HuskyConfig
+from libhusky.HuskyStatics import *
+from libhusky.apis import LaMetric as LaMetricApi
 
-LOG = logging.getLogger("DakotaBot.Plugin." + __name__)
+LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 
 # noinspection PyMethodMayBeStatic
@@ -41,7 +41,7 @@ class LaMetric:
 
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
-        self._config = WolfConfig.get_config()
+        self._config = HuskyConfig.get_config()
 
         self._api = LaMetricApi.LaMetricApi(loop=bot.loop)
 
@@ -85,7 +85,7 @@ class LaMetric:
         pass
 
     @lametric.command(name="register", brief="Register a new LaMetric device")
-    @WolfChecks.has_guild_permissions(administrator=True)
+    @HuskyChecks.has_guild_permissions(administrator=True)
     async def register(self, ctx: commands.Context):
         """
         Begin the registration process for a LaMetric device.
@@ -199,7 +199,7 @@ class LaMetric:
         ))
 
     @lametric.command(name="send", brief="Send a text string to a LaMetric device.")
-    @WolfChecks.has_guild_permissions(administrator=True)
+    @HuskyChecks.has_guild_permissions(administrator=True)
     async def send(self, ctx: commands.Context, device_id: str, icon: str, text: str):
         """
         Send a message to a LaMetric device.
@@ -230,7 +230,7 @@ class LaMetric:
         await ctx.send(f"Status code: {r.status}")
 
     @lametric.command(name="list", brief="List registered LaMetric devices")
-    @WolfChecks.has_guild_permissions(administrator=True)
+    @HuskyChecks.has_guild_permissions(administrator=True)
     async def list(self, ctx: commands.Context):
         """
         List all registered LaMetric devices.
@@ -253,7 +253,7 @@ class LaMetric:
         ))
 
     @lametric.command(name="remove", brief="Remove a LaMetric device")
-    @WolfChecks.has_guild_permissions(administrator=True)
+    @HuskyChecks.has_guild_permissions(administrator=True)
     async def delete(self, ctx: commands.Context, device_id: str):
         """
         De-register a LaMetric device.

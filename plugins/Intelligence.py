@@ -5,12 +5,12 @@ import discord
 from discord.ext import commands
 from discord.http import Route
 
-from WolfBot import WolfConfig
-from WolfBot import WolfConverters
-from WolfBot import WolfUtils
-from WolfBot.WolfStatics import *
+from libhusky import HuskyConfig
+from libhusky import HuskyConverters
+from libhusky import HuskyUtils
+from libhusky.HuskyStatics import *
 
-LOG = logging.getLogger("DakotaBot.Plugin." + __name__)
+LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 
 class Intelligence:
@@ -26,7 +26,7 @@ class Intelligence:
 
     def __init__(self, bot):
         self.bot = bot
-        self._config = WolfConfig.get_config()
+        self._config = HuskyConfig.get_config()
         LOG.info("Loaded plugin!")
 
     @commands.command(name="guildinfo", aliases=["sinfo", "ginfo"], brief="Get information about the current guild")
@@ -47,7 +47,7 @@ class Intelligence:
 
         guild_details.set_thumbnail(url=guild.icon_url)
         guild_details.add_field(name="Guild ID", value=guild.id, inline=True)
-        guild_details.add_field(name="Owner", value=f"{WolfUtils.escape_markdown(guild.owner.display_name)}"
+        guild_details.add_field(name="Owner", value=f"{HuskyUtils.escape_markdown(guild.owner.display_name)}"
                                                     f"#{guild.owner.discriminator}",
                                 inline=True)
         guild_details.add_field(name="Members", value=str(len(guild.members)) + " users", inline=True)
@@ -103,7 +103,7 @@ class Intelligence:
     @commands.command(name="userinfo", aliases=["uinfo", "memberinfo", "minfo", "whois"],
                       brief="Get information about self or specified user")
     async def user_info(self, ctx: discord.ext.commands.Context, *,
-                        user: WolfConverters.OfflineMemberConverter = None):
+                        user: HuskyConverters.OfflineMemberConverter = None):
         """
         Get basic information about a calling user.
 
@@ -131,7 +131,7 @@ class Intelligence:
             member_details = discord.Embed(
                 title=f"User Information for {user}",
                 color=user.color,
-                description=f"Currently in **{user.status}** mode " + WolfUtils.get_fancy_game_data(user)
+                description=f"Currently in **{user.status}** mode " + HuskyUtils.get_fancy_game_data(user)
             )
         else:
             raise ValueError("Illegal state!")
@@ -150,7 +150,7 @@ class Intelligence:
         member_details.add_field(name="User ID", value=user.id, inline=True)
 
         if isinstance(user, discord.Member) and ctx.guild is not None:
-            member_details.add_field(name="Display Name", value=WolfUtils.escape_markdown(user.display_name),
+            member_details.add_field(name="Display Name", value=HuskyUtils.escape_markdown(user.display_name),
                                      inline=True)
 
         member_details.add_field(name="Joined Discord", value=user.created_at.strftime(DATETIME_FORMAT), inline=True)
@@ -166,7 +166,7 @@ class Intelligence:
         await ctx.send(embed=member_details)
 
     @commands.command(name="avatar", brief="Get a link/high-resolution version of a user's avatar")
-    async def avatar(self, ctx: commands.Context, *, user: WolfConverters.OfflineUserConverter = None):
+    async def avatar(self, ctx: commands.Context, *, user: HuskyConverters.OfflineUserConverter = None):
         """
         Get a high-resolution version of a user's avatar.
 
@@ -204,8 +204,8 @@ class Intelligence:
     @commands.has_permissions(manage_messages=True)
     @commands.cooldown(1, 60, commands.BucketType.user)
     async def message_count(self, ctx: commands.Context,
-                            search_context: WolfConverters.ChannelContextConverter = "public",
-                            timedelta: WolfConverters.DateDiffConverter = "24h"):
+                            search_context: HuskyConverters.ChannelContextConverter = "public",
+                            timedelta: HuskyConverters.DateDiffConverter = "24h"):
         """
         Get a count of messages in any given context.
 
@@ -234,7 +234,7 @@ class Intelligence:
         """
 
         if search_context == "public":
-            converter = WolfConverters.ChannelContextConverter()
+            converter = HuskyConverters.ChannelContextConverter()
             search_context = await converter.convert(ctx, "public")
 
         if timedelta == "24h":
@@ -268,8 +268,8 @@ class Intelligence:
     @commands.has_permissions(view_audit_log=True)
     @commands.cooldown(1, 60, commands.BucketType.user)
     async def active_user_count(self, ctx: commands.Context,
-                                search_context: WolfConverters.ChannelContextConverter = "all",
-                                delta: WolfConverters.DateDiffConverter = "24h",
+                                search_context: HuskyConverters.ChannelContextConverter = "all",
+                                delta: HuskyConverters.DateDiffConverter = "24h",
                                 threshold: int = 10):
         """
         Get an active user count for the current guild.
@@ -298,7 +298,7 @@ class Intelligence:
             /help msgcount  - Get a count of messages in the current context
         """
         if search_context == "all":
-            converter = WolfConverters.ChannelContextConverter()
+            converter = HuskyConverters.ChannelContextConverter()
             search_context = await converter.convert(ctx, "all")
 
         if delta == "24h":
@@ -407,7 +407,7 @@ class Intelligence:
 
     @commands.command(name="invitespy", brief="Find information about Guild invite", aliases=["invspy"])
     @commands.has_permissions(view_audit_log=True)
-    async def invitespy(self, ctx: commands.Context, fragment: WolfConverters.InviteLinkConverter):
+    async def invitespy(self, ctx: commands.Context, fragment: HuskyConverters.InviteLinkConverter):
         """
         Get information about a guild invite.
 
@@ -498,7 +498,7 @@ class Intelligence:
                             inline=False)
             embed.set_image(url=invite_guild.splash_url)
 
-        embed.set_footer(text=f"Report generated at {WolfUtils.get_timestamp()}")
+        embed.set_footer(text=f"Report generated at {HuskyUtils.get_timestamp()}")
 
         await ctx.send(embed=embed)
 

@@ -4,9 +4,9 @@ import random
 import discord
 from discord.ext import commands
 
-from WolfBot import WolfConfig, WolfUtils
+from libhusky import HuskyConfig, HuskyUtils
 
-LOG = logging.getLogger("DakotaBot.Plugin." + __name__)
+LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 
 # noinspection PyMethodMayBeStatic
@@ -17,14 +17,14 @@ class PingMe:
 
     def __init__(self, bot: discord.ext.commands.Bot):
         self._bot = bot
-        self._config = WolfConfig.get_config()
+        self._config = HuskyConfig.get_config()
 
         LOG.info("Loaded plugin!")
 
     async def on_message(self, message: discord.Message):
         possible_replies = ["aroowooooo", "rooo", "woorooro", "arowwo"]
 
-        if not WolfUtils.should_process_message(message):
+        if not HuskyUtils.should_process_message(message):
             return
 
         if message.content.startswith(self._bot.command_prefix):

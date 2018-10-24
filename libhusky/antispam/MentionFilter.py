@@ -4,11 +4,11 @@ import logging
 import discord
 from discord.ext import commands
 
-from WolfBot import WolfConfig
-from WolfBot.WolfStatics import *
-from WolfBot.antispam import AntiSpamModule
+from libhusky import HuskyConfig
+from libhusky.HuskyStatics import *
+from libhusky.antispam import AntiSpamModule
 
-LOG = logging.getLogger("DakotaBot.Plugin.AntiSpam." + __name__.split('.')[-1])
+LOG = logging.getLogger("HuskyBot.Plugin.AntiSpam." + __name__.split('.')[-1])
 
 defaults = {
     "soft": 6,  # Number of unique pings in a message before deleting the message
@@ -23,7 +23,7 @@ class MentionFilter(AntiSpamModule):
                          checks=[super().has_permissions(mention_everyone=True)], aliases=["mf"])
 
         self.bot = plugin.bot
-        self._config = WolfConfig.get_config()
+        self._config = HuskyConfig.get_config()
         self._events = {}
 
         self.add_command(self.set_ping_limit)

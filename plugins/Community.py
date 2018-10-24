@@ -3,10 +3,10 @@ import logging
 import discord
 from discord.ext import commands
 
-from WolfBot import WolfConfig
-from WolfBot.WolfStatics import *
+from libhusky import HuskyConfig
+from libhusky.HuskyStatics import *
 
-LOG = logging.getLogger("DakotaBot.Plugin." + __name__)
+LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 
 class Community:
@@ -19,7 +19,7 @@ class Community:
 
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
-        self._config = WolfConfig.get_config()
+        self._config = HuskyConfig.get_config()
         LOG.info("Loaded plugin!")
 
     @commands.command(name="staff", aliases=["stafflist"], brief="Get an up-to-date list of all staff on the guild")

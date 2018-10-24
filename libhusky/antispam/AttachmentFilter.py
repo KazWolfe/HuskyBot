@@ -4,11 +4,11 @@ import logging
 import discord
 from discord.ext import commands
 
-from WolfBot import WolfConfig
-from WolfBot.WolfStatics import *
-from WolfBot.antispam import AntiSpamModule
+from libhusky import HuskyConfig
+from libhusky.HuskyStatics import *
+from libhusky.antispam import AntiSpamModule
 
-LOG = logging.getLogger("DakotaBot.Plugin.AntiSpam." + __name__.split('.')[-1])
+LOG = logging.getLogger("HuskyBot.Plugin.AntiSpam." + __name__.split('.')[-1])
 
 defaults = {
     'seconds': 15,  # Cooldown timer (reset)
@@ -38,7 +38,7 @@ class AttachmentFilter(AntiSpamModule):
                          checks=[super().has_permissions(manage_guild=True)], help=self.classhelp(), aliases=["af"])
 
         self.bot = plugin.bot
-        self._config = WolfConfig.get_config()
+        self._config = HuskyConfig.get_config()
 
         self._events = {}
 

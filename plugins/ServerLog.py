@@ -3,11 +3,11 @@ import logging
 import discord
 from discord.ext import commands
 
-from WolfBot import WolfConfig
-from WolfBot import WolfUtils
-from WolfBot.WolfStatics import *
+from libhusky import HuskyConfig
+from libhusky import HuskyUtils
+from libhusky.HuskyStatics import *
 
-LOG = logging.getLogger("DakotaBot.Plugin." + __name__)
+LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 
 class ServerLog:
@@ -17,8 +17,8 @@ class ServerLog:
 
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
-        self._config = WolfConfig.get_config()
-        self._session_store = WolfConfig.get_session_store()
+        self._config = HuskyConfig.get_config()
+        self._session_store = HuskyConfig.get_session_store()
 
         LOG.info("Loaded plugin!")
 
@@ -103,7 +103,7 @@ class ServerLog:
 
         embed.set_thumbnail(url=member.avatar_url)
         embed.add_field(name="User ID", value=member.id)
-        embed.add_field(name="Leave Timestamp", value=WolfUtils.get_timestamp())
+        embed.add_field(name="Leave Timestamp", value=HuskyUtils.get_timestamp())
 
         LOG.info(f"User {member} has left {member.guild.name}.")
         await alert_channel.send(embed=embed)
@@ -119,7 +119,7 @@ class ServerLog:
             return
 
         # Get timestamp as soon as the event is fired, because waiting for bans may take a while.
-        timestamp = WolfUtils.get_timestamp()
+        timestamp = HuskyUtils.get_timestamp()
 
         alert_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
 
@@ -178,7 +178,7 @@ class ServerLog:
 
         embed.set_thumbnail(url=user.avatar_url)
         embed.add_field(name="User ID", value=user.id)
-        embed.add_field(name="Unban Timestamp", value=WolfUtils.get_timestamp())
+        embed.add_field(name="Unban Timestamp", value=HuskyUtils.get_timestamp())
 
         LOG.info(f"User {user} was unbanned from {guild.name}.")
         await alert_channel.send(embed=embed)
@@ -222,7 +222,7 @@ class ServerLog:
 
         embed.add_field(name=f"Old {update_type.capitalize()}", value=old_val, inline=True)
         embed.add_field(name=f"New {update_type.capitalize()}", value=new_val, inline=True)
-        embed.add_field(name="Display Name", value=WolfUtils.escape_markdown(after.display_name), inline=True)
+        embed.add_field(name="Display Name", value=HuskyUtils.escape_markdown(after.display_name), inline=True)
         embed.add_field(name="User ID", value=after.id, inline=True)
         embed.set_author(name=f"{after}'s {update_type} has changed!", icon_url=after.avatar_url)
 
@@ -261,15 +261,15 @@ class ServerLog:
         embed.add_field(name="Message ID", value=message.id, inline=True)
         embed.add_field(name="Channel", value=message.channel.mention, inline=True)
         embed.add_field(name="Send Timestamp", value=message.created_at.strftime(DATETIME_FORMAT), inline=True)
-        embed.add_field(name="Delete Timestamp", value=WolfUtils.get_timestamp(), inline=True)
+        embed.add_field(name="Delete Timestamp", value=HuskyUtils.get_timestamp(), inline=True)
 
         if message.content is not None and message.content != "":
-            embed.add_field(name="Message", value=WolfUtils.trim_string(message.content, 1000, True), inline=False)
+            embed.add_field(name="Message", value=HuskyUtils.trim_string(message.content, 1000, True), inline=False)
 
         if message.attachments is not None and len(message.attachments) > 1:
             attachments_list = str(f"- {a.url}\n" for a in message.attachments)
             embed.add_field(name="Attachments",
-                            value=WolfUtils.trim_string(attachments_list, 1000, True),
+                            value=HuskyUtils.trim_string(attachments_list, 1000, True),
                             inline=False)
         elif message.attachments is not None and len(message.attachments) == 1:
             embed.add_field(name="Attachment URL", value=message.attachments[0].url, inline=False)
@@ -317,13 +317,13 @@ class ServerLog:
         embed.add_field(name="Edit Timestamp", value=after.edited_at.strftime(DATETIME_FORMAT), inline=True)
 
         if before.content is not None and before.content != "":
-            embed.add_field(name="Message Before", value=WolfUtils.trim_string(before.content, 1000, True),
+            embed.add_field(name="Message Before", value=HuskyUtils.trim_string(before.content, 1000, True),
                             inline=False)
         else:
             embed.add_field(name="Message Before", value="`<No Content>`", inline=False)
 
         if after.content is not None and after.content != "":
-            embed.add_field(name="Message After", value=WolfUtils.trim_string(after.content, 1000, True), inline=False)
+            embed.add_field(name="Message After", value=HuskyUtils.trim_string(after.content, 1000, True), inline=False)
         else:
             embed.add_field(name="Message After", value="`<No Content>`", inline=False)
 

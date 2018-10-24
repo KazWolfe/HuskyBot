@@ -12,8 +12,8 @@ from logging import handlers
 
 import discord
 
-import WolfBot.WolfConfig
-from WolfBot import WolfStatics
+import libhusky.HuskyConfig
+from libhusky import HuskyStatics
 
 
 def member_has_role(member, role_id):
@@ -69,7 +69,7 @@ def should_process_message(message: discord.Message):
         return False
 
     # Don't process messages from ignored guilds (developer mode)
-    if message.guild.id in WolfBot.WolfConfig.get_config().get("ignoredGuilds", []):
+    if message.guild.id in libhusky.HuskyConfig.get_config().get("ignoredGuilds", []):
         return False
 
     # Don't process messages from other bots.
@@ -97,7 +97,7 @@ def get_timestamp():
     Get the UTC timestamp in YYYY-MM-DD HH:MM:SS format (Bot Standard)
     """
 
-    return datetime.datetime.utcnow().strftime(WolfStatics.DATETIME_FORMAT)
+    return datetime.datetime.utcnow().strftime(HuskyStatics.DATETIME_FORMAT)
 
 
 def get_user_id_from_arbitrary_str(guild: discord.Guild, string: str):
@@ -192,8 +192,8 @@ def get_image_size(fname):
         return width, height
 
 
-async def send_to_keyed_channel(bot: discord.Client, channel: WolfStatics.ChannelKeys, embed: discord.Embed):
-    log_channel = WolfBot.WolfConfig.get_config().get('specialChannels', {}).get(channel.value, None)
+async def send_to_keyed_channel(bot: discord.Client, channel: HuskyStatics.ChannelKeys, embed: discord.Embed):
+    log_channel = libhusky.HuskyConfig.get_config().get('specialChannels', {}).get(channel.value, None)
     if log_channel is not None:
         log_channel: discord.TextChannel = bot.get_channel(log_channel)
 
@@ -210,7 +210,7 @@ def get_fragment_from_invite(data: str) -> str:
     :param data: The data to attempt to strip a fragment from
     :return: The best guess for the invite fragment
     """
-    discordgg_link_check = re.search(WolfStatics.Regex.INVITE_REGEX, data, flags=re.IGNORECASE)
+    discordgg_link_check = re.search(HuskyStatics.Regex.INVITE_REGEX, data, flags=re.IGNORECASE)
 
     if discordgg_link_check is not None:
         return discordgg_link_check.group('fragment')
@@ -227,7 +227,7 @@ def confirm_dialog_check(triggering_user: discord.Member):
         if not (user == triggering_user or user.guild_permissions.administrator):
             return False
 
-        if reaction.emoji in [WolfStatics.Emojis.CHECK, WolfStatics.Emojis.X]:
+        if reaction.emoji in [HuskyStatics.Emojis.CHECK, HuskyStatics.Emojis.X]:
             return True
         else:
             return False

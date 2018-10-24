@@ -6,10 +6,10 @@ import discord
 import git
 from discord.ext import commands
 
-from WolfBot import WolfConfig
-from WolfBot.WolfStatics import *
+from libhusky import HuskyConfig
+from libhusky.HuskyStatics import *
 
-LOG = logging.getLogger("DakotaBot.Plugin." + __name__)
+LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 
 # noinspection PyMethodMayBeStatic
@@ -25,7 +25,7 @@ class Updater:
 
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
-        self._config = WolfConfig.get_config()
+        self._config = HuskyConfig.get_config()
         self.repo = git.Repo(search_parent_directories=True)
         LOG.info("Loaded plugin!")
 

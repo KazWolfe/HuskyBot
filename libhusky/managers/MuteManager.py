@@ -5,17 +5,17 @@ import logging
 import discord
 from discord.ext import commands
 
-from WolfBot import WolfConfig, WolfData, WolfUtils
-from WolfBot.WolfStatics import *
+from libhusky import HuskyConfig, HuskyData, HuskyUtils
+from libhusky.HuskyStatics import *
 
-LOG = logging.getLogger("DakotaBot.Managers.MuteManager")
+LOG = logging.getLogger("HuskyBot.Managers.MuteManager")
 
 
 class MuteManager:
     def __init__(self, bot: commands.Bot):
         self._bot = bot
-        self._bot_config = WolfConfig.get_config()
-        self._mute_config = WolfConfig.get_config('mutes', create_if_nonexistent=True)
+        self._bot_config = HuskyConfig.get_config()
+        self._mute_config = HuskyConfig.get_config('mutes', create_if_nonexistent=True)
         self.__cache__ = []
 
         self.read_mutes_from_file()
@@ -28,7 +28,7 @@ class MuteManager:
         disk_mutes = self._mute_config.get("mutes", [])
 
         for raw_mute in disk_mutes:
-            mute = WolfData.Mute(raw_mute)
+            mute = HuskyData.Mute(raw_mute)
 
             self.__cache__.append(mute)
 
@@ -49,7 +49,7 @@ class MuteManager:
 
             await asyncio.sleep(0.5)
 
-    async def mute_user_by_object(self, mute: WolfData.Mute, staff_member: str = "System"):
+    async def mute_user_by_object(self, mute: HuskyData.Mute, staff_member: str = "System"):
         guild = self._bot.get_guild(mute.guild)
 
         member = guild.get_member(mute.user_id)
@@ -77,7 +77,7 @@ class MuteManager:
                                           add_reactions=False)
 
         if mute not in self.__cache__:
-            pos = WolfUtils.get_sort_index(self.__cache__, mute, 'expiry')
+            pos = HuskyUtils.get_sort_index(self.__cache__, mute, 'expiry')
             self.__cache__.insert(pos, mute)
             self.__cache__.sort(key=lambda m: m.expiry if m.expiry else 10 * 100)
             self._mute_config.set("mutes", self.__cache__)
@@ -97,7 +97,7 @@ class MuteManager:
                 embed.set_author(name=f"{member} was muted from {ms}!",
                                  icon_url=member.avatar_url)
                 embed.add_field(name="Responsible User", value=staff_member, inline=True)
-                embed.add_field(name="Timestamp", value=WolfUtils.get_timestamp(), inline=True)
+                embed.add_field(name="Timestamp", value=HuskyUtils.get_timestamp(), inline=True)
                 embed.add_field(name="Expires At", value=datetime.datetime.fromtimestamp(mute.expiry)
                                 .strftime(DATETIME_FORMAT) if mute.expiry is not None else "Never", inline=True)
                 embed.add_field(name="Reason", value=mute.reason, inline=False)
@@ -114,7 +114,7 @@ class MuteManager:
             channel_id = channel.id
             current_perms = channel.overwrites_for(member)
 
-        mute_obj = WolfData.Mute()
+        mute_obj = HuskyData.Mute()
         mute_obj.guild = ctx.guild.id
         mute_obj.user_id = member.id
         mute_obj.reason = reason
@@ -124,7 +124,7 @@ class MuteManager:
 
         await self.mute_user_by_object(mute_obj, str(staff_member))
 
-    async def unmute_user(self, mute: WolfData.Mute, staff_member: str):
+    async def unmute_user(self, mute: HuskyData.Mute, staff_member: str):
         if staff_member is not None:
             unmute_reason = f"user {staff_member}"
         else:
@@ -204,7 +204,7 @@ class MuteManager:
 
         return result
 
-    async def update_mute_record(self, mute: WolfData.Mute, reason: str = None, expiry: int = None):
+    async def update_mute_record(self, mute: HuskyData.Mute, reason: str = None, expiry: int = None):
 
         if mute not in self.__cache__:
             raise KeyError("This record doesn't exist in the cache!")
@@ -221,7 +221,7 @@ class MuteManager:
             mute.expiry = expiry
 
         # Update cache and disk
-        pos = WolfUtils.get_sort_index(self.__cache__, mute, 'expiry')
+        pos = HuskyUtils.get_sort_index(self.__cache__, mute, 'expiry')
         self.__cache__.insert(pos, mute)
         self.__cache__.sort(key=lambda m: m.expiry if m.expiry else 10 * 100)
         self._mute_config.set("mutes", self.__cache__)
@@ -250,7 +250,7 @@ class MuteManager:
                 embed.add_field(name="New Expiry", value=datetime.datetime.fromtimestamp(mute.expiry)
                                 .strftime(DATETIME_FORMAT) if mute.expiry is not None else "Never", inline=True)
 
-            embed.add_field(name="Timestamp", value=WolfUtils.get_timestamp(), inline=True)
+            embed.add_field(name="Timestamp", value=HuskyUtils.get_timestamp(), inline=True)
 
             await alert_channel.send(embed=embed)
 

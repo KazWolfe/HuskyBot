@@ -3,7 +3,7 @@ import logging
 from aiohttp import web
 from discord.ext import commands
 
-LOG = logging.getLogger("DakotaBot.HttpServer")
+LOG = logging.getLogger("HuskyBot.HttpServer")
 
 
 class WolfRouter:

@@ -4,12 +4,12 @@ import logging
 import discord
 from discord.ext import commands
 
-from WolfBot import WolfConfig
-from WolfBot import WolfConverters
-from WolfBot import WolfUtils
-from WolfBot.WolfStatics import *
+from libhusky import HuskyConfig
+from libhusky import HuskyConverters
+from libhusky import HuskyUtils
+from libhusky.HuskyStatics import *
 
-LOG = logging.getLogger("DakotaBot.Plugin." + __name__)
+LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 
 # noinspection PyMethodMayBeStatic
@@ -23,8 +23,8 @@ class GuildSecurity:
 
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
-        self._config = WolfConfig.get_config()
-        self._guildsecurity_store = WolfConfig.get_session_store("guildSecurity")
+        self._config = HuskyConfig.get_config()
+        self._guildsecurity_store = HuskyConfig.get_session_store("guildSecurity")
         LOG.info("Loaded plugin!")
 
     async def on_member_join(self, member: discord.Member):
@@ -89,7 +89,7 @@ class GuildSecurity:
 
     @guildsecurity.command(name="allowBot", brief="Allow a bot to join the guild")
     @commands.has_permissions(administrator=True)
-    async def allow_bot(self, ctx: commands.Context, user: WolfConverters.OfflineUserConverter):
+    async def allow_bot(self, ctx: commands.Context, user: HuskyConverters.OfflineUserConverter):
         # Hack for PyCharm (duck typing)
         user: discord.User = user
 
@@ -174,7 +174,7 @@ class GuildSecurity:
         try:
             reaction, confirming_user = await self.bot.wait_for('reaction_add',
                                                                 timeout=30.0,
-                                                                check=WolfUtils.confirm_dialog_check(ctx.author))
+                                                                check=HuskyUtils.confirm_dialog_check(ctx.author))
         except asyncio.TimeoutError as _:
             pass
 

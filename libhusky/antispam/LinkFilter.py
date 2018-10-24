@@ -6,11 +6,11 @@ import re
 import discord
 from discord.ext import commands
 
-from WolfBot import WolfConfig, WolfUtils
-from WolfBot.WolfStatics import *
-from WolfBot.antispam import AntiSpamModule
+from libhusky import HuskyConfig, HuskyUtils
+from libhusky.HuskyStatics import *
+from libhusky.antispam import AntiSpamModule
 
-LOG = logging.getLogger("DakotaBot.Plugin.AntiSpam." + __name__.split('.')[-1])
+LOG = logging.getLogger("HuskyBot.Plugin.AntiSpam." + __name__.split('.')[-1])
 
 defaults = {
     'banLimit': 5,  # Number of warnings before banning the user
@@ -26,7 +26,7 @@ class LinkFilter(AntiSpamModule):
                          checks=[super().has_permissions(manage_guild=True)], aliases=["lf"])
 
         self.bot = plugin.bot
-        self._config = WolfConfig.get_config()
+        self._config = HuskyConfig.get_config()
 
         self._events = {}
 
@@ -173,7 +173,7 @@ class LinkFilter(AntiSpamModule):
                     color=Colors.WARNING
                 )
 
-                embed.add_field(name="Message Text", value=WolfUtils.trim_string(message.content, 1000, False),
+                embed.add_field(name="Message Text", value=HuskyUtils.trim_string(message.content, 1000, False),
                                 inline=False)
 
                 embed.add_field(name="Message ID", value=message.id, inline=True)

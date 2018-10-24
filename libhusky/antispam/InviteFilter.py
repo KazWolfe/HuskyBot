@@ -6,11 +6,11 @@ import discord
 from discord.ext import commands
 from discord.http import Route
 
-from WolfBot import WolfConfig
-from WolfBot.WolfStatics import *
-from WolfBot.antispam import AntiSpamModule
+from libhusky import HuskyConfig
+from libhusky.HuskyStatics import *
+from libhusky.antispam import AntiSpamModule
 
-LOG = logging.getLogger("DakotaBot.Plugin.AntiSpam." + __name__.split('.')[-1])
+LOG = logging.getLogger("HuskyBot.Plugin.AntiSpam." + __name__.split('.')[-1])
 
 defaults = {
     'minutes': 30,  # Cooldown timer (reset)
@@ -25,7 +25,7 @@ class InviteFilter(AntiSpamModule):
                          checks=[super().has_permissions(manage_guild=True)], aliases=["if"])
 
         self.bot = plugin.bot
-        self._config = WolfConfig.get_config()
+        self._config = HuskyConfig.get_config()
 
         self._events = {}
         self._invite_cache = {}

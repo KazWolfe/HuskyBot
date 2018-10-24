@@ -4,10 +4,10 @@ import os
 import discord
 from discord.ext import commands
 
-from WolfBot import WolfChecks, WolfConfig, WolfConverters, WolfUtils
-from WolfBot.WolfStatics import *
+from libhusky import HuskyChecks, HuskyConfig, HuskyConverters, HuskyUtils
+from libhusky.HuskyStatics import *
 
-LOG = logging.getLogger("DakotaBot.Plugin." + __name__)
+LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 
 # noinspection PyMethodMayBeStatic
@@ -20,8 +20,8 @@ class BotAdmin:
 
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
-        self._config = WolfConfig.get_config()
-        self._session_store = WolfConfig.get_session_store()
+        self._config = HuskyConfig.get_config()
+        self._session_store = HuskyConfig.get_session_store()
         self._devmode = self._config.get("developerMode", False)
 
         # Prevent unloading
@@ -86,7 +86,7 @@ class BotAdmin:
         await ctx.send(embed=embed)
 
     @plugin.command(name="load", brief="Temporarily load a plugin into the bot.")
-    async def load(self, ctx: discord.ext.commands.Context, plugin_name: WolfConverters.CIPluginConverter):
+    async def load(self, ctx: discord.ext.commands.Context, plugin_name: HuskyConverters.CIPluginConverter):
         """
         Load a plugin (temporarily) into the bot.
 
@@ -131,7 +131,7 @@ class BotAdmin:
         ))
 
     @plugin.command(name="unload", brief="Temporarily unload a plugin from the bot.")
-    async def unload(self, ctx: discord.ext.commands.Context, plugin_name: WolfConverters.CIPluginConverter):
+    async def unload(self, ctx: discord.ext.commands.Context, plugin_name: HuskyConverters.CIPluginConverter):
         """
         (Temporarily) unload a plugin from the bot.
 
@@ -188,7 +188,7 @@ class BotAdmin:
         ))
 
     @plugin.command(name="reload", brief="Unload and reload a plugin.")
-    async def reload(self, ctx: discord.ext.commands.Context, plugin_name: WolfConverters.CIPluginConverter):
+    async def reload(self, ctx: discord.ext.commands.Context, plugin_name: HuskyConverters.CIPluginConverter):
         """
         Unload and reload a plugin from the bot.
 
@@ -230,7 +230,7 @@ class BotAdmin:
         ))
 
     @plugin.command(name="enable", brief="Enable a plugin to run now and at bot load.")
-    async def enable(self, ctx: discord.ext.commands.Context, plugin_name: WolfConverters.CIPluginConverter):
+    async def enable(self, ctx: discord.ext.commands.Context, plugin_name: HuskyConverters.CIPluginConverter):
         """
         Load a plugin into the bot, and mark it as auto-load.
 
@@ -279,7 +279,7 @@ class BotAdmin:
         ))
 
     @plugin.command(name="disable", brief="Disable a plugin from running at bot load. Also stops the plugin.")
-    async def disable(self, ctx: discord.ext.commands.Context, plugin_name: WolfConverters.CIPluginConverter):
+    async def disable(self, ctx: discord.ext.commands.Context, plugin_name: HuskyConverters.CIPluginConverter):
         """
         Unload a plugin from the bot, and prevent it from auto-loading
 
@@ -574,7 +574,7 @@ class BotAdmin:
         self._config.set('specialRoles', config)
 
     @config.command(name="ignoreUser", brief="Block a user from interacting with the bot over messages.")
-    async def block_user(self, ctx: commands.Context, user: WolfConverters.OfflineUserConverter):
+    async def block_user(self, ctx: commands.Context, user: HuskyConverters.OfflineUserConverter):
         """
         Block a user from interacting with the bot.
 
@@ -618,7 +618,7 @@ class BotAdmin:
         ))
 
     @config.command(name="unignoreUser", brief="Unblock a blocked user from bot interactions.")
-    async def unblock_user(self, ctx: commands.Context, user: WolfConverters.OfflineUserConverter):
+    async def unblock_user(self, ctx: commands.Context, user: HuskyConverters.OfflineUserConverter):
         """
         Unblock a user blocked from interacting with the bot.
 
@@ -687,10 +687,10 @@ class BotAdmin:
             ))
             return
 
-        logs = WolfUtils.tail(log_file, lines)
+        logs = HuskyUtils.tail(log_file, lines)
 
         log_title = f"**Log Entries from {log_file}**"
-        log_data = WolfUtils.trim_string(logs.replace('```', '`\u200b`\u200b`'), 2000 - (len(log_title) + 15), True)
+        log_data = HuskyUtils.trim_string(logs.replace('```', '`\u200b`\u200b`'), 2000 - (len(log_title) + 15), True)
 
         await ctx.send(log_title + "\n" + f"```{log_data}```")
 
@@ -711,7 +711,7 @@ class BotAdmin:
         await ctx.bot.logout()
 
     @system.command(name="lockdown", brief="Toggle the bot's LOCKDOWN mode.")
-    @WolfChecks.is_developer()
+    @HuskyChecks.is_developer()
     async def lockdown(self, ctx: commands.Context, state: bool = None):
         """
         Control bot lockdown state.

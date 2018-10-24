@@ -8,9 +8,9 @@ import uuid
 import discord
 from discord.ext import commands
 
-from WolfBot import WolfUtils, WolfConfig, WolfStatics
+from libhusky import HuskyUtils, HuskyConfig, HuskyStatics
 
-LOG = logging.getLogger("DakotaBot.Utils." + __name__)
+LOG = logging.getLogger("HuskyBot.Utils." + __name__)
 
 
 class OfflineUserConverter(commands.UserConverter):
@@ -78,20 +78,20 @@ class DateDiffConverter(datetime.timedelta, commands.Converter):
             return None
 
         try:
-            return WolfUtils.get_timedelta_from_string(argument)
+            return HuskyUtils.get_timedelta_from_string(argument)
         except ValueError as e:
             raise commands.BadArgument(str(e))
 
 
 class InviteLinkConverter(str, commands.Converter):
     async def convert(self, ctx: commands.Context, argument: str):
-        return WolfUtils.get_fragment_from_invite(argument)
+        return HuskyUtils.get_fragment_from_invite(argument)
 
 
 class ChannelContextConverter(dict, commands.Converter):
     async def convert(self, ctx: commands.Context, context: str):
-        logging_channel = WolfConfig.get_config() \
-            .get('specialChannels', {}).get(WolfStatics.ChannelKeys.STAFF_LOG.value, None)
+        logging_channel = HuskyConfig.get_config() \
+            .get('specialChannels', {}).get(HuskyStatics.ChannelKeys.STAFF_LOG.value, None)
 
         channels = []
         name = context

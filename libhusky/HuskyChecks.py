@@ -1,6 +1,6 @@
 from discord.ext import commands
 
-from WolfBot.WolfStatics import DEVELOPERS
+from libhusky.HuskyStatics import DEVELOPERS
 
 
 def has_guild_permissions(**perms):

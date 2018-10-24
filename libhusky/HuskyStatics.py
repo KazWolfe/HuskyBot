@@ -2,7 +2,7 @@ from enum import Enum, IntEnum
 
 DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S UTC"
 
-GIT_URL = "https://www.github.com/KazWolfe/DakotaBot"
+GIT_URL = "https://www.github.com/KazWolfe/HuskyBot"
 
 DEVELOPERS = [
     142494680158961664  # KazWolfe#2896, notification PoC

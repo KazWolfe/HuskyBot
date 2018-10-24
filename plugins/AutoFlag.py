@@ -5,12 +5,12 @@ import re
 import discord
 from discord.ext import commands
 
-from WolfBot import WolfChecks
-from WolfBot import WolfConfig
-from WolfBot import WolfUtils
-from WolfBot.WolfStatics import *
+from libhusky import HuskyChecks
+from libhusky import HuskyConfig
+from libhusky import HuskyUtils
+from libhusky.HuskyStatics import *
 
-LOG = logging.getLogger("DakotaBot.Plugin." + __name__)
+LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 
 # noinspection PyMethodMayBeStatic
@@ -24,7 +24,7 @@ class AutoFlag:
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
 
-        self._config = WolfConfig.get_config()
+        self._config = HuskyConfig.get_config()
 
         self._delete_time = 30 * 60  # 30 minutes (30 x 60 seconds)
         LOG.info("Loaded plugin!")
@@ -43,7 +43,7 @@ class AutoFlag:
         if not isinstance(message.channel, discord.TextChannel):
             return
 
-        if not WolfUtils.should_process_message(message):
+        if not HuskyUtils.should_process_message(message):
             return
 
         if message.author.permissions_in(message.channel).manage_messages:
@@ -58,7 +58,7 @@ class AutoFlag:
                     color=Colors.WARNING
                 )
 
-                embed.add_field(name="Message Content", value=WolfUtils.trim_string(message.content, 1000),
+                embed.add_field(name="Message Content", value=HuskyUtils.trim_string(message.content, 1000),
                                 inline=False)
                 embed.add_field(name="Message ID", value=message.id, inline=True)
                 embed.add_field(name="Channel", value=message.channel.mention, inline=True)
@@ -82,7 +82,7 @@ class AutoFlag:
         if alert_channel is not None:
             alert_channel: discord.TextChannel = self.bot.get_channel(alert_channel)
 
-        if not WolfUtils.should_process_message(message):
+        if not HuskyUtils.should_process_message(message):
             return
 
         if message.author.id in flag_users:
@@ -93,7 +93,7 @@ class AutoFlag:
                 color=Colors.WARNING
             )
 
-            embed.add_field(name="Message Content", value=WolfUtils.trim_string(message.content, 1000), inline=False)
+            embed.add_field(name="Message Content", value=HuskyUtils.trim_string(message.content, 1000), inline=False)
             embed.add_field(name="Message ID", value=message.id, inline=True)
             embed.add_field(name="Channel", value=message.channel.mention, inline=True)
             embed.add_field(name="User ID", value=message.author.id, inline=True)
@@ -114,7 +114,7 @@ class AutoFlag:
         await self.regex_message_filter(after, "edit")
 
     @commands.group(name="autoflag", brief="Manage the autoflag plugin")
-    @WolfChecks.has_guild_permissions(manage_messages=True)
+    @HuskyChecks.has_guild_permissions(manage_messages=True)
     async def autoflag(self, ctx: commands.Context):
         """
         Parent command for the AutoFlag plugin.

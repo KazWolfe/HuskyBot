@@ -4,11 +4,11 @@ import logging
 import discord
 from discord.ext import commands
 
-from WolfBot import WolfConfig
-from WolfBot import WolfUtils
-from WolfBot.WolfStatics import Colors
+from libhusky import HuskyConfig
+from libhusky import HuskyUtils
+from libhusky.HuskyStatics import Colors
 
-LOG = logging.getLogger("DakotaBot.Plugin." + __name__)
+LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 
 # noinspection PyMethodMayBeStatic
@@ -26,8 +26,8 @@ class AutoResponder:
     """
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
-        self._config = WolfConfig.get_config()
-        self._session_store = WolfConfig.get_session_store()
+        self._config = HuskyConfig.get_config()
+        self._session_store = HuskyConfig.get_session_store()
         LOG.info("Loaded plugin!")
 
     #   responses: {
@@ -40,7 +40,7 @@ class AutoResponder:
     #   }
 
     async def on_message(self, message: discord.Message):
-        if not WolfUtils.should_process_message(message):
+        if not HuskyUtils.should_process_message(message):
             return
 
         if message.author.id in self._config.get('userBlacklist', []):
@@ -59,7 +59,7 @@ class AutoResponder:
                     or (message.channel.id in responses[response].get('allowedChannels'))):
                 continue
 
-            if WolfUtils.member_has_any_role(message.author, responses[response].get('requiredRoles')) \
+            if HuskyUtils.member_has_any_role(message.author, responses[response].get('requiredRoles')) \
                     or bool(message.author.permissions_in(message.channel).manage_messages):
                 if responses[response].get('isEmbed', False):
                     await message.channel.send(content=None,
@@ -253,7 +253,7 @@ class AutoResponder:
             if k == "response" and response.get('isEmbed', False):
                 v = "< Embedded JSON >"
 
-            confirmation.add_field(name=k, value=WolfUtils.trim_string(str(v), 1000), inline=True)
+            confirmation.add_field(name=k, value=HuskyUtils.trim_string(str(v), 1000), inline=True)
 
         await ctx.send(embed=confirmation)
 
@@ -329,7 +329,7 @@ class AutoResponder:
             if k == "response" and response.get('isEmbed', False):
                 v = "< Embedded JSON >"
 
-            embed.add_field(name=k, value=WolfUtils.trim_string(str(v), 1000), inline=True)
+            embed.add_field(name=k, value=HuskyUtils.trim_string(str(v), 1000), inline=True)
 
         await ctx.send(embed=embed)
 

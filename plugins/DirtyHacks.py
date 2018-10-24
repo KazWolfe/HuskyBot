@@ -9,11 +9,11 @@ import aiohttp
 import discord
 from discord.ext import commands
 
-from WolfBot import WolfConfig
-from WolfBot import WolfUtils
-from WolfBot.WolfStatics import *
+from libhusky import HuskyConfig
+from libhusky import HuskyUtils
+from libhusky.HuskyStatics import *
 
-LOG = logging.getLogger("DakotaBot.Plugin." + __name__)
+LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 
 # noinspection PyMethodMayBeStatic
@@ -26,7 +26,7 @@ class DirtyHacks:
 
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
-        self._config = WolfConfig.get_config()
+        self._config = HuskyConfig.get_config()
 
         self._http_session = aiohttp.ClientSession(loop=bot.loop)
 
@@ -36,7 +36,7 @@ class DirtyHacks:
         self.bot.loop.create_task(self._http_session.close())
 
     async def on_message(self, message: discord.Message):
-        if not WolfUtils.should_process_message(message):
+        if not HuskyUtils.should_process_message(message):
             return
 
         await self.kill_crashing_gifs(message)
@@ -72,7 +72,7 @@ class DirtyHacks:
                 f.write(img_data)
                 f.flush()
 
-                (width, height) = WolfUtils.get_image_size(f.name)
+                (width, height) = HuskyUtils.get_image_size(f.name)
 
                 # Image is larger than 5000 px * 5000 px but *less* than 1 MB
                 if (width > 5000) and (height > 5000) and os.path.getsize(f.name) < 1000000:
@@ -86,7 +86,7 @@ class DirtyHacks:
         if random.randint(1, 5) != 3:
             return
 
-        entropy = WolfUtils.calculate_str_entropy(message.content)
+        entropy = HuskyUtils.calculate_str_entropy(message.content)
 
         clean_content = message.content.replace('\n', ' // ')
         s = clean_content if len(clean_content) < 20 else f"{clean_content[:20]}..."

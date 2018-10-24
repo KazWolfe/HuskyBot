@@ -3,10 +3,10 @@ import logging
 import discord
 from discord.ext import commands
 
-from WolfBot import WolfConfig
-from WolfBot.WolfStatics import *
+from libhusky import HuskyConfig
+from libhusky.HuskyStatics import *
 
-LOG = logging.getLogger("DakotaBot.Plugin." + __name__)
+LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 
 # noinspection PyMethodMayBeStatic
@@ -18,7 +18,7 @@ class ReactionPromote:
 
     def __init__(self, bot):
         self.bot = bot
-        self._config = WolfConfig.get_config()
+        self._config = HuskyConfig.get_config()
         self.roleRemovalBlacklist = []
         LOG.info("Loaded plugin!")
 

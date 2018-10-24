@@ -4,12 +4,12 @@ import re
 import discord
 from discord.ext import commands
 
-from WolfBot import WolfChecks
-from WolfBot import WolfConfig
-from WolfBot import WolfUtils
-from WolfBot.WolfStatics import Colors
+from libhusky import HuskyChecks
+from libhusky import HuskyConfig
+from libhusky import HuskyUtils
+from libhusky.HuskyStatics import Colors
 
-LOG = logging.getLogger("DakotaBot.Plugin." + __name__)
+LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 
 # noinspection PyMethodMayBeStatic
@@ -35,12 +35,12 @@ class Censor:
 
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
-        self._config = WolfConfig.get_config()
+        self._config = HuskyConfig.get_config()
 
         LOG.info("Loaded plugin!")
 
     async def filter_message(self, message: discord.Message, context: str = "new_message"):
-        if not WolfUtils.should_process_message(message):
+        if not HuskyUtils.should_process_message(message):
             return
 
         censor_config = self._config.get("censors", {})
@@ -130,7 +130,7 @@ class Censor:
         ))
 
     @censor.command(name="add", brief="Add a Censor to a channel")
-    @WolfChecks.has_guild_permissions(manage_messages=True)
+    @HuskyChecks.has_guild_permissions(manage_messages=True)
     async def add_channel(self, ctx: commands.Context, channel: discord.TextChannel, *, censor: str):
         """
         Add a censor to the channel list.
@@ -161,7 +161,7 @@ class Censor:
         ))
 
     @censor.command(name="globaladd", brief="Add a Censor to the global list", aliases=["gadd"])
-    @WolfChecks.has_guild_permissions(manage_messages=True)
+    @HuskyChecks.has_guild_permissions(manage_messages=True)
     async def add_global(self, ctx: commands.Context, *, censor: str):
         """
         Add a censor to the global list
@@ -192,7 +192,7 @@ class Censor:
         ))
 
     @censor.command(name="remove", brief="Remove a censor from a channel")
-    @WolfChecks.has_guild_permissions(manage_messages=True)
+    @HuskyChecks.has_guild_permissions(manage_messages=True)
     async def remove_channel(self, ctx: commands.Context, channel: discord.TextChannel, *, censor: str):
         """
         Remove a censor from a channel list.

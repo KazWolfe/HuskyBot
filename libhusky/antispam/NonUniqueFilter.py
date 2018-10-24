@@ -5,11 +5,11 @@ from difflib import SequenceMatcher
 import discord
 from discord.ext import commands
 
-from WolfBot import WolfConfig, WolfUtils
-from WolfBot.WolfStatics import *
-from WolfBot.antispam.__init__ import AntiSpamModule
+from libhusky import HuskyConfig, HuskyUtils
+from libhusky.HuskyStatics import *
+from libhusky.antispam.__init__ import AntiSpamModule
 
-LOG = logging.getLogger("DakotaBot.Plugin.AntiSpam." + __name__.split('.')[-1])
+LOG = logging.getLogger("HuskyBot.Plugin.AntiSpam." + __name__.split('.')[-1])
 
 defaults = {
     "threshold": 0.75,  # Diff threshold before considering a message "similar"
@@ -26,7 +26,7 @@ class NonUniqueFilter(AntiSpamModule):
                          checks=[super().has_permissions(manage_guild=True)], aliases=["nuf"])
 
         self.bot = plugin.bot
-        self._config = WolfConfig.get_config()
+        self._config = HuskyConfig.get_config()
 
         self._events = {}
 
@@ -114,7 +114,7 @@ class NonUniqueFilter(AntiSpamModule):
                 color=Colors.WARNING
             )
 
-            log_embed.add_field(name="Timestamp", value=WolfUtils.get_timestamp(), inline=True)
+            log_embed.add_field(name="Timestamp", value=HuskyUtils.get_timestamp(), inline=True)
             log_embed.add_field(name="Most Recent Channel", value=message.channel.mention, inline=True)
 
             log_embed.set_author(name="Possible non-unique spam!", icon_url=message.author.avatar_url)
