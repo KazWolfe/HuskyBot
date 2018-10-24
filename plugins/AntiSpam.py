@@ -49,7 +49,7 @@ class AntiSpam:
     def load_module(self, module_name):
         importlib.invalidate_caches()
 
-        module = importlib.import_module(f".{module_name}", package=f"HuskyBot.antispam")
+        module = importlib.import_module(f".{module_name}", package=f"libhusky.antispam")
         clazz = getattr(module, module_name)
 
         impl = clazz(self)
