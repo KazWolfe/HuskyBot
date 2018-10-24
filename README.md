@@ -1,4 +1,4 @@
-# DakotaBot - Discord Assistant
+# HuskyBot - Discord Assistant
 
 HuskyBot is a powerful Discord bot designed from the ground up to assist with advanced moderation and
 guild management. It boasts one of the most powerful anti-spam systems ever designed in a Discord bot,
