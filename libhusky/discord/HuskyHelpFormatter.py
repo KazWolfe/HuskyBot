@@ -29,9 +29,12 @@ class HuskyHelpFormatter(HelpFormatter):
                 # skip aliases
                 continue
 
-            entry = '  {0:<{width}} :: {1}'.format(name, command.short_doc, width=max_width)
-            shortened = self.shorten(entry)
-            self.paginator.add_line(shortened)
+            self._add_pair_to_page(max_width, name, command.short_doc)
+
+    def _add_pair_to_page(self, max_width, k, v):
+        entry = '  {0:<{width}} :: {1}'.format(k, v, width=max_width)
+        shortened = self.shorten(entry)
+        self.paginator.add_line(shortened)
 
     async def format(self):
         """Handles the actual behaviour involved with formatting.
@@ -57,11 +60,19 @@ class HuskyHelpFormatter(HelpFormatter):
         if isinstance(self.command, Command):
             # <signature portion>
             signature = self.get_command_signature()
-            self.paginator.add_line(signature + "\n" + ('-' * len(signature)), empty=True)
+            self.paginator.add_line(f"{signature} :: *{self.command.brief}*", empty=True)
 
             # <long doc> section
             if self.command.help:
-                self.paginator.add_line(self.command.help, empty=True)
+                help_lines = []
+
+                for line in self.command.help.split('\n'):
+                    if line.endswith('<!nodoc>'):
+                        continue
+
+                    help_lines.append(line)
+
+                self.paginator.add_line('\n'.join(help_lines), empty=True)
 
             # end it here if it's just a regular command
             if not self.has_subcommands():

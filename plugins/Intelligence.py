@@ -32,8 +32,6 @@ class Intelligence:
     @commands.guild_only()
     async def guild_info(self, ctx: commands.Context):
         """
-        Get an information dump for the current guild.
-
         This command returns basic core information about a guild for reporting purposes.
         """
 
@@ -65,17 +63,18 @@ class Intelligence:
     @commands.guild_only()
     async def role_info(self, ctx: discord.ext.commands.Context, *, role: discord.Role):
         """
-        Get basic information about a specific role in this guild.
-
         This command will dump configuration information (with the exception of permissions) for the selected role. It
         will also attempt to count the number of users with the specified role.
 
-        Parameters:
-            role - A uniquely identifying role string. This can be a role mention, a role ID, or name.
-                   This parameter is case-sensitive, but does not need to be "quoted in case of spaces."
+        Parameters
+        ----------
+            ctx  :: Context <!nodoc>
+            role :: A uniquely identifying role string. This can be a role mention, a role ID, or name.
+                    This parameter is case-sensitive, but does not need to be "quoted in case of spaces."
 
-        Example Command:
-            /roleinfo Admins - Get information about the role "Admins"
+        Examples
+        --------
+            /roleinfo Admins :: Get information about the role "Admins"
         """
 
         role_details = discord.Embed(
@@ -104,18 +103,19 @@ class Intelligence:
     async def user_info(self, ctx: discord.ext.commands.Context, *,
                         user: HuskyConverters.OfflineMemberConverter = None):
         """
-        Get basic information about a calling user.
-
         This command will attempt to return join dates, name status, roles, and the index number of the user in the
         current guild. The bot will attempt to get information for users not in the guild, but information in this case
         is somewhat limited.
 
-        Parameters:
-            user - A uniquely identifying user string, such as a mention, a user ID, a username, or a nickname.
-                   This parameter is case-sensitive, but does not need to be "quoted in case of spaces."
+        Parameters
+        ----------
+            ctx  :: Discord context <!nodoc>
+            user :: A uniquely identifying user string, such as a mention, a user ID, a username, or a nickname.
+                    This parameter is case-sensitive, but does not need to be "quoted in case of spaces."
 
-        Example Command:
-            /uinfo SomeUser#1234 - Get information for user "SomeUser#1234".
+        Examples
+        --------
+            /uinfo SomeUser#1234 :: Get information for user "SomeUser#1234".
         """
 
         user = user or ctx.author
@@ -164,11 +164,9 @@ class Intelligence:
 
         await ctx.send(embed=member_details)
 
-    @commands.command(name="avatar", brief="Get a link/high-resolution version of a user's avatar")
+    @commands.command(name="avatar", brief="Get a high-resolution version of a user's avatar")
     async def avatar(self, ctx: commands.Context, *, user: HuskyConverters.OfflineUserConverter = None):
         """
-        Get a high-resolution version of a user's avatar.
-
         This command will attempt to find and return the largest possible version of a user's avatar that it can, as
         well as the avatar hash.
 
@@ -176,14 +174,16 @@ class Intelligence:
         username, a nickname, etc. If this argument is not specified, the bot will return the avatar of the calling
         user.
 
-        Parameters:
-            user - A uniquely identifying user string, such as a mention, a user ID, a username, or a nickname.
-                   This parameter is case-sensitive, but does not need to be "quoted in case of spaces."
+        Parameters
+        ----------
+            ctx  :: Discord context <!nodoc>
+            user :: A uniquely identifying user string, such as a mention, a user ID, a username, or a nickname.
+                    This parameter is case-sensitive, but does not need to be "quoted in case of spaces."
 
-
-        Example Commands:
-            /avatar               - Get the calling user's avatar.
-            /avatar SomeUser#1234 - Get avatar for user "SomeUser#1234"
+        Examples
+        --------
+            /avatar               :: Get the calling user's avatar.
+            /avatar SomeUser#1234 :: Get avatar for user "SomeUser#1234"
         """
 
         user = user or ctx.author
@@ -206,30 +206,34 @@ class Intelligence:
                             search_context: HuskyConverters.ChannelContextConverter = "public",
                             timedelta: HuskyConverters.DateDiffConverter = "24h"):
         """
-        Get a count of messages in any given context.
-
         A context/area is defined as a single channel, the keyword "all", or the keyword "public". If a channel name is
         specified, only that channel will be searched. "all" will attempt to search every channel that exists in the
         guild. "public" will search every channel in the guild that can be seen by the @everyone user.
 
         Timedelta is a time string formatted in 00d00h00m00s format. This may only be used to search back.
 
-        CAVEATS: It is important to know that this is a *slow* command, because it needs to iterate over every message
-        in the search channels in order to successfully operate. Because of this, the "Typing" indicator will display.
-        Also note that this command may not return accurate results due to the nature of the search system. It should be
-        used for approximation only.
+        Caveats
+        -------
+          * It is important to know that this is a *slow* command, because it needs to iterate over every message
+            in the search channels in order to successfully operate. Because of this, the "Typing" indicator will
+            display. Also note that this command may not return accurate results due to the nature of the search system.
+            It should be used for approximation only.
 
-        Parameters:
-            search_context - A search context as described above. Default "public".
-            timedelta      - A timedelta string as described above. Default 24h.
+        Parameters
+        ----------
+            ctx            :: Discord context <!nodoc>
+            search_context :: A search context as described above. Default "public".
+            timedelta      :: A timedelta string as described above. Default 24h.
 
-        Example Commands:
-            /msgcount public 7d   - Get a count of all public messages in the last 7 days
-            /msgcount all 2d      - Get a count of all messages in the last two days.
-            /msgcount #general 5h - Get a count of all messages in #general within the last 5 hours.
+        Examples
+        --------
+            /msgcount public 7d   :: Get a count of all public messages in the last 7 days
+            /msgcount all 2d      :: Get a count of all messages in the last two days.
+            /msgcount #general 5h :: Get a count of all messages in #general within the last 5 hours.
 
-        See also:
-            /help activeusercount - Get the count of active users on the guild.
+        See also
+        --------
+            /help activeusercount :: Get the count of active users on the guild.
         """
 
         if search_context == "public":
@@ -271,8 +275,6 @@ class Intelligence:
                                 delta: HuskyConverters.DateDiffConverter = "24h",
                                 threshold: int = 10):
         """
-        Get an active user count for the current guild.
-
         This command will look back through message history and attempt to find the number of active users in the guild.
         By default, it will look for all users that spoke in the specified search context. By default, it will only find
         users who have sent at least ten messages in the specified search time
@@ -282,17 +284,22 @@ class Intelligence:
 
         Bots do not count towards the "active user" count.
 
-        CAVEAT: It is important to know that this is a *slow* command, because it needs to iterate over every message
-        in the search context in order to successfully operate. Because of this, the "Typing" indicator will display.
-        Also note that this command may not return accurate results due to the nature of the search system. It should be
-        used for approximation only.
+        Caveats
+        -------
+          * It is important to know that this is a *slow* command, because it needs to iterate over every message
+            in the search channels in order to successfully operate. Because of this, the "Typing" indicator will
+            display. Also note that this command may not return accurate results due to the nature of the search system.
+            It should be used for approximation only.
 
-        Parameters:
-            search_context - A string (or channel ID) that resolves to a channel ctx. See /help msgcount. Default "all"
-            delta          - A string in ##d##h##m##s format to capture. Default 24h.
-            threshold      - The minimum number of messages a user needs to send.
+        Parameters
+        ----------
+            ctx            :: Discord context <!nodoc>
+            search_context :: A string (or channel ID) that resolves to a channel ctx. See /help msgcount. Default "all"
+            delta          :: A string in ##d##h##m##s format to capture. Default 24h.
+            threshold      :: The minimum number of messages a user needs to send.
 
-        See also:
+        See also
+        --------
             /help usercount - Get a count of users on the guild
             /help msgcount  - Get a count of messages in the current context
         """
@@ -341,16 +348,17 @@ class Intelligence:
     @commands.has_permissions(manage_guild=True)
     async def check_prune(self, ctx: commands.Context, days: int = 7):
         """
-        Simulate a prune on the server.
-
         This command will simulate a prune on the server and return a count of members expected to be lost. A member is
         considered for pruning if they have not spoken in the specified number of days *and* they have no roles.
 
-        Parameters:
-            days - The "prune cutoff" value for a user to be eligible for pruning. Defaults to 7.
+        Parameters
+        ----------
+            ctx  :: Command context <!nodoc>
+            days :: The "prune cutoff" value for a user to be eligible for pruning. Defaults to 7.
 
-        Example Command:
-            /prunesim 5 - Get the count of users who have not talked in the last 5 days, and have no roles
+        Examples
+        --------
+            /prunesim 5 :: Get the count of users who have not talked in the last 5 days, and have no roles
         """
 
         if days < 1 or days > 180:
@@ -379,11 +387,10 @@ class Intelligence:
     @commands.command(name="usercount", brief="Get a count of users on the guild", aliases=["uc"])
     async def user_count(self, ctx: commands.Context):
         """
-        Get a count of users on the guild.
-
         This command will return a count of all members on the guild. It's really that simple.
 
-        See also:
+        See also
+        --------
             /help activeusercount - Get a count of active users on the guild.
         """
 
@@ -408,8 +415,6 @@ class Intelligence:
     @commands.has_permissions(view_audit_log=True)
     async def invitespy(self, ctx: commands.Context, fragment: HuskyConverters.InviteLinkConverter):
         """
-        Get information about a guild invite.
-
         This command allows moderators to pull information about any given (valid) invite. It will display all
         publicly-gleanable information about the invite such as user count, verification level, join channel names,
         the invite's creator, and other such information.
@@ -417,10 +422,13 @@ class Intelligence:
         This command calls the API directly, and will validate an invite's existence. If either the bot's account
         or the bot's IP are banned, the system will act as though the invite does not exist.
 
-        Parameters:
-            fragment - Either a Invite URL or fragment (aa1122) for the invite you wish to target.
+        Parameters
+        ----------
+            ctx      :: Discord context <!nodoc>
+            fragment :: Either a Invite URL or fragment (aa1122) for the invite you wish to target.
 
-        Example Commands:
+        Examples
+        --------
             /invitespy aabbcc                       - Get invite data for invite aabbcc
             /invitespy https://disco\u200brd.gg/someguild - Get invite data for invite someguild
         """

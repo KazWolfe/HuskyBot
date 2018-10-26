@@ -333,8 +333,6 @@ class ServerLog:
     @commands.has_permissions(administrator=True)
     async def logger(self, ctx: discord.ext.commands.Context):
         """
-        General parent command for logging management.
-
         This command itself does nothing, but is instead a parent command.
         """
         if ctx.invoked_subcommand is None:
@@ -348,10 +346,13 @@ class ServerLog:
     @logger.command(name="enable", brief="Enable a specified logger")
     async def enable_logger(self, ctx: commands.Context, name: str):
         """
-        Add a logger to the configuration, and enable it.
-
         This command takes a single logger name as an argument, and adds it to the enabled loggers list. Changes to
         loggers take effect immediately.
+
+        Parameters
+        ----------
+            ctx  :: Discord context <!nodoc>
+            name :: The name of a logger to enable.
         """
         enabled_loggers = self._config.get('loggers', {})
 
@@ -384,10 +385,13 @@ class ServerLog:
     @logger.command(name="disable", brief="Disable a specified logger")
     async def disable_logger(self, ctx: commands.Context, name: str):
         """
-        Remove a logger from the configuration, and disable it.
-
         This command takes a single logger name as an argument, and adds it to the enabled loggers list. Changes to
         loggers take effect immediately.
+
+        Parameters
+        ----------
+            ctx  :: Discord context <!nodoc>
+            name :: The name of a logger to disable.
         """
         enabled_loggers = self._config.get('loggers', {})
 
@@ -421,8 +425,6 @@ class ServerLog:
     @commands.has_permissions(administrator=True)
     async def rotate_logs(self, ctx: commands.Context):
         """
-        Rotate the server logs securely.
-
         This command will create a new server log channel, configure it the same as the old channel, and then delete
         the old channel. By doing this, server logs can be effectively rotated and all staff-accessible records of
         messages kept in the server log will be wiped.
@@ -492,18 +494,20 @@ class ServerLog:
     @logger.command(name="ignoreChannel", brief="Ignore certain log events for a channel")
     async def ignore_channel(self, ctx: commands.Context, channel: discord.TextChannel):
         """
-        Exclude a channel from generating logging events.
-
         This command may be used to mark certain channels as "sensitive", and therefore not appear in server logs. This
         is often used to block information leaks from restricted channels, as well as other possible security holes.
 
-        Parameters:
-            channel - The channel reference (ID, mention, name) to add to the exclusion list.
+        Parameters
+        ----------
+            ctx     :: Discord context <!nodoc>
+            channel :: The channel reference (ID, mention, name) to add to the exclusion list.
 
-        Example Commands:
+        Examples
+        --------
             /logger ignoreChannel #secret-admins - Block "#secret-admins" from generating log events.
 
-        See also:
+        See also
+        --------
             /logger unignoreChannel - Remove a channel from the exclusion list.
         """
 
@@ -535,13 +539,17 @@ class ServerLog:
 
         This command may be used to remove exclusions put in place by /logger ingoreChannel.
 
-        Parameters:
-            channel - The channel reference (ID, mention, name) to add to the exclusion list.
+        Parameters
+        ----------
+            ctx     :: Discord context <!nodoc>
+            channel :: The channel reference (ID, mention, name) to add to the exclusion list.
 
-        Example Commands:
+        Examples
+        --------
             /logger unignoreChannel #secret-admins - Allow "#secert-admins" to generate log events again.
 
-        See also:
+        See also
+        --------
             /logger ignoreChannel - Add a channel to the exclusion list.
 
         """

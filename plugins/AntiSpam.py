@@ -81,10 +81,8 @@ class AntiSpam:
     @commands.has_permissions(manage_messages=True)
     async def asp(self, ctx: commands.Context):
         """
-        This is the parent command for the AntiSpam module.
-
-        It does nothing on its own, but it does grant the ability for administrators to change spam filter settings on
-        the fly.
+        This command does nothing on its own, but it does grant the ability for administrators to change spam filter
+        settings on the fly.
         """
         pass
 
@@ -92,8 +90,6 @@ class AntiSpam:
     @commands.has_permissions(administrator=True)
     async def enable_module(self, ctx: commands.Context, name: str):
         """
-        Enable an AntiSpam module, and load it into the bot.
-
         AntiSpam Modules are similar to plugins, except they only will target the AntiSpam plugin. They generally exist
         to isolate anti-spam processes from each other, and give them (powerful) control over their own data management.
 
@@ -103,17 +99,21 @@ class AntiSpam:
         Commands to control a module will only be visible if that module is loaded.
 
         Available Modules:
-            AttachmentFilter - Restrict the number of attachments/files a user can post in a certain time
-            InviteFilter - Block unauthorized Discord invites to other guilds
-            LinkFilter - Block messages that contain excessive links, or link-spamming users.
-            MentionFilter - Block users from "mention-spamming" over set thresholds.
-            NonAsciiFilter - Block messages composed of non-ASCII characters, like Zalgo
-            NonUniqueFilter - Monitor and take action against users who post the same messages over and over again.
+        ------------------
+            AttachmentFilter :: Restrict the number of attachments/files a user can post in a certain time
+            InviteFilter     :: Block unauthorized Discord invites to other guilds
+            LinkFilter       :: Block messages that contain excessive links, or link-spamming users.
+            MentionFilter    :: Block users from "mention-spamming" over set thresholds.
+            NonAsciiFilter   :: Block messages composed of non-ASCII characters, like Zalgo
+            NonUniqueFilter  :: Monitor and take action against users who post the same messages over and over again.
 
-        Parameters:
-            name - The module name (case sensitive) to enable.
+        Parameters
+        ----------
+            ctx  :: Discord context <!nodoc>
+            name :: The module name (case sensitive) to enable.
 
-        See Also:
+        See Also
+        --------
             /as disable - Disable a loaded module.
         """
         as_conf = self._config.get('antiSpam', {})
@@ -159,8 +159,6 @@ class AntiSpam:
     @commands.has_permissions(administrator=True)
     async def disable_module(self, ctx: commands.Context, name: str):
         """
-        Disable an AntiSpam Module, and stop it from automatically loading.
-
         AntiSpam modules are dynamic, meaning they can be started and stopped at will, depending on guild configuration
         and active state. To facilitate easy removal of unnecessary modules, this command can be used.
 
@@ -168,11 +166,14 @@ class AntiSpam:
 
         See `/help as enable` for a list of available modules.
 
-        Parameters:
-            name - The name of the module to disable
+        Parameters
+        ----------
+            ctx  :: Discord context <!nodoc>
+            name :: The name of the module to disable
 
-        See Also:
-            /as enable - Enable an AntiSpam Module.
+        See Also
+        --------
+            /as enable :: Enable an AntiSpam Module.
         """
         as_conf = self._config.get('antiSpam', {})
         mod_config = as_conf.setdefault(name, {"enabled": False})
@@ -230,12 +231,11 @@ class AntiSpam:
     @commands.has_permissions(administrator=True)
     async def clear_all_cooldowns(self, ctx: commands.Context):
         """
-        Clear all cooldowns for all users, on all filters.
-
         This command effectively resets the AntiSpam cooldown system entirely, and is equivalent to reloading the entire
         AntiSpam module.
 
-        See also:
+        See also
+        --------
             /as clear - Clear cooldowns on all filters for a single user.
             /as <filter_name> clear - Clear cooldowns on a single filter for a single user.
             /as <filter_name> clearAll - Clear all cooldowns for all users for a single filter.

@@ -33,8 +33,6 @@ class Updater:
     @commands.has_permissions(administrator=True)
     async def update_bot(self, ctx: discord.ext.commands.Context):
         """
-        Trigger an update check for the bot and get the latest version from GitHub.
-
         This command will attempt to fast-forward the bot's code to the latest version (as present in GitHub). Once it
         successfully pulls the latest version of the code, it will log itself out (triggering the restart loop in
         BotCore). This updater does not alter the config files or run any configuration migrations, so care must be
@@ -92,8 +90,6 @@ class Updater:
     @commands.has_permissions(administrator=True)
     async def changelog(self, ctx: discord.ext.commands.Context):
         """
-        Get the latest changelog for the bot.
-
         This will pull a changelog from the Git log. Specifically, this exposes the last commit to users for
         verification and change notification.
 
