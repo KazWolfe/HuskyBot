@@ -4,7 +4,7 @@ import re
 import discord
 from discord.ext import commands
 
-from libhusky import HuskyConfig
+from HuskyBot import HuskyBot
 from libhusky.HuskyStatics import *
 
 LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
@@ -12,10 +12,10 @@ LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 # noinspection PyMethodMayBeStatic
 class Leaderboards:
-    def __init__(self, bot: discord.ext.commands.Bot):
+    def __init__(self, bot: HuskyBot):
         self.bot = bot
-        self._config = HuskyConfig.get_config()
-        self._session_store = HuskyConfig.get_session_store()
+        self._config = bot.config
+        self._session_store = self.bot.session_store
 
         LOG.info("Loaded plugin!")
 
@@ -123,5 +123,5 @@ class Leaderboards:
         await ctx.send(f"Mapped `{map_from}` -> `{map_to}`")
 
 
-def setup(bot: discord.ext.commands.Bot):
+def setup(bot: HuskyBot):
     bot.add_cog(Leaderboards(bot))

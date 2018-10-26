@@ -5,7 +5,7 @@ import aiohttp
 import discord
 from discord.ext import commands
 
-from libhusky import HuskyConfig
+from HuskyBot import HuskyBot
 from libhusky.HuskyStatics import *
 
 LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
@@ -13,9 +13,9 @@ LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 # noinspection PyMethodMayBeStatic
 class Math:
-    def __init__(self, bot: discord.ext.commands.Bot):
+    def __init__(self, bot: HuskyBot):
         self.bot = bot
-        self._config = HuskyConfig.get_config()
+        self._config = bot.config
 
         self._http_session = aiohttp.ClientSession(loop=bot.loop)
 
@@ -92,5 +92,5 @@ class Math:
         await ctx.send(embed=embed)
 
 
-def setup(bot: discord.ext.commands.Bot):
+def setup(bot: HuskyBot):
     bot.add_cog(Math(bot))

@@ -5,8 +5,8 @@ import re
 import discord
 from discord.ext import commands
 
+from HuskyBot import HuskyBot
 from libhusky import HuskyChecks
-from libhusky import HuskyConfig
 from libhusky import HuskyUtils
 from libhusky.HuskyStatics import *
 
@@ -21,10 +21,9 @@ class AutoFlag:
     This command may be considered with the /autoflag command, where flags can be added and removed.
     """
 
-    def __init__(self, bot: discord.ext.commands.Bot):
+    def __init__(self, bot: HuskyBot):
         self.bot = bot
-
-        self._config = HuskyConfig.get_config()
+        self._config = bot.config
 
         self._delete_time = 30 * 60  # 30 minutes (30 x 60 seconds)
         LOG.info("Loaded plugin!")
@@ -271,5 +270,5 @@ class AutoFlag:
         ))
 
 
-def setup(bot: discord.ext.commands.Bot):
+def setup(bot: HuskyBot):
     bot.add_cog(AutoFlag(bot))

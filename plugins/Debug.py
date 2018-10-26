@@ -10,8 +10,8 @@ import discord
 from aiohttp import web
 from discord.ext import commands
 
+from HuskyBot import HuskyBot
 from libhusky import HuskyChecks
-from libhusky import HuskyConfig
 from libhusky import HuskyHTTP
 from libhusky import HuskyUtils
 from libhusky.HuskyStatics import *
@@ -25,10 +25,10 @@ class Debug:
     Help documentation is not available for this plugin.
     """
 
-    def __init__(self, bot: discord.ext.commands.Bot):
+    def __init__(self, bot: HuskyBot):
         self.bot = bot
-        self._config = HuskyConfig.get_config()
-        self._session_store = HuskyConfig.get_session_store()
+        self._config = bot.config
+        self._session_store = bot.session_store
         LOG.info("Loaded plugin!")
 
     def __unload(self):
@@ -349,5 +349,5 @@ class Debug:
         return web.Response(text=f"Hello {target} from {self.bot.user}!")
 
 
-def setup(bot: discord.ext.commands.Bot):
+def setup(bot: HuskyBot):
     bot.add_cog(Debug(bot))

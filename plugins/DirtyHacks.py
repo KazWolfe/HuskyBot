@@ -9,7 +9,7 @@ import aiohttp
 import discord
 from discord.ext import commands
 
-from libhusky import HuskyConfig
+from HuskyBot import HuskyBot
 from libhusky import HuskyUtils
 from libhusky.HuskyStatics import *
 
@@ -24,9 +24,9 @@ class DirtyHacks:
     Discord is dumb.
     """
 
-    def __init__(self, bot: discord.ext.commands.Bot):
+    def __init__(self, bot: HuskyBot):
         self.bot = bot
-        self._config = HuskyConfig.get_config()
+        self._config = bot.config
 
         self._http_session = aiohttp.ClientSession(loop=bot.loop)
 
@@ -120,5 +120,5 @@ class DirtyHacks:
         await ctx.send("DirtyHacks is running.")
 
 
-def setup(bot: discord.ext.commands.Bot):
+def setup(bot: HuskyBot):
     bot.add_cog(DirtyHacks(bot))

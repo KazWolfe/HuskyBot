@@ -4,8 +4,8 @@ import re
 import discord
 from discord.ext import commands
 
+from HuskyBot import HuskyBot
 from libhusky import HuskyChecks
-from libhusky import HuskyConfig
 from libhusky import HuskyUtils
 from libhusky.HuskyStatics import Colors
 
@@ -33,9 +33,9 @@ class Censor:
     regular expressions.
     """
 
-    def __init__(self, bot: discord.ext.commands.Bot):
+    def __init__(self, bot: HuskyBot):
         self.bot = bot
-        self._config = HuskyConfig.get_config()
+        self._config = bot.config
 
         LOG.info("Loaded plugin!")
 
@@ -367,5 +367,5 @@ class Censor:
         ))
 
 
-def setup(bot: discord.ext.commands.Bot):
+def setup(bot: HuskyBot):
     bot.add_cog(Censor(bot))

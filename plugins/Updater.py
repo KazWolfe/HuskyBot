@@ -6,7 +6,7 @@ import discord
 import git
 from discord.ext import commands
 
-from libhusky import HuskyConfig
+from HuskyBot import HuskyBot
 from libhusky.HuskyStatics import *
 
 LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
@@ -23,9 +23,9 @@ class Updater:
     and bulletproof way of updating the bot.
     """
 
-    def __init__(self, bot: discord.ext.commands.Bot):
+    def __init__(self, bot: HuskyBot):
         self.bot = bot
-        self._config = HuskyConfig.get_config()
+        self._config = bot.config
         self.repo = git.Repo(search_parent_directories=True)
         LOG.info("Loaded plugin!")
 
@@ -118,5 +118,5 @@ class Updater:
         await ctx.send(embed=embed)
 
 
-def setup(bot: discord.ext.commands.Bot):
+def setup(bot: HuskyBot):
     bot.add_cog(Updater(bot))

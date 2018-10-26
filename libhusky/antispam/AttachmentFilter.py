@@ -4,7 +4,6 @@ import logging
 import discord
 from discord.ext import commands
 
-from libhusky import HuskyConfig
 from libhusky.HuskyStatics import *
 from libhusky.antispam import AntiSpamModule
 
@@ -38,7 +37,7 @@ class AttachmentFilter(AntiSpamModule):
                          checks=[super().has_permissions(manage_guild=True)], help=self.classhelp(), aliases=["af"])
 
         self.bot = plugin.bot
-        self._config = HuskyConfig.get_config()
+        self._config = self.bot.config
 
         self._events = {}
 

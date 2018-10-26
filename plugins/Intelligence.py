@@ -5,7 +5,7 @@ import discord
 from discord.ext import commands
 from discord.http import Route
 
-from libhusky import HuskyConfig
+from HuskyBot import HuskyBot
 from libhusky import HuskyConverters
 from libhusky import HuskyUtils
 from libhusky.HuskyStatics import *
@@ -24,14 +24,13 @@ class Intelligence:
     All commands here query their information directly from the Discord API in near realtime.
     """
 
-    def __init__(self, bot):
+    def __init__(self, bot: HuskyBot):
         self.bot = bot
-        self._config = HuskyConfig.get_config()
         LOG.info("Loaded plugin!")
 
     @commands.command(name="guildinfo", aliases=["sinfo", "ginfo"], brief="Get information about the current guild")
     @commands.guild_only()
-    async def guild_info(self, ctx: discord.ext.commands.Context):
+    async def guild_info(self, ctx: commands.Context):
         """
         Get an information dump for the current guild.
 
@@ -503,5 +502,5 @@ class Intelligence:
         await ctx.send(embed=embed)
 
 
-def setup(bot: commands.Bot):
+def setup(bot: HuskyBot):
     bot.add_cog(Intelligence(bot))

@@ -3,7 +3,6 @@ import logging
 import discord
 from discord.ext import commands
 
-from libhusky import HuskyConfig
 from libhusky.HuskyStatics import *
 
 LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
@@ -18,7 +17,7 @@ class ReactionPromote:
 
     def __init__(self, bot):
         self.bot = bot
-        self._config = HuskyConfig.get_config()
+        self._config = bot.config
         self.roleRemovalBlacklist = []
         LOG.info("Loaded plugin!")
 

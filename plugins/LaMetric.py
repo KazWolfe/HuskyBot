@@ -5,8 +5,8 @@ import os
 import discord
 from discord.ext import commands
 
+from HuskyBot import HuskyBot
 from libhusky import HuskyChecks
-from libhusky import HuskyConfig
 from libhusky.HuskyStatics import *
 from libhusky.apis import LaMetric as LaMetricApi
 
@@ -39,9 +39,9 @@ class LaMetric:
     }
     '''
 
-    def __init__(self, bot: discord.ext.commands.Bot):
+    def __init__(self, bot: HuskyBot):
         self.bot = bot
-        self._config = HuskyConfig.get_config()
+        self._config = bot.config
 
         self._api = LaMetricApi.LaMetricApi(loop=bot.loop)
 
@@ -133,8 +133,7 @@ class LaMetric:
         await self._api.push(app_id, LaMetricApi.build_data("i59", verification_key), app_auth)
 
         try:
-            verification_resp = await self.bot.wait_for('message', check=lambda m: m.channel == ctx.author.dm_channel,
-                                                        timeout=90)
+            pass
         except asyncio.TimeoutError:
             await ctx.author.send("Hello? I didn't get a response. I couldn't verify your device works. Please double "
                                   "check your App ID and Access Token, and try again.")
@@ -276,5 +275,5 @@ class LaMetric:
         ))
 
 
-def setup(bot: discord.ext.commands.Bot):
+def setup(bot: HuskyBot):
     bot.add_cog(LaMetric(bot))

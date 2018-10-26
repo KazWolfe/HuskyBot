@@ -4,7 +4,8 @@ import random
 import discord
 from discord.ext import commands
 
-from libhusky import HuskyConfig, HuskyUtils
+from HuskyBot import HuskyBot
+from libhusky import HuskyUtils
 
 LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
@@ -15,14 +16,13 @@ class PingMe:
     A very simple method responsible for handling cases where the bot is pinged (in non-commands).
     """
 
-    def __init__(self, bot: discord.ext.commands.Bot):
+    def __init__(self, bot: HuskyBot):
         self._bot = bot
-        self._config = HuskyConfig.get_config()
+        self._config = bot.config
 
         LOG.info("Loaded plugin!")
 
     async def on_message(self, message: discord.Message):
-        possible_replies = ["aroowooooo", "rooo", "woorooro", "arowwo"]
 
         if not HuskyUtils.should_process_message(message):
             return
@@ -106,5 +106,5 @@ class PingMe:
         return " ".join(words)
 
 
-def setup(bot: discord.ext.commands.Bot):
+def setup(bot: HuskyBot):
     bot.add_cog(PingMe(bot))

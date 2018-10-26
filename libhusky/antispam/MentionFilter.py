@@ -4,7 +4,6 @@ import logging
 import discord
 from discord.ext import commands
 
-from libhusky import HuskyConfig
 from libhusky.HuskyStatics import *
 from libhusky.antispam import AntiSpamModule
 
@@ -23,7 +22,7 @@ class MentionFilter(AntiSpamModule):
                          checks=[super().has_permissions(mention_everyone=True)], aliases=["mf"])
 
         self.bot = plugin.bot
-        self._config = HuskyConfig.get_config()
+        self._config = self.bot.config
         self._events = {}
 
         self.add_command(self.set_ping_limit)

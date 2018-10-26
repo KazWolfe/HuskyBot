@@ -6,7 +6,6 @@ import discord
 from discord.ext import commands
 from discord.http import Route
 
-from libhusky import HuskyConfig
 from libhusky.HuskyStatics import *
 from libhusky.antispam import AntiSpamModule
 
@@ -25,7 +24,7 @@ class InviteFilter(AntiSpamModule):
                          checks=[super().has_permissions(manage_guild=True)], aliases=["if"])
 
         self.bot = plugin.bot
-        self._config = HuskyConfig.get_config()
+        self._config = self.bot.config
 
         self._events = {}
         self._invite_cache = {}

@@ -4,7 +4,8 @@ import os
 import discord
 from discord.ext import commands
 
-from libhusky import HuskyChecks, HuskyConfig, HuskyConverters, HuskyUtils
+from HuskyBot import HuskyBot
+from libhusky import HuskyChecks, HuskyConverters, HuskyUtils
 from libhusky.HuskyStatics import *
 
 LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
@@ -18,11 +19,10 @@ class BotAdmin:
     It provides core administrative functions to bot administrators to change configurations and other important values.
     """
 
-    def __init__(self, bot: discord.ext.commands.Bot):
+    def __init__(self, bot: HuskyBot):
         self.bot = bot
-        self._config = HuskyConfig.get_config()
-        self._session_store = HuskyConfig.get_session_store()
-        self._devmode = self._config.get("developerMode", False)
+        self._config = bot.config
+        self._session_store = bot.session_store
 
         # Prevent unloading
         self.block_unload = True
@@ -147,7 +147,7 @@ class BotAdmin:
             /help admin disable  - Permanently disable a plugin (unload + disallow startup execution)
         """
 
-        if plugin_name == "Debug" and self._devmode:
+        if plugin_name == "Debug" and self.bot.developer_mode:
             await ctx.send(embed=discord.Embed(
                 title="Plugin Manager",
                 description="The `Debug` plugin may not be unloaded while Developer Mode is enabled."
@@ -294,7 +294,7 @@ class BotAdmin:
             /help admin reload   - Unload and reload a plugin from the bot.
             /help admin enable   - Permanently enable a plugin (load + run on start)
         """
-        if plugin_name == "Debug" and self._devmode:
+        if plugin_name == "Debug" and self.bot.developer_mode:
             await ctx.send(embed=discord.Embed(
                 title="Plugin Manager",
                 description="The `Debug` plugin may not be disabled while Developer Mode is enabled."
@@ -740,5 +740,5 @@ class BotAdmin:
         await ctx.send(f"**Bot Lockdown State:** `{st}`")
 
 
-def setup(bot: commands.Bot):
+def setup(bot: HuskyBot):
     bot.add_cog(BotAdmin(bot))

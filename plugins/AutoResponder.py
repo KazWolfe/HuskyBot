@@ -4,7 +4,7 @@ import logging
 import discord
 from discord.ext import commands
 
-from libhusky import HuskyConfig
+from HuskyBot import HuskyBot
 from libhusky import HuskyUtils
 from libhusky.HuskyStatics import Colors
 
@@ -24,10 +24,11 @@ class AutoResponder:
     permitted to use an auto response. If *any* role matches, the bot will respond. Likewise, the bot may also be
     configured to only reply to certain channels. If both roles and channels are defined, both checks must be satisfied.
     """
-    def __init__(self, bot: discord.ext.commands.Bot):
+
+    def __init__(self, bot: HuskyBot):
         self.bot = bot
-        self._config = HuskyConfig.get_config()
-        self._session_store = HuskyConfig.get_session_store()
+        self._config = bot.config
+        self._session_store = bot.session_store
         LOG.info("Loaded plugin!")
 
     #   responses: {
@@ -349,5 +350,5 @@ class AutoResponder:
         ))
 
 
-def setup(bot: discord.ext.commands.Bot):
+def setup(bot: HuskyBot):
     bot.add_cog(AutoResponder(bot))

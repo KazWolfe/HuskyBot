@@ -4,6 +4,7 @@ import logging
 import discord
 from discord.ext import commands
 
+from HuskyBot import HuskyBot
 from libhusky import HuskyConfig
 from libhusky import HuskyConverters
 from libhusky import HuskyUtils
@@ -21,9 +22,9 @@ class GuildSecurity:
     and other potentially nefarious actions
     """
 
-    def __init__(self, bot: discord.ext.commands.Bot):
+    def __init__(self, bot: HuskyBot):
         self.bot = bot
-        self._config = HuskyConfig.get_config()
+        self._config = bot.config
         self._guildsecurity_store = HuskyConfig.get_session_store("guildSecurity")
         LOG.info("Loaded plugin!")
 
@@ -210,5 +211,5 @@ class GuildSecurity:
         ))
 
 
-def setup(bot: discord.ext.commands.Bot):
+def setup(bot: HuskyBot):
     bot.add_cog(GuildSecurity(bot))

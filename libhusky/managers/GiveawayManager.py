@@ -6,6 +6,7 @@ import random
 import discord
 from discord.ext import commands
 
+from HuskyBot import HuskyBot
 from libhusky import HuskyConfig, HuskyData, HuskyUtils
 from libhusky.HuskyStatics import *
 
@@ -21,14 +22,14 @@ class GiveawayManager:
     scheduler needs some registered class.
     """
 
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: HuskyBot):
         """
         Initialize a new GiveawayManager for the bot.
         :param bot: The Bot we use to initialize everything.
         """
 
         self.bot = bot
-        self._config = HuskyConfig.get_config()
+        self._config = bot.config
         self._giveaway_config = HuskyConfig.get_config('giveaways', create_if_nonexistent=True)
 
         # Random number generator

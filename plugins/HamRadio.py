@@ -5,7 +5,7 @@ import aiohttp
 import discord
 from discord.ext import commands
 
-from libhusky import HuskyConfig
+from HuskyBot import HuskyBot
 from libhusky.HuskyStatics import *
 
 LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
@@ -15,9 +15,9 @@ LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 class HamRadio:
     CALLSIGN_LOOKUP_URL = "https://callook.info/{callsign}/json"
 
-    def __init__(self, bot: discord.ext.commands.Bot):
+    def __init__(self, bot: HuskyBot):
         self.bot = bot
-        self._config = HuskyConfig.get_config()
+        self._config = bot.config
 
         self._http_session = aiohttp.ClientSession(loop=bot.loop)
 
@@ -182,5 +182,5 @@ class Callsign:
         return f"https://www.google.com/maps/search/?api=1&query={self.latitude},{self.longitude}"
 
 
-def setup(bot: discord.ext.commands.Bot):
+def setup(bot: HuskyBot):
     bot.add_cog(HamRadio(bot))

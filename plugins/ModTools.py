@@ -5,7 +5,7 @@ import re
 import discord
 from discord.ext import commands
 
-from libhusky import HuskyConfig
+from HuskyBot import HuskyBot
 from libhusky import HuskyConverters
 from libhusky import HuskyUtils
 from libhusky.HuskyStatics import *
@@ -25,10 +25,10 @@ class ModTools:
     about various aspects of this plugin, please see the individual help commands.
     """
 
-    def __init__(self, bot: discord.ext.commands.Bot):
+    def __init__(self, bot: HuskyBot):
         self.bot = bot
-        self._config = HuskyConfig.get_config()
-        self._session_store = HuskyConfig.get_session_store()
+        self._config = bot.config
+        self._session_store = self.bot.session_store
 
         self._mute_manager = MuteManager(self.bot)
 
@@ -756,5 +756,5 @@ class ModTools:
         await HuskyUtils.send_to_keyed_channel(ctx.bot, ChannelKeys.STAFF_LOG, log_entry)
 
 
-def setup(bot: discord.ext.commands.Bot):
+def setup(bot: HuskyBot):
     bot.add_cog(ModTools(bot))

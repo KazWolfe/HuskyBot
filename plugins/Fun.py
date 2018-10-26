@@ -6,7 +6,8 @@ from datetime import datetime
 import discord
 from discord.ext import commands
 
-from libhusky import HuskyConfig, HuskyUtils
+from HuskyBot import HuskyBot
+from libhusky import HuskyUtils
 from libhusky.HuskyStatics import *
 
 LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
@@ -19,9 +20,9 @@ class Fun:
     ToDo: Delete this.
     """
 
-    def __init__(self, bot: discord.ext.commands.Bot):
+    def __init__(self, bot: HuskyBot):
         self.bot = bot
-        self._config = HuskyConfig.get_config()
+        self._config = bot.config
 
         # For those reading this code and wondering about the significance of 736580, it is a very important
         # number relating to someone I loved. </3
@@ -364,5 +365,5 @@ class Fun:
         ))
 
 
-def setup(bot: discord.ext.commands.Bot):
+def setup(bot: HuskyBot):
     bot.add_cog(Fun(bot))

@@ -3,7 +3,8 @@ import logging
 import discord
 from discord.ext import commands
 
-from libhusky import HuskyConfig, HuskyUtils, HuskyConverters
+from HuskyBot import HuskyBot
+from libhusky import HuskyUtils, HuskyConverters
 from libhusky.HuskyStatics import *
 
 LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
@@ -22,7 +23,7 @@ class ReactToPin:
     Pins may be removed from the permanent list by deletion or unpinning.
     """
 
-    def __init__(self, bot: discord.ext.commands.Bot):
+    def __init__(self, bot: HuskyBot):
         """
         Config format:
 
@@ -41,7 +42,7 @@ class ReactToPin:
         }
         """
         self.bot = bot
-        self._config = HuskyConfig.get_config()
+        self._config = bot.config
 
         LOG.info("Loaded plugin!")
 
@@ -367,5 +368,5 @@ class ReactToPin:
         await ctx.send("Message pinned permanently.")
 
 
-def setup(bot: discord.ext.commands.Bot):
+def setup(bot: HuskyBot):
     bot.add_cog(ReactToPin(bot))

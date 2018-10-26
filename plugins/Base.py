@@ -7,7 +7,7 @@ import discord
 import git
 from discord.ext import commands
 
-from libhusky import HuskyConfig
+from HuskyBot import HuskyBot
 from libhusky.HuskyStatics import *
 
 LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
@@ -20,11 +20,10 @@ class Base:
     bot.
     """
 
-    def __init__(self, bot: discord.ext.commands.Bot):
+    def __init__(self, bot: HuskyBot):
         self.bot = bot
-        self._config = HuskyConfig.get_config()
-        self._session_store = HuskyConfig.get_session_store()
-        self._devmode = self._config.get("developerMode", False)
+        self._config = bot.config
+        self._session_store = bot.session_store
 
         # Prevent unloading
         self.block_unload = True
@@ -95,7 +94,7 @@ class Base:
         repo = git.Repo(search_parent_directories=True)
         sha = repo.head.object.hexsha
 
-        debug_str = '| Developer Build' if self._devmode else ''
+        debug_str = '| Developer Build' if self.bot.developer_mode else ''
 
         embed = discord.Embed(
             title=f"About {self.bot.user.name} {debug_str}",
@@ -123,5 +122,5 @@ class Base:
         await ctx.send(embed=embed)
 
 
-def setup(bot: commands.Bot):
+def setup(bot: HuskyBot):
     bot.add_cog(Base(bot))

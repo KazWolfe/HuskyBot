@@ -5,6 +5,7 @@ import logging
 import discord
 from discord.ext import commands
 
+from HuskyBot import HuskyBot
 from libhusky import HuskyConfig, HuskyData, HuskyUtils
 from libhusky.HuskyStatics import *
 
@@ -12,7 +13,7 @@ LOG = logging.getLogger("HuskyBot.Managers.MuteManager")
 
 
 class MuteManager:
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: HuskyBot):
         self._bot = bot
         self._bot_config = HuskyConfig.get_config()
         self._mute_config = HuskyConfig.get_config('mutes', create_if_nonexistent=True)
@@ -150,7 +151,6 @@ class MuteManager:
                                           reason=f"User's channel mute has been lifted by {unmute_reason}")
         else:
             unmute_context = "the guild"
-            channel = None
 
             mute_role = guild.get_role(self._bot_config.get("specialRoles", {}).get(SpecialRoleKeys.MUTED.value))
 

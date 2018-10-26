@@ -5,7 +5,7 @@ import re
 import discord
 from discord.ext import commands
 
-from libhusky import HuskyConfig, HuskyUtils
+from libhusky import HuskyUtils
 from libhusky.HuskyStatics import *
 from libhusky.antispam import AntiSpamModule
 
@@ -26,7 +26,7 @@ class NonAsciiFilter(AntiSpamModule):
                          checks=[super().has_permissions(manage_guild=True)], aliases=["naf"])
 
         self.bot = plugin.bot
-        self._config = HuskyConfig.get_config()
+        self._config = self.bot.config
 
         self._events = {}
 

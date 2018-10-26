@@ -5,7 +5,7 @@ import logging
 import discord
 from discord.ext import commands
 
-from libhusky import HuskyConfig
+from HuskyBot import HuskyBot
 from libhusky import HuskyUtils
 from libhusky import antispam
 from libhusky.HuskyStatics import *
@@ -22,9 +22,9 @@ class AntiSpam:
     It, alongside Censor, ModTools, and the UBL help form the moderative backbone and power of the bot platform.
     """
 
-    def __init__(self, bot: discord.ext.commands.Bot):
+    def __init__(self, bot: HuskyBot):
         self.bot = bot
-        self._config = HuskyConfig.get_config()
+        self._config = bot.config
         self._cleanup_time = 60 * 60 * 4  # four hours (in seconds)
 
         # AS Modules
@@ -251,5 +251,5 @@ class AntiSpam:
         ))
 
 
-def setup(bot: discord.ext.commands.Bot):
+def setup(bot: HuskyBot):
     bot.add_cog(AntiSpam(bot))
