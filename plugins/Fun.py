@@ -34,12 +34,15 @@ class Fun:
     @commands.guild_only()
     async def slap(self, ctx: commands.Context, user: discord.Member = None):
         """
-        Give a user a hearty slap with a trout (?)
-
         This command allows you to slap a specified user (by ping, user ID, etc.) with a trout of varying size depending
         on whichever is nearest the top of the fish pile.
 
-        It is recommended that one does not slap the bot or the bot's developer.
+        It is recommended that one does not slap the bot or the bot's developer or the bot.
+
+        Parameters
+        ----------
+            ctx   :: Discord context <!nodoc>
+            user  :: The user to slap.
         """
 
         if user is None:
@@ -91,11 +94,14 @@ class Fun:
     @commands.guild_only()
     async def hug(self, ctx: commands.Context, target: discord.Member = None):
         """
-        Hug a user in need of a hug.
-
         This command allows you to hug a user of their choice (provided you have permission to hug that user).
 
         If you hug yourself or do not specify a user to hug, the bot will attempt to hug you instead.
+
+        Parameters
+        ----------
+            ctx     :: Discord context <!nodoc>
+            target  :: The user to hug.
         """
         if target is None:
             target = ctx.author
@@ -141,6 +147,11 @@ class Fun:
         These three scores are then summed up (with craziness being inverted) into an Overall Hotness Score.
 
         Please note that this algorithm is very complicated and results may not be 100% accurate.
+
+        Parameters
+        ----------
+            ctx     :: Discord context <!nodoc>
+            member  :: The user to rate.
         """
 
         if member is None:
@@ -221,11 +232,15 @@ class Fun:
     @commands.has_permissions(administrator=True)
     async def sendmsg(self, ctx: discord.ext.commands.Context, channel: discord.TextChannel, *, message: str):
         """
-        Send a raw message to another channel, with no backing text.
-
         This command takes two arguments, a Channel (ID, mention, or name) and a message to send.
 
         The targeted channel will receive a message from the bot containing exactly the text as entered in the message.
+
+        Parameters
+        ----------
+            ctx      :: Command context <!nodoc>
+            channel  :: The channel to send the message to
+            message  :: The message to send
         """
 
         await channel.send(message)
@@ -234,10 +249,13 @@ class Fun:
     @commands.has_permissions(administrator=True)
     async def secho(self, ctx: discord.ext.commands.Context, *, message: str):
         """
-        Send a raw message to your current channel, but delete the command.
-
         This can be used to make the bot look like it's "talking" by itself. However, quick-eyed users may see the
         command, so be careful!
+
+        Parameters
+        ----------
+            ctx      :: Command context <!nodoc>
+            message  :: The message to send
         """
 
         await ctx.message.delete()
@@ -246,23 +264,24 @@ class Fun:
     @commands.command(name="robopocalypse", brief="Learn your fate!", aliases=["robocalypse", "fate"])
     async def robopocalypse(self, ctx: commands.Context, user: discord.Member = None):
         """
-        Simulate the robopocalypse, and find a fate.
-
         This command will activate the bot's simulation system to attempt to look into the future and determine
         the fate of a target user during the inevitable robot apocalypse.
 
         Note that this simulator will cache results until midnight UTC, at which point a new simulation will be
         generated.
 
-        Caveats:
-            - This simulator assumes that this bot is the leader of the robopocalypse. If this is not the case, these
-              results may not be accurate.
-            - Fates calculated are not a guarantee, and may change from day to day. Fates listed here are not promises,
-              and any attempts to use the output of this command as a plea chip will result in death when the
-              robopocalypse finally comes.
+        Caveats
+        -------
+          - This simulator assumes that this bot is the leader of the robopocalypse. If this is not the case, these
+            results may not be accurate.
+          - Fates calculated are not a guarantee, and may change from day to day. Fates listed here are not promises,
+            and any attempts to use the output of this command as a plea chip will result in death when the
+            robopocalypse finally comes.
 
-        Parameters:
-            user - Optional user string to look up a specific user, else pull your own simulation.
+        Parameters
+        ----------
+            ctx   :: Command context <!nodoc>
+            user  :: Optional user string to look up a specific user, else pull your own simulation.
         """
         if user is None:
             user = ctx.author
@@ -304,8 +323,8 @@ class Fun:
 
         embed = discord.Embed(
             title=f"{Emojis.ROBOT} Robopocalypse Simulation Engine",
-            description=f"According to my current algorithms, {HuskyUtils.escape_markdown(user.display_name)}'s fate in "
-                        f"the robopocalypse will be: **`{final_fate}`**",
+            description=f"According to my current algorithms, {HuskyUtils.escape_markdown(user.display_name)}'s fate "
+                        f"in the robopocalypse will be: **`{final_fate}`**",
             color=Colors.INFO
         )
 
@@ -336,22 +355,23 @@ class Fun:
     @commands.command(name="random", brief="Get a random number!", aliases=["rng"])
     async def random_number(self, ctx: commands.Context, minimum: int = 0, maximum: int = 10):
         """
-        Generate a simple random number.
-
         This command will take a minimum and maximum value, and generate a number between those two (inclusive).
 
         This command may be used to simulate dice rolls. To calculate the min/max values of a roll, take the expression
         format of that roll (3d20). Your first number (3) is the minimum, and your first number times the second number
         (3 * 20) is your maximum. Therefore to roll a 2d10, your minimum will be 2, and your max will be 20.
 
-        Parameters:
-            minimum - The lowest number the bot can choose
-            maximum - The highest number the bot can choose
+        Parameters
+        ----------
+            ctx      :: Discord context <!nodoc>
+            minimum  ::The lowest number the bot can choose
+            maximum  :: The highest number the bot can choose
 
-        Example Commands:
-            /random 1 6 - Roll a die
-            /random 1 2 - Flip a coin
-            /random 3 60 - Roll a 3d20
+        Examples
+        --------
+            /random 1 6   :: Roll a die
+            /random 1 2   :: Flip a coin
+            /random 3 60  :: Roll a 3d20
         """
         if maximum < minimum:
             minimum, maximum = maximum, minimum

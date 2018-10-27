@@ -150,8 +150,6 @@ class NonAsciiFilter(AntiSpamModule):
     async def set_ascii_cooldown(self, ctx: commands.Context, cooldown_minutes: int, ban_limit: int, min_length: int,
                                  warn_threshold: float, delete_threshold: float):
         """
-        Set cooldowns/ban thresholds on non-ASCII spam.
-
         AntiSpam will attempt to detect and ban uses who excessively post non-ASCII characters. These are defined as
         symbols that can not be typed on a normal keyboard such as emoji and box art. Effectively, this command will
         single-handedly kill ASCII art spam on the guild.
@@ -162,14 +160,16 @@ class NonAsciiFilter(AntiSpamModule):
 
         Setting min_length to 0 or less will disable this feature.
 
-        Parameters:
-            cooldown_minutes - The number of minutes before a given cooldown expires (default: 5)
-            ban_limit - The number of warnings before a user is autobanned (default: 3)
-            min_length - The minimum total number of characters to process a message (default: 40)
-            warn_threshold - A value (between 0 and 1) that represents the percentage of characters that need to be
-                             non-ASCII before a warning is fired. (default: 0.5)
-            delete_threshold - A value (between 0 and 1) that represents the percentage of characters that need to be
-                               non-ASCII before the message is deleted as well as warned (default: 0.75)
+        Parameters
+        ----------
+            ctx               :: Discord context <!nodoc>
+            cooldown_minutes  :: The number of minutes before a given cooldown expires (default: 5)
+            ban_limit         :: The number of warnings before a user is autobanned (default: 3)
+            min_length        :: The minimum total number of characters to process a message (default: 40)
+            warn_threshold    :: A value (between 0 and 1) that represents the percentage of characters that need to be
+                                 non-ASCII before a warning is fired. (default: 0.5)
+            delete_threshold  :: A value (between 0 and 1) that represents the percentage of characters that need to be
+                                 non-ASCII before the message is deleted as well as warned (default: 0.75)
         """
 
         as_config = self._config.get('antiSpam', {})
@@ -216,11 +216,14 @@ class NonAsciiFilter(AntiSpamModule):
         This command will list the percentage of non-ascii characters detected in the string, as well as return what the
         system will do with the message in question.
 
-        Parameters:
-            text - The text to process.
+        Parameters
+        ----------
+            ctx   :: Discord context <!nodoc>
+            text  :: The text to process.
 
-        Example Commands:
-            /as naf test hello - Get NAF percentage of "hello"
+        Examples
+        --------
+            /as naf test hello  :: Get NAF percentage of "hello"
         """
         as_config = self._config.get('antiSpam', {})
         nonascii_config = {**defaults, **as_config.get('NonAsciiFilter', {}).get('config', {})}
@@ -245,18 +248,19 @@ class NonAsciiFilter(AntiSpamModule):
     @commands.command(name="clear", brief="Clear a cooldown record for a specific user")
     async def clear_cooldown(self, ctx: commands.Context, user: discord.Member):
         """
-        Clear a user's cooldown record for this filter.
-
         This command allows moderators to override the antispam expiry system, and clear a user's cooldowns/strikes/
         warnings early. Any accrued warnings for the selected user are discarded and the user starts with a clean slate.
 
-        Parameters:
-            user - A user object (ID, mention, etc) to target for clearing.
+        Parameters
+        ----------
+            ctx   :: Discord context <!nodoc>
+            user  :: A user object (ID, mention, etc) to target for clearing.
 
-        See also:
-            /as <filter_name> clearAll - Clear all cooldowns for all users for a single filter.
-            /as clear - Clear cooldowns on all filters for a single user.
-            /as clearAll - Clear all cooldowns globally for all users (reset).
+        See Also
+        --------
+            /as <filter_name> clearAll  :: Clear all cooldowns for all users for a single filter.
+            /as clear                   :: Clear cooldowns on all filters for a single user.
+            /as clearAll                :: Clear all cooldowns globally for all users (reset).
         """
 
         try:
@@ -282,15 +286,14 @@ class NonAsciiFilter(AntiSpamModule):
     @commands.has_permissions(administrator=True)
     async def clear_all_cooldowns(self, ctx: commands.Context):
         """
-        Clear cooldown records for all users for this filter.
-
         This command will clear all cooldowns for the current filter, effectively resetting its internal state. No users
         will have any warnings for this filter after this command is executed.
 
-        See also:
-            /as <filter_name> clear - Clear cooldowns on a single filter for a single user.
-            /as clear - Clear cooldowns on all filters for a single user.
-            /as clearAll - Clear all cooldowns globally for all users (reset).
+        See Also
+        --------
+            /as <filter_name> clear  :: Clear cooldowns on a single filter for a single user.
+            /as clear                :: Clear cooldowns on all filters for a single user.
+            /as clearAll             :: Clear all cooldowns globally for all users (reset).
         """
 
         record_count = len(self._events)

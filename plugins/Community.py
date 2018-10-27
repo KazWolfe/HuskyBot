@@ -26,8 +26,6 @@ class Community:
     @commands.guild_only()
     async def stafflist(self, ctx: commands.Context):
         """
-        Get an up-to-date list of staff members on the guild.
-
         This command will dynamically retrieve a list of staff members currently in roles on the guild. It may be
         re-run at any time to get a new list of staff members.
         """
@@ -73,13 +71,16 @@ class Community:
     @commands.guild_only()
     async def rules(self, ctx: commands.Context, rule_num: str = None):
         """
-        Retrieve the current rules list for the Discord guild.
-
         By default, this command will simply return the existing rules in an easy-to-parse embed. If a user is an
         administrator, additional commands exist that allow setting/altering rules.
 
         This command takes an optional rule number as an argument. If this is specified, the bot will return only that
         rule.
+
+        Parameters
+        ----------
+            ctx                  :: Discord context <!nodoc>
+            rule_num OR command  :: A rule number, or subcommand to execute.
         """
 
         if rule_num is not None and rule_num.isnumeric():
@@ -135,12 +136,16 @@ class Community:
     @commands.has_permissions(administrator=True)
     async def add_rule(self, ctx: commands.Context, title: str, *, description: str):
         """
-        Add a new rule to the Discord guild.
-
         This command takes two arguments - a Title, and a Description. If the title has spaces in it, it must be
         "surrounded with quotes". The Description does not require quotes in any cases.
 
         When a new rule is added, it will be appended to the end of the list.
+
+        Parameters
+        ----------
+            ctx          :: Discord context <!nodoc>
+            title        :: The title of the rule to add
+            description  :: A longer description for the rule
         """
 
         rules_list = self._config.get("guildRules", [])
@@ -159,12 +164,15 @@ class Community:
     @commands.has_permissions(administrator=True)
     async def remove_rule(self, ctx: commands.Context, index: int):
         """
-        Remove an existing rule from the Discord guild.
-
         This command takes a single argument - an index. This may be retrieved by looking at /rules and choosing the
         rule number you would like to delete.
 
         All existing rules are shifted up one position.
+
+        Parameters
+        ----------
+            ctx    :: Discord context <!nodoc>
+            index  :: The rule number to delete
         """
 
         rules_list = self._config.get("guildRules", [])
@@ -197,6 +205,12 @@ class Community:
         requires updating, see /help rules rename.
 
         The index may be determined by looking at /rules and selecting the rule to update.
+
+        Parameters
+        ----------
+            ctx              :: Discord context <!nodoc>
+            index            :: The rule number to alter
+            new_description  :: A new description/body for the rule.
         """
 
         rules_list = self._config.get("guildRules", [])
@@ -231,6 +245,12 @@ class Community:
         needs to be updated instead, see /help rules edit
 
         The index may be determined by looking at /rules and selecting the rule to update.
+
+        Parameters
+        ----------
+            ctx        :: Discord context <!nodoc>
+            index      :: The rule number to alter
+            new_title  :: A new title for the target rule
         """
 
         rules_list = self._config.get("guildRules", [])
@@ -266,6 +286,12 @@ class Community:
 
         The new index will be the new place for the rule. The indexes will not swap - only the existing rule will be
         moved.
+
+        Parameters
+        ----------
+            ctx        :: Discord context <!nodoc>
+            old_index  :: The rule number to move
+            new_index  :: The new position for the rule
         """
         rules_list = self._config.get("guildRules", [])
 
@@ -291,8 +317,6 @@ class Community:
     @commands.guild_only()
     async def get_invite(self, ctx: commands.Context):
         """
-        See the current guild invite link.
-
         If the guild has a vanity invite, it will be returned. Otherwise, an administrator configured invite will be
         returned instead.
         """
@@ -335,9 +359,12 @@ class Community:
     @commands.has_permissions(administrator=True)
     async def set_invite(self, ctx: commands.Context, fragment: str):
         """
-        Set the invite code used by the guild.
-
         This command only takes a single argument - a fragment for an invite. It saves immediately.
+
+        Parameters
+        ----------
+            ctx       :: Discord context <!nodoc>
+            fragment  :: Invite fragment (1a2b3c) to set for /invite
         """
         self._config.set("inviteKey", fragment)
 

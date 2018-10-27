@@ -80,8 +80,6 @@ class Censor:
     @commands.has_permissions(manage_messages=True)
     async def censor(self, ctx: commands.Context):
         """
-        The parent command for the Censor plugin.
-
         This command doesn't do anything - it's merely the entrypoint to everything else censor-related.
 
         If you would like to see documentation on the Censor plugin, see `/help Censor`.
@@ -91,12 +89,15 @@ class Censor:
     @censor.command(name="list", brief="List all Censors for a channel")
     async def list_channel(self, ctx: commands.Context, channel: discord.TextChannel = None):
         """
-        List the censor terms in a given channel.
-
         This command takes one optional argument - a channel identifier (ID, #mention, or name). If this is not
         specified, the current channel is used.
 
         Censors in this list apply only to the specified channel. to edit the list, see /help censor
+
+        Parameters
+        ----------
+            ctx      :: Discord context <!nodoc>
+            channel  :: The channel to get censor data from
         """
 
         censor_config = self._config.get("censors", {})
@@ -115,8 +116,6 @@ class Censor:
     @censor.command(name="globallist", brief="List all Censors in the global list", aliases=["glist"])
     async def list_global(self, ctx: commands.Context):
         """
-        List the censor terms in the global list.
-
         Censors in the global list apply to the entire guild. To edit the censor list, see /help censor.
         """
 
@@ -133,10 +132,14 @@ class Censor:
     @HuskyChecks.has_guild_permissions(manage_messages=True)
     async def add_channel(self, ctx: commands.Context, channel: discord.TextChannel, *, censor: str):
         """
-        Add a censor to the channel list.
-
         This command takes two arguments - a mandatory channel identifier (ID, #mention, name) and the censor text. The
         censor text may be a single word or a Python regular expression.
+
+        Parameters
+        ----------
+            ctx      :: Discord context <!nodoc>
+            channel  :: The channel to add a censor to
+            censor   :: A regex string to censor on
         """
 
         censor_config = self._config.get("censors", {})
@@ -164,10 +167,13 @@ class Censor:
     @HuskyChecks.has_guild_permissions(manage_messages=True)
     async def add_global(self, ctx: commands.Context, *, censor: str):
         """
-        Add a censor to the global list
-
         This command takes a single mandatory argument - the censor text. This may be a single word or a Python regular
         expression.
+
+        Parameters
+        ----------
+            ctx      :: Discord context <!nodoc>
+            censor   :: A regex string to censor on
         """
 
         censor_config = self._config.get("censors", {})
@@ -195,10 +201,14 @@ class Censor:
     @HuskyChecks.has_guild_permissions(manage_messages=True)
     async def remove_channel(self, ctx: commands.Context, channel: discord.TextChannel, *, censor: str):
         """
-        Remove a censor from a channel list.
-
         This command takes two arguments - a mandatory channel identifier (ID, #mention, name) and the censor text. The
         censor text must be *exactly* as it is stored in the guild configuration for the deletion to be successful.
+
+        Parameters
+        ----------
+            ctx      :: Discord context <!nodoc>
+            channel  :: The channel to remove a censor from
+            censor   :: The regex string to remove
         """
 
         censor_config = self._config.get("censors", {})
@@ -225,10 +235,13 @@ class Censor:
     @censor.command(name="globalremove", brief="Remove a censor from the global list", aliases=["gremove"])
     async def remove_global(self, ctx: commands.Context, *, censor: str):
         """
-        Remove a censor from a the global list.
-
         This command takes only one argument - the censor text. This must be *exactly* as it is stored in the guild
         configuration for the deletion to be successful.
+
+        Parameters
+        ----------
+            ctx      :: Discord context <!nodoc>
+            censor   :: The regex string to remove
         """
 
         censor_config = self._config.get("censors", {})
@@ -255,17 +268,22 @@ class Censor:
     @censor.command(name="useradd", brief="Add a censor for a specific user", aliases=["uadd"])
     async def add_user(self, ctx: commands.Context, user: discord.Member, *, censor: str):
         """
-        Add a censor for a specific user.
-
         This command allows moderators to define censors for a specific user. This applies to all channels and all
         messages from this user. Users may not create or edit censors for users not below them in the role hierarchy.
 
         This command takes two arguments: a user identifier (either a username, @mention, user id, etc.) and a regex
         censor to parse on.
 
-        See also:
-            /censor userremove - Remove a censor entry from a specific user
-            /censor userlist   - List all censor entries for a specific user
+        Parameters
+        ----------
+            ctx     :: Discord context <!nodoc>
+            user    :: The user to add a censor to
+            censor  :: A regex string to censor
+
+        See Also
+        --------
+            /censor userremove  :: Remove a censor entry from a specific user
+            /censor userlist    :: List all censor entries for a specific user
         """
 
         if user.top_role.position >= ctx.message.author.top_role.position:
@@ -300,17 +318,22 @@ class Censor:
     @censor.command(name="userremove", brief="Remove a censor for a specific user", aliases=["uremove"])
     async def remove_user(self, ctx: commands.Context, user: discord.Member, *, censor: str):
         """
-        Remove a censor from the specific user.
-
         This command allows moderators to define censors for a specific user. This applies to all channels and all
         messages from this user. Users may not create or edit censors for users not below them in the role hierarchy.
 
         This command takes two arguments: a user identifier (either a username, @mention, user id, etc.) and a regex
         censor to parse on. If the regex censor does not exist, this command will throw an error.
 
-        See also:
-            /censor useradd  - Add a new censor entry for a specific user
-            /censor userlist - List all censor entries for a specific user
+        Parameters
+        ----------
+            ctx     :: Discord context <!nodoc>
+            user    :: The user to remove a censor from
+            censor  :: The regex string to remove
+
+        See Also
+        --------
+            /censor useradd   :: Add a new censor entry for a specific user
+            /censor userlist  :: List all censor entries for a specific user
         """
 
         if user.top_role.position >= ctx.message.author.top_role.position:
@@ -345,15 +368,19 @@ class Censor:
     @censor.command(name="userlist", brief="List the censors for a specific user", aliases=["ulist"])
     async def list_user(self, ctx: commands.Context, user: discord.Member):
         """
-        List all censors for a specific user.
-
         This command will find and return all censors for a specific user, as defined in the server configuration.
 
         It takes a single argument, namely a user identifier (user ID, mention, nickname, etc.).
 
-        See also:
-            /censor useradd  - Add a new censor entry for a specific user
-            /censor userremove - Remove a censor entry from a specific user
+       Parameters
+       ----------
+           ctx   :: Discord context <!nodoc>
+           user  :: The user to get censor data for
+
+        See Also
+        --------
+            /censor useradd     :: Add a new censor entry for a specific user
+            /censor userremove  :: Remove a censor entry from a specific user
         """
 
         censor_config = self._config.get("censors", {})

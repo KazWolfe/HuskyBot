@@ -68,13 +68,13 @@ class Intelligence:
 
         Parameters
         ----------
-            ctx  :: Context <!nodoc>
-            role :: A uniquely identifying role string. This can be a role mention, a role ID, or name.
+            ctx   :: Context <!nodoc>
+            role  :: A uniquely identifying role string. This can be a role mention, a role ID, or name.
                     This parameter is case-sensitive, but does not need to be "quoted in case of spaces."
 
         Examples
         --------
-            /roleinfo Admins :: Get information about the role "Admins"
+            /roleinfo Admins  :: Get information about the role "Admins"
         """
 
         role_details = discord.Embed(
@@ -109,13 +109,13 @@ class Intelligence:
 
         Parameters
         ----------
-            ctx  :: Discord context <!nodoc>
-            user :: A uniquely identifying user string, such as a mention, a user ID, a username, or a nickname.
+            ctx   :: Discord context <!nodoc>
+            user  :: A uniquely identifying user string, such as a mention, a user ID, a username, or a nickname.
                     This parameter is case-sensitive, but does not need to be "quoted in case of spaces."
 
         Examples
         --------
-            /uinfo SomeUser#1234 :: Get information for user "SomeUser#1234".
+            /uinfo SomeUser#1234  :: Get information for user "SomeUser#1234".
         """
 
         user = user or ctx.author
@@ -176,14 +176,14 @@ class Intelligence:
 
         Parameters
         ----------
-            ctx  :: Discord context <!nodoc>
-            user :: A uniquely identifying user string, such as a mention, a user ID, a username, or a nickname.
+            ctx   :: Discord context <!nodoc>
+            user  :: A uniquely identifying user string, such as a mention, a user ID, a username, or a nickname.
                     This parameter is case-sensitive, but does not need to be "quoted in case of spaces."
 
         Examples
         --------
-            /avatar               :: Get the calling user's avatar.
-            /avatar SomeUser#1234 :: Get avatar for user "SomeUser#1234"
+            /avatar                :: Get the calling user's avatar.
+            /avatar SomeUser#1234  :: Get avatar for user "SomeUser#1234"
         """
 
         user = user or ctx.author
@@ -221,19 +221,19 @@ class Intelligence:
 
         Parameters
         ----------
-            ctx            :: Discord context <!nodoc>
-            search_context :: A search context as described above. Default "public".
-            timedelta      :: A timedelta string as described above. Default 24h.
+            ctx             :: Discord context <!nodoc>
+            search_context  :: A search context as described above. Default "public".
+            timedelta       :: A timedelta string as described above. Default 24h.
 
         Examples
         --------
-            /msgcount public 7d   :: Get a count of all public messages in the last 7 days
-            /msgcount all 2d      :: Get a count of all messages in the last two days.
-            /msgcount #general 5h :: Get a count of all messages in #general within the last 5 hours.
+            /msgcount public 7d    :: Get a count of all public messages in the last 7 days
+            /msgcount all 2d       :: Get a count of all messages in the last two days.
+            /msgcount #general 5h  :: Get a count of all messages in #general within the last 5 hours.
 
-        See also
+        See Also
         --------
-            /help activeusercount :: Get the count of active users on the guild.
+            /help activeusercount  :: Get the count of active users on the guild.
         """
 
         if search_context == "public":
@@ -293,15 +293,15 @@ class Intelligence:
 
         Parameters
         ----------
-            ctx            :: Discord context <!nodoc>
-            search_context :: A string (or channel ID) that resolves to a channel ctx. See /help msgcount. Default "all"
-            delta          :: A string in ##d##h##m##s format to capture. Default 24h.
-            threshold      :: The minimum number of messages a user needs to send.
+            ctx             :: Discord context <!nodoc>
+            search_context  :: A string (or channel ID) that resolves to a channel ctx. See /help msgcount. Default "all"
+            delta           :: A string in ##d##h##m##s format to capture. Default 24h.
+            threshold       :: The minimum number of messages a user needs to send.
 
-        See also
+        See Also
         --------
-            /help usercount - Get a count of users on the guild
-            /help msgcount  - Get a count of messages in the current context
+            /usercount  :: Get a count of users on the guild
+            /msgcount   :: Get a count of messages in the current context
         """
         if search_context == "all":
             converter = HuskyConverters.ChannelContextConverter()
@@ -353,12 +353,12 @@ class Intelligence:
 
         Parameters
         ----------
-            ctx  :: Command context <!nodoc>
-            days :: The "prune cutoff" value for a user to be eligible for pruning. Defaults to 7.
+            ctx   :: Command context <!nodoc>
+            days  :: The "prune cutoff" value for a user to be eligible for pruning. Defaults to 7.
 
         Examples
         --------
-            /prunesim 5 :: Get the count of users who have not talked in the last 5 days, and have no roles
+            /prunesim 5  :: Get the count of users who have not talked in the last 5 days, and have no roles
         """
 
         if days < 1 or days > 180:
@@ -389,9 +389,9 @@ class Intelligence:
         """
         This command will return a count of all members on the guild. It's really that simple.
 
-        See also
+        See Also
         --------
-            /help activeusercount - Get a count of active users on the guild.
+            /help activeusercount  :: Get a count of active users on the guild.
         """
 
         breakdown = {}
@@ -424,13 +424,13 @@ class Intelligence:
 
         Parameters
         ----------
-            ctx      :: Discord context <!nodoc>
-            fragment :: Either a Invite URL or fragment (aa1122) for the invite you wish to target.
+            ctx       :: Discord context <!nodoc>
+            fragment  :: Either a Invite URL or fragment (aa1122) for the invite you wish to target.
 
         Examples
         --------
-            /invitespy aabbcc                       - Get invite data for invite aabbcc
-            /invitespy https://disco\u200brd.gg/someguild - Get invite data for invite someguild
+            /invitespy aabbcc                              :: Get invite data for invite aabbcc
+            /invitespy https://disco\u200brd.gg/someguild  :: Get invite data for invite someguild
         """
         try:
             invite_data: dict = await self.bot.http.request(

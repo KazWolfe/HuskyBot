@@ -134,8 +134,6 @@ class AttachmentFilter(AntiSpamModule):
     @commands.command(name="configure", brief="Configure thresholds for AttachmentFilter")
     async def set_attach_cooldown(self, ctx: commands.Context, cooldown_seconds: int, warn_limit: int, ban_limit: int):
         """
-        Set cooldowns/ban thresholds on attachment spam.
-
         AntiSpam will log and ban users that go over a set amount of attachments in a second. This command allows those
         limits to be altered on the fly.
 
@@ -144,6 +142,13 @@ class AttachmentFilter(AntiSpamModule):
         automatically banned from the guild.
 
         A message not containing attachments will reset the cooldown period.
+
+        Parameters
+        ----------
+            ctx               :: Discord context <!nodoc>
+            cooldown_seconds  :: The number of seconds before an activity record expires.
+            warn_limit        :: The number of attachment records before a user is warned.
+            ban_limit         :: The number of attachment records before a user is banned.
         """
 
         as_config = self._config.get('antiSpam', {})
@@ -166,18 +171,19 @@ class AttachmentFilter(AntiSpamModule):
     @commands.command(name="clear", brief="Clear a cooldown record for a specific user")
     async def clear_cooldown(self, ctx: commands.Context, user: discord.Member):
         """
-        Clear a user's cooldown record for this filter.
-
         This command allows moderators to override the antispam expiry system, and clear a user's cooldowns/strikes/
         warnings early. Any accrued warnings for the selected user are discarded and the user starts with a clean slate.
 
-        Parameters:
-            user - A user object (ID, mention, etc) to target for clearing.
+        Parameters
+        ----------
+            ctx   :: Discord context <!nodoc>
+            user  :: A user object (ID, mention, etc) to target for clearing.
 
-        See also:
-            /as <filter_name> clearAll - Clear all cooldowns for all users for a single filter.
-            /as clear - Clear cooldowns on all filters for a single user.
-            /as clearAll - Clear all cooldowns globally for all users (reset).
+        See Also
+        --------
+            /as <filter_name> clearAll  :: Clear all cooldowns for all users for a single filter.
+            /as clear                   :: Clear cooldowns on all filters for a single user.
+            /as clearAll                :: Clear all cooldowns globally for all users (reset).
         """
 
         try:
@@ -203,15 +209,14 @@ class AttachmentFilter(AntiSpamModule):
     @commands.has_permissions(administrator=True)
     async def clear_all_cooldowns(self, ctx: commands.Context):
         """
-        Clear cooldown records for all users for this filter.
-
         This command will clear all cooldowns for the current filter, effectively resetting its internal state. No users
         will have any warnings for this filter after this command is executed.
 
-        See also:
-            /as <filter_name> clear - Clear cooldowns on a single filter for a single user.
-            /as clear - Clear cooldowns on all filters for a single user.
-            /as clearAll - Clear all cooldowns globally for all users (reset).
+        See Also
+        --------
+            /as <filter_name> clear  :: Clear cooldowns on a single filter for a single user.
+            /as clear                :: Clear cooldowns on all filters for a single user.
+            /as clearAll             :: Clear all cooldowns globally for all users (reset).
         """
 
         record_count = len(self._events)

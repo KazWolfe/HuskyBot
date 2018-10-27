@@ -33,9 +33,10 @@ class BotAdmin:
     @commands.has_permissions(administrator=True)
     async def plugin(self, ctx: discord.ext.commands.Context):
         """
-        Parent command for the BotAdmin module.
+        This command, when called without any subcommands, will list all plugins that the bot is aware of, and their
+        current state.
 
-        This command does nothing, but it instead acts as the parent to all other commands.
+        To alter a plugin's state, use one of the subcommands listed below.
         """
 
         if ctx.invoked_subcommand is not None:
@@ -88,18 +89,20 @@ class BotAdmin:
     @plugin.command(name="load", brief="Temporarily load a plugin into the bot.")
     async def load(self, ctx: discord.ext.commands.Context, plugin_name: HuskyConverters.CIPluginConverter):
         """
-        Load a plugin (temporarily) into the bot.
-
         This command will attempt to load the named plugin into the bot's runtime. It will not mark this command as
         enabled, nor will it allow the plugin to relaunch on start.
 
-        Plugin names are case sensitive, and almost always start with a capital letter.
+        Parameters
+        ----------
+            ctx          :: Discord context <!nodoc>
+            plugin_name  :: A name of a plugin to load into the bot.
 
-        See also:
-            /help admin unload   - Temporarily unload a plugin from the bot.
-            /help admin reload   - Unload and reload a plugin from the bot.
-            /help admin enable   - Permanently enable a plugin (load + run on start)
-            /help admin disable  - Permanently disable a plugin (unload + disallow startup execution)
+        See Also
+        --------
+            /help admin unload   :: Temporarily unload a plugin from the bot.
+            /help admin reload   :: Unload and reload a plugin from the bot.
+            /help admin enable   :: Permanently enable a plugin (load + run on start)
+            /help admin disable  :: Permanently disable a plugin (unload + disallow startup execution)
         """
 
         if plugin_name in ctx.bot.cogs.keys():
@@ -133,18 +136,20 @@ class BotAdmin:
     @plugin.command(name="unload", brief="Temporarily unload a plugin from the bot.")
     async def unload(self, ctx: discord.ext.commands.Context, plugin_name: HuskyConverters.CIPluginConverter):
         """
-        (Temporarily) unload a plugin from the bot.
-
         This command will attempt to unload non-critical plugin from the bot. It will not disable a plugin, and will
         only last until the bot is restarted.
 
-        Plugin names are case sensitive, and almost always start with a capital letter.
+        Parameters
+        ----------
+            ctx          :: Discord context <!nodoc>
+            plugin_name  :: A name of a plugin to unload from the bot.
 
-        See also:
-            /help admin unload   - Temporarily unload a plugin from the bot.
-            /help admin reload   - Unload and reload a plugin from the bot.
-            /help admin enable   - Permanently enable a plugin (load + run on start)
-            /help admin disable  - Permanently disable a plugin (unload + disallow startup execution)
+        See Also
+        --------
+            /help admin unload   :: Temporarily unload a plugin from the bot.
+            /help admin reload   :: Unload and reload a plugin from the bot.
+            /help admin enable   :: Permanently enable a plugin (load + run on start)
+            /help admin disable  :: Permanently disable a plugin (unload + disallow startup execution)
         """
 
         if plugin_name == "Debug" and self.bot.developer_mode:
@@ -190,8 +195,6 @@ class BotAdmin:
     @plugin.command(name="reload", brief="Unload and reload a plugin.")
     async def reload(self, ctx: discord.ext.commands.Context, plugin_name: HuskyConverters.CIPluginConverter):
         """
-        Unload and reload a plugin from the bot.
-
         This will not enable or disable a command, but it will cause the plugin to re-initialize and reload. This may
         wipe out configurations/timings for certain plugins, depending on how they save information.
 
@@ -200,13 +203,17 @@ class BotAdmin:
 
         The reload command *will* work with critical modules.
 
-        Plugin names are case sensitive, and almost always start with a capital letter.
+        Parameters
+        ----------
+            ctx          :: Discord context <!nodoc>
+            plugin_name  :: A name of a plugin to reload.
 
-        See also:
-            /help admin load     - Temporarily load a plugin from the bot.
-            /help admin unload   - Temporarily unload a plugin from the bot.
-            /help admin enable   - Permanently enable a plugin (load + run on start)
-            /help admin disable  - Permanently disable a plugin (unload + disallow startup execution)
+        See Also
+        --------
+            /help admin load     :: Temporarily load a plugin from the bot.
+            /help admin unload   :: Temporarily unload a plugin from the bot.
+            /help admin enable   :: Permanently enable a plugin (load + run on start)
+            /help admin disable  :: Permanently disable a plugin (unload + disallow startup execution)
         """
 
         self.bot.unload_extension(plugin_name)
@@ -232,18 +239,20 @@ class BotAdmin:
     @plugin.command(name="enable", brief="Enable a plugin to run now and at bot load.")
     async def enable(self, ctx: discord.ext.commands.Context, plugin_name: HuskyConverters.CIPluginConverter):
         """
-        Load a plugin into the bot, and mark it as auto-load.
-
         This command will attempt to load a plugin into the bot, and then mark it for automatic load on bot start. This
         should be used when a plugin is desired to permanently run alongside the bot.
 
-        Plugin names are case sensitive, and almost always start with a capital letter.
+        Parameters
+        ----------
+            ctx          :: Discord context <!nodoc>
+            plugin_name  :: A name of a plugin to enable
 
-        See also:
-            /help admin load     - Temporarily load a plugin from the bot.
-            /help admin unload   - Temporarily unload a plugin from the bot.
-            /help admin reload   - Unload and reload a plugin from the bot.
-            /help admin disable  - Permanently disable a plugin (unload + disallow startup execution)
+        See Also
+        --------
+            /help admin load     :: Temporarily load a plugin from the bot.
+            /help admin unload   :: Temporarily unload a plugin from the bot.
+            /help admin reload   :: Unload and reload a plugin from the bot.
+            /help admin disable  :: Permanently disable a plugin (unload + disallow startup execution)
         """
         config = self._config.get('plugins', [])
 
@@ -281,18 +290,20 @@ class BotAdmin:
     @plugin.command(name="disable", brief="Disable a plugin from running at bot load. Also stops the plugin.")
     async def disable(self, ctx: discord.ext.commands.Context, plugin_name: HuskyConverters.CIPluginConverter):
         """
-        Unload a plugin from the bot, and prevent it from auto-loading
-
         This command will unload a currently active plugin, and additionally mark it as "disabled", preventing it from
         automatically executing at bot startup. The plugin may still be manually loaded using /admin load.
 
-        Plugin names are case sensitive, and almost always start with a capital letter.
+        Parameters
+        ----------
+            ctx          :: Discord context <!nodoc>
+            plugin_name  :: A name of a plugin to disable.
 
-        See also:
-            /help admin load     - Temporarily load a plugin from the bot.
-            /help admin unload   - Temporarily unload a plugin from the bot.
-            /help admin reload   - Unload and reload a plugin from the bot.
-            /help admin enable   - Permanently enable a plugin (load + run on start)
+        See Also
+        --------
+            /help admin load     :: Temporarily load a plugin from the bot.
+            /help admin unload   :: Temporarily unload a plugin from the bot.
+            /help admin reload   :: Unload and reload a plugin from the bot.
+            /help admin enable   :: Permanently enable a plugin (load + run on start)
         """
         if plugin_name == "Debug" and self.bot.developer_mode:
             await ctx.send(embed=discord.Embed(
@@ -366,8 +377,6 @@ class BotAdmin:
     @config.command(name="presence", brief="Set the bot's presence mode.")
     async def presence(self, ctx: discord.ext.commands.Context, presence_type: str, name: str, status: str):
         """
-        Set a new Presence for the bot.
-
         The bot has a user-definable presence used to provide status messages or other information. This may be
         configured on-the-fly using this command.
 
@@ -379,6 +388,13 @@ class BotAdmin:
         The Name may be any (short) string that will be displayed after the presence type.
 
         Status must be a strong containing either ONLINE, IDLE, or DND. No other arguments are permitted.
+
+        Parameters
+        ----------
+            ctx            :: Discord context <!nodoc>
+            presence_type  :: PLAYING, LISTENING, or WATCHING.
+            name           :: The activity name being performed.
+            status         :: ONLINE, IDLE, or DND
         """
         presence_map = {"playing": 0, "listening": 2, "watching": 3}
 
@@ -433,12 +449,11 @@ class BotAdmin:
     @config.command(name="ignoreCommand", brief="Add a command to the ignore list.", enabled=False)
     async def ignore_command(self, ctx: commands.Context, command: str):
         """
-        Add a new command to the ignore list.
-
         This command will allow administrators to add commands that are silently ignored by the bot. This command takes
         only a single string as an argument. Do not include a slash when specifying a command name to ignore.
 
-        See also:
+        See Also
+        --------
             /config unignoreCommand - Remove a command from the ignore list
         """
         command = command.lower()
@@ -465,15 +480,14 @@ class BotAdmin:
     @config.command(name="unignoreCommand", brief="Remove a command from the ignore list.", enabled=False)
     async def unignore_command(self, ctx: commands.Context, command: str):
         """
-        [DEPRECATED COMMAND] Remove a command from the ignore list.
-
         If a command was previously ignored by /admin ignoreCommand, this command will allow the command to be watched
         again.
 
         See /help admin ignoreCommand for information about the arguments for this command.
 
-        See also:
-            /help admin ignoreCommand - Add a command to the ignore list
+        See Also
+        --------
+            /help admin ignoreCommand  :: Add a command to the ignore list
         """
         command = command.lower()
 
@@ -499,8 +513,6 @@ class BotAdmin:
     @config.command(name="bindChannel", brief="Configure a channel binding for the bot.")
     async def set_channel(self, ctx: commands.Context, name: str, channel: discord.TextChannel):
         """
-        Set a channel binding for the bot.
-
         This command allows administrators to set a new channel binding for the bot. Multiple "critical" channels are
         stored in the bot configuration, including log and alert channels. This command allows them to be changed at
         runtime.
@@ -508,6 +520,12 @@ class BotAdmin:
         To get a list of valid binding names, specify a junk binding (like ?) for the name parameter.
 
         The NAME parameter must be a valid channel binding, and the CHANNEL parameter must be a valid channel name/ID.
+
+        Parameters
+        ----------
+            ctx      :: Discord context <!nodoc>
+            name     :: The channel binding name to define
+            channel  :: The channel to set binding to
         """
         name = name.upper()
         config = self._config.get('specialChannels', {})
@@ -538,14 +556,18 @@ class BotAdmin:
     @config.command(name="bindRole", brief="Configure a role binding for the bot.")
     async def set_role(self, ctx: commands.Context, name: str, role: discord.Role):
         """
-        Set a role binding for the bot.
-
         In order to track certain critical states, the bot requires an internal list of roles that must be maintained.
         This command allows these roles to be altered at runtime.
 
         To get a list of valid binding names, specify a junk binding (like ?) for the name parameter.
 
         The NAME parameter must be a valid role binding, and the ROLE parameter must be a valid role name/ID.
+
+        Parameters
+        ----------
+            ctx      :: Discord context <!nodoc>
+            name     :: The role binding name to define
+            role     :: The role to bind to
         """
         name = name.upper()
         config = self._config.get('specialRoles', {})
@@ -576,14 +598,18 @@ class BotAdmin:
     @config.command(name="ignoreUser", brief="Block a user from interacting with the bot over messages.")
     async def block_user(self, ctx: commands.Context, user: HuskyConverters.OfflineUserConverter):
         """
-        Block a user from interacting with the bot.
-
         If a user is blocked through this method, the bot will ignore any and all messages from this user. This means
         that the target user will be unable to run commands (regardless of permissions). This will not affect censors
         and the like, but it will affect auto responses and command execution.
 
-        See also:
-            /help admin unblockUser - Unblock a user blocked by this command.
+        Parameters
+        ----------
+            ctx   :: Discord context <!nodoc>
+            user  :: The user to block from using the bot
+
+        See Also
+        --------
+            /help config unblockUser  :: Unblock a user blocked by this command.
         """
 
         # hack for pycharm to stop complaining (duck-typing)
@@ -620,9 +646,12 @@ class BotAdmin:
     @config.command(name="unignoreUser", brief="Unblock a blocked user from bot interactions.")
     async def unblock_user(self, ctx: commands.Context, user: HuskyConverters.OfflineUserConverter):
         """
-        Unblock a user blocked from interacting with the bot.
+        See /help config blockUser for more information about this command.
 
-        See /help admin blockUser for more information about this command.
+        Parameters
+        ----------
+            ctx   :: Discord context <!nodoc>
+            user  :: The user to unblock from using the bot
         """
 
         # hack for pycharm to stop complaining (duck typing)
@@ -652,12 +681,8 @@ class BotAdmin:
     @commands.has_permissions(administrator=True)
     async def system(self, ctx: discord.ext.commands.Context):
         """
-        Control and send system-level commands to the bot itself.
-
         This command group contains primarily commands that will either get privileged system information (like logs) or
         take heavy actions on the bot itself.
-
-        Available commands:
         """
 
         pass
@@ -674,6 +699,11 @@ class BotAdmin:
         to creatively abuse the lines function to get basic pagination.
 
         WARNING: The log command may reveal some sensitive information about bot execution!
+
+        Parameters
+        ----------
+            ctx    :: Discord context <!nodoc>
+            lines  :: The number of lines to pull from the log file.
         """
 
         log_file = self._session_store.get('logPath')
@@ -721,6 +751,11 @@ class BotAdmin:
 
         This command takes an optional argument, state. It may either be `true` or `false` to set a state manually, or
         no state to toggle.
+
+        Parameters
+        ----------
+            ctx    :: Discord context <!nodoc>
+            state  :: TRUE, FALSE, or blank to toggle
         """
 
         lockdown_state = self._session_store.get('lockdown', False)

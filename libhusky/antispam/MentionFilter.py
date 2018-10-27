@@ -112,11 +112,9 @@ class MentionFilter(AntiSpamModule):
                 del self._events[message.author.id]
                 return
 
-    @commands.command(name="setPingLimit", brief="Set the number of pings required before AntiSpam takes action")
+    @commands.command(name="configure", brief="Set the number of pings required before AntiSpam takes action")
     async def set_ping_limit(self, ctx: commands.Context, warn_limit: int, ban_limit: int):
         """
-        Set the warning and ban limits for the maximum number of pings permitted in a single message.
-
         This command takes two arguments - warn_limit and ban_limit. Both of these are integers.
 
         Once a user exceeds the warning limit of pings in a single message, their message will be automatically deleted
@@ -127,9 +125,16 @@ class MentionFilter(AntiSpamModule):
 
         Setting a value to zero or any negative number will disable that specific limit.
 
-        Example commands:
-            /as setPingLimit 6 15 - Set warn limit to 6, ban limit to 15
-            /as setPingLimit 6 0  - Set warn limit to 6, remove the ban limit
+        Parameters
+        ----------
+            ctx :: Discord context <!nodoc>
+            warn_limit  :: Number of mentions before warning a user
+            ban_limit   :: Number of mentions before banning a user
+
+        Examples
+        --------
+            /as pingFilter setPingLimit 6 15  :: Set warn limit to 6, ban limit to 15
+            /as pingFilter setPingLimit 6 0   :: Set warn limit to 6, remove the ban limit
         """
         if warn_limit < 1:
             warn_limit = None
@@ -154,18 +159,19 @@ class MentionFilter(AntiSpamModule):
     @commands.command(name="clear", brief="Clear a cooldown record for a specific user")
     async def clear_cooldown(self, ctx: commands.Context, user: discord.Member):
         """
-        Clear a user's cooldown record for this filter.
-
         This command allows moderators to override the antispam expiry system, and clear a user's cooldowns/strikes/
         warnings early. Any accrued warnings for the selected user are discarded and the user starts with a clean slate.
 
-        Parameters:
-            user - A user object (ID, mention, etc) to target for clearing.
+        Parameters
+        ----------
+            ctx   :: Discord context <!nodoc>
+            user  :: A user object (ID, mention, etc) to target for clearing.
 
-        See also:
-            /as <filter_name> clearAll - Clear all cooldowns for all users for a single filter.
-            /as clear - Clear cooldowns on all filters for a single user.
-            /as clearAll - Clear all cooldowns globally for all users (reset).
+        See Also
+        --------
+            /as <filter_name> clearAll  :: Clear all cooldowns for all users for a single filter.
+            /as clear                   :: Clear cooldowns on all filters for a single user.
+            /as clearAll                :: Clear all cooldowns globally for all users (reset).
         """
 
         try:
@@ -191,15 +197,14 @@ class MentionFilter(AntiSpamModule):
     @commands.has_permissions(administrator=True)
     async def clear_all_cooldowns(self, ctx: commands.Context):
         """
-        Clear cooldown records for all users for this filter.
-
         This command will clear all cooldowns for the current filter, effectively resetting its internal state. No users
         will have any warnings for this filter after this command is executed.
 
-        See also:
-            /as <filter_name> clear - Clear cooldowns on a single filter for a single user.
-            /as clear - Clear cooldowns on all filters for a single user.
-            /as clearAll - Clear all cooldowns globally for all users (reset).
+        See Also
+        --------
+            /as <filter_name> clear  :: Clear cooldowns on a single filter for a single user.
+            /as clear                :: Clear cooldowns on all filters for a single user.
+            /as clearAll             :: Clear all cooldowns globally for all users (reset).
         """
 
         record_count = len(self._events)

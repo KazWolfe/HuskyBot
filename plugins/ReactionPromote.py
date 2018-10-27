@@ -97,8 +97,6 @@ class ReactionPromote:
     @commands.has_permissions(administrator=True)
     async def rpromote(self, ctx: discord.ext.commands.Context):
         """
-        Parent command for the reaction promotion module.
-
         Run /help rpromote <subcommand> for more information.
         """
         if ctx.invoked_subcommand is None:
@@ -111,10 +109,8 @@ class ReactionPromote:
 
     @rpromote.command(name="add", brief="Add a new promotion to the configs")
     async def add_promotion(self, ctx: discord.ext.commands.Context, channel: discord.TextChannel, message_id: int,
-                            emoji: str, role: discord.Role):
+                            emoji: str, *, role: discord.Role):
         """
-        Add a new Promotion to the Reaction Promotion configuration.
-
         This is a relatively convoluted command due to the number of things that need to happen for it.
 
         This command takes a large number of arguments, as it requires a lot to store and configure a promotion. There
@@ -133,6 +129,14 @@ class ReactionPromote:
 
         The Role is the name (or other identifiable piece - ID, @mention, etc) of a role. This role will be granted to
         a user when they click on the specified Emoji on the specified Message in the specified Channel.
+
+        Parameters
+        ----------
+            ctx         :: Discord context <!nodoc>
+            channel     :: The channel that this promotion will live in
+            message_id  :: The message ID that will handle this promotion
+            emoji       :: A string representation of the emoji to add
+            role        :: The role that this promotion will grant
         """
         promotion_config = self._config.get('promotions', {})
 

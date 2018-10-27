@@ -88,8 +88,6 @@ class LaMetric:
     @HuskyChecks.has_guild_permissions(administrator=True)
     async def register(self, ctx: commands.Context):
         """
-        Begin the registration process for a LaMetric device.
-
         This code will initialize a registration for a LaMetric device, and will take you through the second part
         of the registration.
         """
@@ -150,8 +148,6 @@ class LaMetric:
     @lametric.command(name="authorize", brief="Send the bot an Auth Key", aliases=["auth"])
     async def authorize(self, ctx: commands.Context, device_id: str, app_id: str, auth_key: str):
         """
-        Authorize a LaMetric device.
-
         When a LaMetric device is registered, authorization must be completed. This command allows users to privately
         register their device without leaking credentials. This command may *only* be run from a DM.
 
@@ -201,8 +197,6 @@ class LaMetric:
     @HuskyChecks.has_guild_permissions(administrator=True)
     async def send(self, ctx: commands.Context, device_id: str, icon: str, text: str):
         """
-        Send a message to a LaMetric device.
-
         The Device ID is the registered device ID, as given by /lametric list.
 
         The Icon is an Icon ID from the LaMetric database, and the Text is whatever you want it to be.
@@ -231,11 +225,6 @@ class LaMetric:
     @lametric.command(name="list", brief="List registered LaMetric devices")
     @HuskyChecks.has_guild_permissions(administrator=True)
     async def list(self, ctx: commands.Context):
-        """
-        List all registered LaMetric devices.
-
-        This command takes no arguments.
-        """
         lametric_conf = self._config.get('lametric', {})
         devices = lametric_conf.setdefault('devices', {})
 
@@ -255,8 +244,6 @@ class LaMetric:
     @HuskyChecks.has_guild_permissions(administrator=True)
     async def delete(self, ctx: commands.Context, device_id: str):
         """
-        De-register a LaMetric device.
-
         This command will remove a LaMetric device from the bot. The Device ID (provided by /lametric list) is required.
         """
         lametric_conf = self._config.get('lametric', {})

@@ -41,9 +41,7 @@ class Giveaway:
     @commands.has_permissions(manage_messages=True)
     async def ga(self, ctx: commands.Context):
         """
-        Manage the Giveaway plugin.
-
-        This command, by itself, does nothing. Please refer to the below *actual* commands:
+        This command, by itself, does nothing. Please refer to the below *actual* commands.
         """
 
         pass
@@ -51,8 +49,6 @@ class Giveaway:
     @ga.command(name="list", brief="List all active giveaways in the guild")
     async def list_giveaways(self, ctx: commands.Context):
         """
-        Get a list of all currently active giveaways in the current guild.
-
         This command will iterate over the "active giveaways" list and attempt to find all Giveaways queued for
         execution. This allows staff members to get an overview (and, if necessary, stop) of server giveaways.
         """
@@ -86,8 +82,6 @@ class Giveaway:
     @ga.command(name="start", brief="Start a new Giveaway on the guild")
     async def start(self, ctx: commands.Context, name: str, timedelta: HuskyConverters.DateDiffConverter, winners: int):
         """
-        Start a new Giveaway on the guild.
-
         This command allows a moderator to start a giveaway in the current channel. Giveaway winners are chosen by a
         cryptographically secure random number generator, as determined by the number of entrants.
 
@@ -96,10 +90,12 @@ class Giveaway:
 
         Giveaways will end at most 60 seconds after the specified time, depending on server load and other factors.
 
-        Parameters:
-            name      - The giveaway name, as a text string. A giveaway with spaces in names must be "quoted".
-            timedelta - The time (in standard ##d##h##m##s format) before this giveaway ends.
-            winners   - A count of total winners to be chosen and listed in the final message.
+        Parameters
+        ----------
+            ctx        :: Discord context <!nodoc>
+            name       :: The giveaway name, as a text string. A giveaway with spaces in names must be "quoted".
+            timedelta  :: The time (in standard ##d##h##m##s format) before this giveaway ends.
+            winners    :: A count of total winners to be chosen and listed in the final message.
         """
 
         end_time = datetime.datetime.utcnow() + timedelta
@@ -117,14 +113,15 @@ class Giveaway:
     @ga.command(name="end", brief="End a giveaway early (defining a winner)", aliases=["stop"])
     async def stop(self, ctx: commands.Context, giveaway_id: int):
         """
-        Gracefully stop a running Giveaway.
-
         This command will gracefully end a currently running giveaway, and immediately declare a winner.
 
-        Parameters:
-            giveaway_id - The ID of the giveaway (see /giveaways list) to stop.
+        Parameters
+        ----------
+            ctx          :: Discord context <!nodoc>
+            giveaway_id  :: The ID of the giveaway (see /giveaways list) to stop.
 
-        See Also:
+        See Also
+        --------
             /giveaway kill - Forcefully terminate a giveaway
         """
         giveaway_id = giveaway_id - 1  # We present the ID as one-indexed, but python is zero-indexed.
@@ -147,18 +144,19 @@ class Giveaway:
     @commands.has_permissions(administrator=True)
     async def kill(self, ctx: commands.Context, giveaway_id: int):
         """
-        Forcefully kill a giveaway.
-
         This command will stop a giveaway immediately, without declaring a winner or otherwise running any
         cleanup (such as deleting the giveaway registration message).
 
         NOTE THAT THIS COMMAND MAY CAUSE *VERY* UNEXPECTED BEHAVIOR WITH CERTAIN GIVEAWAYS. Use with caution!
 
-        Parameters:
-            giveaway_id - The ID of the giveaway (see /giveaways list) to stop.
+        Parameters
+        ----------
+            ctx          :: Discord Context <!nodoc>
+            giveaway_id  :: The ID of the giveaway (see /giveaways list) to stop.
 
-        See Also:
-            /giveaway stop - Gracefully stop a running Giveaway.
+        See Also
+        --------
+            /giveaway stop  :: Gracefully stop a running Giveaway.
         """
 
         giveaway_id = giveaway_id - 1  # We present the ID as one-indexed, but python is zero-indexed.

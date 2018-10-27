@@ -24,12 +24,10 @@ class Math:
     def __unload(self):
         self.bot.loop.create_task(self._http_session.close())
 
-    @commands.command(name="latex", brief="Generate and render some LaTeX code")
+    @commands.command(name="latex", brief="Generate and render some LaTeX code [EXPERIMENTAL]")
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def render_tex(self, ctx: commands.Context, *, latex: str):
         """
-        Send off some LaTeX for rendering. [EXPERIMENTAL]
-
         The LaTeX command allows you to write descriptive/advanced mathematical equations and information, and have the
         bot display it as an image in a response.
 

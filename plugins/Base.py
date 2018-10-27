@@ -37,8 +37,6 @@ class Base:
     @commands.command(name="help", brief="Get help with this bot's commands", aliases=["?"])
     async def help_command(self, ctx: commands.Context, *command: str):
         """
-        Get help information from the bot database.
-
         This command takes a string (command) as an argument to look up. If a command does not exist, the bot will throw
         an error.
         """
@@ -86,8 +84,6 @@ class Base:
     @commands.command(name="about", aliases=["version"], brief="Get basic information about the bot.")
     async def about(self, ctx: discord.ext.commands.Context):
         """
-        Get basic information about the current running instance of this bot.
-
         This command returns a quick summary of this bot and its current state.
         """
 

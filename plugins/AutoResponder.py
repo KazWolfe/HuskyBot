@@ -72,17 +72,15 @@ class AutoResponder:
     @commands.has_permissions(manage_messages=True)
     async def responses(self, ctx: discord.ext.commands.Context):
         """
-        This is the parent command for the AutoResponder plugin.
-
-        It by default does nothing, but simply exists as a container for the other commands. See the below command list
-        for valid commands to pass to the plugin.
+        This command by default does nothing, but simply exists as a container for the other commands. See the below
+        command list for valid commands to pass to the plugin.
         """
 
         pass
 
     @responses.command(name="add", aliases=["create"], brief="Add a new automatic response")
     @commands.has_permissions(manage_messages=True)
-    async def add_response(self, ctx: discord.ext.commands.Context, trigger: str, response: str):
+    async def add_response(self, ctx: discord.ext.commands.Context, trigger: str, *, response: str):
         """
         Add a new response to the configuration.
 
@@ -92,6 +90,12 @@ class AutoResponder:
         intended.
 
         If you would like to alter the configuration of a created response, please use the /responses edit command.
+
+        Parameters
+        ----------
+            ctx       :: Discord context. <!nodoc>
+            trigger   :: The string to trigger this autoresponse
+            response  :: A plaintext string to reply with when the autoresponse is triggered.
         """
 
         responses = self._config.get("responses", {})

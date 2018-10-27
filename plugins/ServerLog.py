@@ -351,8 +351,8 @@ class ServerLog:
 
         Parameters
         ----------
-            ctx  :: Discord context <!nodoc>
-            name :: The name of a logger to enable.
+            ctx   :: Discord context <!nodoc>
+            name  :: The name of a logger to enable.
         """
         enabled_loggers = self._config.get('loggers', {})
 
@@ -390,8 +390,8 @@ class ServerLog:
 
         Parameters
         ----------
-            ctx  :: Discord context <!nodoc>
-            name :: The name of a logger to disable.
+            ctx   :: Discord context <!nodoc>
+            name  :: The name of a logger to disable.
         """
         enabled_loggers = self._config.get('loggers', {})
 
@@ -499,16 +499,16 @@ class ServerLog:
 
         Parameters
         ----------
-            ctx     :: Discord context <!nodoc>
-            channel :: The channel reference (ID, mention, name) to add to the exclusion list.
+            ctx      :: Discord context <!nodoc>
+            channel  :: The channel reference (ID, mention, name) to add to the exclusion list.
 
         Examples
         --------
-            /logger ignoreChannel #secret-admins - Block "#secret-admins" from generating log events.
+            /logger ignoreChannel #secret-admins  :: Block "#secret-admins" from generating log events.
 
-        See also
+        See Also
         --------
-            /logger unignoreChannel - Remove a channel from the exclusion list.
+            /logger unignoreChannel  :: Remove a channel from the exclusion list.
         """
 
         logger_settings: dict = self._config.get('loggers', {})
@@ -541,14 +541,14 @@ class ServerLog:
 
         Parameters
         ----------
-            ctx     :: Discord context <!nodoc>
-            channel :: The channel reference (ID, mention, name) to add to the exclusion list.
+            ctx      :: Discord context <!nodoc>
+            channel  :: The channel reference (ID, mention, name) to add to the exclusion list.
 
         Examples
         --------
-            /logger unignoreChannel #secret-admins - Allow "#secert-admins" to generate log events again.
+            /logger unignoreChannel #secret-admins  :: Allow "#secert-admins" to generate log events again.
 
-        See also
+        See Also
         --------
             /logger ignoreChannel - Add a channel to the exclusion list.
 

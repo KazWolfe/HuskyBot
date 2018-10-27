@@ -100,17 +100,17 @@ class AntiSpam:
 
         Available Modules:
         ------------------
-            AttachmentFilter :: Restrict the number of attachments/files a user can post in a certain time
-            InviteFilter     :: Block unauthorized Discord invites to other guilds
-            LinkFilter       :: Block messages that contain excessive links, or link-spamming users.
-            MentionFilter    :: Block users from "mention-spamming" over set thresholds.
-            NonAsciiFilter   :: Block messages composed of non-ASCII characters, like Zalgo
-            NonUniqueFilter  :: Monitor and take action against users who post the same messages over and over again.
+            AttachmentFilter  :: Restrict the number of attachments/files a user can post in a certain time
+            InviteFilter      :: Block unauthorized Discord invites to other guilds
+            LinkFilter        :: Block messages that contain excessive links, or link-spamming users.
+            MentionFilter     :: Block users from "mention-spamming" over set thresholds.
+            NonAsciiFilter    :: Block messages composed of non-ASCII characters, like Zalgo
+            NonUniqueFilter   :: Monitor and take action against users who post the same messages over and over again.
 
         Parameters
         ----------
-            ctx  :: Discord context <!nodoc>
-            name :: The module name (case sensitive) to enable.
+            ctx   :: Discord context <!nodoc>
+            name  :: The module name (case sensitive) to enable.
 
         See Also
         --------
@@ -168,12 +168,12 @@ class AntiSpam:
 
         Parameters
         ----------
-            ctx  :: Discord context <!nodoc>
-            name :: The name of the module to disable
+            ctx   :: Discord context <!nodoc>
+            name  :: The name of the module to disable
 
         See Also
         --------
-            /as enable :: Enable an AntiSpam Module.
+            /as enable  :: Enable an AntiSpam Module.
         """
         as_conf = self._config.get('antiSpam', {})
         mod_config = as_conf.setdefault(name, {"enabled": False})
@@ -199,19 +199,20 @@ class AntiSpam:
     @asp.command(name="clear", brief="Clear cooldowns across all filters for a user.")
     async def clear_cooldowns(self, ctx: commands.Context, user: discord.Member):
         """
-        Clear all cooldowns for a single user, on all filters.
-
         This command allows moderators to immediately reset user filter states across all actively loaded filters,
         without affecting other records. When this command is finished, the user targeted will have *no* warnings on
         their AntiSpam record.
 
-        Parameters:
-            user - A user object (ID, mention, etc) to target for clearing.
+        Parameters
+        ----------
+            ctx   :: Discord context <!nodoc>
+            user  :: A user object (ID, mention, etc) to target for clearing.
 
-        See also:
-            /as <filter_name> clear - Clear cooldowns on a single filter for a single user.
-            /as <filter_name> clearAll - Clear all cooldowns for all users for a single filter.
-            /as clearAll - Clear all cooldowns globally for all users (reset).
+        See Also
+        --------
+            /as <filter_name> clear     :: Clear cooldowns on a single filter for a single user.
+            /as <filter_name> clearAll  :: Clear all cooldowns for all users for a single filter.
+            /as clearAll                :: Clear all cooldowns globally for all users (reset).
         """
         for f in self.__modules__.values():  # type: antispam.AntiSpamModule
             try:
@@ -234,11 +235,11 @@ class AntiSpam:
         This command effectively resets the AntiSpam cooldown system entirely, and is equivalent to reloading the entire
         AntiSpam module.
 
-        See also
+        See Also
         --------
-            /as clear - Clear cooldowns on all filters for a single user.
-            /as <filter_name> clear - Clear cooldowns on a single filter for a single user.
-            /as <filter_name> clearAll - Clear all cooldowns for all users for a single filter.
+            /as clear                   :: Clear cooldowns on all filters for a single user.
+            /as <filter_name> clear     :: Clear cooldowns on a single filter for a single user.
+            /as <filter_name> clearAll  :: Clear all cooldowns for all users for a single filter.
         """
 
         for f in self.__modules__.values():  # type: antispam.AntiSpamModule

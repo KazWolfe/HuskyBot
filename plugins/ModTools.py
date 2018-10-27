@@ -70,14 +70,21 @@ class ModTools:
     @commands.has_permissions(ban_members=True)
     async def pardon(self, ctx: discord.ext.commands.Context, user: HuskyConverters.OfflineUserConverter):
         """
-        Pardon a user currently banned from the guild.
-
         This command will reverse a ban of any user currently in the ban list.
 
         Unbanning a user generally takes a User ID, but in some rare cases (e.g. the user was recently banned), the ban
         can be lifted by using a user name or other unique mention (see /help ban for a more in-depth explanation).
 
         Note that a reason is not needed for an unban - just the user ID.
+
+        Parameters
+        ----------
+            ctx   :: Discord context. <!nodoc>
+            user  :: A unique user representation (ID, usually) to unban.
+
+        See Also
+        --------
+            /help ban  :: Command to ban users from the guild.
         """
         try:
             await ctx.guild.unban(user, reason=f"Unbanned by {ctx.author}")
@@ -95,12 +102,10 @@ class ModTools:
             color=Colors.SUCCESS
         ))
 
-    @commands.command(name="ban", brief="Ban an active user of the Discord")
+    @commands.command(name="ban", brief="Ban a user from this guild")
     @commands.has_permissions(ban_members=True)
     async def ban(self, ctx: commands.Context, user: HuskyConverters.OfflineMemberConverter, *, reason: str):
         """
-        Ban a user from the guild.
-
         The ban command will target and remove a user immediately from the guild, regardless of their guild state.
 
         Users with ban privileges may not ban users at or above themselves in the role hierarchy. Offline users are not
@@ -116,6 +121,12 @@ class ModTools:
 
         In the audit log, the bot will be credited with the ban, but a note will be added including the username of the
         responsible moderator.
+
+        Parameters
+        ----------
+            ctx     :: Discord context <!nodoc>
+            user    :: A uniquely identifying user string (see above)
+            reason  :: A reason to ban the given user.
         """
 
         # If you wonder why this method became so edgy, blame Saviour#8988
@@ -186,8 +197,6 @@ class ModTools:
     async def mute(self, ctx: discord.ext.commands.Context, target: discord.Member,
                    time: HuskyConverters.DateDiffConverter, *, reason: str):
         """
-        Mute a user from the current channel.
-
         This command will allow a moderator to temporarily (or permanently) remove a user's rights to speak and add
         new reactions in the current channel. Mutes will automatically expire within up to 15 seconds of the target time
         returned with the command.
@@ -198,20 +207,24 @@ class ModTools:
 
         `reason` is a mandatory explanation field logging why the mute was given.
 
-        Example commands:
-            /mute SomeSpammer 90s Image spam  - Mute user SomeSpammer for 90 seconds
-            /mute h4xxy perm General rudeness - Mute user h4xxy permanently
-            /mute Dog 0 woof                  - Mute user Dog permanently.
+        Parameters
+        ----------
+            ctx     :: Discord context <!nodoc>
+            target  :: The user to mute
+            time    :: A ##d##h##m##s string to represent mute time
+            reason  :: A string explaining the mute reason.
 
-        See also:
-            /globalmute   - Mute users across all channels
-            /unmute       - Reverse an active standing mute
-            /globalunmute - Reverse an active standing global mute
+        Examples
+        --------
+            /mute SomeSpammer 90s Image spam   :: Mute user SomeSpammer for 90 seconds
+            /mute h4xxy perm General rudeness  :: Mute user h4xxy permanently
+            /mute Dog 0 woof                   :: Mute user Dog permanently.
 
-        Parameters:
-            target - The user to mute
-            time   - A ##d##h##m##s string to represent mute time
-            reason - A string explaining the mute reason.
+        See Also
+        --------
+            /globalmute    :: Mute users across all channels
+            /unmute        :: Reverse an active standing mute
+            /globalunmute  :: Reverse an active standing global mute
         """
         # ToDo: Implement database, and better logging.
 
@@ -267,8 +280,6 @@ class ModTools:
     async def globalmute(self, ctx: discord.ext.commands.Context, target: discord.Member,
                          time: HuskyConverters.DateDiffConverter, *, reason: str):
         """
-        Mute a user from talking anywhere in the guild.
-
         If a full mute is desired across the entire guild, /globalmute should be used instead. The arguments are the
         same as for /mute, but this will instead grant a "Muted" role as defined in the bot configuration.
 
@@ -325,19 +336,21 @@ class ModTools:
     @commands.has_permissions(manage_messages=True)
     async def unmute(self, ctx: discord.ext.commands.Context, target: discord.Member):
         """
-        Unmute a currently muted user from the channel.
-
         This command will allow a moderator to clear all mutes for a user in the current channel. This command will not
         affect mutes in other channels, nor will it clear a global mute.
 
         The only parameter of this is `target`, or the user to unmute.
 
-        Example Commands:
-            /unmute SomeSpammer    - Unmute a user named SomeSpammer
-            /unmute @Dog#4171      - Unmute a user named Dog
+        Parameters
+        ----------
+            ctx     :: Discord context <!nodoc>
+            target  :: The user to unmute from the current channel
 
-        Parameters:
-            target - The user to unmute from the current channel
+        Examples
+        --------
+            /unmute SomeSpammer  :: Unmute a user named SomeSpammer
+            /unmute @Dog#4171    :: Unmute a user named Dog
+
         """
         # Try to find a mute from this user
         mute = await self._mute_manager.find_user_mute_record(target, ctx.channel)
@@ -363,8 +376,6 @@ class ModTools:
     @commands.has_permissions(manage_messages=True)
     async def global_unmute(self, ctx: discord.ext.commands.Context, target: discord.Member):
         """
-        Unmute a currently globally-muted user.
-
         This command will allow a moderator to clear all mutes for a user across the entire guild. This command will not
         alter per-channel mutes, but it will clear the muted role.
 
@@ -372,8 +383,10 @@ class ModTools:
 
         See /help unmute for further information on how to use this command.
 
-        Parameters:
-            target - The user to unmute
+        Parameters
+        ----------
+            ctx     :: Discord context <!nodoc>
+            target  :: The user to unmute
         """
         # Try to find a mute from this user
         mute = await self._mute_manager.find_user_mute_record(target, None)
@@ -407,9 +420,11 @@ class ModTools:
         In order to prevent mass confusion, the bot will include the name of the user who triggered the ping. This
         will also be recorded in the audit log.
 
-        Parameters:
-            target - The name, ID, or mention of the role to ping
-            message - A variable-length message to include in the ping
+        Parameters
+        ----------
+            ctx      :: Discord Context <!nodoc>
+            target   :: The name, ID, or mention of the role to ping
+            message  :: A variable-length message to include in the ping
         """
         is_role_mentionable = target.mentionable
 
@@ -427,12 +442,10 @@ class ModTools:
     @commands.has_permissions(manage_messages=True)
     async def cleanup(self, ctx: commands.Context, lookback: int, *, filter_def: str = None):
         """
-        Quickly and easily delete multiple messages.
-
         This supports an advanced filtering system, currently supporting the following flags:
 
-        - --[user|member|author] <user reference> : Filter by a specific user
-        - --[regex] <regex>                       : Filter by a regular expression
+            --[user|member|author] <user reference>  :: Filter by a specific user
+            --[regex] <regex>                        :: Filter by a regular expression
 
         If multiple filters of the same type are used, *any* will match to delete the message. For example, running
         "/cleanup 100 --user 123 --user 456" will delete all messages posted by users 123 and 456 that it finds in the
@@ -492,8 +505,6 @@ class ModTools:
     @commands.has_permissions(ban_members=True)
     async def editban(self, ctx: commands.Context, user: HuskyConverters.OfflineUserConverter, *, reason: str):
         """
-        Edit a recorded ban reason.
-
         If a ban reason needs to be amended or altered, this command will allow a moderator to change a ban reason
         without risking the user re-joining.
 
@@ -505,9 +516,11 @@ class ModTools:
         Ban credits will be kept the same if they exist, while bans without credit will be updated to reflect that
         it was a ban that did not execute through the bot.
 
-        Parameters:
-            user - A user name, ID, or any other identifying piece of data used to select a banned user
-            reason - A string to be set as the new ban reason.
+        Parameters
+        ----------
+            ctx     :: Discord context <!nodoc>
+            user    :: A user name, ID, or any other identifying piece of data used to select a banned user
+            reason  :: A string to be set as the new ban reason.
         """
         # hack for PyCharm (duck typing)
         user: discord.User = user
@@ -569,24 +582,27 @@ class ModTools:
     async def set_nickname(self, ctx: commands.Context, member: discord.Member,
                            *, nickname: HuskyConverters.NicknameConverter = None):
         """
-        Set a user's nickname to a specific string.
-
         This command optionally provides "nickname providers", which may be used to generate nicknames. To use a
         Provider, use %PROVIDER_NAME% as the value for the new nickname. If a provider is not given, the nickname will
         be interpreted as plaintext instead.
 
-        Valid Providers:
-            - PONY: Generate a My Little Pony nickname for this user.
-            - ANIMAL: Generate an <adjective><species> nickname for this user.
-            - DELETED: Generate a Deleted User nickname, like those in network banned accounts
+        Valid Providers
+        ---------------
+            PONY     :: Generate a My Little Pony nickname for this user.
+            ANIMAL   :: Generate an <adjective><species> nickname for this user.
+            DELETED  :: Generate a Deleted User nickname, like those in network banned accounts
 
-        Parameters:
-            member - The member whose nickname to alter
-            nickname - A string representing a new nickname, or a provider selector string.
+        Parameters
+        ----------
+            ctx       :: Discord context <!nodoc>
+            member    :: The member whose nickname to alter
+            nickname  :: A string representing a new nickname, or a provider selector string.
 
-        Example Commands
-            /setnick Dog#1234 Cat - Set "Dog#1234"'s nickname to "Cat"
-            /setnick SomeTroll#3312 %PONY% - Set "SomeTroll#3312"'s nickname to something generated by the PONY provider
+        Examples
+        --------
+            /setnick Dog#1234 Cat           :: Set "Dog#1234"'s nickname to "Cat"
+            /setnick SomeTroll#3312 %PONY%  :: Set "SomeTroll#3312"'s nickname to something generated by the PONY
+                                               provider
 
         """
 
@@ -621,8 +637,6 @@ class ModTools:
     async def lock_nickname(self, ctx: commands.Context, member: discord.Member, *,
                             new_nickname: HuskyConverters.NicknameConverter = None):
         """
-        Lock a user from changing their nickname.
-
         If a user has abused nickname permissions, constantly switches to improper nicknames, or otherwise is violating
         guild nickname policy, this command will "lock" them to a specific nickname.
 
@@ -639,12 +653,15 @@ class ModTools:
 
         The new_nickname command allows use of Nickname Providers (see /help setnick).
 
-        Parameters:
-            member - The member whose nickname to lock
-            new_nickname - The (optional) new nickname to lock this user to
+        Parameters
+        ----------
+            ctx           :: Discord context <!nodoc>
+            member        :: The member whose nickname to lock
+            new_nickname  :: The (optional) new nickname to lock this user to
 
-        See also:
-            /unlocknick - Unlock a locked user's nickname
+        See Also
+        --------
+            /unlocknick  :: Unlock a locked user's nickname
         """
         locked_users = self._config.get("nicknameLocks", {})
 
@@ -705,16 +722,17 @@ class ModTools:
     @commands.has_permissions(manage_nicknames=True)
     async def unlock_nickname(self, ctx: commands.Context, member: discord.Member):
         """
-        Unlock a locked user's nickname.
-
         This command reverses the nickname locking effect of /locknick. Note that this will not delete any set
         nicknames, this is the responsibility of a moderator or the locked user.
 
-        See also:
-            /locknick - Lock a user's nickname
+        Parameters
+        ----------
+            ctx     :: Discord context <!nodoc>
+            member  :: The member to unlock
 
-        Parameters:
-            member - The user to unlock
+        See Also
+        --------
+            /locknick  :: Lock a user's nickname
         """
         locked_users = self._config.get("nicknameLocks", {})
 

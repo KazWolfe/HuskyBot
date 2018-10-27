@@ -204,8 +204,6 @@ class LinkFilter(AntiSpamModule):
                                 ban_limit: int, total_link_limit: int):
 
         """
-        Set cooldowns/ban thresholds for link spam.
-
         AntiSpam will attempt to log users who post links excessively to chat. This command allows these settings to be
         updated on the fly.
 
@@ -221,11 +219,13 @@ class LinkFilter(AntiSpamModule):
 
         Cooldowns are not reset by anything other than time.
 
-        Default values:
-            cooldown_minutes: 30 minutes
-            links_before_warn: 5 links
-            ban_limit: 5 warnings
-            total_link_limit: 75 links
+        Parameters
+        ----------
+            ctx                :: Discord context <!nodoc>
+            cooldown_minutes   :: The number of minutes before a link warning expires | Default: 30 minutes
+            links_before_warn  :: The number of links allows from a user before warning them | Default: 5 links
+            ban_limit          :: The number of links allowed before banning a user | Default: 5 warnings
+            total_link_limit   :: Total links before warning/ban (see above) | Default: 75 links
         """
 
         as_config = self._config.get('antiSpam', {})
@@ -250,18 +250,19 @@ class LinkFilter(AntiSpamModule):
     @commands.command(name="clear", brief="Clear a cooldown record for a specific user")
     async def clear_cooldown(self, ctx: commands.Context, user: discord.Member):
         """
-        Clear a user's cooldown record for this filter.
-
         This command allows moderators to override the antispam expiry system, and clear a user's cooldowns/strikes/
         warnings early. Any accrued warnings for the selected user are discarded and the user starts with a clean slate.
 
-        Parameters:
-            user - A user object (ID, mention, etc) to target for clearing.
+        Parameters
+        ----------
+            ctx   :: Discord context <!nodoc>
+            user  :: A user object (ID, mention, etc) to target for clearing.
 
-        See also:
-            /as <filter_name> clearAll - Clear all cooldowns for all users for a single filter.
-            /as clear - Clear cooldowns on all filters for a single user.
-            /as clearAll - Clear all cooldowns globally for all users (reset).
+        See Also
+        --------
+            /as <filter_name> clearAll  :: Clear all cooldowns for all users for a single filter.
+            /as clear                   :: Clear cooldowns on all filters for a single user.
+            /as clearAll                :: Clear all cooldowns globally for all users (reset).
         """
 
         try:
@@ -287,15 +288,14 @@ class LinkFilter(AntiSpamModule):
     @commands.has_permissions(administrator=True)
     async def clear_all_cooldowns(self, ctx: commands.Context):
         """
-        Clear cooldown records for all users for this filter.
-
         This command will clear all cooldowns for the current filter, effectively resetting its internal state. No users
         will have any warnings for this filter after this command is executed.
 
-        See also:
-            /as <filter_name> clear - Clear cooldowns on a single filter for a single user.
-            /as clear - Clear cooldowns on all filters for a single user.
-            /as clearAll - Clear all cooldowns globally for all users (reset).
+        See Also
+        --------
+            /as <filter_name> clear  :: Clear cooldowns on a single filter for a single user.
+            /as clear                :: Clear cooldowns on all filters for a single user.
+            /as clearAll             :: Clear all cooldowns globally for all users (reset).
         """
 
         record_count = len(self._events)

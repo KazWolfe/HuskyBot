@@ -138,22 +138,26 @@ class NonUniqueFilter(AntiSpamModule):
     async def nonuniqe_cooldown(self, ctx: commands.Context, threshold: int, cache_size: int, cooldown_minutes: int,
                                 warn_limit: int, ban_limit: int):
         """
-        Configure cooldowns/antispam system for non-unique messages.
-
         When a message is received by the bot, the system checks it for uniqueness against a cache of previous
         messages from that user. If a message is found to already be in that cache, a "strike" is added. Once a user
         accrues a set number of strikes in the configured time period, the user will either be warned publicly, or
         banned from the guild.
 
-        Parameters:
-            threshold - A number between zero and one that determines how "similar" a message needs to be before being
-                        considered a duplicate. Set to 0 to disable this check. Default: 0.75
-            cache_size - The number of back messages to keep in cache for any given user. This value must be above one
-                         to prevent issues. The cache can not exceed 20 messages. Default: 3
-            cooldown_minutes - The number of minutes to keep a cooldown period active. Like most other antispam
-                               commands, this counts from the first message sent. Default: 5
-            warn_limit - The number of non-unique messages to tolerate before issuing a warning to a user. Default: 5
-            ban_limit - The number of non-unique messages to tolerate before banning a user. Default: 15
+        Parameters
+        ----------
+            ctx               :: Discord context <!nodoc>
+            threshold         :: A number between zero and one that determines how "similar" a message needs to be
+                                 before being considered a duplicate. Set to 0 to disable this check.
+                                 Default: 0.75
+            cache_size        :: The number of back messages to keep in cache for any given user. This value must be
+                                 above one to prevent issues. The cache can not exceed 20 messages.
+                                 Default: 3
+            cooldown_minutes  :: The number of minutes to keep a cooldown period active. Like most other antispam
+                                 commands, this counts from the first message sent. Default: 5
+            warn_limit        :: The number of non-unique messages to tolerate before issuing a warning to a user.
+                                 Default: 5
+            ban_limit         :: The number of non-unique messages to tolerate before banning a user.
+                                 Default: 15
         """
 
         as_config = self._config.get('antiSpam', {})
@@ -192,19 +196,20 @@ class NonUniqueFilter(AntiSpamModule):
     @commands.command(name="test", brief="Get the difference between two messages")
     async def test_strings(self, ctx: commands.Context, text_a: str, text_b: str):
         """
-        Test the difference between two strings to NonUniqueFilter.
-
         This command will compare two strings and determine their similarity ratio (used to determine if a message is
         above the threshold or not). Additionally, it will also time the calculation for profiling purposes.
 
         Note that if the strings you are comparing have spaces, *both must be surrounded by quotes*.
 
-        Parameters:
-            text_a - The first text string to compare to.
-            text_b - The text string to compare to text_a.
+        Parameters
+        ----------
+            ctx     :: Discord context <!nodoc>
+            text_a  :: The first text string to compare to.
+            text_b  :: The text string to compare to text_a.
 
-        Example Commands:
-            /as nuf test hello henlo - Compare strings "hello" and "henlo"
+        Example
+        -------
+            /as nuf test hello henlo  :: Compare strings "hello" and "henlo"
         """
         as_config = self._config.get('antiSpam', {})
         nonunique_config = as_config.get('NonUniqueFilter', {}).get('config', defaults)
@@ -228,18 +233,19 @@ class NonUniqueFilter(AntiSpamModule):
     @commands.command(name="clear", brief="Clear a cooldown record for a specific user")
     async def clear_cooldown(self, ctx: commands.Context, user: discord.Member):
         """
-        Clear a user's cooldown record for this filter.
-
         This command allows moderators to override the antispam expiry system, and clear a user's cooldowns/strikes/
         warnings early. Any accrued warnings for the selected user are discarded and the user starts with a clean slate.
 
-        Parameters:
-            user - A user object (ID, mention, etc) to target for clearing.
+        Parameters
+        ----------
+            ctx   :: Discord context <!nodoc>
+            user  :: A user object (ID, mention, etc) to target for clearing.
 
-        See also:
-            /as <filter_name> clearAll - Clear all cooldowns for all users for a single filter.
-            /as clear - Clear cooldowns on all filters for a single user.
-            /as clearAll - Clear all cooldowns globally for all users (reset).
+        See Also
+        --------
+            /as <filter_name> clearAll  :: Clear all cooldowns for all users for a single filter.
+            /as clear                   :: Clear cooldowns on all filters for a single user.
+            /as clearAll                :: Clear all cooldowns globally for all users (reset).
         """
 
         try:
@@ -265,15 +271,14 @@ class NonUniqueFilter(AntiSpamModule):
     @commands.has_permissions(administrator=True)
     async def clear_all_cooldowns(self, ctx: commands.Context):
         """
-        Clear cooldown records for all users for this filter.
-
         This command will clear all cooldowns for the current filter, effectively resetting its internal state. No users
         will have any warnings for this filter after this command is executed.
 
-        See also:
-            /as <filter_name> clear - Clear cooldowns on a single filter for a single user.
-            /as clear - Clear cooldowns on all filters for a single user.
-            /as clearAll - Clear all cooldowns globally for all users (reset).
+        See Also
+        --------
+            /as <filter_name> clear  :: Clear cooldowns on a single filter for a single user.
+            /as clear                :: Clear cooldowns on all filters for a single user.
+            /as clearAll             :: Clear all cooldowns globally for all users (reset).
         """
 
         record_count = len(self._events)

@@ -227,20 +227,25 @@ class InviteFilter(AntiSpamModule):
     @commands.command(name="allowInvite", brief="Allow an invite from a guild")
     async def allow_invite(self, ctx: commands.Context, guild: int):
         """
-        Add a guild to the AntiSpam Invite Whitelist.
-
         By default, AntiSpam will block all guild invites not posted by authorized members (or invites that are not to
         this guild). This may be overridden on a case-by-case basis using this command. Once a guild is added to the
         whitelist, their invites will not be touched on this guild.
 
         This command expects a single argument - a guild ID.
 
-        Example commands:
-            /as allowInvite 11223344 - Allow invites from guild ID 11223344
+        Parameters
+        ----------
+            ctx    :: Discord context <!nodoc>
+            guild  :: The guild ID to whitelist invites for
 
-        See also:
-            /help as blockInvite    - Remove a guild from the invite whitelist
-            /help as inviteCooldown - Edit cooldown settings for the invite limiter.
+        Examples
+        --------
+            /as allowInvite 11223344  :: Allow invites from guild ID 11223344
+
+        See Also
+        --------
+            /help as blockInvite     :: Remove a guild from the invite whitelist
+            /help as inviteCooldown  :: Edit cooldown settings for the invite limiter.
         """
         as_config = self._config.get('antiSpam', {})
         filter_config = as_config.setdefault('InviteFilter', {}).setdefault('config', defaults)
@@ -266,8 +271,6 @@ class InviteFilter(AntiSpamModule):
     @commands.command(name="blockInvite", brief="Block a previously-approved guild's invites")
     async def block_invite(self, ctx: commands.Context, guild: int):
         """
-        Remove a guild from the AntiSpam Invite Whitelist.
-
         If a guild was added to the AntiSpam whitelist, this command may be used to remove the whitelist entry. See
         /help antispam allowInvite for more information on this command.
 
@@ -275,12 +278,19 @@ class InviteFilter(AntiSpamModule):
 
         This command will return an error if a guild not on the whitelist is removed.
 
-        Example Commands:
-            /as blockInvite 11223344 - No longer allow invites from guild ID 11223344
+        Parameters
+        ----------
+            ctx    :: Discord context <!nodoc>
+            guild  :: The guild ID to remove from the whitelist
 
-        See also:
-            /help as allowInvite    - Add a guild to the invite whitelist
-            /help as inviteCooldown - Edit cooldown settings for the invite limiter.
+        Examples
+        --------
+            /as blockInvite 11223344  :: No longer allow invites from guild ID 11223344
+
+        See Also
+        --------
+            /help as allowInvite     :: Add a guild to the invite whitelist
+            /help as inviteCooldown  :: Edit cooldown settings for the invite limiter.
         """
         as_config = self._config.get('antiSpam', {})
         filter_config = as_config.setdefault('InviteFilter', {}).setdefault('config', defaults)
@@ -313,8 +323,6 @@ class InviteFilter(AntiSpamModule):
     @commands.command(name="configure", brief="Configure thresholds for InviteFilter")
     async def set_invite_cooldown(self, ctx: commands.Context, cooldown_minutes: int, ban_limit: int):
         """
-        Set cooldowns/ban thresholds for guild invite spam.
-
         The bot will automatically ban a user after posting a certain number of invites in a defined time period. This
         command allows those limits to be altered.
 
@@ -323,9 +331,16 @@ class InviteFilter(AntiSpamModule):
         If a user posts `ban_limit` or more guild invites in the span of `cooldown_minutes` minutes, they will be
         automatically banned from the guild.
 
-        See also:
-            /help as blockInvite    - Remove a guild from the invite whitelist
-            /help as blockInvite    - Add a guild to the invite whitelist
+        Parameters
+        ----------
+            ctx               :: Discord context <!nodoc>
+            cooldown_minutes  :: The number of minutes before an invite warning expires
+            ban_limit         :: The number of warnings before a user is banned
+
+        See Also
+        --------
+            /help as blockInvite  :: Remove a guild from the invite whitelist
+            /help as blockInvite  :: Add a guild to the invite whitelist
         """
         as_config = self._config.get('antiSpam', {})
         filter_config = as_config.setdefault('InviteFilter', {}).setdefault('config', defaults)
@@ -345,18 +360,19 @@ class InviteFilter(AntiSpamModule):
     @commands.command(name="clear", brief="Clear a cooldown record for a specific user")
     async def clear_cooldown(self, ctx: commands.Context, user: discord.Member):
         """
-        Clear a user's cooldown record for this filter.
-
         This command allows moderators to override the antispam expiry system, and clear a user's cooldowns/strikes/
         warnings early. Any accrued warnings for the selected user are discarded and the user starts with a clean slate.
 
-        Parameters:
-            user - A user object (ID, mention, etc) to target for clearing.
+        Parameters
+        ----------
+            ctx   :: Command context <!nodoc>
+            user  :: A user object (ID, mention, etc) to target for clearing.
 
-        See also:
-            /as <filter_name> clearAll - Clear all cooldowns for all users for a single filter.
-            /as clear - Clear cooldowns on all filters for a single user.
-            /as clearAll - Clear all cooldowns globally for all users (reset).
+        See Also
+        --------
+            /as <filter_name> clearAll  :: Clear all cooldowns for all users for a single filter.
+            /as clear                   :: Clear cooldowns on all filters for a single user.
+            /as clearAll                :: Clear all cooldowns globally for all users (reset).
         """
 
         try:
@@ -382,15 +398,14 @@ class InviteFilter(AntiSpamModule):
     @commands.has_permissions(administrator=True)
     async def clear_all_cooldowns(self, ctx: commands.Context):
         """
-        Clear cooldown records for all users for this filter.
-
         This command will clear all cooldowns for the current filter, effectively resetting its internal state. No users
         will have any warnings for this filter after this command is executed.
 
-        See also:
-            /as <filter_name> clear - Clear cooldowns on a single filter for a single user.
-            /as clear - Clear cooldowns on all filters for a single user.
-            /as clearAll - Clear all cooldowns globally for all users (reset).
+        See Also
+        --------
+            /as <filter_name> clear  :: Clear cooldowns on a single filter for a single user.
+            /as clear                :: Clear cooldowns on all filters for a single user.
+            /as clearAll             :: Clear all cooldowns globally for all users (reset).
         """
 
         record_count = len(self._events)

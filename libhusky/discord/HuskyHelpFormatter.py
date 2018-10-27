@@ -100,7 +100,7 @@ class HuskyHelpFormatter(HelpFormatter):
         else:
             filtered = sorted(filtered)
             if filtered:
-                self.paginator.add_line('Commands:')
+                self.paginator.add_line('Commands:\n---------')
                 self._add_subcommands_to_page(max_width, filtered)
 
         # add the ending note

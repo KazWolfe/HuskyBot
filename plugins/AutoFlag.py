@@ -116,8 +116,6 @@ class AutoFlag:
     @HuskyChecks.has_guild_permissions(manage_messages=True)
     async def autoflag(self, ctx: commands.Context):
         """
-        Parent command for the AutoFlag plugin.
-
         This command inherently does nothing, and only exists to support the child commands, listed below.
         """
         pass
@@ -125,13 +123,16 @@ class AutoFlag:
     @autoflag.command(name="add", brief="Add a new regex to the autoflag config")
     async def add(self, ctx: commands.Context, *, regex: str):
         """
-        Add a regex to the autoflag list.
-
         This command takes a single argument - a regular expression. It will attempt to add the specified regular
         expression to the autoflag list. Note that this command will not take action against the message, but inform
         a staff member only.
 
         If the regex already exists in the autoflag list, it will be ignored.
+
+        Parameters
+        ----------
+            ctx    :: Discord context. <!nodoc>
+            regex  :: The regex to add to the autoflag list.
         """
 
         flag_regexes: list = self._config.get("flaggedRegexes", [])
@@ -157,10 +158,13 @@ class AutoFlag:
     @autoflag.command(name="remove", brief="Remove a regex from the autoflag config")
     async def remove(self, ctx: commands.Context, *, regex: str):
         """
-        Remove a regex from the autoflag list.
-
         This command takes a single argument - a regular expression. It will attempt to remove the specified regex from
         the autoflag list. If it doesn't exist, this command will raise an exception.
+
+        Parameters
+        ----------
+            ctx    :: Discord context. <!nodoc>
+            regex  :: The regex to remove from the autoflag list.
         """
 
         flag_regexes: list = self._config.get("flaggedRegexes", [])
@@ -186,8 +190,6 @@ class AutoFlag:
     @autoflag.command(name="list", brief="List all regexes in the autoflag config")
     async def list(self, ctx: commands.Context):
         """
-        List all defined autoflags registered with the bot.
-
         This command will attempt to return a separated list of all known regexes that the bot has registered in the
         autoflag database. All regexes in this list will generate a staff alert.
         """
@@ -248,13 +250,10 @@ class AutoFlag:
             color=Colors.SUCCESS
         ))
 
-    @autoflag.command(name="userlist", brief="List all regexes in the autoflag config", aliases=["ulist"])
+    @autoflag.command(name="userlist", brief="List all users in the autoflag config", aliases=["ulist"])
     async def userlist(self, ctx: commands.Context):
         """
-        List all defined autoflags registered with the bot.
-
-        This command will attempt to return a separated list of all known regexes that the bot has registered in the
-        autoflag database. All regexes in this list will generate a staff alert.
+        This command will attempt to return a separated list of all known users that the bot will automatically flag.
         """
 
         flag_users = self._config.get("flaggedUsers", [])
