@@ -32,7 +32,7 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
         self.config = HuskyConfig.get_config()
         self.session_store = HuskyConfig.get_session_store()
 
-        self.developer_mode = self.config.get('developerMode', False)
+        self.developer_mode = self.__check_developer_mode()
 
         # Private variables used for init only
         self.__daemon_mode = (os.getppid() == 1)
@@ -59,10 +59,12 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
         self.init_stage = 0
 
     def entrypoint(self):
-        if self.config.get('apiKey') is None:
+        if os.environ.get('DISCORD_TOKEN'):
+            LOG.info("Loading API key from environment variable DISCORD_TOKEN.")
+        elif self.config.get('apiKey') is None:
             if self.__daemon_mode:
-                LOG.critical("The bot does not have an API key assigned to it. Please run the bot without a "
-                             "daemon to set the API key.")
+                LOG.critical("The bot does not have an API key assigned to it. Please either specify a key in the env "
+                             "variable DISCORD_TOKEN, add a key to the config, or run this bot in non-daemon mode.")
                 exit(1)
             else:
                 print("The bot does not have an API key defined. Please enter one below...")
@@ -77,11 +79,18 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
             LOG.info("The bot is currently loaded in Daemon Mode. In Daemon Mode, certain functionalities are "
                      "slightly altered to better utilize the headless environment.")
 
-        self.run(self.config['apiKey'])
+        if self.developer_mode:
+            LOG.info("The bot is running in DEVELOPER MODE! Some features may behave in unexpected ways or may "
+                     "otherwise break. Some bot safety checks are disabled with this mode on.")
+
+        self.run(os.environ.get('DISCORD_TOKEN') or self.config['apiKey'])
 
         if self.config.get("restartReason") is not None:
             print("READY FOR RESTART!")
             os.execl(sys.executable, *([sys.executable] + sys.argv))
+
+    def __check_developer_mode(self):
+        return bool(os.environ.get('HUSKYBOT_DEVMODE', False)) or self.config.get('developerMode', False)
 
     def __build_stage0_activity(self):
         mapping = {

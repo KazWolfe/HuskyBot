@@ -65,9 +65,8 @@ class UniversalBanList:
 
         for ubl_term in blacklist:
             if re.search(ubl_term, member.display_name, re.IGNORECASE) is not None:
-                await member.ban(reason=f"[AUTOMATIC BAN - UBL Module] New user's name contains UBL keyword "
-                                        f"`{ubl_term}`",
-                                 delete_message_days=0)
+                await member.kick(reason=f"[AUTOMATIC KICK - UBL Module] New user's name contains UBL keyword "
+                                         f"`{ubl_term}`")
                 LOG.info("Banned UBL triggering new join of user %s (matching UBL %s)", member, ubl_term)
 
     async def on_member_update(self, before: discord.Member, after: discord.Member):
@@ -87,9 +86,9 @@ class UniversalBanList:
             else:
                 continue
 
-            await after.ban(reason=f"[AUTOMATIC BAN - UBL Module] User {after} changed {u_type} to include UBL "
-                                   f"keyword {ubl_term}")
-            LOG.info("Banned UBL triggering %s change of user %s (matching UBL %s)", u_type, after, ubl_term)
+            await after.kick(reason=f"[AUTOMATIC BAN - UBL Module] User {after} changed {u_type} to include UBL "
+                                    f"keyword {ubl_term}")
+            LOG.info("Kicked UBL triggering %s change of user %s (matching UBL %s)", u_type, after, ubl_term)
 
 
 def setup(bot: HuskyBot):
