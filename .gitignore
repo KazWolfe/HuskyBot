@@ -15,3 +15,7 @@ idea/*
 
 # Used for guild CTF challenges
 ctf
+
+# Don't accidentally upload the keys used by HuskyBot's deploy.
+keys/
+id_rsa*

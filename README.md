@@ -43,13 +43,15 @@ during the bot's inception, the bot was built specifically to run in a single gu
 
 #### Docker Installation
 
-HuskyBot can optionally be installed as a Docker container, and is more or less self-reliant. To do this, just build
-the Dockerfile and then run it:
+HuskyBot can optionally be installed as a Docker container, and is more or less self-reliant. When you have been cleared
+by a bot developer to run your own build of HuskyBot, you will receive a zipfile containing the `Dockerfile` and a 
+folder named `keys`. Extract both of these to an empty folder somewhere. When the files are extracted, switch to that 
+folder and run:
 
-    docker build .
+    docker build -t huskybot .
     docker run -e "DISCORD_TOKEN=<your_api_key>" huskybot:latest
     
-Alternatively, you can set `DISCORD_TOKEN` to your environment variables if you'd rather not pass it in via commands.
+Alternatively, you can set `DISCORD_TOKEN` in your environment variables if you'd rather not pass it in via commands.
 This configuration also allows Docker to be launched on managed services, like ECS. See the Docker manual for 
 instructions on how to do this.
 

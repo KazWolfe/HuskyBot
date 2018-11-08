@@ -1,14 +1,18 @@
 FROM python:3.6.6-alpine
-ARG GIT_CREDENTIALS
 
 # Set the working directory, and expose a port for Husky
 WORKDIR HuskyBot/
 
 # Install prerequisites
-RUN apk add --update --virtual .pynacl_deps git build-base python3-dev libffi-dev
+RUN apk add --update --virtual .pynacl_deps git build-base python3-dev libffi-dev openssh
+
+# Make and load the keys
+ADD keys/* /root/.ssh/
+RUN chmod 600 /root/.ssh/id_rsa && \
+    echo "StrictHostKeyChecking no " > /root/.ssh/config
 
 # Load in HuskyBot and the latest dependencies
-RUN git clone https://$GIT_CREDENTIALS@github.com/KazWolfe/HuskyBot.git . && \
+RUN git clone git@github.com:KazWolfe/HuskyBot.git . && \
     python3 -m pip install -r requirements.txt
 
 # Prepare the config volume, we want to have this in its own layer
