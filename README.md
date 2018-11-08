@@ -36,7 +36,7 @@ during the bot's inception, the bot was built specifically to run in a single gu
        git clone https://github.com/KazWolfe/HuskyBot.git; cd HuskyBot
        sudo python3 -m pip install -r requirements.txt
        
-3. *Before starting the bot*, [add it to your guild](https://discordapp.com/developers/docs/topics/oauth2#bots).
+3. [Add the bot to your guild](https://discordapp.com/developers/docs/topics/oauth2#bots).
 4. Once your bot is in your guild and ready to go, start it with `python3 BotCore.py`.
 5. When prompted, paste in your bot API key, and hit ENTER.
 6. Run `/help config` to get a list of base configuration values, and configure the bot as you see fit.
@@ -47,14 +47,18 @@ HuskyBot can optionally be installed as a Docker container, and is more or less 
 the Dockerfile and then run it:
 
     docker build .
-    docker run huskybot --env DISCORD_TOKEN=<your_api_key>
+    docker run -e "DISCORD_TOKEN=<your_api_key>" huskybot:latest
     
-Alternatively, you can set DISCORD_TOKEN to your environment variables if you'd rather not pass it in via commands.
-This configuration also allows Docker to be launched on managed services, like ECS or similar.
+Alternatively, you can set `DISCORD_TOKEN` to your environment variables if you'd rather not pass it in via commands.
+This configuration also allows Docker to be launched on managed services, like ECS. See the Docker manual for 
+instructions on how to do this.
 
 Note that the initial build will take a while due to dependency updates. This is normal, and future launches using 
 `docker run` will be quick. The bot will automatically take care of updates after it is built, meaning bot owners have 
 a seamless experience.
+
+Once your bot is running, you may [add the bot](https://discordapp.com/developers/docs/topics/oauth2#bots) to your 
+guild.
 
 ### Required Permissions
 For the best experience, it is highly recommended you give HuskyBot **Administrator** privileges in your

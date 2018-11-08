@@ -173,6 +173,8 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
                          "having a guild set. Please remove this account from all guilds, or specify "
                          "a guild ID in the config.")
             exit(127)
+        else:
+            LOG.info("The bot is not associated with any guilds yet. The next guild joined by the bot will be locked.")
 
     async def __initialize_webserver(self):
         http_config = self.config.get('httpConfig', {
