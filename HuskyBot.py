@@ -3,6 +3,7 @@
 # System imports
 import logging
 import os
+import signal
 import ssl
 import sys
 import traceback
@@ -59,9 +60,18 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
         self.init_stage = 0
 
     def entrypoint(self):
+        # Prepare signal handler
+        signal.signal(signal.SIGTERM, self.shutdown)
+        signal.signal(signal.SIGINT, self.shutdown)
+
         if os.environ.get('DISCORD_TOKEN'):
             LOG.info("Loading API key from environment variable DISCORD_TOKEN.")
         elif self.config.get('apiKey') is None:
+            if HuskyUtils.is_docker():
+                LOG.critical("Please specify the API key by using the DISCORD_TOKEN environment varaible when using "
+                             "Docker.")
+                exit(1)
+
             if self.__daemon_mode:
                 LOG.critical("The bot does not have an API key assigned to it. Please either specify a key in the env "
                              "variable DISCORD_TOKEN, add a key to the config, or run this bot in non-daemon mode.")
@@ -74,6 +84,10 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
                 print("The API key has been set!")
 
         LOG.info("The bot's log path is: {}".format(self.__log_path))
+
+        if HuskyUtils.is_docker():
+            LOG.info("The bot has detected it is running in Docker. Some internal systems have been changed in order "
+                     "to better suit the container land.")
 
         if self.__daemon_mode:
             LOG.info("The bot is currently loaded in Daemon Mode. In Daemon Mode, certain functionalities are "
@@ -88,6 +102,14 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
         if self.config.get("restartReason") is not None:
             print("READY FOR RESTART!")
             os.execl(sys.executable, *([sys.executable] + sys.argv))
+
+    def shutdown(self):
+        LOG.info("Shutting down HuskyBot...")
+
+        self.config.save()
+        LOG.debug("Config file saved/written to disk.")
+
+        self.loop.create_task(self.logout())
 
     def __check_developer_mode(self):
         return bool(os.environ.get('HUSKYBOT_DEVMODE', False)) or self.config.get('developerMode', False)
@@ -132,6 +154,10 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
         bot_logger = logging.getLogger("HuskyBot")
         bot_logger.setLevel(logging.INFO)
 
+        if self.developer_mode:
+            bot_logger.setLevel(logging.DEBUG)
+            LOG.setLevel(logging.DEBUG)
+
         return bot_logger
 
     async def __init_guild_lock(self):
@@ -150,7 +176,7 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
 
     async def __initialize_webserver(self):
         http_config = self.config.get('httpConfig', {
-            "host": "localhost",
+            "host": "127.0.0.1",
             "port": "9339",
             "ssl_cert": None
         })
@@ -179,8 +205,7 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
 
         plugin_list = self.config.get('plugins', [])
 
-        if self.config.get("developerMode", False):
-            LOG.setLevel(logging.DEBUG)
+        if self.developer_mode:
             plugin_list = ["Debug"] + plugin_list
 
         for plugin in plugin_list:
@@ -322,7 +347,7 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
 
         # Handle cases where the calling user is missing a required permission.
         if isinstance(error, commands.MissingPermissions):
-            if self.config.get("developerMode", False):
+            if self.developer_mode:
                 await ctx.send(embed=discord.Embed(
                     title="Command Handler",
                     description=f"**You are not authorized to run `/{command_name}`:**\n```{error_string}```\n\n"
@@ -335,7 +360,7 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
 
         # Handle cases where the command is disabled.
         elif isinstance(error, commands.DisabledCommand):
-            if self.config.get("developerMode", False):
+            if self.developer_mode:
                 embed = discord.Embed(
                     title="Command Handler",
                     description=f"**The command `/{command_name}` does not exist.** See `/help` for valid commands.",
@@ -348,7 +373,7 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
 
         # Handle cases where the command does not exist.
         elif isinstance(error, commands.CommandNotFound):
-            if self.config.get("developerMode", False):
+            if self.developer_mode:
                 await ctx.send(embed=discord.Embed(
                     title="Command Handler",
                     description=f"**The command `/{command_name}` does not exist.** See `/help` for valid commands.",
@@ -452,3 +477,4 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
 if __name__ == '__main__':
     bot = HuskyBot()
     bot.entrypoint()
+    LOG.info("Left entrypoint, bot has shut down. Goodbye, everybody!")

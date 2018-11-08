@@ -3,7 +3,6 @@ ARG GIT_CREDENTIALS
 
 # Set the working directory, and expose a port for Husky
 WORKDIR HuskyBot/
-EXPOSE 9339
 
 # Install prerequisites
 RUN apk add --update --virtual .pynacl_deps git build-base python3-dev libffi-dev
@@ -21,4 +20,5 @@ RUN mkdir -p logs/
 VOLUME /HuskyBot/logs/
 
 # And once everything looks good, launch Husky :3
-CMD ["/usr/local/bin/python3", "HuskyBot.py"]
+EXPOSE 9339
+ENTRYPOINT ["/usr/local/bin/python3", "HuskyBot.py"]

@@ -8,6 +8,7 @@ import git
 from discord.ext import commands
 
 from HuskyBot import HuskyBot
+from libhusky import HuskyUtils
 from libhusky.HuskyStatics import *
 
 LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
@@ -110,6 +111,9 @@ class Base:
         embed.add_field(name="Library Version", value=f"discord.py {discord.__version__}", inline=True)
         embed.add_field(name="Python Version", value=f"Python {platform.python_version()}")
         embed.add_field(name="Current Host", value=f"`{socket.gethostname()}`", inline=True)
+
+        if HuskyUtils.is_docker():
+            embed.add_field(name="Platform", value="Docker", inline=True)
 
         embed.set_thumbnail(url=ctx.bot.user.avatar_url)
         embed.set_footer(text="(c) 2018, KazWolfe | Andwooooooo!",

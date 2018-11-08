@@ -250,6 +250,14 @@ def escape_markdown(string):
     return string
 
 
+def is_docker():
+    path = '/proc/self/cgroup'
+    return (
+            os.path.exists('/.dockerenv') or
+            os.path.isfile(path) and any('docker' in line for line in open(path))
+    )
+
+
 class CompressingRotatingFileHandler(logging.handlers.RotatingFileHandler):
     # Code source: https://stackoverflow.com/a/35547094/1817097
     # Modified by Kaz Wolfe

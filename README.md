@@ -41,6 +41,21 @@ during the bot's inception, the bot was built specifically to run in a single gu
 5. When prompted, paste in your bot API key, and hit ENTER.
 6. Run `/help config` to get a list of base configuration values, and configure the bot as you see fit.
 
+#### Docker Installation
+
+HuskyBot can optionally be installed as a Docker container, and is more or less self-reliant. To do this, just build
+the Dockerfile and then run it:
+
+    docker build .
+    docker run huskybot --env DISCORD_TOKEN=<your_api_key>
+    
+Alternatively, you can set DISCORD_TOKEN to your environment variables if you'd rather not pass it in via commands.
+This configuration also allows Docker to be launched on managed services, like ECS or similar.
+
+Note that the initial build will take a while due to dependency updates. This is normal, and future launches using 
+`docker run` will be quick. The bot will automagically take care of updates after it is built, meaning bot owners have 
+a seamless experience.
+
 ### Required Permissions
 For the best experience, it is highly recommended you give HuskyBot **Administrator** privileges in your
 guild. If you are uncomfortable with this, custom permissions may be used. Be sure that the bot at the
