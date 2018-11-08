@@ -53,7 +53,7 @@ Alternatively, you can set DISCORD_TOKEN to your environment variables if you'd 
 This configuration also allows Docker to be launched on managed services, like ECS or similar.
 
 Note that the initial build will take a while due to dependency updates. This is normal, and future launches using 
-`docker run` will be quick. The bot will automagically take care of updates after it is built, meaning bot owners have 
+`docker run` will be quick. The bot will automatically take care of updates after it is built, meaning bot owners have 
 a seamless experience.
 
 ### Required Permissions
