@@ -8,22 +8,20 @@ services:
     image: huskybot:latest
     env_file: .env
     environment:
-    - HUSKYBOT_PLATFORM=DockerCompose
+    - HUSKYBOT_PLATFORM=compose
     ports:
     - "9339"
     networks:
-    - huskybot_resources
+    - resources
     volumes:
     - ./config:/HuskyBot/config
     - ./logs:/HuskyBot/logs
     - ./keys:/root/.ssh/:ro
-    - ./custom_plugins:/HuskyBot/plugins/custom/
-    deploy:
-      restart_policy: on-failure
+    - ./custom_plugins:/HuskyBot/plugins/custom/:ro
     restart: on-failure
 
 networks:
-  huskybot_resources:
+  resources:
 
 volumes:
   huskybot_db:

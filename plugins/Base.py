@@ -112,9 +112,11 @@ class Base:
         embed.add_field(name="Python Version", value=f"Python {platform.python_version()}")
         embed.add_field(name="Current Host", value=f"`{socket.gethostname()}`", inline=True)
 
-        platform_type = HuskyUtils.get_platform_type(self.bot)
+        platform_type = HuskyUtils.get_platform_type()
         if platform_type:
-            embed.add_field(name="Platform", value=platform_type, inline=True)
+            pl_pretty_index = {"compose": "Docker (using Compose)"}
+
+            embed.add_field(name="Platform", value=pl_pretty_index.get(platform_type, platform_type), inline=True)
 
         embed.set_thumbnail(url=ctx.bot.user.avatar_url)
         embed.set_footer(text="(c) 2018, KazWolfe | Andwooooooo!",

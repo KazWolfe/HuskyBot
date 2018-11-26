@@ -45,7 +45,7 @@ class BotAdmin:
         unloaded_plugins = []
         loaded_plugins = list(self.bot.extensions.keys())
 
-        plugin_dir = os.listdir('plugins/')
+        plugin_dir = list(set(os.listdir('plugins/') + os.listdir('plugins/custom')))
 
         for plugin in plugin_dir:  # type: str
             if not plugin.endswith('.py'):

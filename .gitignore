@@ -19,4 +19,8 @@ ctf
 # Don't accidentally upload the keys used by HuskyBot's deploy.
 keys/
 id_rsa*
+
+# Don't load environment-specific things
 .env
+plugins/custom
+custom_plugins

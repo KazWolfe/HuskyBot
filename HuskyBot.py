@@ -200,7 +200,9 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
                  f"{http_config['host']}:{http_config['port']}, now listening...")
 
     async def __init_load_plugins(self):
-        sys.path.insert(1, os.getcwd() + "/plugins/")
+        # Note: Custom plugins come *before* default plugins. This means you can swap out any plugin for your own ver
+        sys.path.insert(1, os.getcwd() + "/plugins/custom/")
+        sys.path.insert(2, os.getcwd() + "/plugins/")
 
         self.load_extension('Base')
         self.load_extension('BotAdmin')

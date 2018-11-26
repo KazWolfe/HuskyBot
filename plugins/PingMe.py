@@ -56,7 +56,7 @@ class PingMe:
             2. This command may eat your shoes if you do not give it the attention it wants.
             3. This command may steal food from the fridge if it is not fed in time.
             4. This command may cause "zoomies" knocking over the plant on the coffee table.
-            5. The above caveat is choosen randomly and you have no way of telling. You may be trying to stop the wrong
+            5. The above caveat is chosen randomly and you have no way of telling. You may be trying to stop the wrong
                caveat altogether. I don't know.
 
             6. This command may cause other nearby huskies to start talking and not shut up for at least five minutes.

@@ -1,5 +1,6 @@
+import asyncio
 import logging
-import time
+import sys
 from datetime import datetime
 
 import discord
@@ -42,23 +43,40 @@ class Updater:
         pushing.
         """
 
-        remote = self.repo.remotes.origin
+        update_result, old_sha, new_sha = await self.perform_upgrade()
 
-        current_sha = self.repo.head.object.hexsha
-
-        fetch_info = remote.fetch()[0]
-        LOG.info("Got update fetch to %s", fetch_info)
-
-        if fetch_info.commit.hexsha == current_sha:
+        if update_result == UpdateResult.UPDATED:
+            await ctx.send(embed=discord.Embed(
+                title=Emojis.INBOX + " Bot Update Utility",
+                description=f"The bot's code has been updated from `{old_sha[:8]}` "
+                            f"to [`{new_sha[:8]}`]({GIT_URL}/commit/{new_sha}). Please wait while the bot restarts...",
+                color=Colors.SUCCESS
+            ))
+        elif update_result == UpdateResult.UPDATED_WITH_DEPS:
+            await ctx.send(embed=discord.Embed(
+                title=Emojis.INBOX + " Bot Update Utility",
+                description=f"The bot's code has been updated from `{old_sha[:8]}` "
+                            f"to [`{new_sha[:8]}`]({GIT_URL}/commit/{new_sha}). The bot's dependencies have "
+                            f"additionally been updated to the latest version. Please wait while the bot restarts...",
+                color=Colors.SUCCESS
+            ))
+        elif update_result == UpdateResult.DEPS_UPDATE_FAILED:
+            await ctx.send(embed=discord.Embed(
+                title=Emojis.INBOX + " Bot Update Utility",
+                description=f"The bot's code could not be updated successfully, as an error was encountered while "
+                            f"attempting to update the bot's dependencies. The bot's code has not been updated.",
+                color=Colors.DANGER
+            ))
+            return
+        elif update_result == UpdateResult.ALREADY_UP_TO_DATE:
             await ctx.send(embed=discord.Embed(
                 title="Bot Manager",
                 description=f"The bot is already up-to-date at version "
-                            f"[`{current_sha[:8]}`]({GIT_URL}/commit/{current_sha})",
+                            f"[`{old_sha[:8]}`]({GIT_URL}/commit/{old_sha})",
                 color=Colors.INFO
             ))
             return
-
-        if fetch_info.flags != 64:
+        elif update_result == UpdateResult.CANNOT_FAST_FORWARD:
             await ctx.send(embed=discord.Embed(
                 title="Bot Manager",
                 description="The bot's code can not be fast-forwarded to the latest version. Please manually "
@@ -66,19 +84,6 @@ class Updater:
                 color=Colors.DANGER
             ))
             return
-
-        # we're clear to update. let's do it!
-        LOG.info("All update sanity checks passed. Pulling...")
-        await ctx.bot.change_presence(activity=discord.Activity(name="Updating...", type=0), status=discord.Status.idle)
-        time.sleep(5)
-        remote.pull()
-        new_sha = self.repo.head.object.hexsha
-        await ctx.send(embed=discord.Embed(
-            title=Emojis.INBOX + " Bot Update Utility",
-            description=f"The bot's code has been updated from `{current_sha[:8]}` "
-                        f"to [`{new_sha[:8]}`]({GIT_URL}/commit/{new_sha}) Please wait while the bot restarts...",
-            color=Colors.SUCCESS
-        ))
 
         LOG.info("Bot is going down for update restart!")
         self._config.set("restartNotificationChannel", ctx.channel.id)
@@ -112,6 +117,70 @@ class Updater:
                         inline=False)
 
         await ctx.send(embed=embed)
+
+    async def perform_upgrade(self):
+        remote = self.repo.remotes.origin
+
+        current_sha = self.repo.head.object.hexsha
+
+        fetch_info = remote.fetch()[0]
+        LOG.info("Updater fetched %s from upstream.", fetch_info)
+
+        if fetch_info.commit.hexsha == current_sha:
+            return UpdateResult.ALREADY_UP_TO_DATE, current_sha, current_sha
+
+        if fetch_info.flags != 64:
+            return UpdateResult.CANNOT_FAST_FORWARD, current_sha, current_sha
+
+        LOG.info("Update sanity checks complete. The bot is ready for upgrade.")
+        await self.bot.change_presence(
+            activity=discord.Activity(name="Updating...", type=0),
+            status=discord.Status.idle
+        )
+
+        await asyncio.sleep(5)
+        remote.pull()
+
+        new_sha = self.repo.head.object.hexsha
+        LOG.info(f"The bot's update succeeded. Now at git revision {new_sha[:8]}.")
+
+        # Dependency upgrade requested
+        if "--update-deps" in self.repo.head.object.message:
+            LOG.info("Git requested a dependency upgrade. Performing...")
+
+            pip_process = await asyncio.create_subprocess_exec(
+                [sys.executable, "-m", "pip", "install", "-r", "./requirements.txt"],
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE
+            )
+
+            stdout, stderr = await pip_process.communicate()
+
+            if pip_process.returncode != 0:
+                LOG.error("Dependencies failed to upgrade. Output below.")
+                LOG.error(f'[stdout]\n{stdout.decode()}')
+                LOG.error(f'[stderr]\n{stderr.decode()}')
+
+                LOG.info("Reverting last commit to code...")
+                self.repo.head.reset(commit=current_sha, index=True, working_tree=True)
+                LOG.info(f"Code hard-reset to {current_sha[:8]}.")
+
+                return UpdateResult.DEPS_UPDATE_FAILED, current_sha, current_sha
+
+            return UpdateResult.UPDATED_WITH_DEPS, current_sha, new_sha
+
+        return UpdateResult.UPDATED, current_sha, new_sha
+
+
+class UpdateResult:
+    # Success
+    UPDATED = 0
+    UPDATED_WITH_DEPS = 1
+
+    # Failure
+    ALREADY_UP_TO_DATE = 100
+    CANNOT_FAST_FORWARD = 101
+    DEPS_UPDATE_FAILED = 110
 
 
 def setup(bot: HuskyBot):

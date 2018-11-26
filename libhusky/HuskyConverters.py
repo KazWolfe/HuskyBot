@@ -208,7 +208,7 @@ class CIPluginConverter(str, commands.Converter):
 
     async def convert(self, ctx, argument):
         all_plugins = {}
-        plugin_dir = os.listdir('plugins/')
+        plugin_dir = list(set(os.listdir('plugins/') + os.listdir('plugins/custom')))
 
         # Regrettably, we can't cache this as plugindir is dynamic.
         for plugin in plugin_dir:  # type: str
