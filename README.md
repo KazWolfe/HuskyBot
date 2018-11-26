@@ -20,26 +20,16 @@ not necessarily friendly to administrators or configuration, as it was initially
 guild.
 
 ### Installation
-HuskyBot *must* be installed once for every guild that it will be used on. Due to design choices made
-during the bot's inception, the bot was built specifically to run in a single guild. 
 
-0. Please be sure that you meet the following requirements before attempting to install HuskyBot:
+#### Docker Compose (Recommended)
 
-    * A Discord API key. You may get one [here](https://discordapp.com/developers/applications/).
-    * Ubuntu 18.04 or newer. ***The bot will not work reliably on Windows platforms!***
-    * A server with at least 1GB RAM. I highly recommend [Digital Ocean](https://m.do.co/c/77962b668c59).
-    * Python 3.6 or newer.
-    * Python's PIP installed for Python 3.6
+HuskyBot also has the capability to run with Docker Compose, and this is the preferred way of running HuskyBot.
 
-2. Once all prerequisites are set, run the below commands (as a non-privileged user) to install the bot:
-
-       git clone https://github.com/KazWolfe/HuskyBot.git; cd HuskyBot
-       sudo python3 -m pip install -r requirements.txt
-       
-3. [Add the bot to your guild](https://discordapp.com/developers/docs/topics/oauth2#bots).
-4. Once your bot is in your guild and ready to go, start it with `python3 BotCore.py`.
-5. When prompted, paste in your bot API key, and hit ENTER.
-6. Run `/help config` to get a list of base configuration values, and configure the bot as you see fit.
+1. Extract the resources zipfile you have received from a bot developer, and `cd` to it.
+2. Copy `env.sample` to `.env`.
+3. Open the `.env` file and add your Discord bot API token on the `DISCORD_TOKEN` line.
+4. Save the file, and run the bot with `docker-compose up -d`. The bot and all dependencies will automatically launch.
+5. Add the bot to your guild, and enjoy.
 
 #### Docker Installation
 
@@ -62,14 +52,28 @@ a seamless experience.
 Once your bot is running, you may [add the bot](https://discordapp.com/developers/docs/topics/oauth2#bots) to your 
 guild.
 
-#### Docker Compose
 
-HuskyBot also has the capability to run with Docker Compose, and this is the preferred way of running HuskyBot.
+#### Classic Mode
+HuskyBot *must* be installed once for every guild that it will be used on. Due to design choices made
+during the bot's inception, the bot was built specifically to run in a single guild. 
 
-1. Extract the resources zipfile you have received from a bot developer, and `cd` to it.
-2. Open the `.env` file and add your Discord bot API token on the `DISCORD_TOKEN` line.
-3. Save the file, and run the bot with `docker-compose up -d`. The bot and all dependencies will automatically launch.
-4. Add the bot to your guild, and enjoy.
+0. Please be sure that you meet the following requirements before attempting to install HuskyBot:
+
+    * A Discord API key. You may get one [here](https://discordapp.com/developers/applications/).
+    * Ubuntu 18.04 or newer. ***The bot will not work reliably on Windows platforms!***
+    * A server with at least 1GB RAM. I highly recommend [Digital Ocean](https://m.do.co/c/77962b668c59).
+    * Python 3.6 or newer.
+    * Python's PIP installed for Python 3.6
+
+2. Once all prerequisites are set, run the below commands (as a non-privileged user) to install the bot:
+
+       git clone https://github.com/KazWolfe/HuskyBot.git; cd HuskyBot
+       sudo python3 -m pip install -r requirements.txt
+       
+3. [Add the bot to your guild](https://discordapp.com/developers/docs/topics/oauth2#bots).
+4. Once your bot is in your guild and ready to go, start it with `python3 BotCore.py`.
+5. When prompted, paste in your bot API key, and hit ENTER.
+6. Run `/help config` to get a list of base configuration values, and configure the bot as you see fit.
 
 ### Required Permissions
 For the best experience, it is highly recommended you give HuskyBot **Administrator** privileges in your
