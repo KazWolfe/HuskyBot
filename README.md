@@ -21,6 +21,9 @@ guild.
 
 ### Installation
 
+HuskyBot is a sophisticated bot, and has a (large) number of possible install paths. Feel free to choose whichever is
+best for your use case.
+
 #### Docker Compose (Recommended)
 
 HuskyBot also has the capability to run with Docker Compose, and this is the preferred way of running HuskyBot.
@@ -51,6 +54,22 @@ a seamless experience.
 
 Once your bot is running, you may [add the bot](https://discordapp.com/developers/docs/topics/oauth2#bots) to your 
 guild.
+
+#### SystemD Unit
+
+For convenience purposes, we provide a SystemD unit file (under [`misc/huskybot.service`](misc/huskybot.service)). This 
+service file may be installed and used to automatically manage HuskyBot. To do this:
+
+0. Ensure all dependencies (as specified under the **Classic Mode** section) are satisfied.
+1. Create a new user and group, `huskybot`. Set their home folder to `/usr/share/huskybot`.
+2. Copy `misc/huskybot.service` to `/etc/systemd/system`.
+3. Run  `systemctl reload-daemon` to register the HuskyBot service with SystemD
+4. Place all HuskyBot files in `/usr/share/huskybot`, and copy `env.sample` to `.env`.
+5. Open `.env`, and set your API key to the specified value.
+6. Start HuskyBot with `systemctl start huskybot.service`.
+7. Add the bot to your guild, and enjoy.
+
+Note that paths and similar values may be changed, however they must be also updated in the provided unit file.
 
 
 #### Classic Mode
