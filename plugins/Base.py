@@ -114,7 +114,7 @@ class Base:
 
         platform_type = HuskyUtils.get_platform_type()
         if platform_type:
-            pl_pretty_index = {"compose": "Docker (using Compose)"}
+            pl_pretty_index = {"compose": "Docker (using Compose)", "systemd": "Linux (systemd)"}
 
             embed.add_field(name="Platform", value=pl_pretty_index.get(platform_type, platform_type), inline=True)
 

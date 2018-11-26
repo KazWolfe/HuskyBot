@@ -55,7 +55,7 @@ a seamless experience.
 Once your bot is running, you may [add the bot](https://discordapp.com/developers/docs/topics/oauth2#bots) to your 
 guild.
 
-#### SystemD Unit
+#### systemd Unit
 
 For convenience purposes, we provide a SystemD unit file (under [`misc/huskybot.service`](misc/huskybot.service)). This 
 service file may be installed and used to automatically manage HuskyBot. To do this:
