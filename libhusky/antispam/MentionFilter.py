@@ -48,8 +48,8 @@ class MentionFilter(AntiSpamModule):
         self._events = {}
 
     async def on_message(self, message):
-        ANTISPAM_CONFIG = self._config.get('antiSpam', {})
-        ping_config = {**defaults, **ANTISPAM_CONFIG.get('MentionFilter', {}).get('config', {})}
+        antispam_config = self._config.get('antiSpam', {})
+        ping_config = {**defaults, **antispam_config.get('MentionFilter', {}).get('config', {})}
 
         alert_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_ALERTS.value, None)
         if alert_channel is not None:

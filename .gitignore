@@ -1,4 +1,4 @@
-# Ignore python's incessence to generate files
+# Ignore python's incessant need to generate files
 *.py[cod]
 __pycache__/
 

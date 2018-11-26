@@ -61,8 +61,8 @@ class NonAsciiFilter(AntiSpamModule):
         return len(nonascii_characters) / float(len(text))
 
     async def on_message(self, message: discord.Message):
-        ANTISPAM_CONFIG = self._config.get('antiSpam', {})
-        CHECK_CONFIG = {**defaults, **ANTISPAM_CONFIG.get('NonAsciiFilter', {}).get('config', {})}
+        antispam_config = self._config.get('antiSpam', {})
+        check_config = {**defaults, **antispam_config.get('NonAsciiFilter', {}).get('config', {})}
 
         # Prepare the logger
         log_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_LOG.value, None)
@@ -74,7 +74,7 @@ class NonAsciiFilter(AntiSpamModule):
             del self._events[message.author.id]
 
         # Disable if min length is 0 or less
-        if CHECK_CONFIG['minMessageLength'] <= 0:
+        if check_config['minMessageLength'] <= 0:
             return
 
         # Users with MANAGE_MESSAGES are allowed to send as many nonascii things as they want.
@@ -82,23 +82,23 @@ class NonAsciiFilter(AntiSpamModule):
             return
 
         # Message is too short, just ignore it.
-        if len(message.content) < CHECK_CONFIG['minMessageLength']:
+        if len(message.content) < check_config['minMessageLength']:
             return
 
         nonascii_percentage = self.calculate_nonascii_value(message.content)
 
         # Message doesn't have enough non-ascii characters, we can ignore it.
-        if nonascii_percentage < min(CHECK_CONFIG['nonAsciiThreshold'], CHECK_CONFIG['nonAsciiDelete']):
+        if nonascii_percentage < min(check_config['nonAsciiThreshold'], check_config['nonAsciiDelete']):
             return
 
-        if nonascii_percentage > CHECK_CONFIG['nonAsciiDelete']:
+        if nonascii_percentage > check_config['nonAsciiDelete']:
             LOG.info(f"Deleted message containing non-ascii percentage over threshold of "
-                     f"{CHECK_CONFIG['nonAsciiDelete']}: {nonascii_percentage}")
+                     f"{check_config['nonAsciiDelete']}: {nonascii_percentage}")
             await message.delete()
 
         # Message is now over threshold, get/create their cooldown record.
         cooldown_record = self._events.setdefault(message.author.id, {
-            'expiry': datetime.datetime.utcnow() + datetime.timedelta(minutes=CHECK_CONFIG['minutes']),
+            'expiry': datetime.datetime.utcnow() + datetime.timedelta(minutes=check_config['minutes']),
             'offenseCount': 0
         })
 
@@ -114,7 +114,7 @@ class NonAsciiFilter(AntiSpamModule):
 
         cooldown_record['offenseCount'] += 1
         LOG.info(f"Offense record for {message.author} incremented. User has "
-                 f"{cooldown_record['offenseCount']} / {CHECK_CONFIG['banLimit']} warnings.")
+                 f"{cooldown_record['offenseCount']} / {check_config['banLimit']} warnings.")
 
         if log_channel is not None:
             embed = discord.Embed(
@@ -129,7 +129,7 @@ class NonAsciiFilter(AntiSpamModule):
             embed.add_field(name="Message ID", value=message.id, inline=True)
             embed.add_field(name="Channel", value=message.channel.mention, inline=True)
 
-            embed.set_footer(text=f"Strike {cooldown_record['offenseCount']} of {CHECK_CONFIG['banLimit']}, "
+            embed.set_footer(text=f"Strike {cooldown_record['offenseCount']} of {check_config['banLimit']}, "
                                   f"resets {cooldown_record['expiry'].strftime(DATETIME_FORMAT)}")
 
             embed.set_author(name=f"Non-ASCII spam from {message.author} detected!",
@@ -137,9 +137,9 @@ class NonAsciiFilter(AntiSpamModule):
 
             await log_channel.send(embed=embed)
 
-        if cooldown_record['offenseCount'] >= CHECK_CONFIG['banLimit']:
-            await message.author.ban(reason=f"[AUTOMATIC BAN - AntiSpam Module] User sent {CHECK_CONFIG['banLimit']} "
-                                            f"messages over the non-ASCII threshold in a {CHECK_CONFIG['minutes']} "
+        if cooldown_record['offenseCount'] >= check_config['banLimit']:
+            await message.author.ban(reason=f"[AUTOMATIC BAN - AntiSpam Module] User sent {check_config['banLimit']} "
+                                            f"messages over the non-ASCII threshold in a {check_config['minutes']} "
                                             f"minute period.",
                                      delete_message_days=1)
 

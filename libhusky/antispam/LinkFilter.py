@@ -67,8 +67,8 @@ class LinkFilter(AntiSpamModule):
         :return: Does not return.
         """
 
-        ANTISPAM_CONFIG = self._config.get('antiSpam', {})
-        COOLDOWN_CONFIG = ANTISPAM_CONFIG.get('LinkFilter', {}).get('config', defaults)
+        antispam_config = self._config.get('antiSpam', {})
+        cooldown_config = antispam_config.get('LinkFilter', {}).get('config', defaults)
 
         # gen the embed here
         link_warning = discord.Embed(
@@ -104,19 +104,19 @@ class LinkFilter(AntiSpamModule):
 
         # We have at least one link now, make the cooldown record.
         cooldown_record = self._events.setdefault(message.author.id, {
-            'expiry': datetime.datetime.utcnow() + datetime.timedelta(minutes=COOLDOWN_CONFIG['minutes']),
+            'expiry': datetime.datetime.utcnow() + datetime.timedelta(minutes=cooldown_config['minutes']),
             'offenseCount': 0,
             'totalLinks': 0
         })
 
         # We also want to track individual link posting
-        if COOLDOWN_CONFIG['linkWarnLimit'] > 0:
+        if cooldown_config['linkWarnLimit'] > 0:
 
             # Increment the record
             cooldown_record['totalLinks'] += len(regex_matches)
 
             # if a member is closely approaching their link cap (75% of max), warn them.
-            warn_limit = math.floor(COOLDOWN_CONFIG['totalBeforeBan'] * 0.75)
+            warn_limit = math.floor(cooldown_config['totalBeforeBan'] * 0.75)
             if cooldown_record['totalLinks'] >= warn_limit and cooldown_record['offenseCount'] == 0:
                 await message.channel.send(embed=link_warning, delete_after=90.0)
                 cooldown_record['offenseCount'] += 1
@@ -125,7 +125,7 @@ class LinkFilter(AntiSpamModule):
                     embed = discord.Embed(
                         description=f"User {message.author} has sent {cooldown_record['totalLinks']} links recently, "
                                     f"and as a result has been warned. If they continue to post links to the currently "
-                                    f"configured value of {COOLDOWN_CONFIG['totalBeforeBan']} links, they will "
+                                    f"configured value of {cooldown_config['totalBeforeBan']} links, they will "
                                     f"be automatically banned.",
                     )
 
@@ -138,10 +138,10 @@ class LinkFilter(AntiSpamModule):
                     await log_channel.send(embed=embed)
 
             # And then ban at max
-            if cooldown_record['totalLinks'] >= COOLDOWN_CONFIG['totalBeforeBan']:
+            if cooldown_record['totalLinks'] >= cooldown_config['totalBeforeBan']:
                 await message.author.ban(reason=f"[AUTOMATIC BAN - AntiSpam Module] User sent "
-                                                f"{COOLDOWN_CONFIG['totalBeforeBan']} or more links in a "
-                                                f"{COOLDOWN_CONFIG['minutes']} minute period.",
+                                                f"{cooldown_config['totalBeforeBan']} or more links in a "
+                                                f"{cooldown_config['minutes']} minute period.",
                                          delete_message_days=1)
 
                 # And purge their record, it's not needed anymore
@@ -149,7 +149,7 @@ class LinkFilter(AntiSpamModule):
                 return
 
         # And now process warning counters
-        if COOLDOWN_CONFIG['linkWarnLimit'] > 0 and (len(regex_matches) > COOLDOWN_CONFIG['linkWarnLimit']):
+        if cooldown_config['linkWarnLimit'] > 0 and (len(regex_matches) > cooldown_config['linkWarnLimit']):
 
             # First and foremost, delete the message
             try:
@@ -169,7 +169,7 @@ class LinkFilter(AntiSpamModule):
             if log_channel is not None:
                 embed = discord.Embed(
                     description=f"User {message.author} has sent a message containing over "
-                                f"{COOLDOWN_CONFIG['linkWarnLimit']} links to a public channel.",
+                                f"{cooldown_config['linkWarnLimit']} links to a public channel.",
                     color=Colors.WARNING
                 )
 
@@ -180,7 +180,7 @@ class LinkFilter(AntiSpamModule):
                 embed.add_field(name="Channel", value=message.channel.mention, inline=True)
 
                 embed.set_footer(text=f"Strike {cooldown_record['offenseCount']} "
-                                      f"of {COOLDOWN_CONFIG['banLimit']}, "
+                                      f"of {cooldown_config['banLimit']}, "
                                       f"resets {cooldown_record['expiry'].strftime(DATETIME_FORMAT)}")
 
                 embed.set_author(name=f"Link spam from {message.author} blocked.",
@@ -189,11 +189,11 @@ class LinkFilter(AntiSpamModule):
                 await log_channel.send(embed=embed)
 
             # If the user is over the ban limit, get rid of them.
-            if cooldown_record['offenseCount'] >= COOLDOWN_CONFIG['banLimit']:
+            if cooldown_record['offenseCount'] >= cooldown_config['banLimit']:
                 await message.author.ban(reason=f"[AUTOMATIC BAN - AntiSpam Module] User sent "
-                                                f"{COOLDOWN_CONFIG['banLimit']} messages containing "
-                                                f"{COOLDOWN_CONFIG['linkWarnLimit']} or more links in a "
-                                                f"{COOLDOWN_CONFIG['minutes']} minute period.",
+                                                f"{cooldown_config['banLimit']} messages containing "
+                                                f"{cooldown_config['linkWarnLimit']} or more links in a "
+                                                f"{cooldown_config['minutes']} minute period.",
                                          delete_message_days=1)
 
                 # And purge their record, it's not needed anymore

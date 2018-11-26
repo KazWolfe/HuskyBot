@@ -294,7 +294,8 @@ class Intelligence:
         Parameters
         ----------
             ctx             :: Discord context <!nodoc>
-            search_context  :: A string (or channel ID) that resolves to a channel ctx. See /help msgcount. Default "all"
+            search_context  :: A string (or channel ID) that resolves to a channel ctx. See /help msgcount.
+                               Default "all"
             delta           :: A string in ##d##h##m##s format to capture. Default 24h.
             threshold       :: The minimum number of messages a user needs to send.
 

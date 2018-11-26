@@ -1,3 +1,2 @@
-aiohttp~=3.3.2
+git+https://github.com/Rapptz/discord.py.git@1f2602d11edf932d7b331e31a1ecbb9dd5c91c8e#egg=discord.py[voice]
 GitPython~=2.1.11
-git+https://github.com/Rapptz/discord.py.git@860d6a9ace8248dfeec18b8b159e7b757d9f56bb#egg=discord.py[voice]
