@@ -262,9 +262,9 @@ def get_platform_type():
         return os.environ.get('HUSKYBOT_PLATFORM', 'Docker')
 
     if HuskyConfig.get_session_store().get('daemonMode', False):
-        return "Daemon"
+        return os.environ.get('HUSKYBOT_PLATFORM', 'Daemonized')
 
-    return None
+    return os.environ.get('HUSKYBOT_PLATFORM', None)
 
 
 class CompressingRotatingFileHandler(logging.handlers.RotatingFileHandler):
