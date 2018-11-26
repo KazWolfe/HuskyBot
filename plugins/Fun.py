@@ -7,7 +7,7 @@ import discord
 from discord.ext import commands
 
 from HuskyBot import HuskyBot
-from libhusky import HuskyUtils
+from libhusky import HuskyUtils, HuskyChecks
 from libhusky.HuskyStatics import *
 
 LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
@@ -229,7 +229,7 @@ class Fun:
 
     # noinspection PyUnusedLocal
     @commands.command(name="sendmsg", brief="Send a message to another channel.", hidden=True)
-    @commands.has_permissions(administrator=True)
+    @HuskyChecks.has_guild_permissions(manage_messages=True)
     async def sendmsg(self, ctx: discord.ext.commands.Context, channel: discord.TextChannel, *, message: str):
         """
         This command takes two arguments, a Channel (ID, mention, or name) and a message to send.
@@ -243,10 +243,13 @@ class Fun:
             message  :: The message to send
         """
 
+        if not channel.permissions_for(ctx.author).manage_messages:
+            raise commands.MissingPermissions(["manage_messages"])
+
         await channel.send(message)
 
     @commands.command(name="secho", brief="Echo a message, deleting the command.", hidden=True)
-    @commands.has_permissions(administrator=True)
+    @commands.has_permissions(manage_messages=True)
     async def secho(self, ctx: discord.ext.commands.Context, *, message: str):
         """
         This can be used to make the bot look like it's "talking" by itself. However, quick-eyed users may see the

@@ -62,6 +62,15 @@ a seamless experience.
 Once your bot is running, you may [add the bot](https://discordapp.com/developers/docs/topics/oauth2#bots) to your 
 guild.
 
+#### Docker Compose
+
+HuskyBot also has the capability to run with Docker Compose, and this is the preferred way of running HuskyBot.
+
+1. Extract the resources zipfile you have received from a bot developer, and `cd` to it.
+2. Open the `.env` file and add your Discord bot API token on the `DISCORD_TOKEN` line.
+3. Save the file, and run the bot with `docker-compose up -d`. The bot and all dependencies will automatically launch.
+4. Add the bot to your guild, and enjoy.
+
 ### Required Permissions
 For the best experience, it is highly recommended you give HuskyBot **Administrator** privileges in your
 guild. If you are uncomfortable with this, custom permissions may be used. Be sure that the bot at the

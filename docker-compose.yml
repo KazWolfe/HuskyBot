@@ -1,0 +1,29 @@
+version: "3"
+
+services:
+  huskybot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: huskybot:latest
+    env_file: .env
+    environment:
+    - HUSKYBOT_PLATFORM=DockerCompose
+    ports:
+    - "9339"
+    networks:
+    - huskybot_resources
+    volumes:
+    - ./config:/HuskyBot/config
+    - ./logs:/HuskyBot/logs
+    - ./keys:/root/.ssh/:ro
+    - ./custom_plugins:/HuskyBot/plugins/custom/
+    deploy:
+      restart_policy: on-failure
+    restart: on-failure
+
+networks:
+  huskybot_resources:
+
+volumes:
+  huskybot_db:

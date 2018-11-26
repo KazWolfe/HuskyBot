@@ -12,8 +12,7 @@ from logging import handlers
 
 import discord
 
-import libhusky.HuskyConfig
-from libhusky import HuskyStatics
+from libhusky import HuskyStatics, HuskyConfig
 
 
 def member_has_role(member, role_id):
@@ -69,7 +68,7 @@ def should_process_message(message: discord.Message):
         return False
 
     # Don't process messages from ignored guilds (developer mode)
-    if message.guild.id in libhusky.HuskyConfig.get_config().get("ignoredGuilds", []):
+    if message.guild.id in HuskyConfig.get_config().get("ignoredGuilds", []):
         return False
 
     # Don't process messages from other bots.
@@ -193,7 +192,7 @@ def get_image_size(fname):
 
 
 async def send_to_keyed_channel(bot: discord.Client, channel: HuskyStatics.ChannelKeys, embed: discord.Embed):
-    log_channel = libhusky.HuskyConfig.get_config().get('specialChannels', {}).get(channel.value, None)
+    log_channel = HuskyConfig.get_config().get('specialChannels', {}).get(channel.value, None)
     if log_channel is not None:
         log_channel: discord.TextChannel = bot.get_channel(log_channel)
 
@@ -256,6 +255,16 @@ def is_docker():
             os.path.exists('/.dockerenv') or
             os.path.isfile(path) and any('docker' in line for line in open(path))
     )
+
+
+def get_platform_type():
+    if is_docker():
+        return os.environ.get('HUSKYBOT_PLATFORM', 'Docker')
+
+    if HuskyConfig.get_session_store().get('daemonMode', False):
+        return "Daemon"
+
+    return None
 
 
 class CompressingRotatingFileHandler(logging.handlers.RotatingFileHandler):
