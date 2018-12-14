@@ -198,6 +198,7 @@ class PartialEmojiConverter(commands.PartialEmojiConverter):
         try:
             return await super().convert(ctx, argument)
         except commands.BadArgument:
+            # Emojis suck. If this fails to convert something, the user can deal with it. Because *meh*.
             return argument
 
 

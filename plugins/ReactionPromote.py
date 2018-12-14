@@ -3,6 +3,7 @@ import logging
 import discord
 from discord.ext import commands
 
+from libhusky import HuskyConverters
 from libhusky.HuskyStatics import *
 
 LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
@@ -33,12 +34,8 @@ class ReactionPromote:
         guild = message.guild
         user = guild.get_member(payload.user_id)
 
-        emoji_slug = payload.emoji.name
-        if payload.emoji.is_custom_emoji():
-            emoji_slug = str(payload.emoji)
-
         try:
-            role_id = promotion_config[str(payload.channel_id)][str(payload.message_id)][emoji_slug]
+            role_id = promotion_config[str(payload.channel_id)][str(payload.message_id)][str(payload.emoji)]
             group_to_add = guild.get_role(role_id)
             await user.add_roles(group_to_add)
             LOG.info(f"Added user {user.display_name} to role {str(group_to_add)}")
@@ -52,7 +49,7 @@ class ReactionPromote:
                 LOG.warning("Not configured for this message. Ignoring.")
                 return
 
-            LOG.warning(f"Got bad emoji {emoji_slug} ({str(hex(ord(emoji_slug)))})")
+            LOG.warning(f"Got bad emoji {str(payload.emoji)}")
             self.roleRemovalBlacklist.append(str(payload.user_id) + str(payload.message_id))
             await message.remove_reaction(payload.emoji, user)
 
@@ -73,12 +70,8 @@ class ReactionPromote:
         guild = message.guild
         user = guild.get_member(payload.user_id)
 
-        emoji_slug = payload.emoji.name
-        if payload.emoji.is_custom_emoji():
-            emoji_slug = str(payload.emoji)
-
         try:
-            role_id = promotion_config[str(payload.channel_id)][str(payload.message_id)][emoji_slug]
+            role_id = promotion_config[str(payload.channel_id)][str(payload.message_id)][str(payload.emoji)]
             group_to_remove = guild.get_role(role_id)
             await user.remove_roles(group_to_remove)
             LOG.info(f"Removed user {user.display_name} from role {str(group_to_remove)}")
@@ -91,7 +84,7 @@ class ReactionPromote:
                 LOG.warning("Not configured for this message. Ignoring.")
                 return
 
-            LOG.warning(f"Got bad emoji {emoji_slug} ({str(hex(ord(emoji_slug)))})")
+            LOG.warning(f"Got bad emoji {str(payload.emoji)}")
 
     @commands.group(pass_context=True, brief="Control the promotions plugin")
     @commands.has_permissions(administrator=True)
@@ -109,7 +102,7 @@ class ReactionPromote:
 
     @rpromote.command(name="add", brief="Add a new promotion to the configs")
     async def add_promotion(self, ctx: discord.ext.commands.Context, channel: discord.TextChannel, message_id: int,
-                            emoji: str, *, role: discord.Role):
+                            emoji: HuskyConverters.PartialEmojiConverter, *, role: discord.Role):
         """
         This is a relatively convoluted command due to the number of things that need to happen for it.
 
@@ -161,6 +154,8 @@ class ReactionPromote:
             ))
             return
         except (discord.NotFound, discord.InvalidArgument):
+            # It may seem  strange to react before we save the emote to config. This is why. Emoji handling is *hard* so
+            # we can just let Discord handle it instead (and reject any invalid emojis) for us.
             await ctx.send(embed=discord.Embed(
                 title=Emojis.WARNING + " Error Adding ReactionPromote",
                 description="The emoji specified is invalid or could otherwise not be processed. Please double-check "
@@ -171,7 +166,7 @@ class ReactionPromote:
 
         message_config = promotion_config.setdefault(str(channel.id), {}).setdefault(str(message_id), {})
 
-        message_config[emoji] = role.id
+        message_config[str(emoji)] = role.id
         self._config.set('promotions', promotion_config)
 
         await ctx.send(embed=discord.Embed(
