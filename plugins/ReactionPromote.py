@@ -178,12 +178,12 @@ class ReactionPromote:
 
     @rpromote.command(name="remove", brief="Remove a promotion to the configs")
     async def remove_promotion(self, ctx: discord.ext.commands.Context, channel: discord.TextChannel, message_id: int,
-                               emoji: str):
+                               emoji: HuskyConverters.PartialEmojiConverter):
 
         promotion_config = self._config.get('promotions', {})
 
         try:
-            del promotion_config[str(channel.id)][str(message_id)][emoji]
+            del promotion_config[str(channel.id)][str(message_id)][str(emoji)]
         except KeyError:
             await ctx.send(embed=discord.Embed(
                 title="Reaction Promotes",
