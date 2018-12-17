@@ -335,9 +335,6 @@ class Debug:
         except ValueError:
             pass
 
-        if len(su_list) == 0:
-            su_list.append("None")
-
         embed = discord.Embed(
             title=Emojis.CROWN + " Bot Superusers",
             description="The below users have full permission on the bot to perform superuser (dangerous) actions.",
@@ -345,7 +342,9 @@ class Debug:
         )
 
         embed.add_field(name="Bot Owner", value=f"<@{owner_id}>", inline=False)
-        embed.add_field(name="Configured Superusers", value="\n".join(f"<@{i}>" for i in su_list), inline=False)
+
+        if len(su_list) > 0:
+            embed.add_field(name="Configured Superusers", value="\n".join(f"<@{i}>" for i in su_list), inline=False)
 
         await ctx.send(embed=embed)
 
