@@ -17,7 +17,6 @@ from discord.ext import commands
 # HuskyBot related imports
 from libhusky import HuskyConfig
 from libhusky import HuskyHTTP
-from libhusky import HuskyStatics
 from libhusky import HuskyUtils
 from libhusky.HuskyStatics import *
 from libhusky.discord.HuskyHelpFormatter import HuskyHelpFormatter
@@ -34,6 +33,7 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
         self.session_store = HuskyConfig.get_session_store()
 
         self.developer_mode = self.__check_developer_mode()
+        self.superusers = []
 
         # Private variables used for init only
         self.__daemon_mode = (os.getppid() == 1)
@@ -239,6 +239,13 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
                         "similar die?")
             return
 
+        # Load in application information
+        app_info = await self.application_info()
+
+        # Load in superusers
+        self.superusers: list = self.config.get('superusers', []) + [app_info.owner.id]
+        LOG.info(f"Superusers loaded: {self.superusers}")
+
         LOG.info(f"HuskyBot is online, running discord.py {discord.__version__}. Initializing and "
                  f"loading modules...")
 
@@ -282,7 +289,7 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
             return
 
         if message.content.startswith(self.command_prefix):
-            if (author.id in self.config.get('userBlacklist', [])) and (author.id not in HuskyStatics.DEVELOPERS):
+            if (author.id in self.config.get('userBlacklist', [])) and (author.id not in self.superusers):
                 LOG.info("Blacklisted user %s attempted to run command %s", message.author, message.content)
                 return
 
@@ -294,7 +301,7 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
                 LOG.info("User %s linked to subreddit %s, ignoring command", message.author, message.content)
                 return
 
-            if self.session_store.get('lockdown', False) and (author.id not in HuskyStatics.DEVELOPERS):
+            if self.session_store.get('lockdown', False) and (author.id not in self.superusers):
                 LOG.info("Lockdown mode is enabled for the bot. Command blocked.")
                 return
 
@@ -330,12 +337,7 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
                     color=Colors.DANGER
                 )
 
-                dev_ping = self.config.get("specialRoles", {}).get(SpecialRoleKeys.BOT_DEVS.value)
-
-                if dev_ping is not None:
-                    dev_ping = f"&{dev_ping}"
-                else:
-                    dev_ping = HuskyStatics.DEVELOPERS[0]
+                dev_ping = self.config.get("specialRoles", {}).get(SpecialRoleKeys.BOT_DEVS.value, self.owner_id)
 
                 await channel.send("<@{}>, an error has occurred with the bot. See attached "
                                    "embed.".format(dev_ping),

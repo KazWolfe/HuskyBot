@@ -4,10 +4,6 @@ DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S UTC"
 
 GIT_URL = "https://www.github.com/KazWolfe/HuskyBot"
 
-DEVELOPERS = [
-    142494680158961664  # KazWolfe#2896, notification PoC
-]
-
 
 class Colors(IntEnum):
     PRIMARY = 0x007BFF
@@ -92,6 +88,7 @@ class Emojis:
     TIMER = "\U000023F2"
     PINGPONG = "\U0001F3D3"
     PLUG = "\U0001F50C"
+    CROWN = "\U0001F451"
 
     # Mod shortcuts
     BAN = NO_ENTRY

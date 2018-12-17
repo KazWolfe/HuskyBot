@@ -30,6 +30,9 @@ class ReactionPromote:
         if not isinstance(channel, discord.TextChannel):
             return
 
+        if payload.user_id == self.bot.user.id:
+            return
+
         message = await channel.get_message(payload.message_id)
         guild = message.guild
         user = guild.get_member(payload.user_id)

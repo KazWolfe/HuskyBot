@@ -172,7 +172,7 @@ class Debug:
         await ctx.send("OK")
 
     @commands.command(name="eval", brief="Execute an eval() statement on the bot")
-    @HuskyChecks.is_developer()
+    @HuskyChecks.is_superuser()
     async def evalcmd(self, ctx: discord.ext.commands.Context, *, expr: str):
         """
         Help documentation is not available for this plugin.
@@ -211,7 +211,7 @@ class Debug:
         ))
 
     @commands.command(name="exec", brief="Execute an eval as a function/method", aliases=["feval"])
-    @HuskyChecks.is_developer()
+    @HuskyChecks.is_superuser()
     async def func_exec(self, ctx: discord.ext.commands.Context, *, expr: str):
         """
         Help documentation is not available for this plugin.
@@ -274,7 +274,7 @@ class Debug:
         ))
 
     @commands.command(name="shell", brief="Run a command through the shell")
-    @HuskyChecks.is_developer()
+    @HuskyChecks.is_superuser()
     async def run_command(self, ctx: commands.Context, *, command: str):
         command = command.strip('`')
 
@@ -301,7 +301,7 @@ class Debug:
         ))
 
     @commands.command(name='requestify', brief="Make a HTTP request through the bot")
-    @HuskyChecks.is_developer()
+    @HuskyChecks.is_superuser()
     async def requestify(self, ctx: commands.Context, url: str, method: str = "GET", *, data: str = None):
         method = method.upper()
         supported_methods = ["GET", "POST", "PUT", "DELETE", "PATCH"]
@@ -339,6 +339,31 @@ class Debug:
                 color=Colors.DANGER
             ))
             LOG.warning("Requestify raised exception.", ex)
+
+    @commands.command(name="superusers", brief="Get a list of all bot superusers.")
+    async def get_superusers(self, ctx: commands.Context):
+        su_list = self.bot.superusers[:]
+        owner_id = self.bot.owner_id
+
+        if owner_id is None:
+            appinfo = await self.bot.application_info()
+            owner_id = appinfo.owner.id
+
+        try:
+            su_list.remove(owner_id)
+        except ValueError:
+            pass
+
+        embed = discord.Embed(
+            title=Emojis.CROWN + " Bot Superusers",
+            description="The below users have full permission on the bot to perform superuser (dangerous) actions.",
+            color=Colors.DANGER
+        )
+
+        embed.add_field(name="Bot Owner", value=f"<@{owner_id}>", inline=False)
+        embed.add_field(name="Configured Superusers", value="\n".join(f"<@{i}>" for i in su_list), inline=False)
+
+        await ctx.send(embed=embed)
 
     @HuskyHTTP.register("/debug/hello", ["GET", "POST"])
     async def say_hello(self, request: web.BaseRequest):

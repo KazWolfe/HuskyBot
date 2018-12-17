@@ -1,8 +1,5 @@
 from discord.ext import commands
 
-from libhusky.HuskyStatics import DEVELOPERS
-
-
 def has_guild_permissions(**perms):
     """
     Check if a user (as determined by ctx.author) has guild-level permissions to run this command.
@@ -23,7 +20,7 @@ def has_guild_permissions(**perms):
     return commands.check(predicate)
 
 
-def is_developer():
+def is_superuser():
     """
     Check if the user is a bot developer.
     :return: Returns TRUE if the command can be run, FALSE otherwise.
@@ -36,8 +33,8 @@ def is_developer():
         if (ctx.guild is not None) and (not ctx.author.guild_permissions.administrator):
             failure_reasons.append("Administrator")
 
-        if ctx.author.id not in DEVELOPERS:
-            failure_reasons.append("Bot Developer (Code Grant)")
+        if ctx.author.id not in ctx.bot.superusers:
+            failure_reasons.append("Superuser")
 
         if len(failure_reasons) == 0:
             return True

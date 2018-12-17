@@ -628,10 +628,10 @@ class BotAdmin:
             ))
             return
 
-        if user.id in DEVELOPERS:
+        if user.id in self.bot.superusers:
             await ctx.send(embed=discord.Embed(
                 title="Bot Manager",
-                description=f"The user `{user}` is a bot developer, and may not be ignored.",
+                description=f"The user `{user}` is a superuser, and may not be ignored.",
                 color=Colors.WARNING
             ))
             return
@@ -744,7 +744,7 @@ class BotAdmin:
         await ctx.bot.logout()
 
     @system.command(name="lockdown", brief="Toggle the bot's LOCKDOWN mode.")
-    @HuskyChecks.is_developer()
+    @HuskyChecks.is_superuser()
     async def lockdown(self, ctx: commands.Context, state: bool = None):
         """
         Control bot lockdown state.
