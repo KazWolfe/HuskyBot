@@ -177,16 +177,6 @@ class Debug:
         """
         Help documentation is not available for this plugin.
         """
-
-        # Block *everyone* except Kaz from running eval
-        if ctx.author.id != 142494680158961664:
-            await ctx.send(embed=discord.Embed(
-                title="Access denied!",
-                description="Due to the danger of this command, access to it has been blocked for this account.",
-                color=Colors.DANGER
-            ))
-            return
-
         code = expr.strip('` ')
 
         env = {
@@ -216,15 +206,6 @@ class Debug:
         """
         Help documentation is not available for this plugin.
         """
-
-        # Block *everyone* except Kaz from running feval
-        if ctx.author.id != 142494680158961664:
-            await ctx.send(embed=discord.Embed(
-                title="Access denied!",
-                description="Due to the danger of this command, access to it has been blocked for this account.",
-                color=Colors.DANGER
-            ))
-            return
 
         fn_name = "_eval_expr"
 
@@ -353,6 +334,9 @@ class Debug:
             su_list.remove(owner_id)
         except ValueError:
             pass
+
+        if len(su_list) == 0:
+            su_list.append("None")
 
         embed = discord.Embed(
             title=Emojis.CROWN + " Bot Superusers",
