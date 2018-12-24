@@ -267,6 +267,21 @@ def get_platform_type():
     return os.environ.get('HUSKYBOT_PLATFORM', None)
 
 
+def get_mutual_guilds(bot, user_a: discord.User, user_b: discord.User):
+    mutuals = []
+
+    for g in bot.guilds:
+        if user_a not in g.members:
+            continue
+
+        if user_b not in g.members:
+            continue
+
+        mutuals.append(g)
+
+    return mutuals
+
+
 class CompressingRotatingFileHandler(logging.handlers.RotatingFileHandler):
     # Code source: https://stackoverflow.com/a/35547094/1817097
     # Modified by Kaz Wolfe

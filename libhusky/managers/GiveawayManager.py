@@ -95,8 +95,18 @@ class GiveawayManager:
 
         wcl = "\n\nWinners will be contacted shortly."
 
-        channel: discord.TextChannel = self.bot.get_channel(giveaway.register_channel_id)
-        message: discord.Message = await channel.get_message(giveaway.register_message_id)
+        try:
+            channel: discord.TextChannel = self.bot.get_channel(giveaway.register_channel_id)
+            message: discord.Message = await channel.get_message(giveaway.register_message_id)
+        except discord.NotFound:
+            LOG.error("An expected giveaway channel or message was deleted. The giveaway can not continue, as the "
+                      "associated records are gone or no longer accessible to the bot. The giveaway will be deleted "
+                      "from the cache.")
+
+            if giveaway in self.__cache__:
+                self.__cache__.remove(giveaway)
+            self._giveaway_config.set(GIVEAWAY_CONFIG_KEY, self.__cache__)
+            return
 
         contending_users = []
 

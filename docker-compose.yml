@@ -14,9 +14,10 @@ services:
     networks:
     - resources
     volumes:
+    - /HuskyBot
     - ./config:/HuskyBot/config
     - ./logs:/HuskyBot/logs
-    - ./keys:/root/.ssh/:ro
+    - ./keys/id_rsa:/root/.ssh/id_rsa:ro
     - ./custom_plugins:/HuskyBot/plugins/custom/:ro
     restart: on-failure
 

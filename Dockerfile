@@ -8,6 +8,7 @@ RUN apk add --update --virtual .pynacl_deps git build-base python3-dev libffi-de
 
 # Make and load the keys
 ADD keys/* /root/.ssh/
+# RUN ssh-keygen
 RUN chmod 600 /root/.ssh/id_rsa && \
     echo "StrictHostKeyChecking no " > /root/.ssh/config
 
