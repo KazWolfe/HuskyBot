@@ -241,6 +241,7 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
 
         # Load in application information
         app_info = await self.application_info()
+        self.session_store.set("appInfo", app_info)
 
         # Load in superusers
         self.superusers: list = self.config.get('superusers', []) + [app_info.owner.id]
@@ -337,7 +338,8 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
                     color=Colors.DANGER
                 )
 
-                dev_ping = self.config.get("specialRoles", {}).get(SpecialRoleKeys.BOT_DEVS.value, self.owner_id)
+                owner_id = self.session_store.get('appInfo', None).owner_id
+                dev_ping = self.config.get("specialRoles", {}).get(SpecialRoleKeys.BOT_DEVS.value, owner_id)
 
                 await channel.send("<@{}>, an error has occurred with the bot. See attached "
                                    "embed.".format(dev_ping),

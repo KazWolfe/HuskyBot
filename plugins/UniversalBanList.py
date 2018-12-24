@@ -45,9 +45,10 @@ class UniversalBanList:
 
         for ubl_term in self._ubl_phrases:
             if re.search(ubl_term, message.content, re.IGNORECASE) is not None:
-                await message.author.ban(reason=f"[AUTOMATIC BAN - UBL Module] User used UBL keyword `{ubl_term}`",
+                await message.author.ban(reason=f"User used UBL keyword `{ubl_term}`. Purging user...",
                                          delete_message_days=5)
-                LOG.info("Banned UBL triggering user (context %s, keyword %s, from %s in %s): %s", context,
+                await message.guild.unban(message.author, reason="UBL ban reversal")
+                LOG.info("Kicked UBL triggering user (context %s, keyword %s, from %s in %s): %s", context,
                          message.author, ubl_term, message.channel, message.content)
 
     async def on_message(self, message):
@@ -67,7 +68,7 @@ class UniversalBanList:
             if re.search(ubl_term, member.display_name, re.IGNORECASE) is not None:
                 await member.kick(reason=f"[AUTOMATIC KICK - UBL Module] New user's name contains UBL keyword "
                                          f"`{ubl_term}`")
-                LOG.info("Banned UBL triggering new join of user %s (matching UBL %s)", member, ubl_term)
+                LOG.info("Kicked UBL triggering new join of user %s (matching UBL %s)", member, ubl_term)
 
     async def on_member_update(self, before: discord.Member, after: discord.Member):
         if after.guild_permissions.manage_guild:
