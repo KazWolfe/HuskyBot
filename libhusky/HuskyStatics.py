@@ -106,3 +106,4 @@ class Regex:
     URL_REGEX = r"\b(([\w-]+://?|www[.])[^\s()<>]+(?:\([\w\d]+\)|([^[:punct:]\s]|\/)))"
 
     INVITE_REGEX = r'(discord\.gg|discordapp.com/invite)/(?P<fragment>[0-9a-z\-]+)'
+    US_HAM_CALLSIGN_REGEX = r'(([KNW][A-Z]?)|(A[A-L]))\d[A-Z]{1,3}'

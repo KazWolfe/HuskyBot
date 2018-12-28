@@ -1,5 +1,6 @@
 import datetime
 import logging
+import re
 
 import aiohttp
 import discord
@@ -45,6 +46,17 @@ class HamRadio:
         --------
             /callsign W1AW  :: Get information for the callsign W1AW.
         """
+
+        callsign = callsign.upper()
+
+        if re.match(Regex.US_HAM_CALLSIGN_REGEX + r'$', callsign) is None:
+            await ctx.send(embed=discord.Embed(
+                title="Callsign Validation Error",
+                description=f"The callsign you have entered appears to be invalid. Please ensure that the callsign you "
+                            f"have entered is valid, and is a United States callsign.",
+                color=Colors.ERROR
+            ))
+            return
 
         async with self._http_session.get(self.CALLSIGN_LOOKUP_URL.format(callsign=callsign)) as r:
             if r.status != 200:
