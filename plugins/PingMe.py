@@ -104,7 +104,7 @@ class PingMe:
 
             words.append("".join(w_verbs))
 
-        return " ".join(words)
+        return " ".join(words)[:500]
 
 
 def setup(bot: HuskyBot):

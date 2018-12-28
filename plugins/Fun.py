@@ -56,18 +56,6 @@ class Fun:
                                          f"critical damage!*")
             return
 
-        # CritZ easter egg
-        if user.id == 255802794244571136:
-            if ctx.author.id == 255802794244571136:
-                await ctx.send("No.")
-                return
-
-            await ctx.send(f"Oh god, what did he screw up this time.... Anyways, {ctx.author.mention} slaps "
-                           f"{user.mention} with a bat or a pig or an anvil or something. Look, the slap command's "
-                           f"been run so many times on {user.display_name} that I can't be creative anymore. Cut me "
-                           f"some slack here.")
-            return
-
         victim = user.mention
 
         if user == ctx.author:
@@ -163,8 +151,7 @@ class Fun:
             336301511942340608: {"a": 6.97, "c": 5.99, "i": 7.50, "otp": "<@418530320707747868> \U0001f49e"},  # Court
             418530320707747868: {"a": 10, "c": 10, "i": 10, "otp": "<@336301511942340608> \U0001f49e"},  # HuskyBot
             237569958903545857: {"a": 7.01, "c": 3.0, "i": 8.74},  # Squeegee
-            128882954343546880: {"a": 0, "c": 0, "i": 0},  # Marahute
-            255802794244571136: {"otp": "slap marks"}  # CritZ
+            128882954343546880: {"a": 0, "c": 0, "i": 0}  # Marahute
         }
 
         entry = hardcoded_users.get(member.id, {})
