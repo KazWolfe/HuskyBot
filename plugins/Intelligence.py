@@ -1,5 +1,6 @@
 import datetime
 import logging
+import unicodedata
 
 import discord
 from discord.ext import commands
@@ -507,6 +508,47 @@ class Intelligence:
             embed.set_image(url=invite_guild.splash_url)
 
         embed.set_footer(text=f"Report generated at {HuskyUtils.get_timestamp()}")
+
+        await ctx.send(embed=embed)
+
+    @commands.command(name="emoji", brief="Get information on a Discord emote", aliases=["einfo"])
+    async def emoji_info(self, ctx: commands.Context, emoji: HuskyConverters.SuperEmojiConverter):
+        # Custom handling for strings
+        if isinstance(emoji, str):
+            lookup_chars = HuskyUtils.convert_emoji_to_hex(emoji)
+            lookup_key = "-".join("{codepoint:x}".format(codepoint=ord(c)) for c in lookup_chars)
+
+            if len(lookup_chars) == 0:
+                raise commands.BadArgument("Specified string could not be converted to an emoji.")
+
+            embed = discord.Embed(
+                title="Emoji Information",
+                description="Emoji is made up of:" +
+                            ''.join(("\n - {} (`{}`)".format(c, unicodedata.name(c)) for c in lookup_chars)),
+                color=Colors.INFO
+            )
+            embed.set_image(url=f"https://twemoji.maxcdn.com/2/72x72/{lookup_key}.png")
+
+            await ctx.send(embed=embed)
+            return
+
+        emoji = emoji  # type: discord.PartialEmoji # duck typing hack for pycharm
+        flake = HuskyUtils.TwitterSnowflake.load(emoji.id, DISCORD_EPOCH)
+
+        embed = discord.Embed(
+            title=f"Emoji - {emoji.name}",
+            description=f"**Emoji ID**: `{emoji.id}`",
+            color=Colors.INFO
+        )
+        embed.add_field(name="Animated", value=emoji.animated, inline=True)
+        embed.add_field(name="Create Date", value=flake.get_datetime().strftime(DATETIME_FORMAT))
+        embed.set_thumbnail(url=emoji.url)
+
+        if isinstance(emoji, discord.Emoji):
+            embed.add_field(name="Integrated", value=emoji.managed, inline=True)
+            embed.add_field(name="Require Colons", value=emoji.require_colons, inline=True)
+            embed.add_field(name="Guild", value=f"{emoji.guild.name} - ID `{emoji.guild_id}`", inline=False)
+            embed.add_field(name="Preview", value=f"Hello world! {emoji}", inline=False)
 
         await ctx.send(embed=embed)
 

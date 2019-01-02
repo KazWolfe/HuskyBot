@@ -7,6 +7,7 @@ import uuid
 
 import discord
 from discord.ext import commands
+from discord.ext.commands import EmojiConverter
 
 from libhusky import HuskyUtils, HuskyConfig, HuskyStatics
 
@@ -200,6 +201,17 @@ class PartialEmojiConverter(commands.PartialEmojiConverter):
         except commands.BadArgument:
             # Emojis suck. If this fails to convert something, the user can deal with it. Because *meh*.
             return argument
+
+
+class SuperEmojiConverter(commands.Converter):
+    async def convert(self, ctx, argument):
+        try:
+            return await EmojiConverter.convert(EmojiConverter(), ctx, argument)
+        except commands.BadArgument:
+            try:
+                return await PartialEmojiConverter.convert(PartialEmojiConverter(), ctx, argument)
+            except commands.BadArgument:
+                return argument
 
 
 class CIPluginConverter(str, commands.Converter):

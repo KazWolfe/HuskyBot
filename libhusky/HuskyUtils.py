@@ -8,6 +8,7 @@ import os
 import re
 import struct
 import subprocess
+import unicodedata
 from logging import handlers
 
 import discord
@@ -280,6 +281,67 @@ def get_mutual_guilds(bot, user_a: discord.User, user_b: discord.User):
         mutuals.append(g)
 
     return mutuals
+
+
+def convert_emoji_to_hex(string: str):
+    splits = []
+    for character in string:
+        if unicodedata.category(character) != "So":
+            continue
+
+        splits.append(character)
+
+    return splits
+
+
+class TwitterSnowflake:
+    def __init__(self):
+        self.timestamp = None
+        self.machine_id = None
+        self.sequence_number = None
+
+        # data itself
+        self.flake = None
+
+        # custom stuff
+        self.epoch = 0
+
+    def __calculate__(self):
+        self.flake = self.sequence_number
+        self.flake += self.machine_id << 12
+        self.flake += int((self.timestamp - self.epoch) * 1000) << 22
+
+    def __decode__(self):
+        self.timestamp = ((self.flake >> 22) + (self.epoch * 1000)) / 1000
+        self.machine_id = (self.flake & 0x3E0000) >> 12
+        self.sequence_number = (self.flake & 0xFFF)
+
+    def __repr__(self):
+        return f"<TwitterSnowflake={self.flake} timestamp={self.timestamp} machine_id={self.machine_id} " \
+               f"seq={self.sequence_number}>"
+
+    @staticmethod
+    def new(timestamp: int, machine_id: int, sequence_number: int, epoch=0):
+        flake = TwitterSnowflake()
+        flake.timestamp = timestamp
+        flake.machine_id = machine_id
+        flake.sequence_number = sequence_number
+        flake.epoch = epoch
+        flake.__calculate__()
+
+        return flake
+
+    @staticmethod
+    def load(flake: int, epoch=0):
+        snowflake = TwitterSnowflake()
+        snowflake.flake = flake
+        snowflake.epoch = epoch
+        snowflake.__decode__()
+
+        return snowflake
+
+    def get_datetime(self):
+        return datetime.datetime.fromtimestamp(self.timestamp)
 
 
 class CompressingRotatingFileHandler(logging.handlers.RotatingFileHandler):

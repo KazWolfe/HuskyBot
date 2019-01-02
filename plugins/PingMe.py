@@ -71,9 +71,17 @@ class PingMe:
             num  :: The number of lines of huskyspeak to generate.
         """
         huskies = []
+        husky_quota = 500
 
         for _ in range(num):
+            generated_husky = self.husky_speak()
+            husky_quota -= len(generated_husky)
+
             huskies.append(self.husky_speak())
+
+            if husky_quota <= 0:
+                LOG.warning("Generated too many huskies! Preventing further generation...")
+                break
 
         await ctx.send("\n".join(huskies))
 
