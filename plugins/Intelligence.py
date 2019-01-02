@@ -550,6 +550,9 @@ class Intelligence:
             embed.add_field(name="Guild", value=f"{emoji.guild.name} - ID `{emoji.guild_id}`", inline=False)
             embed.add_field(name="Preview", value=f"Hello world! {emoji}", inline=False)
 
+            if emoji.roles:
+                embed.add_field(name="Required Roles", value=", ".join(r.mention for r in emoji.roles))
+
         await ctx.send(embed=embed)
 
 
