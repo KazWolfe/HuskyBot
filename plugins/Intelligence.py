@@ -1,6 +1,5 @@
 import datetime
 import logging
-import unicodedata
 
 import discord
 from discord.ext import commands
@@ -515,21 +514,23 @@ class Intelligence:
     async def emoji_info(self, ctx: commands.Context, emoji: HuskyConverters.SuperEmojiConverter):
         # Custom handling for strings
         if isinstance(emoji, str):
-            lookup_chars = HuskyUtils.convert_emoji_to_hex(emoji)
-            lookup_key = "-".join("{codepoint:x}".format(codepoint=ord(c)) for c in lookup_chars)
+            if emoji.isdigit():
+                try:
+                    emoji = self.bot.get_emoji(int(emoji))
+                except discord.NotFound:
+                    await ctx.send(embed=discord.Embed(
+                        title="Emoji Info",
+                        description="The specified emoji ID could not be found.",
+                        color=Colors.ERROR
+                    ))
+            else:
+                await ctx.send(embed=discord.Embed(
+                    title="Emoji Info",
+                    description="This command may only be used to get information on custom emojis, and not "
+                                "default/builtin emojis.",
+                    color=Colors.ERROR
+                ))
 
-            if len(lookup_chars) == 0:
-                raise commands.BadArgument("Specified string could not be converted to an emoji.")
-
-            embed = discord.Embed(
-                title="Emoji Information",
-                description="Emoji is made up of:" +
-                            ''.join(("\n - {} (`{}`)".format(c, unicodedata.name(c)) for c in lookup_chars)),
-                color=Colors.INFO
-            )
-            embed.set_image(url=f"https://twemoji.maxcdn.com/2/72x72/{lookup_key}.png")
-
-            await ctx.send(embed=embed)
             return
 
         emoji = emoji  # type: discord.PartialEmoji # duck typing hack for pycharm
