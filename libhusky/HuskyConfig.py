@@ -100,6 +100,11 @@ def get_config(name: str = 'config', create_if_nonexistent: bool = True) -> Wolf
     :return: Returns the bot's shared persistent configuration.
     """
 
+    config_prefix = os.environ.get('HUSKYBOT_CONFIG_PREFIX')
+
+    if config_prefix:
+        config_prefix += "_"  # Add an underscore to the end of prefix
+
     if name != 'config':
         key = 'config_{}'.format(name)
     else:
@@ -107,7 +112,7 @@ def get_config(name: str = 'config', create_if_nonexistent: bool = True) -> Wolf
 
     if name not in __cache__:
         # The requested store does not exist in cache.
-        __cache__[key] = WolfConfig(f'config/{name}.json', create_if_nonexistent=create_if_nonexistent)
+        __cache__[key] = WolfConfig(f'config/{config_prefix}{name}.json', create_if_nonexistent=create_if_nonexistent)
 
     return __cache__[key]
 
