@@ -349,7 +349,7 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
                 raise e
 
     async def on_command_error(self, ctx, error: commands.CommandError):
-        command_name = ctx.message.content.split(' ')[0][1:]
+        command_name = HuskyUtils.trim_string(ctx.message.content.split(' ')[0][1:], 32, True, '...')
 
         error_string = HuskyUtils.trim_string(str(error).replace('```', '`\u200b`\u200b`'), 128)
 

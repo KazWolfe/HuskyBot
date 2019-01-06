@@ -80,14 +80,14 @@ def should_process_message(message: discord.Message):
     return True
 
 
-def trim_string(string: str, limit: int, add_ellipses: bool = True):
+def trim_string(string: str, limit: int, add_suffix: bool = True, trim_suffix: str = "\n\n..."):
     s = string
 
     if len(string) > limit:
         s = string[:limit]
 
-        if add_ellipses:
-            s = s[:-5] + "\n\n..."
+        if add_suffix:
+            s = s[:-len(trim_suffix)] + trim_suffix
 
     return s
 
