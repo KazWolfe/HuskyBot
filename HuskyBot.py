@@ -48,7 +48,7 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
 
         # Database things
         self.db: sqlalchemy.engine.Engine = None
-        self.db_global_session: sqlalchemy.orm.Session = None
+        self.session_factory = None
 
         # Load in HuskyBot's logger
         self.logger = self.__initialize_logger()
@@ -117,7 +117,6 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
         self.config.save()
         LOG.debug("Config file saved/written to disk.")
 
-        self.db_global_session.close()
         self.db.dispose()
         LOG.debug("DB shut down")
 
@@ -222,7 +221,7 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
         except DatabaseError as s:
             LOG.error(f"Could not connect to the database! The error is as follows: \n{s}")
 
-        self.db_global_session = sqlalchemy.orm.sessionmaker(bind=self.db)
+        self.session_factory = sqlalchemy.orm.sessionmaker(bind=self.db)
 
     async def __init_load_plugins(self):
         # Note: Custom plugins come *before* default plugins. This means you can swap out any plugin for your own ver

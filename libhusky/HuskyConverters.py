@@ -250,7 +250,12 @@ class CommandKV(dict, commands.Converter):
         pairs = argument.split("--")
 
         for pair in pairs:
-            key, value = pair.split(maxsplit=1)
-            res[key.lower()] = value
+            if not pair:
+                continue
+
+            spl = pair.split(maxsplit=1)
+            key = spl[0]
+            value = spl[1] if 1 < len(spl) else ""
+            res[key.lower()] = value.strip()
 
         return res
