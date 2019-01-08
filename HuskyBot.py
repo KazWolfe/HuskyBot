@@ -10,11 +10,15 @@ import traceback
 
 # discord.py imports
 import discord
+# Database imports
+import sqlalchemy
 # aiohttp/web api support
 from aiohttp import web
 from discord.ext import commands
-
+from sqlalchemy import orm
 # HuskyBot related imports
+from sqlalchemy.exc import DatabaseError
+
 from libhusky import HuskyConfig
 from libhusky import HuskyHTTP
 from libhusky import HuskyUtils
@@ -41,6 +45,10 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
 
         self.__log_path = 'logs/huskybot.log'
         self.session_store.set('logPath', self.__log_path)
+
+        # Database things
+        self.db: sqlalchemy.engine.Engine = None
+        self.db_global_session: sqlalchemy.orm.Session = None
 
         # Load in HuskyBot's logger
         self.logger = self.__initialize_logger()
@@ -108,6 +116,10 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
 
         self.config.save()
         LOG.debug("Config file saved/written to disk.")
+
+        self.db_global_session.close()
+        self.db.dispose()
+        LOG.debug("DB shut down")
 
         self.loop.create_task(self.logout())
 
@@ -199,6 +211,19 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
         LOG.info(f"Started {'HTTPS' if ssl_context is not None else 'HTTP'} server at "
                  f"{http_config['host']}:{http_config['port']}, now listening...")
 
+    async def __initialize_database(self):
+        try:
+            c = f"postgresql://{os.environ['POSTGRES_USER']}:{os.environ['POSTGRES_PASSWORD']}" \
+                f"@db:5432/{os.environ['POSTGRES_DB']}"
+            self.db = sqlalchemy.create_engine(c)
+        except KeyError:
+            LOG.warning("No database configuration was set for Husky. Not starting the database.")
+            return
+        except DatabaseError as s:
+            LOG.error(f"Could not connect to the database! The error is as follows: \n{s}")
+
+        self.db_global_session = sqlalchemy.orm.sessionmaker(bind=self.db)
+
     async def __init_load_plugins(self):
         # Note: Custom plugins come *before* default plugins. This means you can swap out any plugin for your own ver
         sys.path.insert(1, os.getcwd() + "/plugins/custom/")
@@ -254,6 +279,7 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
             await self.__init_guild_lock()
 
         await self.__initialize_webserver()
+        await self.__initialize_database()
         await self.__init_load_plugins()
 
         await self.__init_inform_restart()

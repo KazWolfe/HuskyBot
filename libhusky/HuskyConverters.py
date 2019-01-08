@@ -241,3 +241,16 @@ class CIPluginConverter(str, commands.Converter):
         except KeyError:
             raise commands.BadArgument(f"A plugin named {argument} could not be found. Check that the plugin exists. "
                                        f"If a plugin was renamed, please restart the bot to reload the plugin.")
+
+
+class CommandKV(dict, commands.Converter):
+    async def convert(self, ctx, argument):
+        res = {}
+
+        pairs = argument.split("--")
+
+        for pair in pairs:
+            key, value = pair.split(maxsplit=1)
+            res[key.lower()] = value
+
+        return res
