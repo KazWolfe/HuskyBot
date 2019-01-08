@@ -4,7 +4,7 @@ FROM python:3.6.6-alpine
 WORKDIR HuskyBot/
 
 # Install prerequisites
-RUN apk add --update --virtual .pynacl_deps git build-base python3-dev libffi-dev openssh
+RUN apk add --update --virtual .pynacl_deps git build-base python3-dev libffi-dev openssh postgresql-dev gcc musl-dev
 
 # Make and load the keys
 ADD keys/* /root/.ssh/
