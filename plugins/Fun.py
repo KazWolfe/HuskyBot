@@ -3,6 +3,7 @@ import logging
 import random
 from datetime import datetime
 
+import aiohttp
 import discord
 from discord.ext import commands
 
@@ -24,11 +25,16 @@ class Fun:
         self.bot = bot
         self._config = bot.config
 
+        self._http_session = aiohttp.ClientSession(loop=bot.loop)
+
         # For those reading this code and wondering about the significance of 736580, it is a very important
         # number relating to someone I loved. </3
         self._master_rng_seed = 736580
 
         LOG.info("Loaded plugin!")
+
+    def __unload(self):
+        self.bot.loop.create_task(self._http_session.close())
 
     @commands.command(name="slap", brief="Slap a user silly!")
     @commands.guild_only()
@@ -211,6 +217,27 @@ class Fun:
                             )
 
         embed.set_thumbnail(url=member.avatar_url)
+
+        await ctx.send(embed=embed)
+
+    @commands.command(name="dog", brief="Get a photo of a dog. Woof.", aliases=["getdog"])
+    @commands.cooldown(1, 3, commands.BucketType.user)
+    async def get_dog(self, ctx: commands.Context):
+        """
+        Dog.
+        """
+        async with self._http_session.get("https://dog.ceo/api/breeds/image/random") as resp:
+            dog = await resp.json()
+
+        if dog.get('status') != "success":
+            await ctx.send("Error getting dog. Why not play with a husky?")
+            return
+
+        embed = discord.Embed(
+            title="Dog."
+        )
+
+        embed.set_image(url=dog.get('message'))
 
         await ctx.send(embed=embed)
 
