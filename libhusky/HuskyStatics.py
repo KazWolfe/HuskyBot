@@ -89,6 +89,8 @@ class Emojis:
     PINGPONG = "\U0001F3D3"
     PLUG = "\U0001F50C"
     CROWN = "\U0001F451"
+    TRASH = "\U0001F5D1"
+    WRENCH = "\U0001F527"
 
     # Mod shortcuts
     BAN = NO_ENTRY
