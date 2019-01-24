@@ -249,6 +249,9 @@ class CommandKV(dict, commands.Converter):
 
         pairs = argument.split("--")
 
+        if pairs[0] != '':
+            raise commands.BadArgument("Malformed Key-Value structure. Please ensure your arguments are sane.")
+
         for pair in pairs:
             if not pair:
                 continue

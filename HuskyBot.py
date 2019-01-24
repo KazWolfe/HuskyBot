@@ -363,7 +363,7 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
                     color=Colors.DANGER
                 )
 
-                owner_id = self.session_store.get('appInfo', None).owner_id
+                owner_id = self.session_store.get('appInfo', None).owner.id
                 dev_ping = self.config.get("specialRoles", {}).get(SpecialRoleKeys.BOT_DEVS.value, owner_id)
 
                 await channel.send("<@{}>, an error has occurred with the bot. See attached "
