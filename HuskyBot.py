@@ -374,6 +374,7 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
                 raise e
 
     async def on_command_error(self, ctx, error: commands.CommandError):
+        p = self.command_prefix
         command_name = HuskyUtils.trim_string(ctx.message.content.split(' ')[0][1:], 32, True, '...')
 
         error_string = HuskyUtils.trim_string(str(error).replace('```', '`\u200b`\u200b`'), 128)
@@ -383,7 +384,7 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
             if self.developer_mode:
                 await ctx.send(embed=discord.Embed(
                     title="Command Handler",
-                    description=f"**You are not authorized to run `/{command_name}`:**\n```{error_string}```\n\n"
+                    description=f"**You are not authorized to run `{p}{command_name}`:**\n```{error_string}```\n\n"
                                 f"Please ask a staff member for assistance.",
                     color=Colors.DANGER
                 ))
@@ -396,7 +397,8 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
             if self.developer_mode:
                 embed = discord.Embed(
                     title="Command Handler",
-                    description=f"**The command `/{command_name}` does not exist.** See `/help` for valid commands.",
+                    description=f"**The command `{p}{command_name}` does not exist.** See `{p}help` for valid "
+                                f"commands.",
                     color=Colors.DANGER
                 )
 
@@ -409,7 +411,8 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
             if self.developer_mode:
                 await ctx.send(embed=discord.Embed(
                     title="Command Handler",
-                    description=f"**The command `/{command_name}` does not exist.** See `/help` for valid commands.",
+                    description=f"**The command `{p}{command_name}` does not exist.** See `{p}help` for valid "
+                                f"commands.",
                     color=Colors.DANGER
                 ))
 
@@ -419,7 +422,8 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
         elif isinstance(error, commands.CheckFailure):
             await ctx.send(embed=discord.Embed(
                 title="Command Handler",
-                description=f"**The command `/{command_name}` failed an execution check.** Additional information may "
+                description=f"**The command `{p}{command_name}` failed an execution check.** Additional information "
+                            f"may "
                             f"be provided below.",
                 color=Colors.DANGER
             ).add_field(name="Error Log", value="```" + error_string + "```", inline=False))
@@ -431,7 +435,7 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
         elif isinstance(error, commands.NoPrivateMessage):
             await ctx.send(embed=discord.Embed(
                 title="Command Handler",
-                description=f"**The command `/{command_name}` may not be run in a DM.** See `/help` for valid "
+                description=f"**The command `{p}{command_name}` may not be run in a DM.** See `{p}help` for valid "
                             f"commands.",
                 color=Colors.DANGER
             ))
@@ -442,8 +446,8 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
         elif isinstance(error, commands.MissingRequiredArgument):
             await ctx.send(embed=discord.Embed(
                 title="Command Handler",
-                description=f"**The command `/{command_name}` could not run, because it is missing arguments.**\n"
-                            f"See `/help {command_name}` for the arguments required.",
+                description=f"**The command `{p}{command_name}` could not run, because it is missing arguments.**\n"
+                            f"See `{p}help {command_name}` for the arguments required.",
                 color=Colors.DANGER
             ).add_field(name="Missing Parameter", value="`" + error_string.split(" ")[0] + "`", inline=True))
             LOG.error("Command %s was called with the wrong parameters.", command_name)
@@ -453,8 +457,8 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
         elif isinstance(error, commands.BadArgument):
             await ctx.send(embed=discord.Embed(
                 title="Command Handler",
-                description=f"**The command `/{command_name}` could not understand the arguments given.**\n"
-                            f"See `/help {command_name}` and the error below to fix this issue.",
+                description=f"**The command `{p}{command_name}` could not understand the arguments given.**\n"
+                            f"See `{p}help {command_name}` and the error below to fix this issue.",
                 color=Colors.DANGER
             ).add_field(name="Error Log", value="```" + error_string + "```", inline=False))
 
@@ -465,8 +469,9 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
         elif isinstance(error, commands.BotMissingPermissions):
             await ctx.send(embed=discord.Embed(
                 title="Command Handler",
-                description=f"**The command `/{command_name}` could not execute successfully, as the bot does not have "
-                            f"a required permission.**\nPlease make sure that the bot has the following permissions: " +
+                description=f"**The command `{p}{command_name}` could not execute successfully, as the bot does not "
+                            f"have a required permission.**\nPlease make sure that the bot has the following "
+                            f"permissions: " +
                             "`{}`".format(', '.join(error.missing_perms)),
                 color=Colors.DANGER
             ))
@@ -480,8 +485,8 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
 
             await ctx.send(embed=discord.Embed(
                 title="Command Handler",
-                description=f"**The command `/{command_name}` has been run too much recently!**\nPlease wait **{tx}** "
-                            f"until trying again.",
+                description=f"**The command `{p}{command_name}` has been run too much recently!**\nPlease wait "
+                            f"**{tx}** until trying again.",
                 color=Colors.DANGER
             ))
 
