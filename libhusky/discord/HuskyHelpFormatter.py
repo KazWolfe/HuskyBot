@@ -70,6 +70,8 @@ class HuskyHelpFormatter(HelpFormatter):
                     if line.endswith('<!nodoc>'):
                         continue
 
+                    line = line.replace("{prefix}", self.context.bot.command_prefix)
+
                     help_lines.append(line)
 
                 self.paginator.add_line('\n'.join(help_lines), empty=True)

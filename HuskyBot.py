@@ -331,6 +331,11 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
                 LOG.info("Lockdown mode is enabled for the bot. Command blocked.")
                 return
 
+            if message.channel.id in self.config.get("disabledChannels", []) and isinstance(author, discord.Member) \
+                    and not author.permissions_in(message.channel).manage_messages:
+                LOG.info(f"Got a command from a disabled channel {message.channel}. Command blocked.")
+                return
+
             LOG.info("User %s ran %s", author, message.content)
 
             await self.process_commands(message)

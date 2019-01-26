@@ -649,7 +649,7 @@ class BotAdmin:
     @config.command(name="unignoreUser", brief="Unblock a blocked user from bot interactions.")
     async def unblock_user(self, ctx: commands.Context, user: HuskyConverters.OfflineUserConverter):
         """
-        See /help config blockUser for more information about this command.
+        See {prefix}help config blockUser for more information about this command.
 
         Parameters
         ----------
@@ -677,6 +677,76 @@ class BotAdmin:
         await ctx.send(embed=discord.Embed(
             title="Bot Manager",
             description=f"The user `{user}` has been removed from the blacklist.",
+            color=Colors.SUCCESS
+        ))
+
+    @config.command(name="ignoreChannel", brief="Block a channel from executing commands")
+    async def block_channel(self, ctx: commands.Context, channel: discord.TextChannel):
+        """
+        If a channel is blocked from processing commands using this command, HuskyBot will ignore all commands issued by
+        users of that channel, unless they are moderators (have the MANAGE_MESSAGES permission). This is good for
+        preventing or restricting certain channels from being overrun with bot commands.
+
+        This command does not affect events in blocked channels (antispam, responses, and so on).
+
+        Parameters
+        ----------
+            ctx   :: Discord context <!nodoc>
+            channel  :: The channel to block from command execution
+
+        See Also
+        --------
+            /help config unignoreChannel  :: Unblock a channel blocked by this command.
+        """
+
+        config = self._config.get('disabledChannels', [])
+
+        if channel.id in config:
+            await ctx.send(embed=discord.Embed(
+                title="Bot Manager",
+                description=f"The channel {channel.mention} is already ignored by the bot.",
+                color=Colors.WARNING
+            ))
+            return
+
+        config.append(channel.id)
+
+        self._config.set('disabledChannels', config)
+
+        await ctx.send(embed=discord.Embed(
+            title="Bot Manager",
+            description=f"The channel {channel.mention} has been blacklisted by the bot.",
+            color=Colors.SUCCESS
+        ))
+
+    @config.command(name="unignoreChannel", brief="Unblock a blocked channel from bot interactions.")
+    async def unblock_channel(self, ctx: commands.Context, channel: discord.TextChannel):
+        """
+        See {prefix}help config ignoreChannel for more information about this command.
+
+        Parameters
+        ----------
+            ctx   :: Discord context <!nodoc>
+            channel  :: The user to unblock from using the bot
+        """
+
+        config = self._config.get('disabledChannels', [])
+
+        if channel.id not in config:
+            await ctx.send(embed=discord.Embed(
+                title="Bot Manager",
+                description=f"The channel {channel.mention} is not on the block list.",
+                color=Colors.WARNING
+            ))
+            return
+
+        config.remove(channel.id)
+
+        self._config.set('disabledChannels', config)
+
+        await ctx.send(embed=discord.Embed(
+            title="Bot Manager",
+            description=f"The channel {channel.mention} has been removed from the blacklist.",
             color=Colors.SUCCESS
         ))
 

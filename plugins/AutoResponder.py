@@ -47,6 +47,9 @@ class AutoResponder:
         if message.author.id in self._config.get('userBlacklist', []):
             return
 
+        if message.channel.id in self._config.get('disabledChannels', []):
+            return
+
         if self._session_store.get('lockdown', False):
             return
 
