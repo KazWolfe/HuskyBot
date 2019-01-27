@@ -100,7 +100,7 @@ def get_config(name: str = 'config', create_if_nonexistent: bool = True) -> Wolf
     :return: Returns the bot's shared persistent configuration.
     """
 
-    config_prefix = os.environ.get('HUSKYBOT_CONFIG_PREFIX')
+    config_prefix = os.environ.get('HUSKYBOT_CONFIG_PREFIX', '')
 
     if config_prefix:
         config_prefix += "_"  # Add an underscore to the end of prefix
