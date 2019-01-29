@@ -14,7 +14,6 @@ services:
     networks:
     - resources
     volumes:
-    - /HuskyBot
     - ./config:/HuskyBot/config
     - ./logs:/HuskyBot/logs
     - ./keys/id_rsa:/root/.ssh/id_rsa:ro
