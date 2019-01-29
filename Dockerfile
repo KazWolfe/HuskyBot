@@ -24,6 +24,10 @@ VOLUME /HuskyBot/config/
 RUN mkdir -p logs/
 VOLUME /HuskyBot/logs/
 
+# Chmod the entrypoint
+RUN chmod +x /HuskyBot/misc/docker-entrypoint.sh
+
 # And once everything looks good, launch Husky :3
 EXPOSE 9339
-ENTRYPOINT ["/usr/local/bin/python3", "HuskyBot.py"]
+ENTRYPOINT ["/HuskyBot/misc/docker-entrypoint.sh"]
+CMD ["HuskyBot.py"]
