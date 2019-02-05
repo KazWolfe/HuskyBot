@@ -10,14 +10,20 @@ import traceback
 
 # discord.py imports
 import discord
+from discord.ext import commands
+
 # Database imports
-import sqlalchemy
+try:
+    import sqlalchemy
+    from sqlalchemy.exc import DatabaseError
+    from sqlalchemy import orm
+except ImportError:
+    sqlalchemy = None
+    DatabaseError = None
+    orm = None
+
 # aiohttp/web api support
 from aiohttp import web
-from discord.ext import commands
-from sqlalchemy import orm
-# HuskyBot related imports
-from sqlalchemy.exc import DatabaseError
 
 from libhusky import HuskyConfig
 from libhusky import HuskyHTTP
@@ -47,7 +53,7 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
         self.session_store.set('logPath', self.__log_path)
 
         # Database things
-        self.db: sqlalchemy.engine.Engine = None
+        self.db = None  # type: sqlalchemy.engine.Engine
         self.session_factory = None
 
         # Load in HuskyBot's logger
@@ -211,12 +217,16 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
                  f"{http_config['host']}:{http_config['port']}, now listening...")
 
     async def __initialize_database(self):
+        if not sqlalchemy:
+            LOG.warning("SQLAlchemy is not present on this installation of HuskyBot. Database support is disabled.")
+            return
+
         try:
             c = f"postgresql://{os.environ['POSTGRES_USER']}:{os.environ['POSTGRES_PASSWORD']}" \
                 f"@db:5432/{os.environ['POSTGRES_DB']}"
             self.db = sqlalchemy.create_engine(c)
         except KeyError:
-            LOG.warning("No database configuration was set for Husky. Not starting the database.")
+            LOG.warning("No database configuration was set for Husky. Database support is disabled.")
             return
         except DatabaseError as s:
             LOG.error(f"Could not connect to the database! The error is as follows: \n{s}")
