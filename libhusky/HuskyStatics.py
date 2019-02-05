@@ -104,8 +104,10 @@ class Emojis:
 
 
 class Regex:
-    # @stephenhay's regex from https://mathiasbynens.be/demo/url-regex
-    URL_REGEX = r"\b(([\w-]+://?|www[.])[^\s()<>]+(?:\([\w\d]+\)|([^[:punct:]\s]|\/)))"
+    # gruber's v2 regex from https://mathiasbynens.be/demo/url-regex
+    URL_REGEX = r"(?i)\b((?:[a-z][\w-]+:(?:/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|" \
+                r"\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'\".,<>?" \
+                r"«»“”‘’]))"
 
     INVITE_REGEX = r'(discord\.gg|discordapp.com/invite)/(?P<fragment>[0-9a-z\-]+)'
     US_HAM_CALLSIGN_REGEX = r'(([KNW][A-Z]?)|(A[A-L]))\d[A-Z]{1,3}'

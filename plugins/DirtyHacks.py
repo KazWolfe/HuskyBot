@@ -7,6 +7,7 @@ import tempfile
 
 import aiohttp
 import discord
+from PIL import Image, ImageSequence
 from discord.ext import commands
 
 from HuskyBot import HuskyBot
@@ -39,10 +40,35 @@ class DirtyHacks:
         if not HuskyUtils.should_process_message(message):
             return
 
-        await self.kill_crashing_gifs(message)
+        await self.kill_abusive_gifs(message)
         # await self.calculate_entropy(message)
 
-    async def kill_crashing_gifs(self, message: discord.Message):
+    async def kill_abusive_gifs(self, message: discord.Message):
+        def undersized_gif_check(file) -> bool:
+            # Try to see if this gif is too big for its size (over 5000px^2, but less than 1mb)
+            (width, height) = HuskyUtils.get_image_size(file.name)
+
+            if (width > 5000) and (height > 5000) and os.path.getsize(file.name) < 1000000:
+                LOG.info("Found a GIF that exceeds sane size limits (over 5000px^2, but under 1mb)")
+                return True
+
+            return False
+
+        def too_large_frame_check(file) -> bool:
+            # Try to see if this gif has a too big frame
+            im = Image.open(file.name)
+            frames = ImageSequence.Iterator(im)
+            mx, my = im.size
+            for frame in frames:
+                x, y = frame.tile[0][1][2:]
+
+                if (mx + my) > 0 and ((x > 2 * mx) or (y > 2 * my)):
+                    # We found a frame that's way too big
+                    LOG.info("Found a GIF with an obscenely large frame.")
+                    return True
+
+            return False
+
         matches = re.findall(Regex.URL_REGEX, message.content, re.IGNORECASE)
 
         for attach in message.attachments:  # type: discord.Attachment
@@ -72,11 +98,9 @@ class DirtyHacks:
                 f.write(img_data)
                 f.flush()
 
-                (width, height) = HuskyUtils.get_image_size(f.name)
-
-                # Image is larger than 5000 px * 5000 px but *less* than 1 MB
-                if (width > 5000) and (height > 5000) and os.path.getsize(f.name) < 1000000:
-                    await message.delete()
+            if undersized_gif_check(f) or too_large_frame_check(f):
+                await message.delete()
+                break
 
     async def calculate_entropy(self, message: discord.Message):
         if message.content is None or message.content == "":
