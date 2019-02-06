@@ -79,18 +79,23 @@ class DirtyHacks:
         if matches is None or len(matches) == 0:
             return
 
+        # deduplicate the list
+        matches = list(set(matches))
+
         for match in matches:  # type: str
             match = ''.join(match)
 
             if not match.endswith('.gif'):
                 return
 
-            with tempfile.NamedTemporaryFile() as f:
+            with tempfile.NamedTemporaryFile(suffix=".gif") as f:
                 async with self._http_session.get(match) as r:  # type: aiohttp.ClientResponse
                     if r.status != 200:
+                        LOG.warning("Failed to check GIF, because status code was not 200")
                         return
 
                     if not r.headers.get('content-type', 'application/octet-stream').startswith('image'):
+                        LOG.warning("Failed to check GIF, because content type was not image")
                         return
 
                     img_data = await r.read()
@@ -98,10 +103,12 @@ class DirtyHacks:
                 f.write(img_data)
                 f.flush()
 
-            LOG.info(f"Found potentially dangerous GIF, saved at {f.name}")
-            if undersized_gif_check(f) or too_large_frame_check(f):
-                await message.delete()
-                break
+                LOG.info(f"Found potentially dangerous GIF, saved at {f.name}")
+                if undersized_gif_check(f) or too_large_frame_check(f):
+                    await message.delete()
+                    break
+
+                f.delete()
 
     async def calculate_entropy(self, message: discord.Message):
         if message.content is None or message.content == "":
