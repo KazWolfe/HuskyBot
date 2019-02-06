@@ -103,12 +103,9 @@ class DirtyHacks:
                 f.write(img_data)
                 f.flush()
 
-                LOG.info(f"Found potentially dangerous GIF, saved at {f.name}")
                 if undersized_gif_check(f) or too_large_frame_check(f):
                     await message.delete()
                     break
-
-                f.delete()
 
     async def calculate_entropy(self, message: discord.Message):
         if message.content is None or message.content == "":
