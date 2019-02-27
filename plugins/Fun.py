@@ -446,6 +446,7 @@ class Fun:
                 description=f"You can't make a die bigger than a byte!",
                 color=Colors.ERROR
             ))
+            return
 
         if num_rolls > 10:
             await ctx.send(embed=discord.Embed(
