@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import datetime
 # System imports
 import logging
 import os
@@ -294,6 +295,7 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
         await self.__init_inform_restart()
 
         self.init_stage = 1
+        self.session_store.set('initTime', datetime.datetime.now())
         LOG.info("The bot has been initialized. Ready to process commands and events.")
 
     async def on_ready(self):

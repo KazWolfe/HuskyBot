@@ -1,3 +1,4 @@
+import datetime
 import logging
 import platform
 import re
@@ -118,8 +119,21 @@ class Base:
 
             embed.add_field(name="Platform", value=pl_pretty_index.get(platform_type, platform_type), inline=True)
 
+        init_time = self._session_store.get('initTime')
+        if init_time:
+            uptime = datetime.datetime.now() - init_time
+            uph, upm = (uptime.seconds // 3600) % 24, (uptime.seconds // 60) % 60
+            embed.add_field(
+                name="Uptime",
+                value=((f"{uptime.days} days," if uptime.days != 1 else f"1 day, ") if uptime.days else "") +
+                      ((f"{uph} hours, " if uph != 1 else "1 hour, ") if uptime.days or uph else "") +
+                      ((f"{upm} minutes, " if upm != 1 else "1 minute, ") if uptime.days or uph or upm else "") +
+                      (f"{uptime.seconds % 60} seconds" if uptime.seconds % 60 != 1 else "1 second"),
+                inline=True
+            )
+
         embed.set_thumbnail(url=ctx.bot.user.avatar_url)
-        embed.set_footer(text="(c) 2018, KazWolfe | Andwooooooo!",
+        embed.set_footer(text=f"(c) {datetime.datetime.now().year}, KazWolfe | Andwooooooo!",
                          icon_url="https://avatars3.githubusercontent.com/u/5192145")
 
         await ctx.send(embed=embed)
