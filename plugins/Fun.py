@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import random
+import re
 from datetime import datetime
 
 import aiohttp
@@ -400,6 +401,82 @@ class Fun:
             description=f"Your random number is: **`{number}`**",
             color=Colors.INFO
         ))
+
+    @commands.command(name="dice", brief="Roll some dice!", aliases=["roll"])
+    async def roll_dice(self, ctx: commands.Context, die_notation: str):
+        """
+        Roll some virtual dice in standard Dice Notation. The program will expect a die in NdS+M format.
+
+        Parameters
+        ----------
+            ctx          :: discord context <!nodoc>
+            die_notation :: Standard Die Notation
+
+        Examples
+        --------
+            /dice d6    :: Roll a D6
+            /dice 2d6   :: Roll two D6, and add them up
+            /dice 2d6+3 :: Roll two D6, add 3, and add them up.
+            /dice 2d6-3 :: Roll two D6, subtract 3, and add them up.
+        """
+        dice_config = re.match(Regex.DICE_CONFIG, die_notation, re.I)
+
+        if not dice_config:
+            await ctx.send(embed=discord.Embed(
+                title="\U0001F3B2 Dice Roll",
+                description=f"The dice you specified are invalid.",
+                color=Colors.ERROR
+            ))
+            return
+
+        num_rolls = int(dice_config.groupdict().get('count') or 1)
+        die_val = int(dice_config.groupdict().get('size'))
+        die_modifier = int(dice_config.groupdict().get('modifier') or 0)
+
+        if die_val < 2:
+            await ctx.send(embed=discord.Embed(
+                title="\U0001F3B2 Dice Roll",
+                description=f"You can't roll a die with less than two sides!",
+                color=Colors.ERROR
+            ))
+            return
+        elif die_val > 255:
+            await ctx.send(embed=discord.Embed(
+                title="\U0001F3B2 Dice Roll",
+                description=f"You can't make a die bigger than a byte!",
+                color=Colors.ERROR
+            ))
+
+        if num_rolls > 10:
+            await ctx.send(embed=discord.Embed(
+                title="\U0001F3B2 Dice Roll",
+                description=f"Do you really need to roll the same die {num_rolls} times?",
+                color=Colors.ERROR
+            ))
+            return
+
+        rolls = []
+
+        for i in range(num_rolls):
+            roll = random.randint(1, die_val)
+            rolls.append(roll)
+
+        embed = discord.Embed(
+            title="\U0001F3B2 Dice Roll",
+            description=f"Rolling a {die_notation}... **{sum(rolls) + die_modifier}**!",
+            color=Colors.INFO
+        )
+
+        if len(rolls) > 1 or die_modifier:
+            embed.add_field(
+                name="Roll Details",
+                value="\n".join(f"Roll {i+1}: {rolls[i]} (Σ={sum(rolls[:i+1])})"
+                                for i in range(len(rolls))) +
+                      (f"\n\nMod: {die_modifier} (Σ={sum(rolls) + die_modifier})" if die_modifier else ""),
+                inline=False
+            )
+
+        await ctx.send(embed=embed)
 
 
 def setup(bot: HuskyBot):

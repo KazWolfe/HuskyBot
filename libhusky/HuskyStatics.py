@@ -111,3 +111,4 @@ class Regex:
 
     INVITE_REGEX = r'(discord\.gg|discordapp.com/invite)/(?P<fragment>[0-9a-z\-]+)'
     US_HAM_CALLSIGN_REGEX = r'(([KNW][A-Z]?)|(A[A-L]))\d[A-Z]{1,3}'
+    DICE_CONFIG = r'\b(?P<count>\d*)d(?P<size>\d+)(?P<modifier>[+-]\d+)?(?P<flag>[ad])?\b'
