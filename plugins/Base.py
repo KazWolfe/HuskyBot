@@ -126,9 +126,9 @@ class Base:
             embed.add_field(
                 name="Uptime",
                 value=((f"{uptime.days} days," if uptime.days != 1 else f"1 day, ") if uptime.days else "") +
-                      ((f"{uph} hours, " if uph != 1 else "1 hour, ") if uptime.days or uph else "") +
-                      ((f"{upm} minutes, " if upm != 1 else "1 minute, ") if uptime.days or uph or upm else "") +
-                      (f"{uptime.seconds % 60} seconds" if uptime.seconds % 60 != 1 else "1 second"),
+                      ((f"{uph} hrs, " if uph != 1 else "1 hr, ") if uptime.days or uph else "") +
+                      ((f"{upm} mins, " if upm != 1 else "1 min, ") if uptime.days or uph or upm else "") +
+                      (f"{uptime.seconds % 60} secs" if uptime.seconds % 60 != 1 else "1 sec"),
                 inline=True
             )
 
