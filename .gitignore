@@ -2,26 +2,26 @@
 *.py[cod]
 __pycache__/
 
-# Prevent leaking things
+# Prevent leaking sensitive information/data about the bot to Git by accident
 config/*.json
 *.db
 *.log
 logs/
 
-# Prevent IntelliJ from polluting everything
+# PyCharm/IntelliJ configurations shouldn't be part of the repo, either
 idea/*
 .idea
 *.iml
 
-# Used for guild CTF challenges
+# Prevent the CTF file from being exposed to git, or making git complain
 ctf
 
-# Don't accidentally upload the keys used by HuskyBot's deploy.
+# Protect the bot's release/license keys.
 keys/
 id_rsa*
 .ssh/
 
-# Don't load environment-specific things
+# The environment doesn't need to be exposed to Git, either
 .env
 plugins/custom
 custom_plugins
