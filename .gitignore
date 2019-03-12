@@ -25,3 +25,4 @@ id_rsa*
 .env
 plugins/custom
 custom_plugins
+venv
