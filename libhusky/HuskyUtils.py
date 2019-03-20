@@ -1,6 +1,7 @@
 import collections
 import datetime
 import gzip
+import hashlib
 import imghdr
 import logging
 import math
@@ -292,6 +293,17 @@ def convert_emoji_to_hex(string: str):
         splits.append(character)
 
     return splits
+
+
+def get_sha1_hash_of_file(path):
+    blocksize = 65536
+    hasher = hashlib.sha1()
+    with open(path, 'rb') as afile:
+        buf = afile.read(blocksize)
+        while len(buf) > 0:
+            hasher.update(buf)
+            buf = afile.read(blocksize)
+    return hasher.hexdigest()
 
 
 class TwitterSnowflake:
