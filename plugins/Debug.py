@@ -1,17 +1,21 @@
 import ast
 import inspect
+import io
 import json
 import logging
+import os
+import pprint
 import subprocess
 import time
 
 import aiohttp
 import discord
+import math
 from aiohttp import web
 from discord.ext import commands
 
 from HuskyBot import HuskyBot
-from libhusky import HuskyChecks
+from libhusky import HuskyChecks, HuskyConfig
 from libhusky import HuskyHTTP
 from libhusky import HuskyUtils
 from libhusky.HuskyStatics import *
@@ -49,21 +53,31 @@ class Debug:
         Help documentation is not available for this plugin.
         """
 
-        config = str(self._config.dump())
-        config = config.replace(self._config.get('apiKey', '<WTF HOW DID 8741234723890423>'), '[EXPUNGED]')
+        ts = math.floor(time.time() * 1000)
 
-        embed = discord.Embed(
-            title="Bot Manager",
-            description="The current bot config is available below.",
-            color=Colors.INFO
-        )
+        with io.StringIO() as config_fo, io.StringIO() as store_fo, io.StringIO() as env_fo:
+            config = json.dumps(self._config.dump(), sort_keys=True, indent=2)
+            config = config.replace(self.bot.http.token, '[EXPUNGED]')  # Redact the token
+            config_fo.write(config)
+            config_fo.seek(0)
 
-        embed.add_field(name="WolfConfig.getConfig()", value="```javascript\n" + config + "```", inline=False)
-        embed.add_field(name="LOCAL_STORAGE",
-                        value="```javascript\n" + str(self._session_store.dump()) + "```",
-                        inline=False)
+            store_snapshot = pprint.pformat(self._session_store.dump(), indent=2, width=120)
+            store_snapshot = store_snapshot.replace(self.bot.http.token, '[EXPUNGED]')  # Redact the token
+            store_fo.write(store_snapshot)
+            store_fo.seek(0)
 
-        await ctx.send(embed=embed)
+            env_snapshot = json.dumps(dict(os.environ), sort_keys=True, indent=2)
+            env_snapshot = env_snapshot.replace(self.bot.http.token, '[EXPUNGED]')  # Redact the token
+            env_fo.write(env_snapshot)
+            env_fo.seek(0)
+
+            print(HuskyConfig.__cache__)
+
+            await ctx.send("Dumped configs attached.",
+                           files=[discord.File(config_fo, f"config_{ts}.json"),
+                                  discord.File(store_fo, f"store-snap_{ts}.txt"),
+                                  discord.File(env_fo, f"env-snap_{ts}.json")]
+                           )
 
     # noinspection PyUnusedLocal
     @debug.command(name="react", brief="Force the bot to react to a specific message.")
@@ -139,8 +153,8 @@ class Debug:
         embed = discord.Embed(
             title=f"{Emojis.TIMER} {self.bot.user.name} Debugger - Latency Report",
             description=f"This test determines how long is takes the current instance of {self.bot.user.name} "
-                        f"to reach Discord. High results may indicate network or processing issues with Discord "
-                        f"or {self.bot.user.name}.",
+            f"to reach Discord. High results may indicate network or processing issues with Discord "
+            f"or {self.bot.user.name}.",
             color=color
         )
 
@@ -316,7 +330,7 @@ class Debug:
             await ctx.send(embed=discord.Embed(
                 title="Could Not Make Request",
                 description=f"Requestify failed to make a request due to error `{type(ex).__name__}`. "
-                            f"Data has been logged.",
+                f"Data has been logged.",
                 color=Colors.DANGER
             ))
             LOG.warning("Requestify raised exception.", ex)
