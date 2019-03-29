@@ -120,6 +120,7 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
 
     def shutdown(self):
         LOG.info("Shutting down HuskyBot...")
+        LOG.info("Shutting down HuskyBot...")
 
         self.config.save()
         LOG.debug("Config file saved/written to disk.")
