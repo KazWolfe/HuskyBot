@@ -1,5 +1,5 @@
 aiohttp
-discord.py~=1.0[voice]
+discord.py[voice]~=1.0
 GitPython~=2.1.11
 SQLAlchemy~=1.2
 psycopg2~=2.7.6
