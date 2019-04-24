@@ -486,27 +486,52 @@ class Intelligence:
 
         vl_map = {
             0: "No Verification",
-            1: "Verified Email Needed",
-            2: "User for 5+ minutes",
-            3: "Member for 10+ minutes",
-            4: "Verified Phone Needed"
+            1: "Verified Email Required",
+            2: "User for 5+ Minutes",
+            3: "Member for 10+ Minutes",
+            4: "Verified Phone Required"
         }
         embed.add_field(name="Verification Level", value=vl_map[invite_guild.verification_level], inline=True)
 
         if invite_user is not None:
             embed.add_field(name="Invite Creator", value=str(invite_user), inline=True)
 
+        vanity_slug = invite_data.get('guild', {}).get('vanity_url_code')
+        if vanity_slug:
+            embed.add_field(name="Vanity Invite URL",
+                            value=f"[`{vanity_slug}`](https://discord.gg/{vanity_slug})",
+                            inline=True)
+
         if len(invite_guild.features) > 0:
             embed.add_field(name="Guild Features",
-                            value=', '.join(list(f'`{f}`' for f in invite_guild.features)))
+                            value=', '.join(list(f'`{f}`' for f in invite_guild.features)),
+                            inline=False)
+
+        # ToDo: Convert to `invite_guild.description` once d.py stable updates
+        guild_description = invite_data.get('guild', {}).get('description')
+        if guild_description:
+            embed.add_field(name="Guild Description", value=guild_description, inline=False)
+
+        # ToDo: Convert to `invite_guild.banner_url` once d.py stable updates
+        banner_id = invite_data.get('guild', {}).get('banner')
+        if banner_id:
+            banner_url = f"https://cdn.discordapp.com/banners/{invite_guild.id}/{banner_id}.webp?size=2048"
+            embed.add_field(name="Banner Image",
+                            value=f"[Open in Browser >]({banner_url})",
+                            inline=True)
+            embed.set_image(url=banner_url)
 
         if invite_guild.splash is not None:
             embed.add_field(name="Splash Image",
                             value=f"[Open in Browser >]({invite_guild.splash_url})",
-                            inline=False)
-            embed.set_image(url=invite_guild.splash_url)
+                            inline=True)
 
-        embed.set_footer(text=f"Report generated at {HuskyUtils.get_timestamp()}")
+            # ToDo: Clean this up with the d.py release a bit more.
+            # The basic logic here is that banners display as the image first, else use the splash image.
+            if banner_id is None:
+                embed.set_image(url=invite_guild.splash_url)
+
+        embed.set_footer(text=f"Report generated at {HuskyUtils.get_timestamp()} by a good dog")
 
         await ctx.send(embed=embed)
 
