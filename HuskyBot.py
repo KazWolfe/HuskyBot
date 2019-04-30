@@ -69,7 +69,7 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
             activity=self.__build_stage0_activity(),
             command_not_found="**Error:** The bot could not find the command `/{}`.",
             command_has_no_subcommands="**Error:** The command `/{}` has no subcommands.",
-            formatter=HuskyHelpFormatter()
+            help_command=HuskyHelpFormatter()
         )
 
         self.init_stage = 0

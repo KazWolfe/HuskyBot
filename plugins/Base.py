@@ -16,7 +16,7 @@ LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 
 # noinspection PyMethodMayBeStatic
-class Base:
+class Base(commands.Cog):
     """
     The Base plugin provides the very core of the bot. It is a permanent plugin and will always be executed with the
     bot.
@@ -81,7 +81,7 @@ class Base:
             return
 
         # noinspection PyProtectedMember
-        await discord.ext.commands.bot._default_help_command(ctx, *command)
+        await self.bot.help_command.command_callback(ctx, command=' '.join(command) if command else None)
 
     @commands.command(name="about", aliases=["version"], brief="Get basic information about the bot.")
     async def about(self, ctx: discord.ext.commands.Context):

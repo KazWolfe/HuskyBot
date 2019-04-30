@@ -10,7 +10,7 @@ LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 
 # noinspection PyMethodMayBeStatic
-class ReactionPromote:
+class ReactionPromote(commands.Cog):
     """
     Give users a role based on their reaction to a message in a channel. If the user removes their reaction to the
     message, the bot should also remove the role from that user.
@@ -22,7 +22,8 @@ class ReactionPromote:
         self.roleRemovalBlacklist = []
         LOG.info("Loaded plugin!")
 
-    async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
+    @commands.Cog.listener(name="on_raw_reaction_add")
+    async def on_nominate_role(self, payload: discord.RawReactionActionEvent):
         promotion_config = self._config.get('promotions', {})
 
         channel = self.bot.get_channel(payload.channel_id)
@@ -33,7 +34,7 @@ class ReactionPromote:
         if payload.user_id == self.bot.user.id:
             return
 
-        message = await channel.get_message(payload.message_id)
+        message = await channel.getch_message(payload.message_id)
         guild = message.guild
         user = guild.get_member(payload.user_id)
 
@@ -56,7 +57,8 @@ class ReactionPromote:
             self.roleRemovalBlacklist.append(str(payload.user_id) + str(payload.message_id))
             await message.remove_reaction(payload.emoji, user)
 
-    async def on_raw_reaction_remove(self, payload: discord.RawReactionActionEvent):
+    @commands.Cog.listener(name="on_raw_reaction_remove")
+    async def on_unnominate_role(self, payload: discord.RawReactionActionEvent):
         promotion_config = self._config.get('promotions', {})
 
         if (str(payload.user_id) + str(payload.message_id)) in self.roleRemovalBlacklist:
@@ -69,7 +71,7 @@ class ReactionPromote:
         if not isinstance(channel, discord.TextChannel):
             return
 
-        message = await channel.get_message(payload.message_id)
+        message = await channel.fetch_message(payload.message_id)
         guild = message.guild
         user = guild.get_member(payload.user_id)
 
@@ -137,7 +139,7 @@ class ReactionPromote:
         promotion_config = self._config.get('promotions', {})
 
         try:
-            message: discord.Message = await channel.get_message(message_id)
+            message: discord.Message = await channel.fetch_message(message_id)
         except discord.NotFound:
             await ctx.send(embed=discord.Embed(
                 title=Emojis.WARNING + " Error Adding ReactionPromote",
@@ -198,7 +200,7 @@ class ReactionPromote:
 
         # Clean up the entry as well.
         try:
-            message: discord.Message = await channel.get_message(message_id)
+            message: discord.Message = await channel.fetch_message(message_id)
             reaction: discord.Reaction = discord.utils.get(message.reactions, emoji=emoji)
             async for user in reaction.users():
                 self.roleRemovalBlacklist.append(str(user.id) + str(message_id))

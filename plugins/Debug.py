@@ -25,7 +25,7 @@ LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 
 # noinspection PyMethodMayBeStatic
-class Debug:
+class Debug(commands.Cog):
     """
     Help documentation is not available for this plugin.
     """
@@ -36,7 +36,7 @@ class Debug:
         self._session_store = bot.session_store
         LOG.info("Loaded plugin!")
 
-    def __unload(self):
+    def cog_unload(self):
         HuskyHTTP.get_router().unload_plugin(self)
 
     @commands.group(name="debug")
@@ -92,7 +92,7 @@ class Debug:
         Help documentation is not available for this plugin.
         """
 
-        target_message = await channel.get_message(message)
+        target_message = await channel.fetch_message(message)
 
         await target_message.add_reaction(reaction)
 
@@ -174,7 +174,7 @@ class Debug:
         Help documentation is not available for this plugin.
         """
 
-        message = await channel.get_message(message_id)
+        message = await channel.fetch_message(message_id)
 
         await ctx.channel.send(
             content=message.content,

@@ -15,7 +15,7 @@ from libhusky.HuskyStatics import *
 LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 
-class Fun:
+class Fun(commands.Cog):
     """
     Useless plugin.
 

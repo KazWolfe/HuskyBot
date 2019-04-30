@@ -29,7 +29,7 @@ This flag was generated at {ts}.
 """
 
 
-class CTFChallenge:
+class CTFChallenge(commands.Cog):
     """
     Welcome to the HuskyBot Bug Bounty!
 

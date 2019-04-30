@@ -13,7 +13,7 @@ from libhusky.HuskyStatics import *
 LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 
-class Intelligence:
+class Intelligence(commands.Cog):
     """
     Intelligence is a plugin focusing on gathering information from Discord.
 

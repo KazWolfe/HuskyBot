@@ -12,7 +12,7 @@ LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 
 # noinspection PyMethodMayBeStatic
-class BotAdmin:
+class BotAdmin(commands.Cog):
     """
     The BotAdmin plugin is a mandatory plugin that's required for the bot to operate normally.
 
