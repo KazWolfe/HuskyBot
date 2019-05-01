@@ -485,11 +485,11 @@ class Intelligence(commands.Cog):
                             inline=True)
 
         vl_map = {
-            0: "No Verification",
-            1: "Verified Email Needed",
-            2: "User for 5+ minutes",
-            3: "Member for 10+ minutes",
-            4: "Verified Phone Needed"
+            discord.enums.VerificationLevel.none: "No Verification",
+            discord.enums.VerificationLevel.low: "Verified Email Needed",
+            discord.enums.VerificationLevel.medium: "User for 5+ minutes",
+            discord.enums.VerificationLevel.high: "Member for 10+ minutes",
+            discord.enums.VerificationLevel.extreme: "Verified Phone Needed"
         }
         embed.add_field(name="Verification Level", value=vl_map[invite_guild.verification_level], inline=True)
 
@@ -500,11 +500,20 @@ class Intelligence(commands.Cog):
             embed.add_field(name="Guild Features",
                             value=', '.join(list(f'`{f}`' for f in invite_guild.features)))
 
-        if invite_guild.splash is not None:
+        if invite_guild.description:
+            embed.add_field(name="Description", value=invite_guild.description)
+
+        if invite_guild.splash:
             embed.add_field(name="Splash Image",
                             value=f"[Open in Browser >]({invite_guild.splash_url})",
-                            inline=False)
+                            inline=True)
             embed.set_image(url=invite_guild.splash_url)
+
+        if invite_guild.banner_url:
+            embed.add_field(name="Banner Image",
+                            value=f"[Open in Browser >]({invite_guild.banner_url})",
+                            inline=True)
+            embed.set_image(url=invite_guild.banner_url)
 
         embed.set_footer(text=f"Report generated at {HuskyUtils.get_timestamp()}")
 
