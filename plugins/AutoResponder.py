@@ -40,7 +40,7 @@ class AutoResponder(commands.Cog):
     #       }
     #   }
 
-    @commands.Cog.listener
+    @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
         if not HuskyUtils.should_process_message(message):
             return

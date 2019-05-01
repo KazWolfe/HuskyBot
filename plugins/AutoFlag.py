@@ -104,13 +104,13 @@ class AutoFlag(commands.Cog):
 
             LOG.info("Got user flagged message (from %s in %s): %s", message.author, message.channel, message.content)
 
-    @commands.Cog.listener
+    @commands.Cog.listener()
     async def on_message(self, message):
         asyncio.ensure_future(self.regex_message_filter(message))
         asyncio.ensure_future(self.user_filter(message))
 
     # noinspection PyUnusedLocal
-    @commands.Cog.listener
+    @commands.Cog.listener()
     async def on_message_edit(self, before, after):
         await self.regex_message_filter(after, "edit")
 

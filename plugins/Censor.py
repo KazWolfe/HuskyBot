@@ -69,12 +69,12 @@ class Censor(commands.Cog):
                 LOG.warning("I tried to delete a censored message (ID %s, ctx %s, from %s in %s), but I couldn't find "
                             "it. Was it already deleted?", message.id, context, message.author, message.channel)
 
-    @commands.Cog.listener
+    @commands.Cog.listener()
     async def on_message(self, message):
         await self.filter_message(message)
 
     # noinspection PyUnusedLocal
-    @commands.Cog.listener
+    @commands.Cog.listener()
     async def on_message_edit(self, before, after):
         await self.filter_message(after, "edit")
 

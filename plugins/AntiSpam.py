@@ -70,7 +70,7 @@ class AntiSpam(commands.Cog):
 
             await asyncio.sleep(self._cleanup_time)  # sleep for four hours
 
-    @commands.Cog.listener
+    @commands.Cog.listener()
     async def on_message(self, message):
         if not HuskyUtils.should_process_message(message):
             return

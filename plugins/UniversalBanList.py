@@ -73,16 +73,16 @@ class UniversalBanList(commands.Cog):
                 LOG.info("Kicked UBL triggering user (context %s, keyword %s, from %s in %s): %s", context,
                          message.author, ubl_term, message.channel, message.content)
 
-    @commands.Cog.listener
+    @commands.Cog.listener()
     async def on_message(self, message):
         await self.filter_message(message)
 
     # noinspection PyUnusedLocal
-    @commands.Cog.listener
+    @commands.Cog.listener()
     async def on_message_edit(self, before, after):
         await self.filter_message(after, "edit")
 
-    @commands.Cog.listener
+    @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):
         if member.guild_permissions.manage_guild:
             return
@@ -93,7 +93,7 @@ class UniversalBanList(commands.Cog):
                                          f"`{ubl_term}`")
                 LOG.info("Kicked UBL triggering new join of user %s (matching UBL %s)", member, ubl_term)
 
-    @commands.Cog.listener
+    @commands.Cog.listener()
     async def on_member_update(self, before: discord.Member, after: discord.Member):
         if after.guild_permissions.manage_guild:
             return

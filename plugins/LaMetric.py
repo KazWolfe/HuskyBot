@@ -74,11 +74,11 @@ class LaMetric(commands.Cog):
             LOG.info(f"Updating usercount for LaMetric device ID {device_id}")
             await self._api.push(device['appId'], LaMetricApi.build_data(icon, new_count), device['authToken'])
 
-    @commands.Cog.listener
+    @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):
         await self.update_lametric_counts(member.guild)
 
-    @commands.Cog.listener
+    @commands.Cog.listener()
     async def on_member_remove(self, member: discord.Member):
         await self.update_lametric_counts(member.guild)
 
