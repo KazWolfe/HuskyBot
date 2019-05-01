@@ -17,17 +17,18 @@ defaults = {
 
 
 class MentionFilter(AntiSpamModule):
-    def __init__(self, plugin):
-        super().__init__(name="mentionFilter", callback=self.base, brief="Control the mention filter's settings",
+    def __init__(cls, plugin):
+        super().__init__(cls.base, name="mentionFilter", brief="Control the mention filter's settings",
                          checks=[super().has_permissions(mention_everyone=True)], aliases=["mf"])
 
-        self.bot = plugin.bot
-        self._config = self.bot.config
-        self._events = {}
+        cls.bot = plugin.bot
+        cls._config = cls.bot.config
+        cls._events = {}
 
-        self.add_command(self.set_ping_limit)
-        self.add_command(self.clear_cooldown)
-        self.add_command(self.clear_all_cooldowns)
+        cls.add_command(cls.set_ping_limit)
+        cls.add_command(cls.clear_cooldown)
+        cls.add_command(cls.clear_all_cooldowns)
+        cls.register_commands(plugin)
 
         LOG.info("Filter initialized.")
 

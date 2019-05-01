@@ -11,6 +11,10 @@ class AntiSpamModule(commands.Group, metaclass=ABCMeta):
     Base module for AntiSpam Modules.
     """
 
+    def register_commands(self, plugin):
+        for c in self.commands:
+            c.cog = plugin
+
     @abstractmethod
     def cleanup(self):
         raise NotImplementedError
@@ -27,7 +31,7 @@ class AntiSpamModule(commands.Group, metaclass=ABCMeta):
     def clear_all(self):
         raise NotImplementedError
 
-    async def base(self, ctx: commands.Context):
+    async def base(self, ctx):
         pass
 
     @staticmethod

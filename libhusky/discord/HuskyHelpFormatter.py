@@ -25,8 +25,9 @@ class HuskyHelpFormatter(DefaultHelpCommand):
     def get_command_signature(self, command):
         parent = command.full_parent_name
         alias = command.name if not parent else parent + ' ' + command.name
+        signature = command.signature + " " if command.signature else ""
 
-        return '%s%s %s :: **%s**' % (self.clean_prefix, alias, command.signature, command.brief)
+        return '%s%s %s:: **%s**' % (self.clean_prefix, alias, signature, command.brief)
 
     def add_indented_commands(self, commands, *, heading, max_size=None):
         if not commands:
@@ -91,11 +92,8 @@ class HuskyHelpFormatter(DefaultHelpCommand):
         self.paginator.add_line(signature, empty=True)
 
         if command.help:
-            try:
-                self.paginator.add_line(command.help, empty=True)
-            except RuntimeError:
-                for line in command.help.splitlines():
-                    if "<!nodoc>" in line:
-                        continue
-                    self.paginator.add_line(line)
-                self.paginator.add_line()
+            for line in command.help.splitlines():
+                if "<!nodoc>" in line:
+                    continue
+                self.paginator.add_line(line)
+            self.paginator.add_line()

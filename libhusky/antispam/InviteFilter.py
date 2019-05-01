@@ -19,21 +19,22 @@ defaults = {
 
 class InviteFilter(AntiSpamModule):
 
-    def __init__(self, plugin):
-        super().__init__(name="inviteFilter", callback=self.base, brief="Control the invite filter's settings",
+    def __init__(cls, plugin):
+        super().__init__(cls.base, name="inviteFilter", brief="Control the invite filter's settings",
                          checks=[super().has_permissions(manage_guild=True)], aliases=["if"])
 
-        self.bot = plugin.bot
-        self._config = self.bot.config
+        cls.bot = plugin.bot
+        cls._config = cls.bot.config
 
-        self._events = {}
-        self._invite_cache = {}
+        cls._events = {}
+        cls._invite_cache = {}
 
-        self.add_command(self.allow_invite)
-        self.add_command(self.block_invite)
-        self.add_command(self.set_invite_cooldown)
-        self.add_command(self.clear_cooldown)
-        self.add_command(self.clear_all_cooldowns)
+        cls.add_command(cls.allow_invite)
+        cls.add_command(cls.block_invite)
+        cls.add_command(cls.set_invite_cooldown)
+        cls.add_command(cls.clear_cooldown)
+        cls.add_command(cls.clear_all_cooldowns)
+        cls.register_commands(plugin)
 
         LOG.info("Filter initialized.")
 

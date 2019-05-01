@@ -33,17 +33,25 @@ class AttachmentFilter(AntiSpamModule):
     """
 
     def __init__(self, plugin):
-        super().__init__(name="attachFilter", callback=self.base, brief="Control the attachment filter's settings",
-                         checks=[super().has_permissions(manage_guild=True)], help=self.classhelp(), aliases=["af"])
+        super().__init__(
+            self.base,
+            name="attachFilter",
+            brief="Control the attachment filter's settings",
+            checks=[super().has_permissions(manage_guild=True)],
+            help=self.classhelp(),
+            aliases=["af"]
+        )
 
         self.bot = plugin.bot
         self._config = self.bot.config
 
         self._events = {}
 
+        self.add_command(self.blah)
         self.add_command(self.set_attach_cooldown)
         self.add_command(self.clear_cooldown)
         self.add_command(self.clear_all_cooldowns)
+        self.register_commands(plugin)
 
         LOG.info("Filter initialized.")
 
@@ -130,6 +138,10 @@ class AttachmentFilter(AntiSpamModule):
                 LOG.info(f"User {message.author} previously on file cooldown warning list has sent a file-less "
                          f"message. Deleting cooldown entry.")
                 del self._events[message.author.id]
+
+    @commands.command(name="blah", brief="blah")
+    async def blah(self, ctx: commands.Context):
+        await ctx.send("blah")
 
     @commands.command(name="configure", brief="Configure thresholds for AttachmentFilter")
     async def set_attach_cooldown(self, ctx: commands.Context, cooldown_seconds: int, warn_limit: int, ban_limit: int):

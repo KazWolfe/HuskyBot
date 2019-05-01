@@ -21,19 +21,20 @@ defaults = {
 
 
 class NonAsciiFilter(AntiSpamModule):
-    def __init__(self, plugin):
-        super().__init__(name="nonAsciiFilter", callback=self.base, brief="Control the non-ascii filter's settings",
+    def __init__(cls, plugin):
+        super().__init__(cls.base, name="nonAsciiFilter", brief="Control the non-ascii filter's settings",
                          checks=[super().has_permissions(manage_guild=True)], aliases=["naf"])
 
-        self.bot = plugin.bot
-        self._config = self.bot.config
+        cls.bot = plugin.bot
+        cls._config = cls.bot.config
 
-        self._events = {}
+        cls._events = {}
 
-        self.add_command(self.set_ascii_cooldown)
-        self.add_command(self.test_strings)
-        self.add_command(self.clear_cooldown)
-        self.add_command(self.clear_all_cooldowns)
+        cls.add_command(cls.set_ascii_cooldown)
+        cls.add_command(cls.test_strings)
+        cls.add_command(cls.clear_cooldown)
+        cls.add_command(cls.clear_all_cooldowns)
+        cls.register_commands(plugin)
 
         LOG.info("Filter initialized.")
 

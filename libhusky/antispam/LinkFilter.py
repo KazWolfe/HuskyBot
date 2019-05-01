@@ -1,9 +1,9 @@
 import datetime
 import logging
-import math
 import re
 
 import discord
+import math
 from discord.ext import commands
 
 from libhusky import HuskyUtils
@@ -21,18 +21,19 @@ defaults = {
 
 
 class LinkFilter(AntiSpamModule):
-    def __init__(self, plugin):
-        super().__init__(name="linkFilter", callback=self.base, brief="Control the link filter's settings",
+    def __init__(cls, plugin):
+        super().__init__(cls.base, name="linkFilter", brief="Control the link filter's settings",
                          checks=[super().has_permissions(manage_guild=True)], aliases=["lf"])
 
-        self.bot = plugin.bot
-        self._config = self.bot.config
+        cls.bot = plugin.bot
+        cls._config = cls.bot.config
 
-        self._events = {}
+        cls._events = {}
 
-        self.add_command(self.set_link_cooldown)
-        self.add_command(self.clear_cooldown)
-        self.add_command(self.clear_all_cooldowns)
+        cls.add_command(cls.set_link_cooldown)
+        cls.add_command(cls.clear_cooldown)
+        cls.add_command(cls.clear_all_cooldowns)
+        cls.register_commands(plugin)
 
         LOG.info("Filter initialized.")
 
@@ -74,10 +75,10 @@ class LinkFilter(AntiSpamModule):
         link_warning = discord.Embed(
             title=Emojis.STOP + " Hey! Listen!",
             description=f"Hey {message.author.mention}! It looks like you posted a lot of links.\n\n"
-                        f"In order to cut down on server spam, we have a limitation on the number of links "
-                        f"you are allowed to have in a time period. Generally, you won't exceed this limit "
-                        f"normally, but I'd like to give you a friendly warning to calm down on the number of "
-                        f"links you have. Thanks!",
+            f"In order to cut down on server spam, we have a limitation on the number of links "
+            f"you are allowed to have in a time period. Generally, you won't exceed this limit "
+            f"normally, but I'd like to give you a friendly warning to calm down on the number of "
+            f"links you have. Thanks!",
             color=Colors.WARNING
         ).set_thumbnail(url="https://i.imgur.com/Z3l78Dh.gif")
 
@@ -124,13 +125,13 @@ class LinkFilter(AntiSpamModule):
                 if log_channel is not None:
                     embed = discord.Embed(
                         description=f"User {message.author} has sent {cooldown_record['totalLinks']} links recently, "
-                                    f"and as a result has been warned. If they continue to post links to the currently "
-                                    f"configured value of {cooldown_config['totalBeforeBan']} links, they will "
-                                    f"be automatically banned.",
+                        f"and as a result has been warned. If they continue to post links to the currently "
+                        f"configured value of {cooldown_config['totalBeforeBan']} links, they will "
+                        f"be automatically banned.",
                     )
 
                     embed.set_footer(text=f"Cooldown resets "
-                                          f"{cooldown_record['expiry'].strftime(DATETIME_FORMAT)}")
+                    f"{cooldown_record['expiry'].strftime(DATETIME_FORMAT)}")
 
                     embed.set_author(name="Link spam from {message.author} detected!",
                                      icon_url=message.author.avatar_url)
@@ -140,8 +141,8 @@ class LinkFilter(AntiSpamModule):
             # And then ban at max
             if cooldown_record['totalLinks'] >= cooldown_config['totalBeforeBan']:
                 await message.author.ban(reason=f"[AUTOMATIC BAN - AntiSpam Module] User sent "
-                                                f"{cooldown_config['totalBeforeBan']} or more links in a "
-                                                f"{cooldown_config['minutes']} minute period.",
+                f"{cooldown_config['totalBeforeBan']} or more links in a "
+                f"{cooldown_config['minutes']} minute period.",
                                          delete_message_days=1)
 
                 # And purge their record, it's not needed anymore
@@ -169,7 +170,7 @@ class LinkFilter(AntiSpamModule):
             if log_channel is not None:
                 embed = discord.Embed(
                     description=f"User {message.author} has sent a message containing over "
-                                f"{cooldown_config['linkWarnLimit']} links to a public channel.",
+                    f"{cooldown_config['linkWarnLimit']} links to a public channel.",
                     color=Colors.WARNING
                 )
 
@@ -180,8 +181,8 @@ class LinkFilter(AntiSpamModule):
                 embed.add_field(name="Channel", value=message.channel.mention, inline=True)
 
                 embed.set_footer(text=f"Strike {cooldown_record['offenseCount']} "
-                                      f"of {cooldown_config['banLimit']}, "
-                                      f"resets {cooldown_record['expiry'].strftime(DATETIME_FORMAT)}")
+                f"of {cooldown_config['banLimit']}, "
+                f"resets {cooldown_record['expiry'].strftime(DATETIME_FORMAT)}")
 
                 embed.set_author(name=f"Link spam from {message.author} blocked.",
                                  icon_url=message.author.avatar_url)
@@ -191,9 +192,9 @@ class LinkFilter(AntiSpamModule):
             # If the user is over the ban limit, get rid of them.
             if cooldown_record['offenseCount'] >= cooldown_config['banLimit']:
                 await message.author.ban(reason=f"[AUTOMATIC BAN - AntiSpam Module] User sent "
-                                                f"{cooldown_config['banLimit']} messages containing "
-                                                f"{cooldown_config['linkWarnLimit']} or more links in a "
-                                                f"{cooldown_config['minutes']} minute period.",
+                f"{cooldown_config['banLimit']} messages containing "
+                f"{cooldown_config['linkWarnLimit']} or more links in a "
+                f"{cooldown_config['minutes']} minute period.",
                                          delete_message_days=1)
 
                 # And purge their record, it's not needed anymore
@@ -241,9 +242,9 @@ class LinkFilter(AntiSpamModule):
         await ctx.send(embed=discord.Embed(
             title="AntiSpam Plugin",
             description=f"The links module of AntiSpam has been set to allow a max of {links_before_warn} links in a "
-                        f"single message. If a user posts more than {ban_limit} illegal messages in a "
-                        f"{cooldown_minutes} minute period, they will additionally be banned. If a user posts "
-                        f"{total_link_limit} links in the same time period, they will also be banned.",
+            f"single message. If a user posts more than {ban_limit} illegal messages in a "
+            f"{cooldown_minutes} minute period, they will additionally be banned. If a user posts "
+            f"{total_link_limit} links in the same time period, they will also be banned.",
             color=Colors.SUCCESS
         ))
 
@@ -272,7 +273,7 @@ class LinkFilter(AntiSpamModule):
             await ctx.send(embed=discord.Embed(
                 title="Link Filter",
                 description=f"There is no cooldown record present for `{user}`. Either this user does not exist, they "
-                            f"do not have a cooldown record, or it has already been cleared.",
+                f"do not have a cooldown record, or it has already been cleared.",
                 color=Colors.DANGER
             ))
             return
@@ -280,7 +281,7 @@ class LinkFilter(AntiSpamModule):
         await ctx.send(embed=discord.Embed(
             title=Emojis.SPARKLES + " Link Filter | Cooldown Record Cleared!",
             description=f"The cooldown record for `{user}` has been cleared. There are now no warnings on this user's "
-                        f"record.",
+            f"record.",
             color=Colors.SUCCESS
         ))
 
@@ -306,6 +307,6 @@ class LinkFilter(AntiSpamModule):
         await ctx.send(embed=discord.Embed(
             title=Emojis.SPARKLES + " Link Filter | Cooldown Records Cleared!",
             description=f"All cooldown records for the link filter have been successfully cleared. No warnings "
-                        f"currently exist in the system.",
+            f"currently exist in the system.",
             color=Colors.SUCCESS
         ))
