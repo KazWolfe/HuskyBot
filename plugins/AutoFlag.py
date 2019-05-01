@@ -14,7 +14,7 @@ LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 
 # noinspection PyMethodMayBeStatic
-class AutoFlag:
+class AutoFlag(commands.Cog):
     """
     The Auto Flag plugin allows staff members to be alerted on the use of certain key phrases.
 

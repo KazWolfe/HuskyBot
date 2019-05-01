@@ -35,7 +35,6 @@ class ModTools(commands.Cog):
         LOG.info("Loaded plugin!")
 
     def cog_unload(self):
-        # super.__unload()
         self._mute_manager.cleanup()
 
     @commands.Cog.listener(name="on_member_update")
@@ -131,6 +130,7 @@ class ModTools(commands.Cog):
         # If you wonder why this method became so edgy, blame Saviour#8988
 
         # hack for pycharm (duck typing)
+        # noinspection PyTypeChecker
         user: discord.Member = user
 
         if user == ctx.author:
@@ -522,6 +522,7 @@ class ModTools(commands.Cog):
             reason  :: A string to be set as the new ban reason.
         """
         # hack for PyCharm (duck typing)
+        # noinspection PyTypeChecker
         user: discord.User = user
 
         ban_entry = discord.utils.get(await ctx.guild.bans(), user=user)

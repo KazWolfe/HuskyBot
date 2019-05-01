@@ -54,6 +54,7 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
         self.session_store.set('logPath', self.__log_path)
 
         # Database things
+        # noinspection PyTypeChecker
         self.db = None  # type: sqlalchemy.engine.Engine
         self.session_factory = None
 

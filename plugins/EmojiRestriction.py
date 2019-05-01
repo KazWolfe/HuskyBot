@@ -9,7 +9,7 @@ from libhusky.HuskyStatics import *
 LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 
-class EmojiRestriction:
+class EmojiRestriction(commands.Cog):
     """
     EmojiRestriction allows administrators to restrict which user may use a certain emoji.
 

@@ -616,6 +616,7 @@ class BotAdmin(commands.Cog):
         """
 
         # hack for pycharm to stop complaining (duck-typing)
+        # noinspection PyTypeChecker
         user: discord.User = user
 
         config = self._config.get('userBlacklist', [])
@@ -658,6 +659,7 @@ class BotAdmin(commands.Cog):
         """
 
         # hack for pycharm to stop complaining (duck typing)
+        # noinspection PyTypeChecker
         user: discord.User = user
 
         config = self._config.get('userBlacklist', [])

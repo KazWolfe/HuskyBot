@@ -35,7 +35,9 @@ class HuskyHelpFormatter(DefaultHelpCommand):
         self.paginator.add_line(heading)
         max_size = max_size or self.get_max_size(commands)
 
+        # noinspection PyProtectedMember
         get_width = discord.utils._string_width
+
         for command in commands:
             name = command.name
             width = max_size - (get_width(name) - len(name))
@@ -52,7 +54,7 @@ class HuskyHelpFormatter(DefaultHelpCommand):
 
         no_category = '\u200b{0.no_category}:'.format(self)
 
-        def get_category(command, *, no_category=no_category):
+        def get_category(command):
             cog = command.cog
             name = cog.qualified_name if cog is not None else no_category
             return name + "\n" + "-" * len(name)

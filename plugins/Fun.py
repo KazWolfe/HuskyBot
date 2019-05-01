@@ -34,7 +34,7 @@ class Fun(commands.Cog):
 
         LOG.info("Loaded plugin!")
 
-    def __unload(self):
+    def cog_unload(self):
         self.bot.loop.create_task(self._http_session.close())
 
     @commands.command(name="slap", brief="Slap a user silly!")

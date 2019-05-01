@@ -13,7 +13,7 @@ LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 
 # noinspection PyMethodMayBeStatic
-class HamRadio:
+class HamRadio(commands.Cog):
     CALLSIGN_LOOKUP_URL = "https://callook.info/{callsign}/json"
 
     def __init__(self, bot: HuskyBot):
@@ -24,7 +24,7 @@ class HamRadio:
 
         LOG.info("Loaded plugin!")
 
-    def __unload(self):
+    def cog_unload(self):
         self.bot.loop.create_task(self._http_session.close())
 
     @commands.command(name="callsign", brief="Get information about a callsign")

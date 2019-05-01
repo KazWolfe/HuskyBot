@@ -306,6 +306,38 @@ def get_sha1_hash_of_file(path):
     return hasher.hexdigest()
 
 
+def get_delta_timestr(timediff: datetime.timedelta):
+    time_components = []
+
+    seconds = timediff.seconds
+    hours = (seconds // 3600) % 24
+    minutes = (seconds // 60) % 60
+
+    if timediff.days > 1:
+        time_components.append(f"{timediff.days} days")
+    elif timediff.days == 1:
+        time_components.append(f"{timediff.days} day")
+
+    if hours > 1 or timediff.days:
+        time_components.append(f"{hours} hours")
+    elif hours == 1:
+        time_components.append(f"{hours} hour")
+
+    if minutes > 1 or hours or timediff.days:
+        time_components.append(f"{minutes} minutes")
+    elif minutes == 1:
+        time_components.append(f"{minutes} minute")
+
+    if seconds > 1 or hours or minutes or timediff.days:
+        time_components.append(f"{seconds} seconds")
+    elif seconds == 1:
+        time_components.append(f"{seconds} second")
+    else:
+        time_components.append("now")
+
+    return ", ".join(time_components)
+
+
 class TwitterSnowflake:
     def __init__(self):
         self.timestamp = None
@@ -344,7 +376,7 @@ class TwitterSnowflake:
         return flake
 
     @staticmethod
-    def load(flake: int, epoch=0):
+    def load(flake, epoch=0):
         snowflake = TwitterSnowflake()
         snowflake.flake = flake
         snowflake.epoch = epoch

@@ -112,7 +112,7 @@ class Debug(commands.Cog):
 
         obj = json.loads(message)
 
-        embed = discord.Embed.from_data(obj)
+        embed = discord.Embed.from_dict(obj)
 
         await ctx.send(embed=embed)
 
@@ -295,10 +295,10 @@ class Debug(commands.Cog):
                                               output['text'].replace("```", "`\u200b``"))
 
         await ctx.send(embed=discord.Embed(
-            title=f"Command returned code {output['status']}",
-            description=pretty_desc,
+            title=f"Command {command.split(' ')[0]} returned code {output['status']}",
             color=output['color']
         ))
+        await ctx.send(pretty_desc)
 
     @commands.command(name='requestify', brief="Make a HTTP request through the bot")
     @HuskyChecks.is_superuser()

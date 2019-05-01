@@ -70,7 +70,7 @@ class AutoResponder(commands.Cog):
                     or bool(message.author.permissions_in(message.channel).manage_messages):
                 if responses[response].get('isEmbed', False):
                     await message.channel.send(content=None,
-                                               embed=discord.Embed.from_data(responses[response]['response']))
+                                               embed=discord.Embed.from_dict(responses[response]['response']))
                 else:
                     await message.channel.send(content=responses[response]['response'])
 

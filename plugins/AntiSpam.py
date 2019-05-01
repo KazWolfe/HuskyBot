@@ -40,7 +40,7 @@ class AntiSpam(commands.Cog):
 
         LOG.info("Loaded plugin!")
 
-    def __unload(self):
+    def cog_unload(self):
         self.__cleanup_task__.cancel()
 
         for mod_name in list(self.__modules__.keys()):

@@ -9,7 +9,7 @@ from libhusky.HuskyStatics import *
 LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 
-class Community:
+class Community(commands.Cog):
     """
     The Community plugin gives users the ability to get information about the community itself.
 
@@ -79,8 +79,8 @@ class Community:
 
         Parameters
         ----------
-            ctx                  :: Discord context <!nodoc>
-            rule_num OR command  :: A rule number, or subcommand to execute.
+            ctx       :: Discord context <!nodoc>
+            rule_num  :: A rule number, or subcommand to execute.
         """
 
         if rule_num is not None and rule_num.isnumeric():

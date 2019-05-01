@@ -122,13 +122,9 @@ class Base(commands.Cog):
         init_time = self._session_store.get('initTime')
         if init_time:
             uptime = datetime.datetime.now() - init_time
-            uph, upm = (uptime.seconds // 3600) % 24, (uptime.seconds // 60) % 60
             embed.add_field(
                 name="Uptime",
-                value=((f"{uptime.days} days," if uptime.days != 1 else f"1 day, ") if uptime.days else "") +
-                      ((f"{uph} hrs, " if uph != 1 else "1 hr, ") if uptime.days or uph else "") +
-                      ((f"{upm} mins, " if upm != 1 else "1 min, ") if uptime.days or uph or upm else "") +
-                      (f"{uptime.seconds % 60} secs" if uptime.seconds % 60 != 1 else "1 sec"),
+                value=HuskyUtils.get_delta_timestr(uptime),
                 inline=True
             )
 

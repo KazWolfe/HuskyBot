@@ -34,7 +34,7 @@ class ReactionPromote(commands.Cog):
         if payload.user_id == self.bot.user.id:
             return
 
-        message = await channel.getch_message(payload.message_id)
+        message = await channel.fetch_message(payload.message_id)
         guild = message.guild
         user = guild.get_member(payload.user_id)
 

@@ -531,8 +531,9 @@ class Intelligence(commands.Cog):
                     color=Colors.ERROR
                 ))
 
-            return
+                return
 
+        # noinspection PyTypeChecker
         emoji = emoji  # type: discord.PartialEmoji # duck typing hack for pycharm
         flake = HuskyUtils.TwitterSnowflake.load(emoji.id, DISCORD_EPOCH)
 

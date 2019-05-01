@@ -10,7 +10,7 @@ from libhusky.HuskyStatics import *
 LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 
-class ServerLog:
+class ServerLog(commands.Cog):
     """
     The ServerLog plugin exists to provide a clean and transparent method of tracking server activity on the bot.
     """
@@ -30,61 +30,59 @@ class ServerLog:
                               "messageDelete", "messageDelete.logIntegrity",
                               "messageEdit"]
 
-    async def on_member_join(self, member: discord.Member):
-        # Send milestones to the moderator alerts channel
-        async def milestone_notifier():
-            if "userJoin.milestones" not in self._config.get("loggers", {}).keys():
-                return
+    @commands.Cog.listener(name="on_member_join")
+    async def user_milestone_logger(self, member: discord.Member):
+        if "userJoin.milestones" not in self._config.get("loggers", {}).keys():
+            return
 
-            milestone_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_ALERTS.value, None)
-            guild = member.guild
+        milestone_channel = self._config.get('specialChannels', {}).get(ChannelKeys.STAFF_ALERTS.value, None)
+        guild = member.guild
 
-            if milestone_channel is None:
-                return
+        if milestone_channel is None:
+            return
 
-            milestone_channel = guild.get_channel(milestone_channel)
+        milestone_channel = guild.get_channel(milestone_channel)
 
-            if guild.member_count % 1000 == 0:
-                await milestone_channel.send(embed=discord.Embed(
-                    title=Emojis.PARTY + " Guild Member Count Milestone!",
-                    description=f"The guild has now reached {guild.member_count} members! Thank you "
-                                f"{member.mention} for joining!",
-                    color=Colors.SUCCESS
-                ))
+        if guild.member_count % 1000 == 0:
+            await milestone_channel.send(embed=discord.Embed(
+                title=Emojis.PARTY + " Guild Member Count Milestone!",
+                description=f"The guild has now reached {guild.member_count} members! Thank you "
+                            f"{member.mention} for joining!",
+                color=Colors.SUCCESS
+            ))
 
-        # Send all joins to the logging channel
-        async def general_notifier():
-            if "userJoin" not in self._config.get("loggers", {}).keys():
-                return
+    # Send all joins to the logging channel
+    @commands.Cog.listener(name="on_member_join")
+    async def user_join_logger(self, member: discord.Member):
+        if "userJoin" not in self._config.get("loggers", {}).keys():
+            return
 
-            channel = self._config.get('specialChannels', {}).get(ChannelKeys.USER_LOG.value, None)
+        channel = self._config.get('specialChannels', {}).get(ChannelKeys.USER_LOG.value, None)
 
-            if channel is None:
-                return
+        if channel is None:
+            return
 
-            channel = member.guild.get_channel(channel)
+        channel = member.guild.get_channel(channel)
 
-            embed = discord.Embed(
-                title=Emojis.SUNRISE + " New Member!",
-                description=f"{member} has joined the guild.",
-                color=Colors.PRIMARY
-            )
+        embed = discord.Embed(
+            title=Emojis.SUNRISE + " New Member!",
+            description=f"{member} has joined the guild.",
+            color=Colors.PRIMARY
+        )
 
-            embed.set_thumbnail(url=member.avatar_url)
-            embed.add_field(name="Joined Discord", value=member.created_at.strftime(DATETIME_FORMAT), inline=True)
-            embed.add_field(name="Joined Guild", value=member.joined_at.strftime(DATETIME_FORMAT), inline=True)
-            embed.add_field(name="User ID", value=member.id, inline=True)
+        embed.set_thumbnail(url=member.avatar_url)
+        embed.add_field(name="Joined Discord", value=member.created_at.strftime(DATETIME_FORMAT), inline=True)
+        embed.add_field(name="Joined Guild", value=member.joined_at.strftime(DATETIME_FORMAT), inline=True)
+        embed.add_field(name="User ID", value=member.id, inline=True)
 
-            member_num = sorted(member.guild.members, key=lambda m: m.joined_at).index(member) + 1
-            embed.set_footer(text=f"Member #{member_num} on the guild")
+        member_num = sorted(member.guild.members, key=lambda m: m.joined_at).index(member) + 1
+        embed.set_footer(text=f"Member #{member_num} on the guild")
 
-            LOG.info(f"User {member} ({member.id}) has joined {member.guild.name}.")
-            await channel.send(embed=embed)
+        LOG.info(f"User {member} ({member.id}) has joined {member.guild.name}.")
+        await channel.send(embed=embed)
 
-        await milestone_notifier()
-        await general_notifier()
-
-    async def on_member_remove(self, member: discord.Member):
+    @commands.Cog.listener(name="on_member_remove")
+    async def user_leave_logger(self, member: discord.Member):
         if "userLeave" not in self._config.get("loggers", {}).keys():
             return
 
@@ -108,7 +106,8 @@ class ServerLog:
         LOG.info(f"User {member} has left {member.guild.name}.")
         await alert_channel.send(embed=embed)
 
-    async def on_member_ban(self, guild: discord.Guild, user: discord.User):
+    @commands.Cog.listener(name="on_member_ban")
+    async def user_ban_logger(self, guild: discord.Guild, user: discord.User):
         if "userBan" not in self._config.get("loggers", {}).keys():
             return
 
@@ -153,7 +152,8 @@ class ServerLog:
         await alert_channel.send(embed=embed)
 
     # noinspection PyUnusedLocal
-    async def on_member_unban(self, guild: discord.Guild, user: discord.User):
+    @commands.Cog.listener(name="on_member_unban")
+    async def user_unban_logger(self, guild: discord.Guild, user: discord.User):
         if "userBan" not in self._config.get("loggers", {}).keys():
             return
 
@@ -183,7 +183,8 @@ class ServerLog:
         LOG.info(f"User {user} was unbanned from {guild.name}.")
         await alert_channel.send(embed=embed)
 
-    async def on_member_update(self, before: discord.Member, after: discord.Member):
+    @commands.Cog.listener(name="on_member_update")
+    async def user_rename_logger(self, before: discord.Member, after: discord.Member):
         if "userRename" not in self._config.get("loggers", {}).keys():
             return
 
@@ -228,7 +229,8 @@ class ServerLog:
 
         await alert_channel.send(embed=embed)
 
-    async def on_message_delete(self, message: discord.Message):
+    @commands.Cog.listener(name="on_message_delete")
+    async def message_delete_logger(self, message: discord.Message):
         logger_config = self._config.get("loggers", {})
 
         if message.guild is None:
@@ -277,7 +279,8 @@ class ServerLog:
 
         await alert_channel.send(embed=embed)
 
-    async def on_message_edit(self, before: discord.Message, after: discord.Message):
+    @commands.Cog.listener(name="on_message_edit")
+    async def message_edit_logger(self, before: discord.Message, after: discord.Message):
         logger_config = self._config.get('loggers', {})
 
         if after.guild is None:
@@ -537,7 +540,7 @@ class ServerLog:
         """
         Remove a channel exclusion on logging events.
 
-        This command may be used to remove exclusions put in place by /logger ingoreChannel.
+        This command may be used to remove exclusions put in place by /logger ignoreChannel.
 
         Parameters
         ----------
