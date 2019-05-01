@@ -1,6 +1,6 @@
-discord.py[voice]=1.0.1
+discord.py[voice]==1.0.1
 GitPython~=2.1.11
 SQLAlchemy~=1.2
 psycopg2~=2.7.6
 Pillow~=5.1
-aiohttp
+aiohttp>=3.3.0,<3.6.0
