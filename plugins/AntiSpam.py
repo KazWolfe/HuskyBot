@@ -14,7 +14,7 @@ LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 
 # noinspection PyMethodMayBeStatic
-class AntiSpam:
+class AntiSpam(commands.Cog):
     """
     The AntiSpam plugin is responsible for maintaining and running advanced logic-based moderation tasks on behalf of
     the moderator team.
@@ -40,7 +40,7 @@ class AntiSpam:
 
         LOG.info("Loaded plugin!")
 
-    def __unload(self):
+    def cog_unload(self):
         self.__cleanup_task__.cancel()
 
         for mod_name in list(self.__modules__.keys()):
@@ -70,6 +70,7 @@ class AntiSpam:
 
             await asyncio.sleep(self._cleanup_time)  # sleep for four hours
 
+    @commands.Cog.listener
     async def on_message(self, message):
         if not HuskyUtils.should_process_message(message):
             return

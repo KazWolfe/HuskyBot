@@ -13,7 +13,7 @@ from libhusky.HuskyStatics import *
 LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 
-class Intelligence:
+class Intelligence(commands.Cog):
     """
     Intelligence is a plugin focusing on gathering information from Discord.
 
@@ -531,8 +531,9 @@ class Intelligence:
                     color=Colors.ERROR
                 ))
 
-            return
+                return
 
+        # noinspection PyTypeChecker
         emoji = emoji  # type: discord.PartialEmoji # duck typing hack for pycharm
         flake = HuskyUtils.TwitterSnowflake.load(emoji.id, DISCORD_EPOCH)
 

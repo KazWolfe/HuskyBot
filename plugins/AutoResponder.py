@@ -12,7 +12,7 @@ LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 
 # noinspection PyMethodMayBeStatic
-class AutoResponder:
+class AutoResponder(commands.Cog):
     """
     The AutoResponder plugin allows staff members to generate simple non-interactive commands quickly, easily, and
     without code changes.
@@ -40,6 +40,7 @@ class AutoResponder:
     #       }
     #   }
 
+    @commands.Cog.listener
     async def on_message(self, message: discord.Message):
         if not HuskyUtils.should_process_message(message):
             return
@@ -69,7 +70,7 @@ class AutoResponder:
                     or bool(message.author.permissions_in(message.channel).manage_messages):
                 if responses[response].get('isEmbed', False):
                     await message.channel.send(content=None,
-                                               embed=discord.Embed.from_data(responses[response]['response']))
+                                               embed=discord.Embed.from_dict(responses[response]['response']))
                 else:
                     await message.channel.send(content=responses[response]['response'])
 

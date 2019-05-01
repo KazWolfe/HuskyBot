@@ -12,7 +12,7 @@ LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 
 # noinspection PyMethodMayBeStatic
-class BotAdmin:
+class BotAdmin(commands.Cog):
     """
     The BotAdmin plugin is a mandatory plugin that's required for the bot to operate normally.
 
@@ -616,6 +616,7 @@ class BotAdmin:
         """
 
         # hack for pycharm to stop complaining (duck-typing)
+        # noinspection PyTypeChecker
         user: discord.User = user
 
         config = self._config.get('userBlacklist', [])
@@ -658,6 +659,7 @@ class BotAdmin:
         """
 
         # hack for pycharm to stop complaining (duck typing)
+        # noinspection PyTypeChecker
         user: discord.User = user
 
         config = self._config.get('userBlacklist', [])

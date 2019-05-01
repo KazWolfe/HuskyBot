@@ -16,7 +16,7 @@ GIVEAWAY_CONFIG_KEY = "giveaways"
 
 
 # noinspection PyMethodMayBeStatic
-class Giveaway:
+class Giveaway(commands.Cog):
     """
     The Giveaway plugin allows server moderators to schedule and execute fair giveaways determined by a random number
     generator.
@@ -33,7 +33,7 @@ class Giveaway:
         LOG.info("Loaded plugin!")
 
     # noinspection PyUnresolvedReferences
-    def __unload(self):
+    def cog_unload(self):
         # super.__cleanup()
         self.giveaway_manager.cleanup()
 

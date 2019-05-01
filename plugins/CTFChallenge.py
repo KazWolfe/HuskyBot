@@ -29,7 +29,7 @@ This flag was generated at {ts}.
 """
 
 
-class CTFChallenge:
+class CTFChallenge(commands.Cog):
     """
     Welcome to the HuskyBot Bug Bounty!
 
@@ -207,7 +207,7 @@ class CTFChallenge:
             ))
             return
 
-        user = await self.bot.get_user_info(ctf_config.get('pwned_by'))
+        user = await self.bot.fetch_user(ctf_config.get('pwned_by'))
 
         embed = discord.Embed(
             title=Emojis.RED_FLAG + " HuskyBot CTF Challenge",

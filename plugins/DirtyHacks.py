@@ -18,7 +18,7 @@ LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 
 # noinspection PyMethodMayBeStatic
-class DirtyHacks:
+class DirtyHacks(commands.Cog):
     """
     A series of dirty hacks used to bypass Discord's stupidity.
 
@@ -33,16 +33,10 @@ class DirtyHacks:
 
         LOG.info("Loaded plugin!")
 
-    def __unload(self):
+    def cog_unload(self):
         self.bot.loop.create_task(self._http_session.close())
 
-    async def on_message(self, message: discord.Message):
-        if not HuskyUtils.should_process_message(message):
-            return
-
-        await self.kill_abusive_gifs(message)
-        # await self.calculate_entropy(message)
-
+    @commands.Cog.listener(name="on_message")
     async def kill_abusive_gifs(self, message: discord.Message):
         def undersized_gif_check(file) -> bool:
             # Try to see if this gif is too big for its size (over 5000px^2, but less than 1mb)
@@ -68,6 +62,9 @@ class DirtyHacks:
                     return True
 
             return False
+
+        if not HuskyUtils.should_process_message(message):
+            return
 
         matches = re.findall(Regex.URL_REGEX, message.content, re.IGNORECASE)
 
@@ -106,6 +103,8 @@ class DirtyHacks:
                 if undersized_gif_check(f) or too_large_frame_check(f):
                     await message.delete()
                     break
+
+    # @commands.Cog.listener(name="on_message")
 
     async def calculate_entropy(self, message: discord.Message):
         if message.content is None or message.content == "":

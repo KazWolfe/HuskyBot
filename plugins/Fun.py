@@ -15,7 +15,7 @@ from libhusky.HuskyStatics import *
 LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 
-class Fun:
+class Fun(commands.Cog):
     """
     Useless plugin.
 
@@ -34,7 +34,7 @@ class Fun:
 
         LOG.info("Loaded plugin!")
 
-    def __unload(self):
+    def cog_unload(self):
         self.bot.loop.create_task(self._http_session.close())
 
     @commands.command(name="slap", brief="Slap a user silly!")

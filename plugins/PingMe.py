@@ -11,7 +11,7 @@ LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 
 # noinspection PyMethodMayBeStatic
-class PingMe:
+class PingMe(commands.Cog):
     """
     A very simple method responsible for handling cases where the bot is pinged (in non-commands).
     """
@@ -22,8 +22,8 @@ class PingMe:
 
         LOG.info("Loaded plugin!")
 
-    async def on_message(self, message: discord.Message):
-
+    @commands.Cog.listener(name="on_message")
+    async def on_ping(self, message: discord.Message):
         if not HuskyUtils.should_process_message(message):
             return
 
@@ -32,7 +32,7 @@ class PingMe:
 
         bot_mention = f"<@{self._bot.user.id}>"
 
-        # Don't let people ping Dakota to get a response.
+        # Don't let people ping Husky to get a response.
         if bot_mention == message.content:
             return
 

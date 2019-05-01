@@ -54,6 +54,7 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
         self.session_store.set('logPath', self.__log_path)
 
         # Database things
+        # noinspection PyTypeChecker
         self.db = None  # type: sqlalchemy.engine.Engine
         self.session_factory = None
 
@@ -69,7 +70,7 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
             activity=self.__build_stage0_activity(),
             command_not_found="**Error:** The bot could not find the command `/{}`.",
             command_has_no_subcommands="**Error:** The command `/{}` has no subcommands.",
-            formatter=HuskyHelpFormatter()
+            help_command=HuskyHelpFormatter()
         )
 
         self.init_stage = 0

@@ -15,7 +15,7 @@ LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 
 # noinspection PyMethodMayBeStatic
-class ModTools:
+class ModTools(commands.Cog):
     """
     ModTools is a plugin that provides a set of core moderator tools to guilds running HuskyBot.
 
@@ -34,36 +34,34 @@ class ModTools:
 
         LOG.info("Loaded plugin!")
 
-    def __unload(self):
-        # super.__unload()
+    def cog_unload(self):
         self._mute_manager.cleanup()
 
-    async def on_member_update(self, before: discord.Member, after: discord.Member):
-        async def nickname_lock():
-            if before.nick == after.nick:
-                return
+    @commands.Cog.listener(name="on_member_update")
+    async def nicklock_check(self, before: discord.Member, after: discord.Member):
+        if before.nick == after.nick:
+            return
 
-            locked_users = self._config.get("nicknameLocks", {})
+        locked_users = self._config.get("nicknameLocks", {})
 
-            lock_entry = locked_users.get(str(before.id), -1)
+        lock_entry = locked_users.get(str(before.id), -1)
 
-            if lock_entry != -1 and lock_entry != after.nick:
-                logger_ignores: dict = self._session_store.get('loggerIgnores', {})
-                ignored_nicks = logger_ignores.setdefault('nickname', [])
-                ignored_nicks.append(before.id)
-                self._session_store.set('loggerIgnores', logger_ignores)
+        if lock_entry != -1 and lock_entry != after.nick:
+            logger_ignores: dict = self._session_store.get('loggerIgnores', {})
+            ignored_nicks = logger_ignores.setdefault('nickname', [])
+            ignored_nicks.append(before.id)
+            self._session_store.set('loggerIgnores', logger_ignores)
 
-                await after.edit(nick=lock_entry, reason="Nickname is currently locked.")
+            await after.edit(nick=lock_entry, reason="Nickname is currently locked.")
 
-                # We get this again to reload the cache in case of changes elsewhere.
-                logger_ignores: dict = self._session_store.get('loggerIgnores', {})
-                ignored_nicks = logger_ignores.setdefault('nickname', [])
-                ignored_nicks.remove(before.id)
-                self._session_store.set('loggerIgnores', logger_ignores)
+            # We get this again to reload the cache in case of changes elsewhere.
+            logger_ignores: dict = self._session_store.get('loggerIgnores', {})
+            ignored_nicks = logger_ignores.setdefault('nickname', [])
+            ignored_nicks.remove(before.id)
+            self._session_store.set('loggerIgnores', logger_ignores)
 
-        await nickname_lock()
-
-    async def on_member_join(self, member: discord.Member):
+    @commands.Cog.listener(name="on_member_join")
+    async def mute_bypass_listener(self, member: discord.Member):
         await self._mute_manager.restore_user_mute(member)
 
     @commands.command(name="pardon", aliases=["unban"], brief="Pardon a banned member from their ban")
@@ -132,6 +130,7 @@ class ModTools:
         # If you wonder why this method became so edgy, blame Saviour#8988
 
         # hack for pycharm (duck typing)
+        # noinspection PyTypeChecker
         user: discord.Member = user
 
         if user == ctx.author:
@@ -523,6 +522,7 @@ class ModTools:
             reason  :: A string to be set as the new ban reason.
         """
         # hack for PyCharm (duck typing)
+        # noinspection PyTypeChecker
         user: discord.User = user
 
         ban_entry = discord.utils.get(await ctx.guild.bans(), user=user)

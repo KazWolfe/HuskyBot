@@ -90,7 +90,7 @@ class WolfRouter:
                 raise web.HTTPMethodNotAllowed(method=request.method, allowed_methods=path_routes.keys())
 
             method = path_routes[request.method]
-            result = await method['func'](bot.get_cog(name=method['cog']), request=request)
+            result = await method['func'](bot.get_cog(name=method['plugin']), request=request)
             return result
         return wrapped
 

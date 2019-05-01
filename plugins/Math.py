@@ -12,7 +12,7 @@ LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 
 # noinspection PyMethodMayBeStatic
-class Math:
+class Math(commands.Cog):
     def __init__(self, bot: HuskyBot):
         self.bot = bot
         self._config = bot.config
@@ -21,7 +21,7 @@ class Math:
 
         LOG.info("Loaded plugin!")
 
-    def __unload(self):
+    def cog_unload(self):
         self.bot.loop.create_task(self._http_session.close())
 
     @commands.command(name="latex", brief="Generate and render some LaTeX code [EXPERIMENTAL]")

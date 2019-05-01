@@ -82,7 +82,7 @@ class ReactToPin:
 
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
         channel = self.bot.get_channel(payload.channel_id)  # type: discord.TextChannel
-        message = await channel.get_message(payload.message_id)  # type: discord.Message
+        message = await channel.fetch_message(payload.message_id)  # type: discord.Message
 
         channel_config = self._config.get('reactToPin', {}).get(str(channel.id))  # type: dict
 
@@ -134,7 +134,7 @@ class ReactToPin:
 
     async def on_raw_reaction_remove(self, payload: discord.RawReactionActionEvent):
         channel = self.bot.get_channel(payload.channel_id)  # type: discord.TextChannel
-        message = await channel.get_message(payload.message_id)  # type: discord.Message
+        message = await channel.fetch_message(payload.message_id)  # type: discord.Message
 
         channel_config = self._config.get('reactToPin', {}).get(str(channel.id))  # type: dict
 
@@ -171,7 +171,7 @@ class ReactToPin:
 
     async def on_raw_reaction_clear(self, event: discord.RawReactionClearEvent):
         channel = self.bot.get_channel(event.channel_id)  # type: discord.TextChannel
-        message = await channel.get_message(event.message_id)  # type: discord.Message
+        message = await channel.fetch_message(event.message_id)  # type: discord.Message
 
         channel_config = self._config.get('reactToPin', {}).get(str(channel.id))  # type: dict
 
@@ -318,6 +318,7 @@ class ReactToPin:
     @react2pin.command(name="configure", aliases=["config"], brief="Configure ReactToPin for the current channel")
     async def config(self, ctx: commands.Context, emoji: HuskyConverters.PartialEmojiConverter, min_reacts: int):
         # pycharm duck hack
+        # noinspection PyTypeChecker
         emoji = emoji  # type: discord.PartialEmoji
 
         plugin_config = self._config.get('reactToPin', {})  # type: dict

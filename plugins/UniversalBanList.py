@@ -2,6 +2,7 @@ import logging
 import re
 
 import discord
+from discord.ext import commands
 
 from HuskyBot import HuskyBot
 from libhusky import HuskyUtils, HuskyStatics
@@ -10,7 +11,7 @@ LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 
 # noinspection PyMethodMayBeStatic
-class UniversalBanList:
+class UniversalBanList(commands.Cog):
     """
     The (poorly named) Universal Ban List module is responsible for kicking users that meet certain (very strict)
     conditions. The bot will automatically kick any user that contains certain key phrases in a username, or sends a
@@ -72,13 +73,16 @@ class UniversalBanList:
                 LOG.info("Kicked UBL triggering user (context %s, keyword %s, from %s in %s): %s", context,
                          message.author, ubl_term, message.channel, message.content)
 
+    @commands.Cog.listener
     async def on_message(self, message):
         await self.filter_message(message)
 
     # noinspection PyUnusedLocal
+    @commands.Cog.listener
     async def on_message_edit(self, before, after):
         await self.filter_message(after, "edit")
 
+    @commands.Cog.listener
     async def on_member_join(self, member: discord.Member):
         if member.guild_permissions.manage_guild:
             return
@@ -89,6 +93,7 @@ class UniversalBanList:
                                          f"`{ubl_term}`")
                 LOG.info("Kicked UBL triggering new join of user %s (matching UBL %s)", member, ubl_term)
 
+    @commands.Cog.listener
     async def on_member_update(self, before: discord.Member, after: discord.Member):
         if after.guild_permissions.manage_guild:
             return

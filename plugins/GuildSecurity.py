@@ -14,7 +14,7 @@ LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 
 # noinspection PyMethodMayBeStatic
-class GuildSecurity:
+class GuildSecurity(commands.Cog):
     """
     GuildSecurity is a plugin designed to add more security to Discord guilds.
 
@@ -28,55 +28,51 @@ class GuildSecurity:
         self._guildsecurity_store = HuskyConfig.get_session_store("guildSecurity")
         LOG.info("Loaded plugin!")
 
-    async def on_member_join(self, member: discord.Member):
-        async def prevent_bot_joins():
-            if not member.bot:
-                # ignore non-bots
-                return
+    @commands.Cog.listener(name="on_member_join")
+    async def prevent_bot_joins(self, member: discord.Member):
+        if not member.bot:
+            # ignore non-bots
+            return
 
-            permitted_bots = self._guildsecurity_store.get('permittedBotList', [])
+        permitted_bots = self._guildsecurity_store.get('permittedBotList', [])
 
-            if member.id not in permitted_bots:
-                await member.kick(reason="[AUTOMATIC KICK - Guild Security] User is not an authorized bot.")
+        if member.id not in permitted_bots:
+            await member.kick(reason="[AUTOMATIC KICK - Guild Security] User is not an authorized bot.")
 
-        await prevent_bot_joins()
+    @commands.Cog.listener(name="on_member_update")
+    async def protect_roles(self, before: discord.Member, after: discord.Member):
+        if before.roles == after.roles:
+            return
 
-    async def on_member_update(self, before: discord.Member, after: discord.Member):
-        async def protect_roles():
-            if before.roles == after.roles:
-                return
+        sec_config = self._config.get('guildSecurity', {})
+        protected_roles = sec_config.get('protectedRoles', [])
+        allowed_promotions = self._guildsecurity_store.get('allowedPromotions', {})
+        allowed_promotions_for_user = allowed_promotions.get(after.id, [])
 
-            sec_config = self._config.get('guildSecurity', {})
-            protected_roles = sec_config.get('protectedRoles', [])
-            allowed_promotions = self._guildsecurity_store.get('allowedPromotions', {})
-            allowed_promotions_for_user = allowed_promotions.get(after.id, [])
+        new_roles = list(set(after.roles).difference(before.roles))
 
-            new_roles = list(set(after.roles).difference(before.roles))
+        for r in new_roles:
+            if r.id in protected_roles and r.id not in allowed_promotions_for_user:
+                await after.remove_roles(r, reason="Unauthorized grant of protected role")
+                LOG.info(f"A protected role {r} was granted to {after} without prior authorization. "
+                         f"Removed.")
 
-            for r in new_roles:
-                if r.id in protected_roles and r.id not in allowed_promotions_for_user:
-                    await after.remove_roles(r, reason="Unauthorized grant of protected role")
-                    LOG.info(f"A protected role {r} was granted to {after} without prior authorization. "
-                             f"Removed.")
+    @commands.Cog.listener(name="on_member_update")
+    async def protect_bot_role(self, before: discord.Member, after: discord.Member):
+        if before.roles == after.roles:
+            return
 
-        async def lockdown_bot_role():
-            if before.roles == after.roles:
-                return
+        special_roles = self._config.get("specialRoles", {})
 
-            special_roles = self._config.get("specialRoles", {})
+        if special_roles.get('bots') is None:
+            return
 
-            if special_roles.get('bots') is None:
-                return
+        bot_role = after.guild.get_role(int(special_roles.get('bots')))
 
-            bot_role = after.guild.get_role(int(special_roles.get('bots')))
-
-            if (bot_role is not None) and (bot_role in after.roles) and (bot_role not in before.roles) \
-                    and (not before.bot):
-                await after.remove_roles(bot_role, reason="User is not an authorized bot.")
-                LOG.info(f"User {after} was granted bot role, but was not a bot. Removing.")
-
-        asyncio.ensure_future(protect_roles())
-        asyncio.ensure_future(lockdown_bot_role())
+        if (bot_role is not None) and (bot_role in after.roles) and (bot_role not in before.roles) \
+                and (not before.bot):
+            await after.remove_roles(bot_role, reason="User is not an authorized bot.")
+            LOG.info(f"User {after} was granted bot role, but was not a bot. Removing.")
 
     @commands.group(name="guildsecurity", brief="Manage the Guild Security plugin", aliases=["gs", "guildsec"])
     @commands.has_permissions(manage_guild=True)
@@ -92,6 +88,7 @@ class GuildSecurity:
     @commands.has_permissions(administrator=True)
     async def allow_bot(self, ctx: commands.Context, user: HuskyConverters.OfflineUserConverter):
         # Hack for PyCharm (duck typing)
+        # noinspection PyTypeChecker
         user: discord.User = user
 
         permitted_bots: list = self._guildsecurity_store.get('permittedBotList', [])

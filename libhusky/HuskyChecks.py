@@ -1,5 +1,6 @@
 from discord.ext import commands
 
+
 def has_guild_permissions(**perms):
     """
     Check if a user (as determined by ctx.author) has guild-level permissions to run this command.

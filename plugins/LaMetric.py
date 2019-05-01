@@ -14,7 +14,7 @@ LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 
 # noinspection PyMethodMayBeStatic
-class LaMetric:
+class LaMetric(commands.Cog):
     """
     Plugin for interfacing with LaMetric devices based on server events.
 
@@ -74,9 +74,11 @@ class LaMetric:
             LOG.info(f"Updating usercount for LaMetric device ID {device_id}")
             await self._api.push(device['appId'], LaMetricApi.build_data(icon, new_count), device['authToken'])
 
+    @commands.Cog.listener
     async def on_member_join(self, member: discord.Member):
         await self.update_lametric_counts(member.guild)
 
+    @commands.Cog.listener
     async def on_member_remove(self, member: discord.Member):
         await self.update_lametric_counts(member.guild)
 

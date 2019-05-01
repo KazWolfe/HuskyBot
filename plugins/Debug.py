@@ -25,7 +25,7 @@ LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 
 # noinspection PyMethodMayBeStatic
-class Debug:
+class Debug(commands.Cog):
     """
     Help documentation is not available for this plugin.
     """
@@ -36,7 +36,7 @@ class Debug:
         self._session_store = bot.session_store
         LOG.info("Loaded plugin!")
 
-    def __unload(self):
+    def cog_unload(self):
         HuskyHTTP.get_router().unload_plugin(self)
 
     @commands.group(name="debug")
@@ -92,7 +92,7 @@ class Debug:
         Help documentation is not available for this plugin.
         """
 
-        target_message = await channel.get_message(message)
+        target_message = await channel.fetch_message(message)
 
         await target_message.add_reaction(reaction)
 
@@ -112,7 +112,7 @@ class Debug:
 
         obj = json.loads(message)
 
-        embed = discord.Embed.from_data(obj)
+        embed = discord.Embed.from_dict(obj)
 
         await ctx.send(embed=embed)
 
@@ -174,7 +174,7 @@ class Debug:
         Help documentation is not available for this plugin.
         """
 
-        message = await channel.get_message(message_id)
+        message = await channel.fetch_message(message_id)
 
         await ctx.channel.send(
             content=message.content,
@@ -295,10 +295,10 @@ class Debug:
                                               output['text'].replace("```", "`\u200b``"))
 
         await ctx.send(embed=discord.Embed(
-            title=f"Command returned code {output['status']}",
-            description=pretty_desc,
+            title=f"Command {command.split(' ')[0]} returned code {output['status']}",
             color=output['color']
         ))
+        await ctx.send(pretty_desc)
 
     @commands.command(name='requestify', brief="Make a HTTP request through the bot")
     @HuskyChecks.is_superuser()

@@ -97,7 +97,7 @@ class GiveawayManager:
 
         try:
             channel: discord.TextChannel = self.bot.get_channel(giveaway.register_channel_id)
-            message: discord.Message = await channel.get_message(giveaway.register_message_id)
+            message: discord.Message = await channel.fetch_message(giveaway.register_message_id)
         except discord.NotFound:
             LOG.error("An expected giveaway channel or message was deleted. The giveaway can not continue, as the "
                       "associated records are gone or no longer accessible to the bot. The giveaway will be deleted "
@@ -130,8 +130,8 @@ class GiveawayManager:
         if len(winning_users) == 1:
             win_text = f"{f'Congratulations to our winner, {winning_users[0].mention}!'}{wcl}"
         elif len(winning_users) == 2:
-            message = f'Congratulations to our winners, {winning_users[0].mention} and {winning_users[1].mention}!'
-            win_text = f"{message}{wcl}"
+            mc = f'Congratulations to our winners, {winning_users[0].mention} and {winning_users[1].mention}!'
+            win_text = f"{mc}{wcl}"
         elif len(winning_users) > 2:
             win_csb = [u.mention for u in winning_users]
 

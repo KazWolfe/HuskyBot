@@ -14,7 +14,7 @@ LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 
 # noinspection PyMethodMayBeStatic
-class Updater:
+class Updater(commands.Cog):
     """
     Core class for bot update management.
 
@@ -149,7 +149,7 @@ class Updater:
             LOG.info("Git requested a dependency upgrade. Performing...")
 
             pip_process = await asyncio.create_subprocess_exec(
-                [sys.executable, "-m", "pip", "install", "-r", "./requirements.txt"],
+                " ".join([sys.executable, "-m", "pip", "install", "-r", "./requirements.txt"]),
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE
             )
