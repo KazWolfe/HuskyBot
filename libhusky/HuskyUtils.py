@@ -309,9 +309,9 @@ def get_sha1_hash_of_file(path):
 def get_delta_timestr(timediff: datetime.timedelta):
     time_components = []
 
-    seconds = timediff.seconds
-    hours = (seconds // 3600) % 24
-    minutes = (seconds // 60) % 60
+    hours = (timediff.seconds // 3600) % 24
+    minutes = (timediff.seconds // 60) % 60
+    seconds = timediff.seconds % 60
 
     if timediff.days > 1:
         time_components.append(f"{timediff.days} days")

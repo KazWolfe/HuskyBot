@@ -1,8 +1,10 @@
 import ast
+import datetime
 import inspect
 import io
 import json
 import logging
+import math
 import os
 import pprint
 import subprocess
@@ -11,7 +13,6 @@ import zipfile
 
 import aiohttp
 import discord
-import math
 from aiohttp import web
 from discord.ext import commands
 
@@ -189,6 +190,15 @@ class Debug(commands.Cog):
             LOG.info("spam " * 30)
 
         await ctx.send("OK")
+
+    @debug.command(name="uptime", brief="Get bot application uptime")
+    async def get_bot_uptime(self, ctx: commands.Context):
+        init_time = self._session_store.get('initTime')
+        if init_time:
+            uptime = datetime.datetime.now() - init_time
+            await ctx.send(f"**Uptime:** {HuskyUtils.get_delta_timestr(uptime)}")
+        else:
+            await ctx.send("Bot initialization time is unavailable.")
 
     @commands.command(name="eval", brief="Execute an eval() statement on the bot")
     @HuskyChecks.is_superuser()

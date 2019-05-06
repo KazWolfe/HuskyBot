@@ -65,16 +65,16 @@ class WolfRouter:
                 del self.routes[p]
 
     def unload_plugin(self, instance):
-        plugin_name = instance.__qualname__.split('.')[-2]
+        plugin_name = instance.__class__.__name__
 
         for path in list(self.routes.keys()):
             path_o = self.routes[path]
 
-            for method in path_o.keys():
+            for method in list(path_o.keys()):
                 method_o = path_o[method]
 
                 if method_o['plugin'] == plugin_name:
-                    del self.routes[path]
+                    del self.routes[path][method]
 
             if len(path_o.keys()) == 0:
                 del self.routes[path]
