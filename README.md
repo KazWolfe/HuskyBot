@@ -5,9 +5,7 @@ guild management. It boasts one of the most powerful anti-spam systems ever desi
 with more features being added almost daily.
 
 HuskyBot is built to be easy to use, easy to manage, and easy to deploy. It's based on KazWolfe's WolfBot
-platform, using [`discord.py`  (rewrite)](https://github.com/Rapptz/discord.py/) as the provider.
-
-Dakota was specifically built for [DIY Tech](https://discord.gg/diytech), but has since seen a number of
+platform, using [`discord.py`  (rewrite)](https://github.com/Rapptz/discord.py/) as the provider. HuskyBot was specifically built for [DIY Tech](https://discord.gg/diytech), but has since seen a number of
 changes to make it more available to the general public.
 
 HuskyBot features an extremely powerful plugin system based on discord.py's cog system, augmented with
