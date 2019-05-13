@@ -350,7 +350,7 @@ class ReactToPin:
         plugin_config = self._config.get('reactToPin', {})  # type: dict
         channel_config = plugin_config.get(str(ctx.channel.id), {})  # type: dict
 
-        message = await ctx.channel.get_message(message)
+        message = await ctx.channel.fetch_message(message)
         perm_pins = channel_config.setdefault('permanent', [])
 
         if message is None:

@@ -32,7 +32,7 @@ class OfflineUserConverter(commands.UserConverter):
 
             if match is not None:
                 try:
-                    result = await ctx.bot.get_user_info(int(match.group(1)))
+                    result = await ctx.bot.fetch_user_info(int(match.group(1)))
                 except discord.NotFound:
                     result = None
 
@@ -61,7 +61,7 @@ class OfflineMemberConverter(commands.MemberConverter):
 
             if match is not None:
                 try:
-                    result = await ctx.bot.get_user_info(int(match.group(1)))
+                    result = await ctx.bot.fetch_user_info(int(match.group(1)))
                 except discord.NotFound:
                     result = None
 
