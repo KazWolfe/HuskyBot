@@ -425,6 +425,14 @@ class ModTools(commands.Cog):
             target   :: The name, ID, or mention of the role to ping
             message  :: A variable-length message to include in the ping
         """
+
+        if target >= ctx.me.top_role:
+            await ctx.send(embed=discord.Embed(
+                title="Permissions Error",
+                description="I may not trigger a roleping for a role higher than my own top role."
+            ))
+            return
+
         is_role_mentionable = target.mentionable
 
         if not is_role_mentionable:

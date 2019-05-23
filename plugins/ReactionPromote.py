@@ -138,6 +138,15 @@ class ReactionPromote(commands.Cog):
         """
         promotion_config = self._config.get('promotions', {})
 
+        if role >= ctx.me.top_role:
+            await ctx.send(embed=discord.Embed(
+                title="Permission Error",
+                description="A reaction promotion may not be created for a role equal to or higher than the bot's "
+                            "highest role. Please either move the bot's role up or move the target role down.",
+                color=Colors.DANGER
+            ))
+            return
+
         try:
             message: discord.Message = await channel.fetch_message(message_id)
         except discord.NotFound:
