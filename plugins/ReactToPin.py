@@ -10,7 +10,7 @@ from libhusky.HuskyStatics import *
 LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 
-class ReactToPin:
+class ReactToPin(commands.Cog):
     """
     ReactToPin allows users to pin their own posts, after a set number of reactions are added to any given post.
 
@@ -111,7 +111,7 @@ class ReactToPin:
             LOG.debug("Got a valid emote reaction, but still below pin threshold. Ignoring (for now).")
             return
 
-        if len(await channel.pins()) >= 3:
+        if len(await channel.pins()) >= 50:
             LOG.debug("Too many pins in the current channel, removing oldest one using smart unpin.")
             try:
                 await self.smart_unpin_oldest(channel)
