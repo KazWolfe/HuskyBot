@@ -782,6 +782,42 @@ class ModTools(commands.Cog):
 
         await HuskyUtils.send_to_keyed_channel(ctx.bot, ChannelKeys.STAFF_LOG, log_entry)
 
+    @commands.command(name="massban", brief="Ban a large number of users at once", aliases=["mban"])
+    @commands.has_permissions(ban_members=True)
+    async def mass_ban(self, ctx: commands.Context, reason: str, *users):
+        """
+        Massively ban a list of users programatically. This will delete the past day of message history for all users.
+
+        Parameters
+        ----------
+            ctx     :: Discord context <!nodoc>
+            reason  :: The reason to store for bans, must be "in quotes" if containing spaces.
+            users   :: A list of users (space separated) to ban.
+
+        Examples
+        --------
+            /mban "bot accounts" 123 345 SomeUser
+
+        """
+        report = {"succeeded": [], "failed": []}
+        converter = HuskyConverters.OfflineUserConverter()
+
+        for user in users:
+            try:
+                user = await converter.convert(ctx, user)
+                await ctx.guild.ban(user, reason=reason, delete_message_days=1)
+                report['succeeded'].append(user)
+            except discord.DiscordException:
+                report['failed'].append(user)
+                continue
+
+        await ctx.send(embed=discord.Embed(
+            title="Mass Ban Report",
+            description=f"{len(report['succeeded'])} users banned.\n"
+            f"{len(report['failed'])} failed to ban (already banned or nonexistent user?).",
+            color=Colors.INFO
+        ))
+
 
 def setup(bot: HuskyBot):
     bot.add_cog(ModTools(bot))
