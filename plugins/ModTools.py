@@ -802,28 +802,32 @@ class ModTools(commands.Cog):
         report = {"succeeded": [], "failed": []}
         converter = HuskyConverters.OfflineMemberConverter()
 
-        for user in users:
+        for user_selector in users:
             try:
-                user = await converter.convert(ctx, user)
+                user = await converter.convert(ctx, user_selector)
 
-                if user == ctx.author or user == ctx.bot.user:
-                    raise discord.DiscordException()
+                if user == ctx.author:
+                    raise discord.DiscordException("IS_SELF")
+
+                if user == ctx.bot.user:
+                    raise discord.DiscordException("IS_BOT")
 
                 is_trueban = isinstance(user, discord.Member)
                 if is_trueban and (user.top_role.position >= ctx.message.author.top_role.position):
-                    raise discord.DiscordException()
+                    raise discord.DiscordException("IS_ABOVE_USER")
 
                 ban_prefix = f"[{'HACKBAN |' if not is_trueban else ''}MASSBAN | By {ctx.author}] "
                 await ctx.guild.ban(user, reason=ban_prefix + reason, delete_message_days=1)
-                report['succeeded'].append(user)
-            except discord.DiscordException:
-                report['failed'].append(user)
+                report['succeeded'].append(user_selector)
+            except discord.DiscordException as e:
+                report['failed'].append(f"{user_selector} - {''.join(e.args) if e.args else 'OTHER_ERR'}")
+                LOG.error("Massban Error", e)
                 continue
 
         embed = discord.Embed(
             title="Mass Ban Report",
             description=f"{len(report['succeeded'])} users banned.\n"
-            f"{len(report['failed'])} failed to ban (already banned or nonexistent user?).",
+            f"{len(report['failed'])} failed to ban. Nonexistent user or other error.",
             color=Colors.INFO
         )
 
