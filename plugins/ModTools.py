@@ -800,23 +800,37 @@ class ModTools(commands.Cog):
 
         """
         report = {"succeeded": [], "failed": []}
-        converter = HuskyConverters.OfflineUserConverter()
+        converter = HuskyConverters.OfflineMemberConverter()
 
         for user in users:
             try:
                 user = await converter.convert(ctx, user)
-                await ctx.guild.ban(user, reason=reason, delete_message_days=1)
+
+                if user == ctx.author or user == ctx.bot.user:
+                    raise discord.DiscordException()
+
+                is_trueban = isinstance(user, discord.Member)
+                if is_trueban and (user.top_role.position >= ctx.message.author.top_role.position):
+                    raise discord.DiscordException()
+
+                ban_prefix = f"[{'HACKBAN |' if not is_trueban else ''}MASSBAN | By {ctx.author}] "
+                await ctx.guild.ban(user, reason=ban_prefix + reason, delete_message_days=1)
                 report['succeeded'].append(user)
             except discord.DiscordException:
                 report['failed'].append(user)
                 continue
 
-        await ctx.send(embed=discord.Embed(
+        embed = discord.Embed(
             title="Mass Ban Report",
             description=f"{len(report['succeeded'])} users banned.\n"
             f"{len(report['failed'])} failed to ban (already banned or nonexistent user?).",
             color=Colors.INFO
-        ))
+        )
+
+        if len(report['failed']) < 5:
+            embed.add_field(name="Failed Bans", value="\n".join(report['failed']))
+
+        await ctx.send(embed=embed)
 
 
 def setup(bot: HuskyBot):
