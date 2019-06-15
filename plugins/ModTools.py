@@ -816,7 +816,7 @@ class ModTools(commands.Cog):
                 if is_trueban and (user.top_role.position >= ctx.message.author.top_role.position):
                     raise discord.DiscordException("IS_ABOVE_USER")
 
-                ban_prefix = f"[{'HACKBAN |' if not is_trueban else ''}MASSBAN | By {ctx.author}] "
+                ban_prefix = f"[{'HACKBAN | ' if not is_trueban else ''}MASSBAN | By {ctx.author}] "
                 await ctx.guild.ban(user, reason=ban_prefix + reason, delete_message_days=1)
                 report['succeeded'].append(user_selector)
             except discord.DiscordException as e:
@@ -831,7 +831,7 @@ class ModTools(commands.Cog):
             color=Colors.INFO
         )
 
-        if len(report['failed']) < 5:
+        if 0 < len(report['failed']) < 5:
             embed.add_field(name="Failed Bans", value="\n".join(report['failed']))
 
         await ctx.send(embed=embed)
