@@ -136,7 +136,7 @@ class NonUniqueFilter(AntiSpamModule):
             del self._events[message.author.id]
 
     @commands.command(name="configure", brief="Configure thresholds for NonUniqueFilter")
-    async def nonuniqe_cooldown(self, ctx: commands.Context, threshold: int, cache_size: int, cooldown_minutes: int,
+    async def nonuniqe_cooldown(self, ctx: commands.Context, threshold: float, cache_size: int, cooldown_minutes: int,
                                 warn_limit: int, ban_limit: int):
         """
         When a message is received by the bot, the system checks it for uniqueness against a cache of previous
@@ -172,7 +172,7 @@ class NonUniqueFilter(AntiSpamModule):
             ))
             return
 
-        if not 1 <= threshold <= 20:
+        if not 1 <= cache_size <= 20:
             await ctx.send(embed=discord.Embed(
                 title="Configuration Error",
                 description="The `cache_size` value must be between 1 and 20!",
