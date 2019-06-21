@@ -38,7 +38,10 @@ def member_has_any_role(member, roles):
 
 def get_fancy_game_data(member):
     if member.activity is not None:
-        state = {0: "Playing ", 1: "Streaming ", 2: "Listening to ", 3: "Watching "}
+        state = {discord.ActivityType.playing: "Playing ",
+                 discord.ActivityType.streaming: "Streaming ",
+                 discord.ActivityType.listening: "Listening to ",
+                 discord.ActivityType.watching: "Watching "}
 
         if isinstance(member.activity, discord.Spotify):
             m = "(Listening to Spotify)"

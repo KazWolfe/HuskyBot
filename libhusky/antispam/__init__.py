@@ -9,11 +9,20 @@ from discord.ext.commands import MissingPermissions
 class AntiSpamModule(commands.Group, metaclass=ABCMeta):
     """
     Base module for AntiSpam Modules.
+
+    This entire class is a bit of dark magic to (abuse) dpy's Cog feature. It is probably poorly written.
+
+    Due to the modular requirements of antispam, it is important that one be able to dynamically load and unload the
+    antispam submodules. As a result, we abuse a dpy cog-like mechanism, while also treating the commands themselves as
+    a subcommand. This is probably not the most elegant way of doing this, but it works.
+
+    As such, the "base" cog methods are present here, just for the sake of dpy not throwing errors. It's weird dumb
+    magic, and should probably be made better, but the dev is lazy.
     """
 
     def register_commands(self, plugin):
         for c in self.commands:
-            c.cog = plugin
+            c.cog = self
 
     @abstractmethod
     def cleanup(self):
@@ -48,6 +57,15 @@ class AntiSpamModule(commands.Group, metaclass=ABCMeta):
             raise MissingPermissions(missing)
 
         return predicate
+
+    def cog_check(self, ctx):
+        return True
+
+    async def cog_before_invoke(self, ctx):
+        pass
+
+    async def cog_after_invoke(self, ctx):
+        pass
 
     def classhelp(self):
         return inspect.cleandoc(self.__doc__)

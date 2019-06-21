@@ -21,20 +21,21 @@ defaults = {
 
 
 class NonUniqueFilter(AntiSpamModule):
-    def __init__(cls, plugin):
-        super().__init__(cls.base, name="nonUniqueFilter", brief="Control the non-unique filter's settings",
+    def __init__(self, plugin):
+        super().__init__(self.base, name="nonUniqueFilter", brief="Control the non-unique filter's settings",
                          checks=[super().has_permissions(manage_guild=True)], aliases=["nuf"])
 
-        cls.bot = plugin.bot
-        cls._config = cls.bot.config
+        self.plugin = plugin
+        self.bot = self.plugin.bot
+        self._config = self.bot.config
 
-        cls._events = {}
+        self._events = {}
 
-        cls.add_command(cls.nonuniqe_cooldown)
-        cls.add_command(cls.test_strings)
-        cls.add_command(cls.clear_cooldown)
-        cls.add_command(cls.clear_all_cooldowns)
-        cls.register_commands(plugin)
+        self.add_command(self.nonuniqe_cooldown)
+        self.add_command(self.test_strings)
+        self.add_command(self.clear_cooldown)
+        self.add_command(self.clear_all_cooldowns)
+        self.register_commands(plugin)
 
         LOG.info("Filter initialized.")
 
