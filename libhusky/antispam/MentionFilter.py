@@ -17,18 +17,19 @@ defaults = {
 
 
 class MentionFilter(AntiSpamModule):
-    def __init__(cls, plugin):
-        super().__init__(cls.base, name="mentionFilter", brief="Control the mention filter's settings",
+    def __init__(self, plugin):
+        super().__init__(self.base, name="mentionFilter", brief="Control the mention filter's settings",
                          checks=[super().has_permissions(mention_everyone=True)], aliases=["mf"])
 
-        cls.bot = plugin.bot
-        cls._config = cls.bot.config
-        cls._events = {}
+        self.bot = plugin.bot
+        self._config = self.bot.config
+        self._events = {}
 
-        cls.add_command(cls.set_ping_limit)
-        cls.add_command(cls.clear_cooldown)
-        cls.add_command(cls.clear_all_cooldowns)
-        cls.register_commands(plugin)
+        self.add_command(self.set_ping_limit)
+        self.add_command(self.clear_cooldown)
+        self.add_command(self.clear_all_cooldowns)
+        self.add_command(self.view_config)
+        self.register_commands(plugin)
 
         LOG.info("Filter initialized.")
 
@@ -66,12 +67,14 @@ class MentionFilter(AntiSpamModule):
         if len(message.mentions) == 0:
             return
 
-        cooldown_record = self._events.setdefault(message.author.id, {
-            "expiry": datetime.datetime.utcnow() + datetime.timedelta(seconds=ping_config['seconds']),
-            "offenseCount": 0
-        })
+        cooldown_record = None
+        if ping_config['seconds']:
+            cooldown_record = self._events.setdefault(message.author.id, {
+                "expiry": datetime.datetime.utcnow() + datetime.timedelta(seconds=ping_config['seconds']),
+                "offenseCount": 0
+            })
 
-        cooldown_record['offenseCount'] += len(message.mentions)
+            cooldown_record['offenseCount'] += len(message.mentions)
 
         if ping_config['soft'] is not None and len(message.mentions) >= ping_config['soft']:
             try:
@@ -104,17 +107,18 @@ class MentionFilter(AntiSpamModule):
                 del self._events[message.author.id]
                 return
 
-            if cooldown_record['offenseCount'] >= ping_config['hard']:
-                await message.author.ban(
-                    delete_message_days=0,
-                    reason=f"[AUTOMATIC BAN - AntiSpam Module] Pinged over guild ban limit in {ping_config['seconds']} "
-                           f"seconds."
-                )
-                del self._events[message.author.id]
-                return
+            if cooldown_record:
+                if cooldown_record['offenseCount'] >= ping_config['hard']:
+                    await message.author.ban(
+                        delete_message_days=0,
+                        reason=f"[AUTOMATIC BAN - AntiSpam Module] Pinged over guild ban limit in "
+                        f"{ping_config['seconds']} seconds."
+                    )
+                    del self._events[message.author.id]
+                    return
 
     @commands.command(name="configure", brief="Set the number of pings required before AntiSpam takes action")
-    async def set_ping_limit(self, ctx: commands.Context, warn_limit: int, ban_limit: int):
+    async def set_ping_limit(self, ctx: commands.Context, warn_limit: int, ban_limit: int, seconds: int):
         """
         This command takes two arguments - warn_limit and ban_limit. Both of these are integers.
 
@@ -124,6 +128,8 @@ class MentionFilter(AntiSpamModule):
         If a user surpasses the ban limit of pings in a single message, the message will be deleted and the user will
         be immediately banned.
 
+        Likewise, if a user surpasses the ban limit of pings in the specified cooldown time, the user will be banned.
+
         Setting a value to zero or any negative number will disable that specific limit.
 
         Parameters
@@ -131,11 +137,12 @@ class MentionFilter(AntiSpamModule):
             ctx :: Discord context <!nodoc>
             warn_limit  :: Number of mentions before warning a user
             ban_limit   :: Number of mentions before banning a user
+            seconds     :: A cooldown time
 
         Examples
         --------
-            /as pingFilter setPingLimit 6 15  :: Set warn limit to 6, ban limit to 15
-            /as pingFilter setPingLimit 6 0   :: Set warn limit to 6, remove the ban limit
+            /as pingFilter setPingLimit 6 15 30  :: Set warn limit to 6, ban limit to 15, seconds to 30
+            /as pingFilter setPingLimit 6 0 0   :: Set warn limit to 6, remove the ban limit, remove seconds.
         """
         if warn_limit < 1:
             warn_limit = None
@@ -143,11 +150,15 @@ class MentionFilter(AntiSpamModule):
         if ban_limit < 1:
             ban_limit = None
 
+        if seconds < 1:
+            seconds = None
+
         as_config = self._config.get('antiSpam', {})
         ping_config = as_config.setdefault('MentionSpamFilter', {}).setdefault('config', defaults)
 
         ping_config['soft'] = warn_limit
         ping_config['hard'] = ban_limit
+        ping_config['seconds'] = seconds
         self._config.set('antiSpam', as_config)
 
         await ctx.send(embed=discord.Embed(
@@ -156,6 +167,23 @@ class MentionFilter(AntiSpamModule):
                         f"ban in `{ban_limit}`.",
             color=Colors.SUCCESS
         ))
+
+    @commands.command(name="viewConfig", brief="See currently set configuration values for this plugin.")
+    async def view_config(self, ctx: commands.Context):
+        as_config = self._config.get('antiSpam', {})
+        filter_config = as_config.get('MentionFilter', {}).get('config', defaults)
+
+        embed = discord.Embed(
+            title="Mention Filter Configuration",
+            description="The below settings are the current values for the mention filter configuration.",
+            color=Colors.INFO
+        )
+
+        embed.add_field(name="Cooldown Time", value=f"{filter_config['seconds']} seconds", inline=False)
+        embed.add_field(name="Warning Limit", value=f"{filter_config['soft']} mentions", inline=False)
+        embed.add_field(name="Ban Limit", value=f"{filter_config['hard']} mentions", inline=False)
+
+        await ctx.send(embed=embed)
 
     @commands.command(name="clear", brief="Clear a cooldown record for a specific user")
     async def clear_cooldown(self, ctx: commands.Context, user: discord.Member):

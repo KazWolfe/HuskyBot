@@ -47,10 +47,10 @@ class AttachmentFilter(AntiSpamModule):
 
         self._events = {}
 
-        self.add_command(self.blah)
         self.add_command(self.set_attach_cooldown)
         self.add_command(self.clear_cooldown)
         self.add_command(self.clear_all_cooldowns)
+        self.add_command(self.view_config)
         self.register_commands(plugin)
 
         LOG.info("Filter initialized.")
@@ -139,10 +139,6 @@ class AttachmentFilter(AntiSpamModule):
                          f"message. Deleting cooldown entry.")
                 del self._events[message.author.id]
 
-    @commands.command(name="blah", brief="blah")
-    async def blah(self, ctx: commands.Context):
-        await ctx.send("blah")
-
     @commands.command(name="configure", brief="Configure thresholds for AttachmentFilter")
     async def set_attach_cooldown(self, ctx: commands.Context, cooldown_seconds: int, warn_limit: int, ban_limit: int):
         """
@@ -179,6 +175,23 @@ class AttachmentFilter(AntiSpamModule):
                         f"attachments",
             color=Colors.SUCCESS
         ))
+
+    @commands.command(name="viewConfig", brief="See currently set configuration values for this plugin.")
+    async def view_config(self, ctx: commands.Context):
+        as_config = self._config.get('antiSpam', {})
+        filter_config = as_config.get('NonUniqueFilter', {}).get('config', defaults)
+
+        embed = discord.Embed(
+            title="NonUnique Filter Configuration",
+            description="The below settings are the current values for the nonunique filter configuration.",
+            color=Colors.INFO
+        )
+
+        embed.add_field(name="Cooldown Timer", value=f"{filter_config['seconds']} seconds", inline=False)
+        embed.add_field(name="Warning Limit", value=f"{filter_config['warnLimit']} attachments", inline=False)
+        embed.add_field(name="Ban Limit", value=f"{filter_config['banLimit']} attachments", inline=False)
+
+        await ctx.send(embed=embed)
 
     @commands.command(name="clear", brief="Clear a cooldown record for a specific user")
     async def clear_cooldown(self, ctx: commands.Context, user: discord.Member):

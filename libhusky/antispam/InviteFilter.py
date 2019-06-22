@@ -19,22 +19,23 @@ defaults = {
 
 class InviteFilter(AntiSpamModule):
 
-    def __init__(cls, plugin):
-        super().__init__(cls.base, name="inviteFilter", brief="Control the invite filter's settings",
+    def __init__(self, plugin):
+        super().__init__(self.base, name="inviteFilter", brief="Control the invite filter's settings",
                          checks=[super().has_permissions(manage_guild=True)], aliases=["if"])
 
-        cls.bot = plugin.bot
-        cls._config = cls.bot.config
+        self.bot = plugin.bot
+        self._config = self.bot.config
 
-        cls._events = {}
-        cls._invite_cache = {}
+        self._events = {}
+        self._invite_cache = {}
 
-        cls.add_command(cls.allow_invite)
-        cls.add_command(cls.block_invite)
-        cls.add_command(cls.set_invite_cooldown)
-        cls.add_command(cls.clear_cooldown)
-        cls.add_command(cls.clear_all_cooldowns)
-        cls.register_commands(plugin)
+        self.add_command(self.allow_invite)
+        self.add_command(self.block_invite)
+        self.add_command(self.set_invite_cooldown)
+        self.add_command(self.clear_cooldown)
+        self.add_command(self.clear_all_cooldowns)
+        self.add_command(self.view_config)
+        self.register_commands(plugin)
 
         LOG.info("Filter initialized.")
 
@@ -394,6 +395,22 @@ class InviteFilter(AntiSpamModule):
                         f"record.",
             color=Colors.SUCCESS
         ))
+
+    @commands.command(name="viewConfig", brief="See currently set configuration values for this plugin.")
+    async def view_config(self, ctx: commands.Context):
+        as_config = self._config.get('antiSpam', {})
+        filter_config = as_config.get('InviteFilter', {}).get('config', defaults)
+
+        embed = discord.Embed(
+            title="Invite Filter Configuration",
+            description="The below settings are the current values for the invite filter configuration.",
+            color=Colors.INFO
+        )
+
+        embed.add_field(name="Cooldown Timer", value=f"{filter_config['minutes']} minutes", inline=False)
+        embed.add_field(name="Ban Limit", value=f"{filter_config['banLimit']} invites", inline=False)
+
+        await ctx.send(embed=embed)
 
     @commands.command(name="clearAll", brief="Clear all cooldown records for this filter.")
     @commands.has_permissions(administrator=True)

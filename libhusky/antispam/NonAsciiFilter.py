@@ -21,20 +21,21 @@ defaults = {
 
 
 class NonAsciiFilter(AntiSpamModule):
-    def __init__(cls, plugin):
-        super().__init__(cls.base, name="nonAsciiFilter", brief="Control the non-ascii filter's settings",
+    def __init__(self, plugin):
+        super().__init__(self.base, name="nonAsciiFilter", brief="Control the non-ascii filter's settings",
                          checks=[super().has_permissions(manage_guild=True)], aliases=["naf"])
 
-        cls.bot = plugin.bot
-        cls._config = cls.bot.config
+        self.bot = plugin.bot
+        self._config = self.bot.config
 
-        cls._events = {}
+        self._events = {}
 
-        cls.add_command(cls.set_ascii_cooldown)
-        cls.add_command(cls.test_strings)
-        cls.add_command(cls.clear_cooldown)
-        cls.add_command(cls.clear_all_cooldowns)
-        cls.register_commands(plugin)
+        self.add_command(self.set_ascii_cooldown)
+        self.add_command(self.test_strings)
+        self.add_command(self.clear_cooldown)
+        self.add_command(self.clear_all_cooldowns)
+        self.add_command(self.view_config)
+        self.register_commands(plugin)
 
         LOG.info("Filter initialized.")
 
@@ -207,6 +208,26 @@ class NonAsciiFilter(AntiSpamModule):
                         f"banned for posting **{ban_limit} messages** in a **{cooldown_minutes} minute** period.",
             color=Colors.SUCCESS
         ))
+
+    @commands.command(name="viewConfig", brief="See currently set configuration values for this plugin.")
+    async def view_config(self, ctx: commands.Context):
+        as_config = self._config.get('antiSpam', {})
+        filter_config = as_config.get('NonAsciiFilter', {}).get('config', defaults)
+
+        embed = discord.Embed(
+            title="Non-Ascii Filter Configuration",
+            description="The below settings are the current values for the non-ascii filter configuration.",
+            color=Colors.INFO
+        )
+
+        embed.add_field(name="Cooldown Timer", value=f"{filter_config['minutes']} minutes", inline=False)
+        embed.add_field(name="Min Processing Length", value=f"{filter_config['minMessageLength']} characters",
+                        inline=False)
+        embed.add_field(name="Non-Ascii Warn %", value=f"{filter_config['nonAsciiThreshold']}% nac", inline=False)
+        embed.add_field(name="Non-Ascii Delete %", value=f"{filter_config['nonAsciiDelete']}% nac", inline=False)
+        embed.add_field(name="Deletes to Ban", value=f"{filter_config['banLimit']} deletes", inline=False)
+
+        await ctx.send(embed=embed)
 
     @commands.command(name="test", brief="Get the non-ascii percentage of a string")
     async def test_strings(self, ctx: commands.Context, *, text: str):

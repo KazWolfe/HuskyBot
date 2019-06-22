@@ -1,9 +1,9 @@
 import datetime
 import logging
+import math
 import re
 
 import discord
-import math
 from discord.ext import commands
 
 from libhusky import HuskyUtils
@@ -21,19 +21,20 @@ defaults = {
 
 
 class LinkFilter(AntiSpamModule):
-    def __init__(cls, plugin):
-        super().__init__(cls.base, name="linkFilter", brief="Control the link filter's settings",
+    def __init__(self, plugin):
+        super().__init__(self.base, name="linkFilter", brief="Control the link filter's settings",
                          checks=[super().has_permissions(manage_guild=True)], aliases=["lf"])
 
-        cls.bot = plugin.bot
-        cls._config = cls.bot.config
+        self.bot = plugin.bot
+        self._config = self.bot.config
 
-        cls._events = {}
+        self._events = {}
 
-        cls.add_command(cls.set_link_cooldown)
-        cls.add_command(cls.clear_cooldown)
-        cls.add_command(cls.clear_all_cooldowns)
-        cls.register_commands(plugin)
+        self.add_command(self.set_link_cooldown)
+        self.add_command(self.clear_cooldown)
+        self.add_command(self.clear_all_cooldowns)
+        self.add_command(self.view_config)
+        self.register_commands(plugin)
 
         LOG.info("Filter initialized.")
 
@@ -247,6 +248,25 @@ class LinkFilter(AntiSpamModule):
             f"{total_link_limit} links in the same time period, they will also be banned.",
             color=Colors.SUCCESS
         ))
+
+    @commands.command(name="viewConfig", brief="See currently set configuration values for this plugin.")
+    async def view_config(self, ctx: commands.Context):
+        as_config = self._config.get('antiSpam', {})
+        filter_config = as_config.get('LinkFilter', {}).get('config', defaults)
+
+        embed = discord.Embed(
+            title="Link Filter Configuration",
+            description="The below settings are the current values for the link filter configuration.",
+            color=Colors.INFO
+        )
+
+        embed.add_field(name="Cooldown Timer", value=f"{filter_config['minutes']} minutes", inline=False)
+        embed.add_field(name="Warning Limit", value=f"{filter_config['linkWarnLimit']} links in msg", inline=False)
+        embed.add_field(name="Warnings to Ban", value=f"{filter_config['banLimit']} warnings", inline=False)
+        embed.add_field(name="Total Ban Limit", value=f"{filter_config['totalBeforeBan']} links in cooldown",
+                        inline=False)
+
+        await ctx.send(embed=embed)
 
     @commands.command(name="clear", brief="Clear a cooldown record for a specific user")
     async def clear_cooldown(self, ctx: commands.Context, user: discord.Member):

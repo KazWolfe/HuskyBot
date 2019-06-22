@@ -35,6 +35,7 @@ class NonUniqueFilter(AntiSpamModule):
         self.add_command(self.test_strings)
         self.add_command(self.clear_cooldown)
         self.add_command(self.clear_all_cooldowns)
+        self.add_command(self.view_config)
         self.register_commands(plugin)
 
         LOG.info("Filter initialized.")
@@ -194,6 +195,25 @@ class NonUniqueFilter(AntiSpamModule):
             description="The configuration has been successfully saved. Changes have been applied.",
             color=Colors.SUCCESS
         ))
+
+    @commands.command(name="viewConfig", brief="See currently set configuration values for this plugin.")
+    async def view_config(self, ctx: commands.Context):
+        as_config = self._config.get('antiSpam', {})
+        filter_config = as_config.get('NonUniqueFilter', {}).get('config', defaults)
+
+        embed = discord.Embed(
+            title="Non-Unique Filter Configuration",
+            description="The below settings are the current values for the non-unique filter configuration.",
+            color=Colors.INFO
+        )
+
+        embed.add_field(name="Cooldown Timer", value=f"{filter_config['minutes']} minutes", inline=False)
+        embed.add_field(name="Cache Size", value=f"{filter_config['cacheSize']} messages", inline=False)
+        embed.add_field(name="Uniqueness Threshold", value=f"{filter_config['threshold']}% similar", inline=False)
+        embed.add_field(name="Warn Limit", value=f"{filter_config['warnLimit']} matching messages", inline=False)
+        embed.add_field(name="Ban Limit", value=f"{filter_config['banLimit']} matching messages", inline=False)
+
+        await ctx.send(embed=embed)
 
     @commands.command(name="test", brief="Get the difference between two messages")
     async def test_strings(self, ctx: commands.Context, text_a: str, text_b: str):
