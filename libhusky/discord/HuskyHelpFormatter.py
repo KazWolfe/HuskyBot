@@ -15,12 +15,12 @@ class HuskyHelpFormatter(DefaultHelpCommand):
     A modified help formatter that does some things differently.
     """
 
-    def __init__(self):
+    def __init__(self, **options):
         self.asciidoc_prefix = "```asciidoc"
         self.paginator = Paginator(prefix=self.asciidoc_prefix)
         self.commands_heading = "Commands\n--------"
 
-        super().__init__(paginator=self.paginator, commands_heading=self.commands_heading)
+        super().__init__(paginator=self.paginator, commands_heading=self.commands_heading, **options)
 
     def get_command_signature(self, command):
         parent = command.full_parent_name
@@ -44,6 +44,14 @@ class HuskyHelpFormatter(DefaultHelpCommand):
             width = max_size - (get_width(name) - len(name))
             entry = '{0}{1:<{width}} :: {2}'.format(self.indent * ' ', name, command.short_doc, width=width)
             self.paginator.add_line(self.shorten_text(entry))
+
+    async def prepare_help_command(self, ctx, command):
+        # The more upstream changes break my help formatter, the more I think I'm insane for making
+        # the help formatter so terrible.
+        #
+        # Oh well.
+        self.context = ctx
+        await super().prepare_help_command(ctx, command)
 
     async def send_bot_help(self, mapping):
         ctx = self.context

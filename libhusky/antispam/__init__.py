@@ -1,12 +1,12 @@
 import inspect
-from abc import abstractmethod, ABCMeta
+from abc import abstractmethod
 
 import discord
 from discord.ext import commands
-from discord.ext.commands import MissingPermissions
+from discord.ext.commands import MissingPermissions, CogMeta
 
 
-class AntiSpamModule(commands.Group, metaclass=ABCMeta):
+class AntiSpamModule(commands.Group, metaclass=CogMeta):
     """
     Base module for AntiSpam Modules.
 
@@ -65,6 +65,9 @@ class AntiSpamModule(commands.Group, metaclass=ABCMeta):
         pass
 
     async def cog_after_invoke(self, ctx):
+        pass
+
+    async def cog_command_error(self, ctx, error):
         pass
 
     def classhelp(self):
