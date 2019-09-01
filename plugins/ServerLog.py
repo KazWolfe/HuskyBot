@@ -1,4 +1,5 @@
 import logging
+import 
 
 import discord
 from discord.ext import commands
@@ -317,7 +318,11 @@ class ServerLog(commands.Cog):
         embed.add_field(name="Message ID", value=after.id, inline=True)
         embed.add_field(name="Channel", value=after.channel.mention, inline=True)
         embed.add_field(name="Send Timestamp", value=before.created_at.strftime(DATETIME_FORMAT), inline=True)
-        embed.add_field(name="Edit Timestamp", value=after.edited_at.strftime(DATETIME_FORMAT), inline=True)
+        if after.edited_at:
+            embed.add_field(name="Edit Timestamp", value=after.edited_at.strftime(DATETIME_FORMAT), inline=True)
+        else:
+            # Todo: figure out why edited_at is none
+   none     embed.add_field(name="Event Timestamp", value=datetime.datetime.now().strftime(DATETIME_FORMAT), inline=True)
 
         if before.content is not None and before.content != "":
             embed.add_field(name="Message Before", value=HuskyUtils.trim_string(before.content, 1000, True),
