@@ -1,5 +1,5 @@
-import logging
 import datetime
+import logging
 
 import discord
 from discord.ext import commands
@@ -321,7 +321,7 @@ class ServerLog(commands.Cog):
         if after.edited_at:
             embed.add_field(name="Edit Timestamp", value=after.edited_at.strftime(DATETIME_FORMAT), inline=True)
         else:
-            # Todo: figure out why edited_at is none
+            # ToDo: Fix once d.py version is bumped (regression)
             embed.add_field(name="Event Timestamp", value=datetime.datetime.now().strftime(DATETIME_FORMAT), inline=True)
 
         if before.content is not None and before.content != "":

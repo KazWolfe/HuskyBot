@@ -35,6 +35,10 @@ class AntiSpam(commands.Cog):
 
         # Initialize the modules
         for (module_name, module_config) in self._config.get('antiSpam', {}).items():
+            # ignore system configs
+            if module_name.startswith("__"):
+                continue
+
             if module_config.get('enabled', True):
                 self.load_module(module_name)
 
@@ -71,8 +75,16 @@ class AntiSpam(commands.Cog):
             await asyncio.sleep(self._cleanup_time)  # sleep for four hours
 
     @commands.Cog.listener()
-    async def on_message(self, message):
+    async def on_message(self, message: discord.Message):
+        # config loading
+        as_config: dict = self._config.get("antiSpam", {})
+        global_config: dict = as_config.get("__global__", {})
+        exemption_config: list = global_config.get("exemptedRoles", [])
+
         if not HuskyUtils.should_process_message(message):
+            return
+
+        if exemption_config and HuskyUtils.member_has_any_role(message.author, exemption_config):
             return
 
         for module in self.__modules__.values():
@@ -250,6 +262,91 @@ class AntiSpam(commands.Cog):
             title=Emojis.SPARKLES + " AntiSpam | Cooldowns Cleared",
             description=f"All cooldowns for all users across all antispam filters have been successfully cleared.",
             color=Colors.SUCCESS
+        ))
+
+    @asp.group(name="exemptions", brief="Manage exemptions to the AntiSpam plugin")
+    @commands.has_permissions(manage_guild=True)
+    async def exemptions(self, ctx: commands.Context):
+        """
+        This command allows certain roles to be exempted from anti-spam triggering.
+
+        This is useful for moderators and other roles where granting MANAGE_MESSAGES is not beneficial. Note that this
+        command will override any modules that do not have MANAGE_MESSAGES exemptions.
+
+        In the future, this will become a per-module check, with this serving as the "global" override.
+        """
+
+        pass
+
+    @exemptions.command(name="add", brief="Add a role to the exemptions list.")
+    async def add_exemption(self, ctx: commands.Context, *, role: discord.Role):
+        as_config: dict = self._config.get("antiSpam", {})
+        global_config: dict = as_config.setdefault("__global__", {})
+        exemption_config: list = global_config.setdefault("exemptedRoles", [])
+
+        if role.id in exemption_config:
+            await ctx.send(embed=discord.Embed(
+                title="Role Already Exempt",
+                color=Colors.WARNING,
+                description=f"The role {role.mention} is already exempt from AntiSpam, and may not be re-added."
+            ))
+            return
+
+        exemption_config.append(role.id)
+        self._config.set("antiSpam", as_config)
+
+        await ctx.send(embed=discord.Embed(
+            title="Role Exempted!",
+            color=Colors.SUCCESS,
+            description=f"The role {role.mention} is now exempt from AntiSpam checks."
+        ))
+
+    @exemptions.command(name="remove", brief="Remove a role from the exemptions list")
+    async def remove_exemption(self, ctx: commands.Context, *, role: discord.Role):
+        as_config: dict = self._config.get("antiSpam", {})
+        global_config: dict = as_config.get("__global__", {})
+        exemption_config: list = global_config.get("exemptedRoles", [])
+
+        if role.id not in exemption_config:
+            await ctx.send(embed=discord.Embed(
+                title="Role Wasn't Exempted",
+                color=Colors.WARNING,
+                description=f"The role {role.mention} isn't exempt from AntiSpam, and may not be removed."
+            ))
+            return
+
+        exemption_config.remove(role.id)
+        self._config.set("antispam", as_config)
+
+        await ctx.send(embed=discord.Embed(
+            title="Role Unexempted!",
+            color=Colors.SUCCESS,
+            description=f"The role {role.mention} is now subject to AntiSpam checks again."
+        ))
+
+    @exemptions.command(name="list", brief="List all exempted roles in the AntiSpam config.")
+    async def list_exemptions(self, ctx: commands.Context):
+        as_config: dict = self._config.get("antiSpam", {})
+        global_config: dict = as_config.get("__global__", {})
+        exemption_config: list = global_config.get("exemptedRoles", [])
+
+        if not exemption_config:
+            await ctx.send(embed=discord.Embed(
+                title="AntiSpam Exemptions",
+                color=Colors.WARNING,
+                description=f"There are no configured AntiSpam exemptions."
+            ))
+            return
+
+        rls = []
+
+        for role_id in exemption_config:
+            rls.append(f"- <@&{role_id}>")
+
+        await ctx.send(embed=discord.Embed(
+            title="AntiSpam Exemptions",
+            color=Colors.INFO,
+            description="The following roles are exempt from AntiSpam checks:\n\n" + "\n".join(rls)
         ))
 
 

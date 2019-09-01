@@ -125,7 +125,8 @@ class NonUniqueFilter(AntiSpamModule):
             log_embed.set_footer(text=f"Strike {total_infractions} of {nonunique_config['banLimit']}, "
                                       f"resets {cooldown_record['expiry'].strftime(DATETIME_FORMAT)}")
 
-            await log_channel.send(embed=log_embed)
+            if log_channel:
+                await log_channel.send(embed=log_embed)
 
             cooldown_record['wasntWarned'] = False
 
