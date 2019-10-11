@@ -19,7 +19,7 @@ class Fun(commands.Cog):
     """
     Useless plugin.
 
-    ToDo: Delete this.
+    ToDo: Delete this. And for the open release, don't judge me :(
     """
 
     def __init__(self, bot: HuskyBot):
@@ -155,8 +155,7 @@ class Fun(commands.Cog):
         hardcoded_users = {
             142494680158961664: {"disabled": True},  # Kaz
             84374504964358144: {"a": 4.94, "c": 6.17, "i": 7.79, "otp": "DIY Tech"},  # Clover
-            336301511942340608: {"a": 6.97, "c": 5.99, "i": 7.50, "otp": "<@418530320707747868> \U0001f49e"},  # Court
-            418530320707747868: {"a": 10, "c": 10, "i": 10, "otp": "<@336301511942340608> \U0001f49e"},  # HuskyBot
+            self.bot.user.id: {"a": 10, "c": 10, "i": 10},  # HuskyBot
             237569958903545857: {"a": 7.01, "c": 3.0, "i": 8.74},  # Squeegee
             128882954343546880: {"a": 0, "c": 0, "i": 0}  # Marahute
         }
@@ -174,12 +173,6 @@ class Fun(commands.Cog):
 
             base = entry.get(mode, rng.randint(imin, imax))
             result = round(base + master_rng.gauss(0, dev), 2)
-
-            if result > 10:
-                return 10.00
-
-            if result < 0:
-                return 0.00
 
             return min(max(result, 0.0), 10.0)
 
