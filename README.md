@@ -5,7 +5,7 @@ guild management. It boasts one of the most powerful anti-spam systems ever desi
 with more features being added almost daily.
 
 HuskyBot is built to be easy to use, easy to manage, and easy to deploy. It's based on KazWolfe's WolfBot
-platform, using [`discord.py`  (rewrite)](https://github.com/Rapptz/discord.py/) as the provider. HuskyBot was specifically built for [DIY Tech](https://discord.gg/diytech), but has since seen a number of
+platform, using [`discord.py`](https://github.com/Rapptz/discord.py/) as the provider. HuskyBot was specifically built for [DIY Tech](https://discord.gg/diytech), but has since seen a number of
 changes to make it more available to the general public.
 
 HuskyBot features an extremely powerful plugin system based on discord.py's cog system, augmented with
@@ -17,6 +17,9 @@ version of HuskyBot, you either know how to code or you have someone close by wh
 not necessarily friendly to administrators or configuration, as it was initially designed for a specific
 guild.
 
+If you require assistance or support with the bot at any time (and you're using the master branch), swing
+on by DIY Tech's `#husky-support` channel to get (mostly) live developer assistance.
+
 ### Installation
 
 HuskyBot is a sophisticated bot, and has a (large) number of possible install paths. Feel free to choose whichever is
@@ -26,18 +29,16 @@ best for your use case.
 
 HuskyBot also has the capability to run with Docker Compose, and this is the preferred way of running HuskyBot.
 
-1. Extract the resources zipfile you have received from a bot developer, and `cd` to it.
+1. Clone the repository somewhere and `cd` to it,
 2. Copy `env.sample` to `.env`.
 3. Open the `.env` file and add your Discord bot API token on the `DISCORD_TOKEN` line.
 4. Save the file, and run the bot with `docker-compose up -d`. The bot and all dependencies will automatically launch.
-5. Add the bot to your guild, and enjoy.
+5. [Add the bot to your guild](https://discordapp.com/developers/docs/topics/oauth2#bots), and enjoy.
 
 #### Docker Installation
 
-HuskyBot can optionally be installed as a Docker container, and is more or less self-reliant. When you have been cleared
-by a bot developer to run your own build of HuskyBot, you will receive a zipfile containing the `Dockerfile` and a 
-folder named `keys`. Extract both of these to an empty folder somewhere. When the files are extracted, switch to that 
-folder and run:
+HuskyBot can optionally be installed as a Docker container, and is more or less self-reliant. Clone the repository, 
+`cd` to it, and run: 
 
     docker build -t huskybot .
     docker run -e "DISCORD_TOKEN=<your_api_key>" huskybot:latest
@@ -68,6 +69,8 @@ service file may be installed and used to automatically manage HuskyBot. To do t
 7. Add the bot to your guild, and enjoy.
 
 Note that paths and similar values may be changed, however they must be also updated in the provided unit file.
+
+If you want the bot to auto-start with your server, run `systemctl enable huskybot.service`.
 
 
 #### Classic Mode

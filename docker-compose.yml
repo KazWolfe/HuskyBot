@@ -16,7 +16,6 @@ services:
     volumes:
     - ./config:/HuskyBot/config
     - ./logs:/HuskyBot/logs
-    - ./keys/id_rsa:/root/.ssh/id_rsa:ro
     - ./custom_plugins:/HuskyBot/plugins/custom/:ro
     restart: on-failure
   db:
