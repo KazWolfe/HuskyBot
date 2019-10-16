@@ -57,7 +57,7 @@ class LinkFilter(AntiSpamModule):
     def clear_all(self):
         self._events = {}
 
-    async def on_message(self, message: discord.Message):
+    async def process_message(self, message: discord.Message, context):
         """
         Prevent link spam by scanning messages for anything that looks link-like.
 
@@ -68,6 +68,7 @@ class LinkFilter(AntiSpamModule):
         Alternatively, if a user posts [totalBeforeBan] links in [minutes] from their initial link message, they will
         also be banned.
 
+        :param context: A context in which the message is being sent to the filters.
         :param message: The discord Message object to process.
         :return: Does not return.
         """

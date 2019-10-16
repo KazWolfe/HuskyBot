@@ -79,6 +79,13 @@ class AntiSpam(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
+        await self.process_message(message, context='new_message')
+
+    @commands.Cog.listener()
+    async def on_message_edit(self, before: discord.Message, after: discord.Message):
+        await self.process_message(after, context='edited_message')
+
+    async def process_message(self, message: discord.Message, context: str):
         # config loading
         as_config: dict = self._config.get("antiSpam", {})
         global_config: dict = as_config.get("__global__", {})
@@ -91,7 +98,7 @@ class AntiSpam(commands.Cog):
             return
 
         for module in self.__modules__.values():
-            asyncio.ensure_future(module.on_message(message))
+            asyncio.ensure_future(module.process_message(message, context))
 
     @commands.group(name="antispam", aliases=['as'], brief="Manage the Antispam configuration for the bot")
     @commands.has_permissions(manage_messages=True)

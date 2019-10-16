@@ -59,7 +59,7 @@ class NonUniqueFilter(AntiSpamModule):
     def clear_all(self):
         self._events = {}
 
-    async def on_message(self, message: discord.message):
+    async def process_message(self, message: discord.message, context):
         as_config = self._config.get('antiSpam', {})
         nonunique_config = as_config.get('NonUniqueFilter', {}).get('config', defaults)
 

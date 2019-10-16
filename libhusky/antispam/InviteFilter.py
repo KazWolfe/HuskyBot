@@ -63,7 +63,7 @@ class InviteFilter(AntiSpamModule):
     def clear_all(self):
         self._events = {}
 
-    async def on_message(self, message: discord.Message):
+    async def process_message(self, message: discord.Message, context):
         class UserFate:
             WARN = 0
             KICK_NEW = 50
