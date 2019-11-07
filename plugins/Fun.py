@@ -375,7 +375,7 @@ class Fun(commands.Cog):
         Parameters
         ----------
             ctx      :: Discord context <!nodoc>
-            minimum  ::The lowest number the bot can choose
+            minimum  :: The lowest number the bot can choose
             maximum  :: The highest number the bot can choose
 
         Examples
@@ -472,6 +472,50 @@ class Fun(commands.Cog):
 
         await ctx.send(embed=embed)
 
+    @commands.command(name="xkcd", brief="Get comic from xkcd.com!")
+    async def xkcd_comic(self, ctx: commands.Context, comic_id: str = None):
+        """
+        Enjoy some comics by Randall Munroe.
+
+        Parameters
+        ----------
+            ctx          :: discord context <!nodoc>
+            comic_id     :: This can be empty string for random comic, number of specific comic or string latest
+
+        Examples
+        --------
+            /xkcd        :: Get random comic
+            /xkcd 1000   :: Get comic number 1000
+            /xkcd latest :: Get the latest comic
+        """
+        base_url = "http://wa.funsite.cz/xkcd/"
+
+        if comic_id:
+            if comic_id.isnumeric():
+                base_url += "?id=" + comic_id
+            elif comic_id == "latest":
+                base_url += "?new"
+
+        async with self._http_session.get("http://wa.funsite.cz/xkcd/") as resp:            
+            if resp.stats != 200:
+                await ctx.send("Error getting comic. Is this https://xkcd.com/404?")
+                return
+
+            comic = await resp.json()
+
+        if not "image" in comic.keys():
+                await ctx.send("Couldn't find comic with that number")
+                return            
+
+        embed = discord.Embed(
+            title = comic.get("title"),
+            url = comic.get("url"),
+            description = comic.get("description")
+        )
+
+        embed.set_image(url=comic.get('image'))
+
+        await ctx.send(embed=embed)
 
 def setup(bot: HuskyBot):
     bot.add_cog(Fun(bot))
