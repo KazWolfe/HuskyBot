@@ -464,7 +464,7 @@ class Fun(commands.Cog):
         if len(rolls) > 1 or die_modifier:
             embed.add_field(
                 name="Roll Details",
-                value="\n".join(f"Roll {i+1}: {rolls[i]} (Σ={sum(rolls[:i+1])})"
+                value="\n".join(f"Roll {i + 1}: {rolls[i]} (Σ={sum(rolls[:i + 1])})"
                                 for i in range(len(rolls))) +
                       (f"\n\nMod: {die_modifier} (Σ={sum(rolls) + die_modifier})" if die_modifier else ""),
                 inline=False
@@ -477,45 +477,89 @@ class Fun(commands.Cog):
         """
         Enjoy some comics by Randall Munroe.
 
+        comic_id may be a number of a comic, or a selector. Valid selectors are "latest" or "new" for the most recent
+        comic, or "random" for a random comic. If no selector is specified, a random comic is selected.
+
         Parameters
         ----------
             ctx          :: discord context <!nodoc>
-            comic_id     :: This can be empty string for random comic, number of specific comic or string latest
+            comic_id     :: A selector for the comic you want.
 
         Examples
         --------
             /xkcd        :: Get random comic
             /xkcd 1000   :: Get comic number 1000
             /xkcd latest :: Get the latest comic
+
+        Credits
+        -------
+            - @Groowy#7658 for the original command
+            - Randall Munroe of XKCD for the API
         """
-        base_url = "http://wa.funsite.cz/xkcd/"
+
+        async def get_random_comic():
+            # because of the extra delay, let's add a typing notifier
+            await ctx.trigger_typing()
+
+            async with self._http_session.get('https://c.xkcd.com/random/comic', allow_redirects=False) as r_resp:
+                if r_resp.status != 302 or not r_resp.headers.get('Location'):
+                    await ctx.send(embed=discord.Embed(
+                        title="XKCD API Error",
+                        description="The XKCD API returned an unexpected result when querying for a random comic. Try "
+                                    "again later.",
+                        color=Colors.DANGER
+                    ))
+                    return
+
+                return r_resp.headers.get('Location').rsplit('/', 2)[1]
+
+        base_url = "https://xkcd.com/{}/info.0.json"
 
         if comic_id:
-            if comic_id.isnumeric():
-                base_url += "?id=" + comic_id
-            elif comic_id == "latest":
-                base_url += "?new"
+            if comic_id.isnumeric() and int(comic_id) > 1:
+                api_url = base_url.format(comic_id)
+            elif comic_id in ['latest', 'new', 'l', 'n']:
+                api_url = base_url.format('')  # hacky, but works.
+            elif comic_id in ['random', 'rand', 'r']:
+                api_url = base_url.format(await get_random_comic())
+            else:
+                await ctx.send(embed=discord.Embed(
+                    title="XKCD - User Error",
+                    description="A comic ID or a valid selector (see the help for this command) is required.",
+                    color=Colors.WARNING
+                ))
+                return
+        else:
+            api_url = base_url.format(await get_random_comic())
 
-        async with self._http_session.get("http://wa.funsite.cz/xkcd/") as resp:            
-            if resp.stats != 200:
-                await ctx.send("Error getting comic. Is this https://xkcd.com/404?")
+        async with self._http_session.get(api_url) as resp:
+            if resp.status != 200:
+                await ctx.send(embed=discord.Embed(
+                    title="XKCD Comic Not Found!",
+                    description="The requested comic ID could not be found. ",
+                    color=Colors.DANGER
+                ))
                 return
 
             comic = await resp.json()
 
-        if not "image" in comic.keys():
-                await ctx.send("Couldn't find comic with that number")
-                return            
-
         embed = discord.Embed(
-            title = comic.get("title"),
-            url = comic.get("url"),
-            description = comic.get("description")
+            title=f"[{comic.get('num')}] {comic.get('safe_title')}",
+            url=f"https://xkcd.com/{comic.get('num')}/",
+            description=comic.get("alt")
         )
 
-        embed.set_image(url=comic.get('image'))
+        embed.set_image(url=comic.get('img'))
+
+        embed.set_footer(text=f"Comic from "
+                              f"{comic.get('year').zfill(4)}-{comic.get('month').zfill(2)}-{comic.get('day').zfill(2)}",
+                         icon_url="https://i.imgur.com/5lT31la.png")  # discord doesnt like .ico
+
+        if comic.get('link'):
+            embed.add_field(name="Extra Link", value=f"[Go! >]({comic.get('link')}]", inline=False)
 
         await ctx.send(embed=embed)
+
 
 def setup(bot: HuskyBot):
     bot.add_cog(Fun(bot))
