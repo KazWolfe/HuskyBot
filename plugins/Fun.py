@@ -496,14 +496,14 @@ class Fun(commands.Cog):
             elif comic_id == "latest":
                 base_url += "?new"
 
-        async with self._http_session.get("http://wa.funsite.cz/xkcd/") as resp:            
+        async with self._http_session.get(base_url) as resp:            
             if resp.stats != 200:
                 await ctx.send("Error getting comic. Is this https://xkcd.com/404?")
                 return
 
             comic = await resp.json()
 
-        if not "image" in comic.keys():
+        if not "image" in comic:
                 await ctx.send("Couldn't find comic with that number")
                 return            
 
