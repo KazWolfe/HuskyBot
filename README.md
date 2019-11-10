@@ -91,7 +91,7 @@ during the bot's inception, the bot was built specifically to run in a single gu
        sudo python3 -m pip install -r requirements.txt
        
 3. [Add the bot to your guild](https://discordapp.com/developers/docs/topics/oauth2#bots).
-4. Once your bot is in your guild and ready to go, start it with `python3 BotCore.py`.
+4. Once your bot is in your guild and ready to go, start it with `python3 HuskyBot.py`.
 5. When prompted, paste in your bot API key, and hit ENTER.
 6. Run `/help config` to get a list of base configuration values, and configure the bot as you see fit.
 
