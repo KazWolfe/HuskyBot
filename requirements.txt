@@ -1,4 +1,4 @@
-discord.py[voice]==1.2.3
+discord.py[voice]==1.2.4
 GitPython~=2.1.11
 SQLAlchemy~=1.2
 psycopg2~=2.7.6

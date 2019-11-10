@@ -41,7 +41,8 @@ def get_fancy_game_data(member):
         state = {discord.ActivityType.playing: "Playing ",
                  discord.ActivityType.streaming: "Streaming ",
                  discord.ActivityType.listening: "Listening to ",
-                 discord.ActivityType.watching: "Watching "}
+                 discord.ActivityType.watching: "Watching ",
+                 4: "Custom: "}
 
         if isinstance(member.activity, discord.Spotify):
             m = "(Listening to Spotify)"
@@ -53,6 +54,9 @@ def get_fancy_game_data(member):
                      f"{member.activity.artist}]({track_url.format(member.activity.track_id)})"
 
             return m
+        # custom status
+        elif member.activity.type == 4:
+            return f"({member.activity.state})"
         elif not isinstance(member.activity, discord.Game) and member.activity.url is not None:
             return f"([{state[member.activity.type] + member.activity.name}]({member.activity.url}))"
         else:

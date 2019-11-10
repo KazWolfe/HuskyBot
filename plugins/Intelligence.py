@@ -152,11 +152,11 @@ class Intelligence(commands.Cog):
             member_details.add_field(name="Display Name", value=HuskyUtils.escape_markdown(user.display_name),
                                      inline=True)
 
-        member_details.add_field(name="Joined Discord", value=user.created_at.strftime(DATETIME_FORMAT), inline=True)
+        member_details.add_field(name="Joined Discord", value=user.created_at.strftime(DATETIME_FORMAT), inline=False)
         member_details.set_thumbnail(url=user.avatar_url)
 
         if isinstance(user, discord.Member) and ctx.guild is not None:
-            member_details.add_field(name="Joined Guild", value=user.joined_at.strftime(DATETIME_FORMAT), inline=True)
+            member_details.add_field(name="Joined Guild", value=user.joined_at.strftime(DATETIME_FORMAT), inline=False)
             member_details.add_field(name="Roles", value=", ".join(roles), inline=False)
 
             index = sorted(ctx.guild.members, key=lambda m: m.joined_at).index(user) + 1
