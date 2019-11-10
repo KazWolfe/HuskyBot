@@ -561,7 +561,7 @@ class Fun(commands.Cog):
                                                             "full experience.", inline=False)
 
         if comic.get('link'):
-            embed.add_field(name="Extra Link", value=f"[Go! >]({comic.get('link')}]", inline=False)
+            embed.add_field(name="Extra Link", value=f"[Go! >]({comic.get('link')})", inline=False)
 
         await ctx.send(embed=embed)
 
