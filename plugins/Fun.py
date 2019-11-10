@@ -555,6 +555,11 @@ class Fun(commands.Cog):
                               f"{comic.get('year').zfill(4)}-{comic.get('month').zfill(2)}-{comic.get('day').zfill(2)}",
                          icon_url="https://i.imgur.com/5lT31la.png")  # discord doesnt like .ico
 
+        if comic.get('extra_parts'):
+            embed.add_field(name="Interactive Comic", value="This comic appears to be interactive! Click the title of "
+                                                            "this embed to see the comic on the official site for the "
+                                                            "full experience.", inline=False)
+
         if comic.get('link'):
             embed.add_field(name="Extra Link", value=f"[Go! >]({comic.get('link')}]", inline=False)
 
