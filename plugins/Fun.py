@@ -473,6 +473,7 @@ class Fun(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command(name="xkcd", brief="Get comic from xkcd.com!")
+    @commands.cooldown(1, 3, commands.BucketType.user)
     async def xkcd_comic(self, ctx: commands.Context, comic_id: str = None):
         """
         Enjoy some comics by Randall Munroe.
@@ -504,8 +505,8 @@ class Fun(commands.Cog):
             async with self._http_session.get('https://c.xkcd.com/random/comic', allow_redirects=False) as r_resp:
                 if r_resp.status != 302 or not r_resp.headers.get('Location'):
                     await ctx.send(embed=discord.Embed(
-                        title="XKCD API Error",
-                        description="The XKCD API returned an unexpected result when querying for a random comic. Try "
+                        title="xkcd API Error",
+                        description="The xkcd API returned an unexpected result when querying for a random comic. Try "
                                     "again later.",
                         color=Colors.DANGER
                     ))
@@ -515,27 +516,24 @@ class Fun(commands.Cog):
 
         base_url = "https://xkcd.com/{}/info.0.json"
 
-        if comic_id:
-            if comic_id.isnumeric() and int(comic_id) > 1:
-                api_url = base_url.format(comic_id)
-            elif comic_id in ['latest', 'new', 'l', 'n']:
-                api_url = base_url.format('')  # hacky, but works.
-            elif comic_id in ['random', 'rand', 'r']:
-                api_url = base_url.format(await get_random_comic())
-            else:
-                await ctx.send(embed=discord.Embed(
-                    title="XKCD - User Error",
-                    description="A comic ID or a valid selector (see the help for this command) is required.",
-                    color=Colors.WARNING
-                ))
-                return
-        else:
+        if not comic_id or comic_id in ['random', 'rand', 'r']:
             api_url = base_url.format(await get_random_comic())
+        elif comic_id in ['latest', 'new', 'l', 'n']:
+            api_url = base_url.format('')  # hacky, but works.
+        elif comic_id.isnumeric() and int(comic_id) > 1:
+            api_url = base_url.format(comic_id)
+        else:
+            await ctx.send(embed=discord.Embed(
+                title="xkcd - User Error",
+                description="A comic ID or a valid selector (see the help for this command) is required.",
+                color=Colors.WARNING
+            ))
+            return
 
         async with self._http_session.get(api_url) as resp:
             if resp.status != 200:
                 await ctx.send(embed=discord.Embed(
-                    title="XKCD Comic Not Found!",
+                    title="xkcd Comic Not Found!",
                     description="The requested comic ID could not be found. ",
                     color=Colors.DANGER
                 ))
@@ -549,16 +547,22 @@ class Fun(commands.Cog):
             description=comic.get("alt")
         )
 
-        embed.set_image(url=comic.get('img'))
+        # Discord doesn't like .ico - find a better source or make sure this imgur stays live.
+        embed.set_author(name="xkcd", url="https://xkcd.com/", icon_url="https://i.imgur.com/5lT31la.png")
 
-        embed.set_footer(text=f"Comic from "
-                              f"{comic.get('year').zfill(4)}-{comic.get('month').zfill(2)}-{comic.get('day').zfill(2)}",
-                         icon_url="https://i.imgur.com/5lT31la.png")  # discord doesnt like .ico
+        embed.set_image(url=comic.get('img'))
+        embed.set_footer(
+            text=f"Comic from {comic.get('year').zfill(4)}-{comic.get('month').zfill(2)}-{comic.get('day').zfill(2)}. "
+                 f"Source xkcd.com (obviously)."
+        )
 
         if comic.get('extra_parts'):
-            embed.add_field(name="Interactive Comic", value="This comic appears to be interactive! Click the title of "
-                                                            "this embed to see the comic on the official site for the "
-                                                            "full experience.", inline=False)
+            embed.add_field(
+                name="Interactive Comic",
+                value="This comic appears to be interactive! Click the title of this embed to see the comic on the "
+                      "official site for the full experience.",
+                inline=False
+            )
 
         if comic.get('link'):
             embed.add_field(name="Extra Link", value=f"[Go! >]({comic.get('link')})", inline=False)

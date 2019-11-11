@@ -20,6 +20,7 @@ ctf
 keys/
 id_rsa*
 .ssh/
+certs/
 
 # The environment doesn't need to be exposed to Git, either
 .env
