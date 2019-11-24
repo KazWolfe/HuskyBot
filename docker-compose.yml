@@ -10,7 +10,7 @@ services:
     environment:
     - HUSKYBOT_PLATFORM=compose
     ports:
-    - "9339"
+      - "9339:9339"
     networks:
     - resources
     volumes:

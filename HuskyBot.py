@@ -11,6 +11,7 @@ import traceback
 
 # discord.py imports
 import discord
+import discord.http
 from discord.ext import commands
 
 # Database imports
@@ -64,6 +65,9 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
         # Load in HuskyBot's API
         self.webapp = web.Application()
 
+        # Allow setting custom routes (litecord/canary/apiv7 support)
+        discord.http.Route.BASE = os.getenv('DISCORD_API_URL', discord.http.Route.BASE)
+
         super().__init__(
             command_prefix=self.config.get('prefix', '/'),
             status=discord.Status.idle,
@@ -84,7 +88,7 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
             LOG.info("Loading API key from environment variable DISCORD_TOKEN.")
         elif self.config.get('apiKey') is None:
             if HuskyUtils.is_docker():
-                LOG.critical("Please specify the API key by using the DISCORD_TOKEN environment varaible when using "
+                LOG.critical("Please specify the API key by using the DISCORD_TOKEN environment variable when using "
                              "Docker.")
                 exit(1)
 
