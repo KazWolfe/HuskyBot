@@ -569,6 +569,51 @@ class Fun(commands.Cog):
 
         await ctx.send(embed=embed)
 
+    @commands.command(name="bampersand", brief="Make someone bampersand!", aliases=["b&"])
+    @commands.has_permissions(ban_members=True)
+    async def bampersand(self, ctx: commands.Context, member: discord.Member):
+        if ctx.author == member:
+            await ctx.send(embed=discord.Embed(
+                title="Well aren't you edgy?",
+                description="Hey everyone, we have a prime example of some 3dg3 over here. Someone just tried to go "
+                            "commit b& but didnt have the nerve. Lolz, l00zer.",
+                color=0  # the edgiest color there is.
+            ))
+            return
+
+        if ctx.author.top_role < member.top_role:
+            await ctx.send(embed=discord.Embed(
+                title="Oof!",
+                description="Oof ouch owie, i cant bampersand this user cuz they're cooler than you. try again later.",
+                color=Colors.DANGER
+            ))
+            return
+
+        bampifications = [
+            "you are strictly forbidden to yeet, yote, yeeteth, or any other tense of yeet.",
+            "you have been hit in the head with the bampersand hammer, and now have a minor headache.",
+            "a tactical furry squad has been assigned to you for the purposes of national security.",
+            "you are forced to watch only the VRV ads on Cyanide and Happiness.",
+            "your waifu has been taken by the bot. You were dumped for a dog.",
+            "your Discord bots have all been replaced by NotSoBot.",
+            "chicken chicken chicken, chicken chicken. Chicken chicken chicken.",
+            "Daddy Stallman will now start ignoring you.",
+            "your Social Credit Score was penalized by 50 points. The Party notes its displeasure.",
+            "you must unironically think that Hotel California is a good song.",
+            "YouTube will now only play Lollipop by Aqua."
+        ]
+
+        bamped_embed = discord.Embed(
+            title=Emojis.BAN + " You've been b&!",
+            description=f"It has come to this bot's attention that {ctx.author.mention} has decided that thou areth "
+                        f"too not cooleth to be in ths guild anymore. \n\n"
+                        f"As punishment, {random.choice(bampifications)}",
+            color=Colors.INFO
+        )
+        bamped_embed.set_footer(text="This meme made by the Fellow Kids gang.")
+
+        await ctx.send(f"Hey! Hey {member.mention}! I have a super important announcement for you!", embed=bamped_embed)
+
 
 def setup(bot: HuskyBot):
     bot.add_cog(Fun(bot))

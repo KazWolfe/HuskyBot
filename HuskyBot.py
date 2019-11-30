@@ -85,23 +85,14 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
         signal.signal(signal.SIGINT, self.shutdown)
 
         if os.environ.get('DISCORD_TOKEN'):
-            LOG.info("Loading API key from environment variable DISCORD_TOKEN.")
-        elif self.config.get('apiKey') is None:
-            if HuskyUtils.is_docker():
-                LOG.critical("Please specify the API key by using the DISCORD_TOKEN environment variable when using "
-                             "Docker.")
-                exit(1)
-
-            if self.__daemon_mode:
-                LOG.critical("The bot does not have an API key assigned to it. Please either specify a key in the env "
-                             "variable DISCORD_TOKEN, add a key to the config, or run this bot in non-daemon mode.")
-                exit(1)
-            else:
-                print("The bot does not have an API key defined. Please enter one below...")
-                key = input("Discord API Key? ")
-
-                self.config.set('apiKey', key)
-                print("The API key has been set!")
+            LOG.debug("Loading API key from environment variable DISCORD_TOKEN.")
+        elif self.config.get('apiKey'):
+            LOG.warning("DEPRECATION WARNING - The Discord API key is being retrieved from the config file. "
+                        "This capability will be removed in a future release. Please move the token to the "
+                        "DISCORD_TOKEN environment variable.")
+        else:
+            LOG.critical("The API key for HuskyBot must be loaded via the DISCORD_TOKEN environment variable.")
+            exit(1)
 
         LOG.info("The bot's log path is: {}".format(self.__log_path))
 
@@ -117,14 +108,13 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
             LOG.info("The bot is running in DEVELOPER MODE! Some features may behave in unexpected ways or may "
                      "otherwise break. Some bot safety checks are disabled with this mode on.")
 
-        self.run(os.environ.get('DISCORD_TOKEN') or self.config['apiKey'])
+        self.run(os.getenv('DISCORD_TOKEN', self.config.get('apiKey')))
 
         if self.config.get("restartReason") is not None:
-            print("READY FOR RESTART!")
+            LOG.info("Bot is ready for restart...")
             os.execl(sys.executable, *([sys.executable] + sys.argv))
 
     def shutdown(self):
-        LOG.info("Shutting down HuskyBot...")
         LOG.info("Shutting down HuskyBot...")
 
         self.config.save()
@@ -136,7 +126,7 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
         self.loop.create_task(self.logout())
 
     def __check_developer_mode(self):
-        return bool(os.environ.get('HUSKYBOT_DEVMODE', False)) or self.config.get('developerMode', False)
+        return bool(os.environ.get('HUSKYBOT_DEVMODE', self.config.get('developerMode', False)))
 
     def __build_stage0_activity(self):
         mapping = {
@@ -420,7 +410,7 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
             if self.developer_mode:
                 embed = discord.Embed(
                     title="Command Handler",
-                    description=f"**The command `{p}{command_name}` does not exist.** See `{p}help` for valid "
+                    description=f"**The command `{p}{command_name}` is disabled.** See `{p}help` for valid "
                                 f"commands.",
                     color=Colors.DANGER
                 )
@@ -446,8 +436,7 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
             await ctx.send(embed=discord.Embed(
                 title="Command Handler",
                 description=f"**The command `{p}{command_name}` failed an execution check.** Additional information "
-                            f"may "
-                            f"be provided below.",
+                            f"may be provided below.",
                 color=Colors.DANGER
             ).add_field(name="Error Log", value="```" + error_string + "```", inline=False))
 
@@ -508,8 +497,8 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
 
             await ctx.send(embed=discord.Embed(
                 title="Command Handler",
-                description=f"**The command `{p}{command_name}` has been run too much recently!**\nPlease wait "
-                            f"**{tx}** until trying again.",
+                description=f"**The command `{p}{command_name}` has been run too much recently!**\n"
+                            f"Please wait **{tx}** until trying again.",
                 color=Colors.DANGER
             ))
 
@@ -527,6 +516,7 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
                       ctx.message.content,
                       ''.join(traceback.format_exception(type(error), error, error.__traceback__)))
 
+            # ToDo: Clean this up a bit more so these commands don't have hardcoded exemptions.
             if command_name.lower() in ["eval", "feval", "requestify"]:
                 LOG.info(f"Suppressed critical error reporting for command {command_name}")
                 return
@@ -536,6 +526,12 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
 
 
 if __name__ == '__main__':
+    if os.name != "posix":
+        # Critical logging isn't the best way to do this, as this is (technically) before the logger is initialized,
+        # but it's still somewhat there. We just haven't hooked in our fancy features yet.
+        LOG.critical("This application may only run on POSIX-compliant operating systems such as Linux or macOS.")
+        exit(1)
+
     bot = HuskyBot()
     bot.entrypoint()
     LOG.info("Left entrypoint, bot has shut down. Goodbye, everybody!")
