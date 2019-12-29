@@ -90,6 +90,7 @@ class ServerLog(commands.Cog):
         alert_channel = self._config.get('specialChannels', {}).get(ChannelKeys.USER_LOG.value, None)
 
         if alert_channel is None:
+            LOG.debug("skipping log event - no userlog channel set.")
             return
 
         alert_channel = member.guild.get_channel(alert_channel)
@@ -103,6 +104,16 @@ class ServerLog(commands.Cog):
         embed.set_thumbnail(url=member.avatar_url)
         embed.add_field(name="User ID", value=member.id)
         embed.add_field(name="Leave Timestamp", value=HuskyUtils.get_timestamp())
+
+        roles_on_leave = []
+        for role in member.roles:  # type: discord.Role
+            if role.is_default():
+                continue
+
+            roles_on_leave.append(role.mention)
+
+        if roles_on_leave:
+            embed.add_field(name="Roles on Leave", value=", ".join(roles_on_leave), inline=False)
 
         LOG.info(f"User {member} has left {member.guild.name}.")
         await alert_channel.send(embed=embed)

@@ -138,7 +138,7 @@ class Intelligence(commands.Cog):
         roles = []
         if isinstance(user, discord.Member) and ctx.guild is not None:
             for r in user.roles:
-                if r.name == "@everyone":
+                if r.is_default():
                     continue
 
                 roles.append(r.mention)
