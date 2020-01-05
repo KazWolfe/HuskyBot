@@ -30,13 +30,11 @@ class PingMe(commands.Cog):
         if message.content.startswith(self._bot.command_prefix):
             return
 
-        bot_mention = f"<@{self._bot.user.id}>"
-
-        # Don't let people ping Husky to get a response.
-        if bot_mention == message.content:
+        # hacky way to determine if a message is only a bot mention
+        if message.clean_content == f"@{message.guild.me.display_name}":
             return
 
-        if bot_mention in message.content:
+        if self._bot.user in message.mentions:
             await message.channel.send(self.husky_speak())
 
     @commands.command(name="husky", brief="Act like a husky.")

@@ -4,7 +4,6 @@ import datetime
 # System imports
 import logging
 import os
-import signal
 import ssl
 import sys
 import traceback
@@ -80,10 +79,6 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
         self.init_stage = 0
 
     def entrypoint(self):
-        # Prepare signal handler
-        signal.signal(signal.SIGTERM, self.shutdown)
-        signal.signal(signal.SIGINT, self.shutdown)
-
         if os.environ.get('DISCORD_TOKEN'):
             LOG.debug("Loading API key from environment variable DISCORD_TOKEN.")
         elif self.config.get('apiKey'):
@@ -114,7 +109,7 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
             LOG.info("Bot is ready for restart...")
             os.execl(sys.executable, *([sys.executable] + sys.argv))
 
-    def shutdown(self):
+    async def logout(self):
         LOG.info("Shutting down HuskyBot...")
 
         self.config.save()
@@ -123,7 +118,7 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
         self.db.dispose()
         LOG.debug("DB shut down")
 
-        self.loop.create_task(self.logout())
+        await super().logout()
 
     def __check_developer_mode(self):
         return bool(os.environ.get('HUSKYBOT_DEVMODE', self.config.get('developerMode', False)))
