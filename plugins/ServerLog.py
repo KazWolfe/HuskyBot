@@ -98,7 +98,7 @@ class ServerLog(commands.Cog):
         embed = discord.Embed(
             title=Emojis.DOOR + " Member left the guild",
             description=f"{member} has left the guild.",
-            color=Colors.PRIMARY
+            color=Colors.WARNING
         )
 
         embed.set_thumbnail(url=member.avatar_url)

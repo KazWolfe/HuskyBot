@@ -13,7 +13,7 @@ class Colors(IntEnum):
     WARNING = 0xFFC107
     INFO = 0x17A2B8
 
-    GUILD_COLOR = 0x3AC4FF
+    GUILD_COLOR = 0x3AC4FF  # diy tech color.
 
     # Shortcuts
     ERROR = DANGER
