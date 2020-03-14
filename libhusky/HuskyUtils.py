@@ -4,15 +4,15 @@ import gzip
 import hashlib
 import imghdr
 import logging
-import math
 import os
 import re
 import struct
 import subprocess
-import unicodedata
 from logging import handlers
 
 import discord
+import math
+import unicodedata
 
 from libhusky import HuskyStatics, HuskyConfig
 
@@ -250,7 +250,7 @@ def calculate_str_entropy(string):
 
 
 def escape_markdown(string):
-    markdown_characters = ["\\", "~", "`", "*", "_", "["]
+    markdown_characters = ["\\", "~", "`", "*", "_", "[", "@"]
 
     for c in markdown_characters:
         string = string.replace(c, "\\" + c)
