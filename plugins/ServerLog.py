@@ -276,9 +276,16 @@ class ServerLog(commands.Cog):
         embed.add_field(name="Channel", value=message.channel.mention, inline=True)
         embed.add_field(name="Send Timestamp", value=message.created_at.strftime(DATETIME_FORMAT), inline=True)
         embed.add_field(name="Delete Timestamp", value=HuskyUtils.get_timestamp(), inline=True)
+        if len(message.embeds):
+            embed.add_field(name="Embed Count", value=f"{len(message.embeds)}", inline=True)
+        if message.type != discord.MessageType.default:
+            embed.add_field(name="Message Type", value=f"`{message.type}`", inline=True)
+        if message.is_system():
+            embed.add_field(name="System Message", value="True", inline=True)
 
         if message.content is not None and message.content != "":
-            embed.add_field(name="Message", value=HuskyUtils.trim_string(message.content, 1000, True), inline=False)
+            embed.add_field(name="Message", value=HuskyUtils.trim_string(message.clean_content, 1000, True),
+                            inline=False)
 
         if message.attachments is not None and len(message.attachments) > 1:
             attachments_list = str(f"- {a.url}\n" for a in message.attachments)

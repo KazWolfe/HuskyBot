@@ -157,7 +157,7 @@ class MentionFilter(AntiSpamModule):
             seconds = None
 
         as_config = self._config.get('antiSpam', {})
-        ping_config = as_config.setdefault('MentionmFilter', {}).setdefault('config', defaults)
+        ping_config = as_config.setdefault('MentionFilter', {}).setdefault('config', defaults)
 
         ping_config['soft'] = warn_limit
         ping_config['hard'] = ban_limit
