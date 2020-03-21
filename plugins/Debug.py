@@ -353,11 +353,13 @@ class Debug(commands.Cog):
     @commands.command(name="superusers", brief="Get a list of all bot superusers.")
     async def get_superusers(self, ctx: commands.Context):
         su_list = self.bot.superusers[:]
-        owner_id = self.bot.owner_id
+        app_info: discord.AppInfo = self._session_store.get("appInfo", await self.bot.application_info())
+        owner_id = self.bot.owner_id or app_info.owner.id
 
-        if owner_id is None:
-            appinfo = await self.bot.application_info()
-            owner_id = appinfo.owner.id
+        if app_info.team:
+            owner_string = f"[TEAM] {app_info.team.name} (owned by {app_info.owner.mention})"
+        else:
+            owner_string = f"<@{owner_id}>"
 
         try:
             su_list.remove(owner_id)
@@ -370,7 +372,7 @@ class Debug(commands.Cog):
             color=Colors.DANGER
         )
 
-        embed.add_field(name="Bot Owner", value=f"<@{owner_id}>", inline=False)
+        embed.add_field(name="Bot Owner", value=owner_string, inline=False)
 
         if len(su_list) > 0:
             embed.add_field(name="Configured Superusers", value="\n".join(f"<@{i}>" for i in su_list), inline=False)

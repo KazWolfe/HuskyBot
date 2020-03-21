@@ -278,7 +278,7 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
         else:
             su_list.append(app_info.owner.id)
 
-        return su_list
+        return list(set(su_list))
 
     async def init_stage1(self):
         """
