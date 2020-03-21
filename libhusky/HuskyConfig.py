@@ -81,7 +81,7 @@ class WolfConfig:
             return
 
         with open(self._path, 'w') as config_file:
-            json.dump(self._config, config_file, sort_keys=True, default=override_dumper)
+            json.dump(self._config, config_file, sort_keys=True, default=override_dumper, indent=2)
 
 
 __cache__ = {}

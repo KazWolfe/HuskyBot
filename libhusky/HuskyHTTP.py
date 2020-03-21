@@ -6,10 +6,11 @@ from discord.ext import commands
 LOG = logging.getLogger("HuskyBot.HttpServer")
 
 
-class WolfRouter:
+class HuskyRouter:
     """
     A simple dynamic router that allows methods to be added/removed freely.
     """
+
     def __init__(self):
         self.routes = {}
 
@@ -95,7 +96,7 @@ class WolfRouter:
         return wrapped
 
 
-router = WolfRouter()
+router = HuskyRouter()
 
 
 def get_router():

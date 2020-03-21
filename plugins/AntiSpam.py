@@ -140,7 +140,7 @@ class AntiSpam(commands.Cog):
             /as disable - Disable a loaded module.
         """
         as_conf = self._config.get('antiSpam', {})
-        mod_config = as_conf.setdefault(name, {"enabled": False})
+        mod_config = as_conf.get(name, {"enabled": False})
 
         if mod_config['enabled'] and name in self.__modules__:
             await ctx.send(embed=discord.Embed(

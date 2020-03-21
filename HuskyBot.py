@@ -7,6 +7,7 @@ import os
 import ssl
 import sys
 import traceback
+from typing import *
 
 # discord.py imports
 import discord
@@ -55,7 +56,7 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
 
         # Database things
         # noinspection PyTypeChecker
-        self.db = None  # type: sqlalchemy.engine.Engine
+        self.db: Optional[sqlalchemy.engine.Engine] = None
         self.session_factory = None
 
         # Load in HuskyBot's logger
@@ -105,18 +106,21 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
 
         self.run(os.getenv('DISCORD_TOKEN', self.config.get('apiKey')))
 
+        LOG.info("Shutting down HuskyBot...")
+
+        self.config.save()
+        LOG.debug("Config file saved/written to disk.")
+
+        if self.db:
+            self.db.dispose()
+            LOG.debug("DB connection shut down")
+
         if self.config.get("restartReason") is not None:
             LOG.info("Bot is ready for restart...")
             os.execl(sys.executable, *([sys.executable] + sys.argv))
 
     async def logout(self):
         LOG.info("Shutting down HuskyBot...")
-
-        self.config.save()
-        LOG.debug("Config file saved/written to disk.")
-
-        self.db.dispose()
-        LOG.debug("DB shut down")
 
         await super().logout()
 
@@ -127,7 +131,7 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
         mapping = {
             "admin": "Restarting...",
             "update": "Updating...",
-            None: "Starting"
+            None: "Starting..."
         }
 
         restart_reason = self.config.get("restartReason")
@@ -153,6 +157,7 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
         if self.__daemon_mode:
             stream_log_handler.setFormatter(logging.Formatter("[%(levelname)s] %(name)s: %(message)s"))
 
+        # noinspection PyArgumentList
         logging.basicConfig(
             level=logging.WARNING,
             format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
@@ -170,17 +175,21 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
         return bot_logger
 
     async def __init_guild_lock(self):
-        if self.config.get('guildId') is not None:
+        locked_guild = self.config.get('guildId')
+
+        if locked_guild:
             for guild in self.guilds:  # type: discord.Guild
-                if guild.id != self.config.get('guildId'):
+                if guild.id != locked_guild:
                     LOG.warning(f"Bot was in unauthorized guild {guild.name} ({guild.id}). "
                                 f"Leaving the guild.")
                     await guild.leave()
-
-        elif len(self.guilds) > 0:
-            LOG.critical("Bot account is in multiple guilds without being in developer mode or "
-                         "having a guild set. Please remove this account from all guilds, or specify "
-                         "a guild ID in the config.")
+        elif len(self.guilds) == 1:
+            LOG.info(f"The bot did not have a guild locked, but was a member of one. Locking the bot to guild ID "
+                     f"{self.guilds[0].id}.")
+            self.config.set('guildId', self.guilds[0].id)
+        elif len(self.guilds) > 1:
+            LOG.critical("The bot is in multiple guilds without being locked to a guild. Please remove the bot from "
+                         "extra guilds, or specify a guildId in the configuration.")
             exit(127)
         else:
             LOG.info("The bot is not associated with any guilds yet. The next guild joined by the bot will be locked.")
@@ -199,6 +208,7 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
                 ssl_context.load_cert_chain(cert.read())
 
         for method in ["GET", "HEAD", "POST", "PATCH", "PUT", "DELETE", "VIEW"]:
+            # Abuse the hell out of aiohttp's own router to load in HuskyRouter.
             self.webapp.router.add_route(method, '/{tail:.*}', HuskyHTTP.get_router().handle(self))
 
         runner = web.AppRunner(self.webapp)
@@ -255,6 +265,21 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
             ))
             self.config.delete("restartNotificationChannel")
 
+    async def __get_superusers(self, app_info: discord.AppInfo = None) -> []:
+        su_list = self.config.get('superusers', [])
+
+        if not app_info:
+            app_info: discord.AppInfo = await self.application_info()
+
+        if app_info.team:
+            for team_member in app_info.team.members:
+                if team_member.membership_state == discord.TeamMembershipState.accepted and not team_member.bot:
+                    su_list.append(team_member.id)
+        else:
+            su_list.append(app_info.owner.id)
+
+        return su_list
+
     async def init_stage1(self):
         """
         Initialize the bot logger and other critical services. Init stage 1 will *not* re-run if it has executed.
@@ -270,7 +295,7 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
         self.session_store.set("appInfo", app_info)
 
         # Load in superusers
-        self.superusers: list = self.config.get('superusers', []) + [app_info.owner.id]
+        self.superusers = await self.__get_superusers(app_info)
         LOG.info(f"Superusers loaded: {self.superusers}")
 
         LOG.info(f"HuskyBot is online, running discord.py {discord.__version__}. Initializing and "
