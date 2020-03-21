@@ -352,19 +352,9 @@ class Debug(commands.Cog):
 
     @commands.command(name="superusers", brief="Get a list of all bot superusers.")
     async def get_superusers(self, ctx: commands.Context):
-        su_list = self.bot.superusers[:]
+        su_list = self.bot.superusers[:]  # copy list so we can tamper with it
         app_info: discord.AppInfo = self._session_store.get("appInfo", await self.bot.application_info())
         owner_id = self.bot.owner_id or app_info.owner.id
-
-        if app_info.team:
-            owner_string = f"[TEAM] {app_info.team.name} (owned by {app_info.owner.mention})"
-        else:
-            owner_string = f"<@{owner_id}>"
-
-        try:
-            su_list.remove(owner_id)
-        except ValueError:
-            pass
 
         embed = discord.Embed(
             title=Emojis.CROWN + " Bot Superusers",
@@ -372,7 +362,36 @@ class Debug(commands.Cog):
             color=Colors.DANGER
         )
 
-        embed.add_field(name="Bot Owner", value=owner_string, inline=False)
+        if app_info.team:
+            team_members = []
+            for tm in app_info.team.members:
+                if not tm.bot and tm.membership_state == discord.TeamMembershipState.accepted:
+                    team_members.append(tm.id)
+
+                    # remove from declared superusers
+                    try:
+                        su_list.remove(tm.id)
+                    except ValueError:
+                        pass
+
+            try:
+                team_members.remove(app_info.team.owner_id)
+            except ValueError:
+                pass
+
+            embed.add_field(name="Owning Team", value=app_info.team.name, inline=True)
+            embed.add_field(name="Owning Team ID", value=app_info.team.id, inline=True)
+            embed.add_field(name="Team Owner", value=app_info.team.owner.mention, inline=True)
+            embed.add_field(name="Team Members", value="\n".join(f"<@{i}>" for i in team_members), inline=False)
+
+            embed.set_thumbnail(url=app_info.team.icon_url)
+        else:
+            embed.add_field(name="Bot Owner", value=app_info.owner.mention, inline=False)
+
+        try:
+            su_list.remove(owner_id)
+        except ValueError:
+            pass
 
         if len(su_list) > 0:
             embed.add_field(name="Configured Superusers", value="\n".join(f"<@{i}>" for i in su_list), inline=False)
