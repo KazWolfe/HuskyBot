@@ -381,7 +381,7 @@ class Debug(commands.Cog):
 
             embed.add_field(name="Owning Team", value=app_info.team.name, inline=True)
             embed.add_field(name="Owning Team ID", value=app_info.team.id, inline=True)
-            embed.add_field(name="Team Owner", value=app_info.team.owner.mention, inline=True)
+            embed.add_field(name="Team Owner", value=app_info.team.owner.mention, inline=False)
 
             if team_members:
                 embed.add_field(name="Team Members", value="\n".join(f"<@{i}>" for i in team_members), inline=False)
