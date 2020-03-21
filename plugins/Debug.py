@@ -382,7 +382,9 @@ class Debug(commands.Cog):
             embed.add_field(name="Owning Team", value=app_info.team.name, inline=True)
             embed.add_field(name="Owning Team ID", value=app_info.team.id, inline=True)
             embed.add_field(name="Team Owner", value=app_info.team.owner.mention, inline=True)
-            embed.add_field(name="Team Members", value="\n".join(f"<@{i}>" for i in team_members), inline=False)
+
+            if team_members:
+                embed.add_field(name="Team Members", value="\n".join(f"<@{i}>" for i in team_members), inline=False)
 
             embed.set_thumbnail(url=app_info.team.icon_url)
         else:
@@ -393,7 +395,7 @@ class Debug(commands.Cog):
         except ValueError:
             pass
 
-        if len(su_list) > 0:
+        if su_list:
             embed.add_field(name="Configured Superusers", value="\n".join(f"<@{i}>" for i in su_list), inline=False)
 
         await ctx.send(embed=embed)
