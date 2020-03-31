@@ -70,7 +70,7 @@ class Intelligence(commands.Cog):
         ----------
             ctx   :: Context <!nodoc>
             role  :: A uniquely identifying role string. This can be a role mention, a role ID, or name.
-                    This parameter is case-sensitive, but does not need to be "quoted in case of spaces."
+                     This parameter is case-sensitive, but does not need to be "quoted in case of spaces."
 
         Examples
         --------

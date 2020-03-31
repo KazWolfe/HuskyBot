@@ -5,6 +5,7 @@ Modified by KazWolfe for HuskyBot, and likely botched beyond belief.
 """
 
 import itertools
+import re
 
 import discord
 from discord.ext.commands import DefaultHelpCommand, Paginator
@@ -21,6 +22,11 @@ class HuskyHelpFormatter(DefaultHelpCommand):
         self.commands_heading = "Commands\n--------"
 
         super().__init__(paginator=self.paginator, commands_heading=self.commands_heading, **options)
+
+    def preprocess_message_newlines(self, doc) -> str:
+        regex = r"(?<![\r\n])(\r?\n|\r)(?![\r\n]|\-+|\s+)"
+
+        return re.sub(regex, ' ', doc)
 
     def get_command_signature(self, command):
         parent = command.full_parent_name
@@ -93,15 +99,26 @@ class HuskyHelpFormatter(DefaultHelpCommand):
             The command to format.
         """
 
-        if command.description:
-            self.paginator.add_line(command.description, empty=True)
-
-        signature = self.get_command_signature(command)
-        self.paginator.add_line(signature, empty=True)
+        # ToDo: Codesmell, this overrides `help` for the command. Not the best, but relatively safe.
 
         if command.help:
-            for line in command.help.splitlines():
+            pretty_helpdoc = self.preprocess_message_newlines(command.help)
+            lines = []
+
+            for line in pretty_helpdoc.splitlines():
                 if "<!nodoc>" in line:
                     continue
-                self.paginator.add_line(line)
-            self.paginator.add_line()
+
+                lines.append(line)
+
+            command.help = "\n".join(lines)
+
+        super().add_command_formatting(command)
+
+    async def send_cog_help(self, cog):
+        # ToDo: Codesmell, this overrides `__cog_cleaned_doc` for the cog. Not the best, but relatively safe.
+
+        if cog.description:
+            cog.__cog_cleaned_doc__ = self.preprocess_message_newlines(cog.description)
+
+        await super().send_cog_help(cog)

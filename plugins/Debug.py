@@ -31,7 +31,7 @@ class Debug(commands.Cog):
     Internal HuskyBot debugging toolkit.
 
     This plugin provides a number of internal debugging commands useful for development and low-level maintenance of
-    the bot This plugin (typically) should not be loaded on production Husky servers. However, certain functionality
+    the bot. This plugin (typically) should not be loaded on production Husky servers. However, certain functionality
     may be useful in certain use cases, so it is made available.
 
     The Debug plugin is automatically loaded in Recovery Mode as well as Developer Mode.
