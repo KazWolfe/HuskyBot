@@ -28,7 +28,13 @@ LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 # noinspection PyMethodMayBeStatic
 class Debug(commands.Cog):
     """
-    Help documentation is not available for this plugin.
+    Internal HuskyBot debugging toolkit.
+
+    This plugin provides a number of internal debugging commands useful for development and low-level maintenance of
+    the bot This plugin (typically) should not be loaded on production Husky servers. However, certain functionality
+    may be useful in certain use cases, so it is made available.
+
+    The Debug plugin is automatically loaded in Recovery Mode as well as Developer Mode.
     """
 
     def __init__(self, bot: HuskyBot):
@@ -44,15 +50,27 @@ class Debug(commands.Cog):
     @commands.has_permissions(administrator=True)
     async def debug(self, ctx: discord.ext.commands.Context):
         """
-        Help documentation is not available for this plugin.
-        """
+        Base helper command for most debug applications.
 
-        pass
+        This command is the general permission manager and entrypoint for most subcommands in the debug module. Unless
+        otherwise noted, users must be guild administrators in order to run most of these commands.
+        """
+        if ctx.invoked_subcommand is None:
+            await ctx.send(embed=discord.Embed(
+                title="HuskyBot Debug Toolkit",
+                description="The command you have requested is not available. See `/help debug` for valid commands.",
+                color=Colors.DANGER
+            ))
+            return
 
     @debug.command(name="dumpConfig", brief="Dump the bot's active configuration.")
     async def dump_config(self, ctx: discord.ext.commands.Context):
         """
-        Help documentation is not available for this plugin.
+        This command will dump all active configurations (core config, mutes, giveaways, and session store to a zipfile.
+
+        Please note that this command may contain sensitive information, although every attempt is made to expunge
+        anything considered highly sensitive. Only run this command in a secure context and do not distribute the
+        resulting file.
         """
 
         ts = math.floor(time.time() * 1000)
@@ -90,7 +108,9 @@ class Debug(commands.Cog):
     async def force_react(self, ctx: discord.ext.commands.Context, channel: discord.TextChannel, message: int,
                           reaction: str):
         """
-        Help documentation is not available for this plugin.
+        This command will force-add a reaction to a specific message.
+
+        The reaction must be specified as an emote or valid emote-like string.
         """
 
         target_message = await channel.fetch_message(message)
@@ -100,7 +120,7 @@ class Debug(commands.Cog):
     @debug.command(name="echo", brief="Repeat the message back to the current channel.")
     async def echo(self, ctx: discord.ext.commands.Context, *, message: str):
         """
-        Help documentation is not available for this plugin.
+        Echo a text string back to the current channel.
         """
 
         await ctx.send(message)
@@ -108,7 +128,9 @@ class Debug(commands.Cog):
     @debug.command(name="richEcho", brief="Echo text in a rich embed")
     async def rich_echo(self, ctx: commands.Context, *, message: str):
         """
-        Help documentation is not available for this plugin.
+        Echo a Discord embed back to the current channel.
+
+        Use a tool like https://leovoel.github.io/embed-visualizer/ to generate valid embed code.
         """
 
         obj = json.loads(message)
@@ -120,7 +142,7 @@ class Debug(commands.Cog):
     @debug.command(name="forceExcept", brief="Force an exception (useful for testing purposes)")
     async def force_except(self, ctx: discord.ext.commands.Context):
         """
-        Help documentation is not available for this plugin.
+        Raise an exception (of type Exception) to test error handling or logging.
         """
 
         raise Exception("Random exception that was requested!")
@@ -128,7 +150,15 @@ class Debug(commands.Cog):
     @debug.command(name="ping", brief="Get the latency (in ms) to the Discord servers")
     async def ping(self, ctx: commands.Context):
         """
-        Help documentation is not available for this plugin.
+        Check latency to the Discord servers.
+
+        This system will measure two separate systems:
+        - The current websocket latency (measured in milliseconds), as determined by discord.py
+        - The current message latency (time for the bot to send and receive confirmation of an event.
+
+        Note that latency measurements may be affected by bot load, network congestion, Discord server issues, and
+        other similar systems. This command should not be a direct measure of latency to Discord but rather a generic
+        debugging tool.
         """
 
         # Grab the latency for the websocket
@@ -159,8 +189,8 @@ class Debug(commands.Cog):
         embed = discord.Embed(
             title=f"{Emojis.TIMER} {self.bot.user.name} Debugger - Latency Report",
             description=f"This test determines how long is takes the current instance of {self.bot.user.name} "
-            f"to reach Discord. High results may indicate network or processing issues with Discord "
-            f"or {self.bot.user.name}.",
+                        f"to reach Discord. High results may indicate network or processing issues with Discord "
+                        f"or {self.bot.user.name}.",
             color=color
         )
 
@@ -172,7 +202,9 @@ class Debug(commands.Cog):
     @debug.command(name="repost", brief="Copy a specified message to the current channel")
     async def repost(self, ctx: commands.Context, channel: discord.TextChannel, message_id: int):
         """
-        Help documentation is not available for this plugin.
+        Copy (report) a message from one channel to the current channel.
+
+        This command may be used to copy logs or other important events from one channel to another.
         """
 
         message = await channel.fetch_message(message_id)
@@ -185,6 +217,11 @@ class Debug(commands.Cog):
 
     @debug.command(name="spamLog", brief="Spam the log with a *lot* of content")
     async def spam_log(self, ctx: commands.Context, spams: int = 300):
+        """
+        Spam the bot's system log.
+
+        This command is useful to test log rotation and other systems.
+        """
 
         for i in range(spams):
             LOG.info("spam " * 30)
@@ -193,6 +230,10 @@ class Debug(commands.Cog):
 
     @debug.command(name="uptime", brief="Get bot application uptime")
     async def get_bot_uptime(self, ctx: commands.Context):
+        """
+        Return the bot's current system uptime.
+        """
+
         init_time = self._session_store.get('initTime')
         if init_time:
             uptime = datetime.datetime.now() - init_time
@@ -204,7 +245,24 @@ class Debug(commands.Cog):
     @HuskyChecks.is_superuser()
     async def evalcmd(self, ctx: discord.ext.commands.Context, *, expr: str):
         """
-        Help documentation is not available for this plugin.
+        Evaluate a simple Python command, generally for debugging.
+
+        This command will execute evaluations on the bot's context, automatically determining if the result will need
+        to be awaited. Certain globals are available for command execution.
+
+        This command does NOT support multiline expressions nor does it support certain use cases (double-awaits). If
+        this is required, use the more powerful /exec command.
+
+        Users must be superusers in order to run this command, or admins if the bot is in recovery mode.
+
+        Globals
+        -------
+            bot      :: The current HuskyBot instance.
+            ctx      :: The context that triggered this command execution.
+            message  :: The message that triggered this command execution (from ctx.message)
+            guild    :: The guild that triggered this command execution (from message.guild)
+            channel  :: The channel that triggered this command execution (from message.channel)
+            author   :: The author that triggered this command execution (from message.author)
         """
         code = expr.strip('` ')
 
@@ -229,11 +287,24 @@ class Debug(commands.Cog):
             color=Colors.SECONDARY
         ))
 
-    @commands.command(name="exec", brief="Execute an eval as a function/method", aliases=["feval"])
+    @commands.command(name="exec", brief="Run an arbitrary script", aliases=["script", "feval"])
     @HuskyChecks.is_superuser()
     async def func_exec(self, ctx: discord.ext.commands.Context, *, expr: str):
         """
-        Help documentation is not available for this plugin.
+        This command allows bot superusers to run arbitrary Python scripts in the context of the bot.
+
+        Unlike /eval, this command allows for multiline entry (and therefore, scripts) to run, as well as finer control
+        over awaitable objects (however, automatic awaiting is not available). Arbitrary code may be imported as well.
+
+        By default, only the returned object is echoed back to Discord. If no explicit return method is found, the last
+        line will act as an implicit return. Standard Output (e.g. print()) will not be captured.
+
+        Globals
+        -------
+            bot      :: The current HuskyBot instance.
+            ctx      :: The context that triggered this command execution.
+            discord  :: The discord.py library (auto-imported)
+            commands :: The discord.py Commands Extension (auto-imported)
         """
 
         fn_name = "_eval_expr"
@@ -279,13 +350,23 @@ class Debug(commands.Cog):
 
         await ctx.send(embed=discord.Embed(
             title="Evaluation Result",
-            description=f"```python\n>>> {formatted_code}\n\n{result}```",
+            description="Execution results are below.",
             color=Colors.SECONDARY
         ))
+
+        await ctx.send(f"```python\n>>> {formatted_code.strip()}\n\n{result}```")
 
     @commands.command(name="shell", brief="Run a command through the shell")
     @HuskyChecks.is_superuser()
     async def run_command(self, ctx: commands.Context, *, command: str):
+        """
+        Run a shell command on Husky's host instance.
+
+        This command will be restricted to the host instance in which the bot is -- that is, it can not run a command on
+        the parent host if the bot is containerized.
+
+        Commands are run in a shell (typically bash). Multiline input is not supported.
+        """
         command = command.strip('`')
 
         try:
@@ -310,9 +391,19 @@ class Debug(commands.Cog):
         ))
         await ctx.send(pretty_desc)
 
-    @commands.command(name='requestify', brief="Make a HTTP request through the bot")
+    @commands.command(name='requestify', brief="Make a HTTP request through the bot", aliases=["curl"])
     @HuskyChecks.is_superuser()
     async def requestify(self, ctx: commands.Context, url: str, method: str = "GET", *, data: str = None):
+        """
+        Make an HTTP call to an [external] server.
+
+        This command functionally acts as cURL, and allows for HTTP calls to be made and sent to a server. This command
+        may hit HuskyBot's internal API server.
+
+        The following HTTP methods are supported: GET, POST, PUT, DELETE, PATCH
+
+        The bot API server is available at http://127.0.0.1 at whatever port is defined (default 9339).
+        """
         method = method.upper()
         supported_methods = ["GET", "POST", "PUT", "DELETE", "PATCH"]
 
@@ -345,13 +436,19 @@ class Debug(commands.Cog):
             await ctx.send(embed=discord.Embed(
                 title="Could Not Make Request",
                 description=f"Requestify failed to make a request due to error `{type(ex).__name__}`. "
-                f"Data has been logged.",
+                            f"Data has been logged.",
                 color=Colors.DANGER
             ))
             LOG.warning("Requestify raised exception.", ex)
 
     @commands.command(name="superusers", brief="Get a list of all bot superusers.")
     async def get_superusers(self, ctx: commands.Context):
+        """
+        Return a list of all superusers currently registered with the bot.
+
+        This command will attempt to "parse" and re-execute the superuser logic to determine how a superuser was granted
+        their power. Note that in some cases, this command may be somewhat out of date (e.g. if a Team changes).
+        """
         su_list = self.bot.superusers[:]  # copy list so we can tamper with it
         app_info: discord.AppInfo = self._session_store.get("appInfo", await self.bot.application_info())
         owner_id = self.bot.owner_id or app_info.owner.id

@@ -280,15 +280,27 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
 
         return list(set(su_list))
 
+    # noinspection PyBroadException
+    async def init(self):
+        if self.init_stage != 0:
+            LOG.warning("The bot attempted to re-run initialization. Did the network or similar die?")
+            return
+
+        try:
+            await self.init_stage1()
+            await self.init_stage2()
+        except Exception as e:
+            try:
+                await self.init_recovery()
+            except Exception:
+                LOG.critical("Failed to launch recovery mode, flailing...")
+                exit(127)  # just crash at this point, something is very very bad.
+            raise e
+
     async def init_stage1(self):
         """
         Initialize the bot logger and other critical services. Init stage 1 will *not* re-run if it has executed.
         """
-
-        if self.init_stage >= 1:
-            LOG.warning("The system attempted to re-run initialization stage 1. Did the network or "
-                        "similar die?")
-            return
 
         # Load in application information
         app_info = await self.application_info()
@@ -301,6 +313,9 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
         LOG.info(f"HuskyBot is online, running discord.py {discord.__version__}. Initializing and "
                  f"loading modules...")
 
+        self.init_stage = 1
+
+    async def init_stage2(self):
         if not self.developer_mode:
             await self.__init_guild_lock()
 
@@ -310,13 +325,30 @@ class HuskyBot(commands.Bot, metaclass=HuskyUtils.Singleton):
 
         await self.__init_inform_restart()
 
-        self.init_stage = 1
         self.session_store.set('initTime', datetime.datetime.now())
         LOG.info("The bot has been initialized. Ready to process commands and events.")
 
+        self.init_stage = 2
+
+    async def init_recovery(self):
+        LOG.critical("The bot has loaded into recovery mode due to an unrecoverable initialization failure.")
+        sys.path.insert(2, os.getcwd() + "/plugins/")
+
+        recovery_plugins = ['Base', 'BotAdmin', 'Debug']
+
+        for plugin in recovery_plugins:
+            LOG.info(f"Loaded recovery mode plugin {plugin}")
+            self.load_extension(plugin)
+
+        await self.change_presence(
+            activity=discord.Activity(name="< RECOVERY MODE >", type=discord.ActivityType.playing),
+            status=discord.Status.dnd
+        )
+
+        self.init_stage = -127
+
     async def on_ready(self):
-        # Attempt to initialize the bot
-        await self.init_stage1()
+        await self.init()
 
         ready_presence = self.config.get('presence', {"game": "HuskyBot", "type": 2, "status": "dnd"})
 

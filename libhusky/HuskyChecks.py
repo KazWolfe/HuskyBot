@@ -30,6 +30,10 @@ def is_superuser():
     def predicate(ctx: commands.Context):
         failure_reasons = []
 
+        # recovery mode shim -- if no superusers loaded and bot in recovery mode, all guild admins are su
+        if not ctx.bot.superusers and ctx.bot.init_stage == -127:
+            return (ctx.guild is not None) and ctx.author.guild_permissions.administrator
+
         # Devs must have admin, or must be in a DM context
         if (ctx.guild is not None) and (not ctx.author.guild_permissions.administrator):
             failure_reasons.append("Administrator")
