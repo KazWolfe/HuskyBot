@@ -8,11 +8,12 @@ config/*.json
 *.log
 logs/
 
-# PyCharm/IntelliJ configurations shouldn't be part of the repo, either
+# PyCharm/IntelliJ/OS configurations shouldn't be part of the repo, either
 idea/*
 .idea
 *.iml
 .DS_Store
+thumbs.db
 
 # Prevent the CTF file from being exposed to git, or making git complain
 ctf
@@ -25,6 +26,5 @@ certs/
 
 # The environment doesn't need to be exposed to Git, either
 .env
-plugins/custom
 custom_plugins
 venv

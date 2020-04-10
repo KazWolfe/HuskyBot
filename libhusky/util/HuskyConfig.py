@@ -10,7 +10,7 @@ def override_dumper(obj):
         return obj.__dict__
 
 
-class WolfConfig:
+class HuskyConfig:
     def __init__(self, path: str = None, create_if_nonexistent: bool = False):
         self._config = {}
         self._path = path
@@ -87,37 +87,7 @@ class WolfConfig:
 __cache__ = {}
 
 
-def get_config(name: str = 'config', create_if_nonexistent: bool = True) -> WolfConfig:
-    """
-    Get the bot's current persistent configuration (thread-safe).
-
-    Due to Python's annoyance, we can't grab the same object from everything, so instead we will just load the config
-    here, and expose it through get_config() to clients. DO NOT access the config manually, as it may be out of date, or
-    otherwise rewrite configs without expectation.
-
-    :param name: Define the name of the persistent configuration to get.
-    :param create_if_nonexistent: Create this config file if it doesn't exist.
-    :return: Returns the bot's shared persistent configuration.
-    """
-
-    config_prefix = os.environ.get('HUSKYBOT_CONFIG_PREFIX', '')
-
-    if config_prefix:
-        config_prefix += "_"  # Add an underscore to the end of prefix
-
-    if name != 'config':
-        key = 'config_{}'.format(name)
-    else:
-        key = 'config'
-
-    if name not in __cache__:
-        # The requested store does not exist in cache.
-        __cache__[key] = WolfConfig(f'config/{config_prefix}{name}.json', create_if_nonexistent=create_if_nonexistent)
-
-    return __cache__[key]
-
-
-def get_session_store(name: str = None) -> WolfConfig:
+def get_session_store(name: str = None) -> HuskyConfig:
     """
     Get the bot's Session Store (thread-safe).
 
@@ -139,6 +109,6 @@ def get_session_store(name: str = None) -> WolfConfig:
 
     if key not in __cache__:
         # The requested store does not exist in cache.
-        __cache__[key] = WolfConfig()
+        __cache__[key] = HuskyConfig()
 
     return __cache__[key]

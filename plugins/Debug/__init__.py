@@ -1,15 +1,10 @@
 import ast
 import datetime
 import inspect
-import io
 import json
 import logging
-import math
-import os
-import pprint
 import subprocess
 import time
-import zipfile
 
 import aiohttp
 import discord
@@ -17,15 +12,13 @@ from aiohttp import web
 from discord.ext import commands
 
 from HuskyBot import HuskyBot
-from libhusky import HuskyChecks, HuskyConfig
 from libhusky import HuskyHTTP
-from libhusky import HuskyUtils
 from libhusky.HuskyStatics import *
+from libhusky.util import SuperuserUtil, DateUtil, StringUtil
 
 LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
 
-# noinspection PyMethodMayBeStatic
 class Debug(commands.Cog):
     """
     Internal HuskyBot debugging toolkit.
@@ -34,13 +27,18 @@ class Debug(commands.Cog):
     the bot. This plugin (typically) should not be loaded on production Husky servers. However, certain functionality
     may be useful in certain use cases, so it is made available.
 
-    The Debug plugin is automatically loaded in Recovery Mode as well as Developer Mode.
+    The Debug plugin is automatically loaded in Developer Mode.
     """
+
+    # ToDo: Add some stuff to test the database and redis, make sure it's working.
 
     def __init__(self, bot: HuskyBot):
         self.bot = bot
-        self._config = bot.config
-        self._session_store = bot.session_store
+
+        # This module may not load on non-development instances.
+        if not bot.developer_mode:
+            raise PermissionError("Plugin may not be loaded on non-development instances.")
+
         LOG.info("Loaded plugin!")
 
     def cog_unload(self):
@@ -62,46 +60,6 @@ class Debug(commands.Cog):
                 color=Colors.DANGER
             ))
             return
-
-    @debug.command(name="dumpConfig", brief="Dump the bot's active configuration.")
-    async def dump_config(self, ctx: discord.ext.commands.Context):
-        """
-        This command will dump all active configurations (core config, mutes, giveaways, and session store to a zipfile.
-
-        Please note that this command may contain sensitive information, although every attempt is made to expunge
-        anything considered highly sensitive. Only run this command in a secure context and do not distribute the
-        resulting file.
-        """
-
-        ts = math.floor(time.time() * 1000)
-        with io.BytesIO() as buf:
-            with zipfile.ZipFile(buf, mode='w') as zipf:
-                # Special handling for the environment, as it's a bit... unique.
-                env_snapshot = '\n'.join(f"{k}={v}" for k, v in dict(os.environ).items())
-                env_snapshot = env_snapshot.replace(self.bot.http.token, '[EXPUNGED]')  # Redact the token
-                env_snapshot = env_snapshot.replace(
-                    os.environ.get('POSTGRES_PASSWORD', f"<nosetdbpass_{ts}>"), '[EXPUNGED]')  # redact db pass
-                zipf.writestr(f'environment.txt', env_snapshot)
-
-                for key, config in HuskyConfig.__cache__.items():  # type: HuskyConfig.WolfConfig
-                    if config.is_persistent():
-                        cs = json.dumps(config.dump(), sort_keys=True, indent=2)
-                        fn = f"{key}.json"
-                    else:
-                        cs = pprint.pformat(config.dump(), indent=2, width=120)
-                        fn = f"{key}.txt"
-
-                    cs = cs.replace(self.bot.http.token, '[EXPUNGED]')
-
-                    zipf.writestr(fn, cs)
-
-            buf.seek(0)
-            await ctx.send("The configuration files and caches currently associated with this instance of HuskyBot "
-                           "have been zipped and uploaded alongside this message.\n\n"
-                           "**CAUTION:** While the Discord bot token has been removed from all files, other API keys "
-                           "may still be present inside of this config dump! Additionally, depending on your system "
-                           "configuration, some environment variables (e.g. database credentials) may be leaked.",
-                           file=discord.File(buf, f"{self.bot.user.name}-dump-{ts}.zip"))
 
     # noinspection PyUnusedLocal
     @debug.command(name="react", brief="Force the bot to react to a specific message.")
@@ -234,15 +192,15 @@ class Debug(commands.Cog):
         Return the bot's current system uptime.
         """
 
-        init_time = self._session_store.get('initTime')
+        init_time = self.bot.session_store.get('initTime')
         if init_time:
             uptime = datetime.datetime.now() - init_time
-            await ctx.send(f"**Uptime:** {HuskyUtils.get_delta_timestr(uptime)}")
+            await ctx.send(f"**Uptime:** {DateUtil.get_delta_timestr(uptime)}")
         else:
             await ctx.send("Bot initialization time is unavailable.")
 
     @commands.command(name="eval", brief="Execute an eval() statement on the bot")
-    @HuskyChecks.is_superuser()
+    @SuperuserUtil.superuser_check()
     async def evalcmd(self, ctx: discord.ext.commands.Context, *, expr: str):
         """
         Evaluate a simple Python command, generally for debugging.
@@ -288,7 +246,7 @@ class Debug(commands.Cog):
         ))
 
     @commands.command(name="exec", brief="Run an arbitrary script", aliases=["script", "feval"])
-    @HuskyChecks.is_superuser()
+    @SuperuserUtil.superuser_check()
     async def func_exec(self, ctx: discord.ext.commands.Context, *, expr: str):
         """
         This command allows bot superusers to run arbitrary Python scripts in the context of the bot.
@@ -357,7 +315,7 @@ class Debug(commands.Cog):
         await ctx.send(f"```python\n>>> {formatted_code.strip()}\n\n{result}```")
 
     @commands.command(name="shell", brief="Run a command through the shell")
-    @HuskyChecks.is_superuser()
+    @SuperuserUtil.superuser_check()
     async def run_command(self, ctx: commands.Context, *, command: str):
         """
         Run a shell command on Husky's host instance.
@@ -392,7 +350,7 @@ class Debug(commands.Cog):
         await ctx.send(pretty_desc)
 
     @commands.command(name='requestify', brief="Make a HTTP request through the bot", aliases=["curl"])
-    @HuskyChecks.is_superuser()
+    @SuperuserUtil.superuser_check()
     async def requestify(self, ctx: commands.Context, url: str, method: str = "GET", *, data: str = None):
         """
         Make an HTTP call to an [external] server.
@@ -429,7 +387,7 @@ class Debug(commands.Cog):
 
                 await ctx.send(embed=discord.Embed(
                     title=f"HTTP Status {response.status}",
-                    description="```{}```".format(HuskyUtils.trim_string(await response.text(), 2000)),
+                    description="```{}```".format(StringUtil.trim_string(await response.text(), 2000)),
                     color=color
                 ))
         except aiohttp.client.ClientError as ex:
@@ -450,7 +408,7 @@ class Debug(commands.Cog):
         their power. Note that in some cases, this command may be somewhat out of date (e.g. if a Team changes).
         """
         su_list = self.bot.superusers[:]  # copy list so we can tamper with it
-        app_info: discord.AppInfo = self._session_store.get("appInfo", await self.bot.application_info())
+        app_info: discord.AppInfo = self.bot.session_store.get("appInfo", await self.bot.application_info())
         owner_id = self.bot.owner_id or app_info.owner.id
 
         embed = discord.Embed(

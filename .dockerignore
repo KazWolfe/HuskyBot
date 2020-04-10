@@ -1,0 +1,15 @@
+# PyCharm/IntelliJ/OS configurations don't need to leak to Docker
+idea/*
+.idea
+*.iml
+.DS_Store
+thumbs.db
+
+# Ignore human (doc)files
+*.md
+
+# Protect the environment inside Docker, don't include deps or anything.
+.env
+venv
+logs
+**/*.log

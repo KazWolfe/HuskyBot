@@ -5,12 +5,11 @@ import re
 import socket
 
 import discord
-import git
 from discord.ext import commands
 
 from HuskyBot import HuskyBot
-from libhusky import HuskyUtils
 from libhusky.HuskyStatics import *
+from libhusky.util import DateUtil
 
 LOG = logging.getLogger("HuskyBot.Plugin." + __name__)
 
@@ -24,8 +23,6 @@ class Base(commands.Cog):
 
     def __init__(self, bot: HuskyBot):
         self.bot = bot
-        self._config = bot.config
-        self._session_store = bot.session_store
 
         # Prevent unloading
         self.block_unload = True
@@ -89,42 +86,34 @@ class Base(commands.Cog):
         This command returns a quick summary of this bot and its current state.
         """
 
-        repo = git.Repo(search_parent_directories=True)
-        sha = repo.head.object.hexsha
-
         debug_str = '| Developer Build' if self.bot.developer_mode else ''
 
         embed = discord.Embed(
             title=f"About {self.bot.user.name} {debug_str}",
-            description="This bot (known in code as **HuskyBot**) is a custom-made Discord moderation and management "
-                        "utility bot initially for [DIY Tech](https://discord.gg/diytech). It's an implementation of "
-                        "the WolfBot platform for Discord, built on the popular "
-                        "[discord.py rewrite](https://github.com/Rapptz/discord.py). It features seamless integration "
-                        "with any workflow, and some of the most powerful plugin management and integration features "
-                        "available in any commercial Discord bot. HuskyBot is built for speed and reliability for "
-                        "guilds of any size, as well as easy and intuitive administration.",
+            description="This bot (known in code as **HuskyBot**) is a Discord moderation and management utility bot "
+                        "initially for [DIY Tech](https://discord.gg/diytech). It's built on the popular "
+                        "[discord.py rewrite](https://github.com/Rapptz/discord.py) and leverages containers to run at "
+                        "scale. It features tight integration into Discord itself, meaning server configurations port "
+                        "directly over into the bot's own configuration for ease of use and administration.",
             color=Colors.INFO
         )
 
         embed.add_field(name="Authors", value="[KazWolfe](https://github.com/KazWolfe), "
                                               "[Clover](https://github.com/cclover550)", inline=False)
-        embed.add_field(name="Bot Version", value=f"[`{sha[:8]}`]({GIT_URL}/commit/{sha})", inline=True)
+        # todo: better version management. this way sucks.
+        # embed.add_field(name="Bot Version", value=f"bot printer goes brrr", inline=True)
         embed.add_field(name="Library Version", value=f"discord.py {discord.__version__}", inline=True)
-        embed.add_field(name="Python Version", value=f"Python {platform.python_version()}")
+        embed.add_field(name="Python Version", value=f"Python {platform.python_version()}", inline=True)
         embed.add_field(name="Current Host", value=f"`{socket.gethostname()}`", inline=True)
+        if ctx.guild.shard_id:
+            embed.add_field(name="Current Shard", value=ctx.guild.shard_id, inline=True)
 
-        platform_type = HuskyUtils.get_platform_type()
-        if platform_type:
-            pl_pretty_index = {"compose": "Docker (using Compose)", "systemd": "Linux (systemd)"}
-
-            embed.add_field(name="Platform", value=pl_pretty_index.get(platform_type, platform_type), inline=True)
-
-        init_time = self._session_store.get('initTime')
+        init_time = self.bot.session_store.get('initTime')
         if init_time:
             uptime = datetime.datetime.now() - init_time
             embed.add_field(
                 name="Uptime",
-                value=HuskyUtils.get_delta_timestr(uptime),
+                value=DateUtil.get_delta_timestr(uptime),
                 inline=True
             )
 

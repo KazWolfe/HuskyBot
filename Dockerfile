@@ -1,31 +1,19 @@
-FROM python:3.7.4-alpine
+FROM python:3.7-slim
 
-# Set the working directory, and expose a port for Husky
-WORKDIR HuskyBot/
+ENV APPDIR /app
 
-# Install prerequisites
-RUN apk add --update --virtual .pynacl_deps git build-base python3-dev libffi-dev \
-                               openssh postgresql-dev gcc musl-dev jpeg-dev zlib-dev
+# Set the work directory to the application directory.
+WORKDIR $APPDIR
 
-# Disable SSH strict key checks, just to unbreak things.
-RUN mkdir -p /root/.ssh && echo "StrictHostKeyChecking no " > /root/.ssh/config
+# Install requirements and get the base environment ready to go. Use cache-magic so we dont need to redo this
+# all the time.
+COPY requirements.txt $APPDIR
+RUN pip3 install -r $APPDIR/requirements.txt
 
-# Load in HuskyBot and the latest dependencies
-RUN git clone https://github.com/KazWolfe/HuskyBot.git . && \
-    python3 -m pip install -r requirements.txt
+# Copy the full application from outside the container to inside the container
+COPY . $APPDIR
 
-# Prepare the config volume, we want to have this in its own layer
-RUN mkdir -p config/
-VOLUME /HuskyBot/config/
-
-# Prepare logs, again in its own layer
-RUN mkdir -p logs/
-VOLUME /HuskyBot/logs/
-
-# Chmod the entrypoint
-RUN chmod +x /HuskyBot/misc/docker-entrypoint.sh
-
-# And once everything looks good, launch Husky :3
+# Expose the management/API port. (future use)
 EXPOSE 9339
-ENTRYPOINT ["/HuskyBot/misc/docker-entrypoint.sh"]
-CMD ["HuskyBot.py"]
+
+CMD ["/usr/local/bin/python3", "/app/HuskyBot.py"]
