@@ -23,7 +23,18 @@ class HuskyHelpFormatter(DefaultHelpCommand):
 
         super().__init__(paginator=self.paginator, commands_heading=self.commands_heading, **options)
 
-    def preprocess_message_newlines(self, doc) -> str:
+    def preprocess_helpdoc(self, doc) -> str:
+        """
+        Formatting preprocessor to handle ugly helpdocs.
+
+        This method will "intelligently" strip newlines from helpdocs, based on a couple rules:
+
+        - Newlines with a preceding newline are *not* stripped
+        - Newlines with a following newline, one or more following dashes, or one or more whitespaces.
+
+        This isn't perfect, but it generally will clean up most of the bot's helpdocs and make them cleaner.
+        """
+
         regex = r"(?<![\r\n])(\r?\n|\r)(?![\r\n]|\-+|\s+)"
 
         return re.sub(regex, ' ', doc)
@@ -102,7 +113,7 @@ class HuskyHelpFormatter(DefaultHelpCommand):
         # ToDo: Codesmell, this overrides `help` for the command. Not the best, but relatively safe.
 
         if command.help:
-            pretty_helpdoc = self.preprocess_message_newlines(command.help)
+            pretty_helpdoc = self.preprocess_helpdoc(command.help)
             lines = []
 
             for line in pretty_helpdoc.splitlines():
@@ -119,6 +130,6 @@ class HuskyHelpFormatter(DefaultHelpCommand):
         # ToDo: Codesmell, this overrides `__cog_cleaned_doc` for the cog. Not the best, but relatively safe.
 
         if cog.description:
-            cog.__cog_cleaned_doc__ = self.preprocess_message_newlines(cog.description)
+            cog.__cog_cleaned_doc__ = self.preprocess_helpdoc(cog.description)
 
         await super().send_cog_help(cog)

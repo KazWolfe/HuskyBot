@@ -12,6 +12,7 @@ logs/
 idea/*
 .idea
 *.iml
+.DS_Store
 
 # Prevent the CTF file from being exposed to git, or making git complain
 ctf
