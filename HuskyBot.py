@@ -11,6 +11,7 @@ from discord.ext import commands
 from sqlalchemy import orm
 from sqlalchemy.exc import DatabaseError
 
+from libhusky.discordpy import ErrorHandler, ShardManager
 from libhusky.discordpy.HuskyHelpFormatter import HuskyHelpFormatter
 from libhusky.util import UtilClasses, HuskyConfig, SuperuserUtil
 
@@ -34,10 +35,14 @@ class HuskyBot(commands.AutoShardedBot, metaclass=UtilClasses.Singleton):
         self.__initialize_database()
         self.redis = self.__initialize_redis()
 
-        # todo: bring sharding logic in to redis, hook redis for this data.
+        # shard controller and logic
+        self.__shard_manager = ShardManager.ShardManager(self)
+        shard_ids, shard_count = self.__shard_manager.register()
 
+        # todo: bring sharding logic in to redis, hook redis for this data.
         super().__init__(
-            shard_count=2,
+            shard_count=shard_count,
+            shard_ids=shard_ids,
             command_prefix="/",
             status=discord.Status.idle,
             activity=self.__build_stage0_activity(),
@@ -46,10 +51,10 @@ class HuskyBot(commands.AutoShardedBot, metaclass=UtilClasses.Singleton):
             help_command=HuskyHelpFormatter(),
         )
 
-    async def logout(self):
+    async def close(self):
         LOG.info("Shutting down HuskyBot...")
 
-        await super().logout()
+        await super().close()
 
     def __build_stage0_activity(self):
         # ToDo: [PARITY] Add support for different types
@@ -91,6 +96,7 @@ class HuskyBot(commands.AutoShardedBot, metaclass=UtilClasses.Singleton):
             LOG.critical("Redis didn't come up in 30 seconds!")
             raise ConnectionError("Redis hit timeout!")
 
+        LOG.debug("Redis is online.")
         return conn
 
     def __initialize_logger(self):
@@ -163,6 +169,7 @@ class HuskyBot(commands.AutoShardedBot, metaclass=UtilClasses.Singleton):
             LOG.debug("DB connection shut down")
 
         if self.redis:
+            self.__shard_manager.remove_host()
             self.redis.close()
             LOG.debug("Redis shut down")
 
@@ -178,7 +185,7 @@ class HuskyBot(commands.AutoShardedBot, metaclass=UtilClasses.Singleton):
                 self.superusers = await SuperuserUtil.get_superusers(app_info)
                 LOG.info(f"Superusers loaded: {self.superusers}")
 
-        # init time is _first_ onReady
+        # We consider the initialization time to be the first execution
         if not self.session_store.get('initTime'):
             self.session_store.set('initTime', datetime.datetime.now())
             LOG.debug("Initialization time recorded to local cache!")
@@ -192,6 +199,18 @@ class HuskyBot(commands.AutoShardedBot, metaclass=UtilClasses.Singleton):
             status=discord.Status.online,
             shard_id=shard_id
         )
+
+    async def on_command_error(self, ctx, error: commands.CommandError):
+        await ErrorHandler.CommandErrorHandler().handle_command_error(ctx, error)
+
+    async def on_error(self, event_method, *args, **kwargs):
+        exception = sys.exc_info()
+
+        if isinstance(exception, discord.HTTPException) and exception.code == 502:
+            LOG.error(f"Got HTTP status code {exception.code} for method {event_method} - Discord is "
+                      f"likely borked now.")
+        else:
+            LOG.error('Exception in method %s!', event_method, exc_info=exception)
 
 
 if __name__ == '__main__':
