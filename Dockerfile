@@ -2,6 +2,12 @@ FROM python:3.7-slim
 
 ENV APPDIR /app
 
+# Install gcc and other core deps used as part of build process
+# ToDo: Split this into a multi-stage build (smaller containers)
+RUN apt-get update \
+    && apt-get install gcc git -y \
+    && apt-get clean
+
 # Set the work directory to the application directory.
 WORKDIR $APPDIR
 

@@ -1,39 +1,42 @@
+import asyncio
 import datetime
 import logging
 import os
 import sys
-import time
+
+import tortoise
 
 import discord
-import redis
-import sqlalchemy
 from discord.ext import commands
-from sqlalchemy import orm
-from sqlalchemy.exc import DatabaseError
-
 from libhusky.discordpy import ErrorHandler, ShardManager
 from libhusky.discordpy.HuskyHelpFormatter import HuskyHelpFormatter
-from libhusky.util import UtilClasses, HuskyConfig, SuperuserUtil
+from libhusky.helpers import DatabaseHelper, RedisHelper, LoggingHelper
+from libhusky.util import HuskyConfig, SuperuserUtil
+from libhusky.util.UtilClasses import InitializationState
 
 LOG = logging.getLogger("HuskyBot.Core")
 
 
-class HuskyBot(commands.AutoShardedBot, metaclass=UtilClasses.Singleton):
+class HuskyBot(commands.AutoShardedBot):
     def __init__(self):
+        # the loop needs to be initialized early
+        _loop = asyncio.get_event_loop()
+
+        self.init_stage = InitializationState.NOT_INITIALIZED
+
         self.developer_mode = os.environ.get('HUSKYBOT_DEVMODE', False)
-        self.__daemon_mode = (os.getppid() == 1)
         self.superusers = None
 
         self.session_store = HuskyConfig.get_session_store()
 
         # initialize logging subsystem
         self.__log_path = "logs/huskybot.log"
-        self.logger = self.__initialize_logger()
+        self.logger = LoggingHelper.initialize_logger(self, self.__log_path)
         LOG.info("The bot's log path is: {}".format(self.__log_path))
 
         # datastore initialization and connection
-        self.__initialize_database()
-        self.redis = self.__initialize_redis()
+        DatabaseHelper.initialize_database(_loop)
+        self.redis = RedisHelper.initialize_redis()
 
         # shard controller and logic
         self.__shard_manager = ShardManager.ShardManager(self)
@@ -49,85 +52,19 @@ class HuskyBot(commands.AutoShardedBot, metaclass=UtilClasses.Singleton):
             command_not_found="**Error:** The bot could not find the command `/{}`.",
             command_has_no_subcommands="**Error:** The command `/{}` has no subcommands.",
             help_command=HuskyHelpFormatter(),
+            loop=_loop
         )
 
-    async def close(self):
-        LOG.info("Shutting down HuskyBot...")
+        self.db = DatabaseHelper.block_wait_for_database(_loop)
 
-        await super().close()
+        self.init_stage = InitializationState.INSTANTIATED
 
     def __build_stage0_activity(self):
         # ToDo: [PARITY] Add support for different types
         return discord.Activity(
-            name="Starting...",
+            name=f"Starting HuskyBot...",
             type=discord.ActivityType.playing
         )
-
-    def __initialize_database(self):
-        try:
-            c = f"postgresql://{os.environ['POSTGRES_USER']}:{os.environ['POSTGRES_PASSWORD']}" \
-                f"@db:5432/{os.environ['POSTGRES_DB']}"
-            self.db = sqlalchemy.create_engine(c)
-        except KeyError as e:
-            LOG.critical("No database configuration was set for Husky!")
-            raise e
-        except DatabaseError as s:
-            LOG.critical(f"Could not connect to the database! The error is as follows: \n{s}")
-            raise s
-
-        self.session_factory = sqlalchemy.orm.sessionmaker(bind=self.db)
-
-    def __initialize_redis(self):
-        conn = redis.Redis(
-            host=os.environ['REDIS_HOST'],
-            port=int(os.getenv('REDIS_PORT', 6379)),
-            db=int(os.getenv('REDIS_DB', 0)),
-            password=os.getenv('REDIS_PASSWORD')
-        )
-
-        max_wait_time = 30
-
-        LOG.debug("Waiting 30s for Redis to come online...", )
-        for t in range(max_wait_time):
-            if conn.ping():
-                break
-            time.sleep(1)
-        else:
-            LOG.critical("Redis didn't come up in 30 seconds!")
-            raise ConnectionError("Redis hit timeout!")
-
-        LOG.debug("Redis is online.")
-        return conn
-
-    def __initialize_logger(self):
-        # Build the to-file logger HuskyBot uses.
-        file_log_handler = UtilClasses.CompressingRotatingFileHandler(self.__log_path,
-                                                                      maxBytes=(1024 ** 2) * 5,
-                                                                      backupCount=5,
-                                                                      encoding='utf-8')
-        file_log_handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s"))
-
-        # Build the to-stream logger
-        stream_log_handler = logging.StreamHandler(sys.stdout)
-        if self.__daemon_mode:
-            stream_log_handler.setFormatter(logging.Formatter("[%(levelname)s] %(name)s: %(message)s"))
-
-        # noinspection PyArgumentList
-        logging.basicConfig(
-            level=logging.WARNING,
-            format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-            datefmt="%Y-%m-%d %H:%M:%S",
-            handlers=[file_log_handler, stream_log_handler]
-        )
-
-        bot_logger = logging.getLogger("HuskyBot")
-        bot_logger.setLevel(logging.INFO)
-
-        if self.developer_mode:
-            bot_logger.setLevel(logging.DEBUG)
-            LOG.setLevel(logging.DEBUG)
-
-        return bot_logger
 
     def __load_modules(self):
         # Add modules to path, giving precedence to custom_modules.
@@ -146,10 +83,6 @@ class HuskyBot(commands.AutoShardedBot, metaclass=UtilClasses.Singleton):
             LOG.critical("The API key for HuskyBot must be loaded via the DISCORD_TOKEN environment variable.")
             exit(1)
 
-        if self.__daemon_mode:
-            LOG.info("The bot is currently loaded in Daemon Mode. In Daemon Mode, certain functionalities are "
-                     "slightly altered to better utilize the headless environment.")
-
         if self.developer_mode:
             LOG.info("The bot is running in DEVELOPER MODE! Some features may behave in unexpected ways or may "
                      "otherwise break. Some bot safety checks are disabled with this mode on.")
@@ -159,14 +92,13 @@ class HuskyBot(commands.AutoShardedBot, metaclass=UtilClasses.Singleton):
         self.__load_modules()
         LOG.info(f"Modules loaded.")
 
+        # mark initialization state
+        self.init_stage = InitializationState.LOADED
+
         # pass over to discord.py
         self.run(os.getenv('DISCORD_TOKEN'))
 
         LOG.info("Shutting down HuskyBot...")
-
-        if self.db:
-            self.db.dispose()
-            LOG.debug("DB connection shut down")
 
         if self.redis:
             self.__shard_manager.remove_host()
@@ -174,6 +106,14 @@ class HuskyBot(commands.AutoShardedBot, metaclass=UtilClasses.Singleton):
             LOG.debug("Redis shut down")
 
     async def on_ready(self):
+        LOG.debug("HuskyBot.on_ready()")
+        if self.init_stage == InitializationState.READY_RECEIVED:
+            LOG.warning("The bot attempted to re-run on_ready() - did the network die or similar?")
+            return
+
+        # Generate any schemas that the system deems necessary
+        await tortoise.Tortoise.generate_schemas(safe=True)
+
         # Load in application information
         if not self.session_store.get('appInfo'):
             app_info = await self.application_info()
@@ -190,7 +130,10 @@ class HuskyBot(commands.AutoShardedBot, metaclass=UtilClasses.Singleton):
             self.session_store.set('initTime', datetime.datetime.now())
             LOG.debug("Initialization time recorded to local cache!")
 
+        self.init_stage = InitializationState.READY_RECEIVED
+
     async def on_shard_ready(self, shard_id):
+        LOG.debug(f"HuskyBot.on_shard_ready({shard_id})")
         LOG.info(f"Shard ID {shard_id} online and receiving events. Target shard count is {self.shard_count}.")
 
         # ToDo: [PARITY] Better presence handler.
@@ -211,6 +154,13 @@ class HuskyBot(commands.AutoShardedBot, metaclass=UtilClasses.Singleton):
                       f"likely borked now.")
         else:
             LOG.error('Exception in method %s!', event_method, exc_info=exception)
+
+    async def close(self):
+        if self.db:
+            await tortoise.Tortoise.close_connections()
+            LOG.debug("DB connection shut down")
+
+        await super().close()
 
 
 if __name__ == '__main__':

@@ -1,6 +1,7 @@
 import gzip
 import logging
 import os
+from enum import Enum
 from logging import handlers
 
 
@@ -59,3 +60,19 @@ class Singleton(type):
         if cls not in cls._instances:
             cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
         return cls._instances[cls]
+
+
+class InitializationState(Enum):
+    """Track the initialization state of the bot."""
+
+    """No initialization was yet run, the bot is in a "clean" slate"""
+    NOT_INITIALIZED = 0
+
+    """An instance of the bot was successfully created, but certain aspects may not yet be ready."""
+    INSTANTIATED = 1
+
+    """The bot's entrypoint has run and the bot is currently ready to block itself on Client#run()."""
+    LOADED = 2
+
+    """DiscordPy's on_ready event has been fired at least once. The bot is considered fully initialized."""
+    READY_RECEIVED = 3

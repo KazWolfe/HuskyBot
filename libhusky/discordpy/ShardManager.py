@@ -1,13 +1,19 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from HuskyBot import HuskyBot
+
 import logging
 import os
 import socket
 
-from HuskyBot import HuskyBot
 from libhusky.util import UtilClasses
 
 LOG = logging.getLogger("HuskyBot." + __name__)
 
-SHARDS_IN_INSTANCE = int(os.getenv('HUSKYBOT_INSTANCE_SHARDS', 4))
+SHARDS_PER_INSTANCE = int(os.getenv('HUSKYBOT_INSTANCE_SHARDS', 4))
 SHARD_LOCK_NAME = "huskybot-shard-lock"
 SHARD_KEY = "huskybot.shards"
 
@@ -19,15 +25,19 @@ class ShardManager(metaclass=UtilClasses.Singleton):
 
     @staticmethod
     def _get_shard_ids_for_instance(index: int) -> list:
-        return list(range(SHARDS_IN_INSTANCE * index, SHARDS_IN_INSTANCE * (index + 1)))
+        return list(range(SHARDS_PER_INSTANCE * index, SHARDS_PER_INSTANCE * (index + 1)))
 
     @staticmethod
     def _get_instance_number_by_shard(shard_number) -> int:
-        return shard_number // SHARDS_IN_INSTANCE
+        return shard_number // SHARDS_PER_INSTANCE
 
-    def get_shards(self) -> dict:
-        with self.redis.lock(SHARD_LOCK_NAME):
-            return self.redis.hgetall(SHARD_KEY)
+    def _get_hosting_shard_for_guild(self, guild_id: int) -> int:
+        shard_count = self.redis.llen(SHARD_KEY)
+        return (guild_id >> 22) % shard_count
+
+    def _get_hosting_instance_number_for_guild(self, guild_id):
+        shard_id = self._get_hosting_shard_for_guild(guild_id)
+        return self._get_instance_number_by_shard(shard_id)
 
     def register(self, inform_others=True) -> (list, int):
         """
@@ -39,16 +49,16 @@ class ShardManager(metaclass=UtilClasses.Singleton):
 
         with self.redis.lock(SHARD_LOCK_NAME):
             current_instances: list = self.redis.lrange(SHARD_KEY, 0, -1)
-            shard_count = SHARDS_IN_INSTANCE * len(current_instances)
+            shard_count = SHARDS_PER_INSTANCE * len(current_instances)
 
             if instance_hostname not in current_instances:
-                # off-by-one magic here. with a length of 1, instance 0 will have [0 - 3].
-                # we can cheat and say the next shard (by ID) will be the current length.
+                # off-by-one magic here. we can cheat and say the next instance ID
+                # is the length of all current instances.
                 my_instance_id = len(current_instances)
                 my_shard_range = self._get_shard_ids_for_instance(my_instance_id)
 
                 self.redis.rpush(SHARD_KEY, socket.gethostname())
-                shard_count += SHARDS_IN_INSTANCE
+                shard_count += SHARDS_PER_INSTANCE
             else:
                 my_instance_id = current_instances.index(instance_hostname)
                 my_shard_range = self._get_shard_ids_for_instance(my_instance_id)
