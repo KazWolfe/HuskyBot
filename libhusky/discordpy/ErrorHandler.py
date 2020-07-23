@@ -5,13 +5,13 @@ import discord
 from discord.ext import commands
 
 from libhusky.HuskyStatics import Colors
-from libhusky.util import StringUtil, UtilClasses
+from libhusky.util import StringUtil
 
 LOG = logging.getLogger("HuskyBot.ErrorHandler")
 
 
 # noinspection PyMethodMayBeStatic
-class CommandErrorHandler(metaclass=UtilClasses.Singleton):
+class CommandErrorHandler:
     def __init__(self):
         self.__errors = {
             commands.MissingPermissions: self.on_missing_permissions,
@@ -162,3 +162,15 @@ class CommandErrorHandler(metaclass=UtilClasses.Singleton):
 
         LOG.error("Command %s was on cooldown, and is unable to be run for %s seconds. Cooldown: %s",
                   etx['cmd'], round(error.retry_after, 0), error.cooldown)
+
+
+__instance__ = None
+
+
+def get_instance():
+    global __instance__
+
+    if __instance__ is None:
+        __instance__ = CommandErrorHandler()
+
+    return __instance__

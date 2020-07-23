@@ -28,8 +28,7 @@ class HuskyRouter:
 
         path_route[method.upper()]['func'] = handler
 
-        # This is discordpy related bullshit, because we need to be able to
-        # pass a self()
+        # We need to be able to associate this route with a plugin.
         path_route[method.upper()]['plugin'] = plugin
 
     def remove_method(self, path: str, method: str):
@@ -104,6 +103,18 @@ def get_router():
 
 
 def register(path: str, methods: list):
+    """
+    Decorator to register an HTTP method with the HuskyHTTP router.
+
+    Note that this decorator can *only* be used in a plugin and can not be used bare. This is crucial to allow contexts
+    and bot-level access to be given to the HTTP server.
+
+    :param path: The path (from root) to assign to this function
+    :param methods: A list of valid HTTP methods for this route.
+
+    :return: Decorator, no explicit return
+    """
+
     def decorator(f):
         """
         This is a ***dangerously ugly*** way of registering things with an otherwise pretty HTTP router.

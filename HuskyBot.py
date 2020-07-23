@@ -4,13 +4,14 @@ import logging
 import os
 import sys
 
-import tortoise
-
 import discord
+import tortoise
 from discord.ext import commands
+
+from libhusky.HuskyStatics import *
 from libhusky.discordpy import ErrorHandler, ShardManager
 from libhusky.discordpy.HuskyHelpFormatter import HuskyHelpFormatter
-from libhusky.helpers import DatabaseHelper, RedisHelper, LoggingHelper
+from libhusky.helpers import DatabaseHelper, RedisHelper, LoggingHelper, HTTPServerHelper
 from libhusky.util import HuskyConfig, SuperuserUtil
 from libhusky.util.UtilClasses import InitializationState
 
@@ -42,6 +43,9 @@ class HuskyBot(commands.AutoShardedBot):
         self.__shard_manager = ShardManager.ShardManager(self)
         shard_ids, shard_count = self.__shard_manager.register()
 
+        # API server
+        self.api_server = HTTPServerHelper.initialize_webserver(self, _loop)
+
         # todo: bring sharding logic in to redis, hook redis for this data.
         super().__init__(
             shard_count=shard_count,
@@ -66,12 +70,12 @@ class HuskyBot(commands.AutoShardedBot):
             type=discord.ActivityType.playing
         )
 
-    def __load_modules(self):
-        # Add modules to path, giving precedence to custom_modules.
+    def __load_plugins(self):
+        # Add plugins to path, giving precedence to custom_plugins.
         sys.path.insert(1, os.getcwd() + "/custom_plugins/")
         sys.path.insert(2, os.getcwd() + "/plugins/")
 
-        # load in key modules (*guaranteed* to exist)
+        # load in key plugins (*guaranteed* to exist)
         self.load_extension('Base')
         if self.developer_mode:
             self.load_extension('Debug')
@@ -84,13 +88,12 @@ class HuskyBot(commands.AutoShardedBot):
             exit(1)
 
         if self.developer_mode:
-            LOG.info("The bot is running in DEVELOPER MODE! Some features may behave in unexpected ways or may "
-                     "otherwise break. Some bot safety checks are disabled with this mode on.")
+            LOG.warning("!!! The bot is running in DEVELOPER MODE !!!")
 
-        # load in modules and everything else
-        LOG.info(f"HuskyBot is online, running discord.py {discord.__version__}. Loading plugins...")
-        self.__load_modules()
-        LOG.info(f"Modules loaded.")
+        # load in plugins and everything else
+        LOG.info(f"HuskyBot loading, running discord.py {discord.__version__}. Loading plugins...")
+        self.__load_plugins()
+        LOG.info(f"Plugins loaded.")
 
         # mark initialization state
         self.init_stage = InitializationState.LOADED
@@ -100,13 +103,8 @@ class HuskyBot(commands.AutoShardedBot):
 
         LOG.info("Shutting down HuskyBot...")
 
-        if self.redis:
-            self.__shard_manager.remove_host()
-            self.redis.close()
-            LOG.debug("Redis shut down")
-
     async def on_ready(self):
-        LOG.debug("HuskyBot.on_ready()")
+        # LOG.debug("HuskyBot.on_ready()")
         if self.init_stage == InitializationState.READY_RECEIVED:
             LOG.warning("The bot attempted to re-run on_ready() - did the network die or similar?")
             return
@@ -118,7 +116,7 @@ class HuskyBot(commands.AutoShardedBot):
         if not self.session_store.get('appInfo'):
             app_info = await self.application_info()
             self.session_store.set("appInfo", app_info)
-            LOG.debug("Loaded application info into local cache.")
+            LOG.debug("Loaded application info into local cache")
 
             # Load in superusers
             if not self.superusers:
@@ -128,12 +126,19 @@ class HuskyBot(commands.AutoShardedBot):
         # We consider the initialization time to be the first execution
         if not self.session_store.get('initTime'):
             self.session_store.set('initTime', datetime.datetime.now())
-            LOG.debug("Initialization time recorded to local cache!")
+            LOG.debug("Initialization time recorded to local cache")
 
+        LOG.info("=== HuskyBot is online and ready to process events! ===")
         self.init_stage = InitializationState.READY_RECEIVED
 
+        if StaticFeatureFlags.FF_SHIM_BOT_INIT:
+            await self.change_presence(
+                activity=discord.Activity(name="Discord", type=discord.ActivityType.listening),
+                status=discord.Status.online
+            )
+
     async def on_shard_ready(self, shard_id):
-        LOG.debug(f"HuskyBot.on_shard_ready({shard_id})")
+        # LOG.debug(f"HuskyBot.on_shard_ready({shard_id})")
         LOG.info(f"Shard ID {shard_id} online and receiving events. Target shard count is {self.shard_count}.")
 
         # ToDo: [PARITY] Better presence handler.
@@ -144,23 +149,30 @@ class HuskyBot(commands.AutoShardedBot):
         )
 
     async def on_command_error(self, ctx, error: commands.CommandError):
-        await ErrorHandler.CommandErrorHandler().handle_command_error(ctx, error)
+        await ErrorHandler.get_instance().handle_command_error(ctx, error)
 
     async def on_error(self, event_method, *args, **kwargs):
         exception = sys.exc_info()
 
         if isinstance(exception, discord.HTTPException) and exception.code == 502:
             LOG.error(f"Got HTTP status code {exception.code} for method {event_method} - Discord is "
-                      f"likely borked now.")
+                      f"likely broken right now.")
         else:
             LOG.error('Exception in method %s!', event_method, exc_info=exception)
 
     async def close(self):
         if self.db:
             await tortoise.Tortoise.close_connections()
-            LOG.debug("DB connection shut down")
+            LOG.debug("DB connection(s) shut down")
 
         await super().close()
+
+        # Redis needs to be shut down _after_ the host goes down. Otherwise, we risk multiple responses for a single
+        # event.
+        if self.redis:
+            self.__shard_manager.remove_host()
+            self.redis.close()
+            LOG.debug("Redis connection shut down")
 
 
 if __name__ == '__main__':

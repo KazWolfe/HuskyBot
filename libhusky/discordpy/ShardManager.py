@@ -9,7 +9,7 @@ import logging
 import os
 import socket
 
-from libhusky.util import UtilClasses
+from libhusky.HuskyStatics import StaticFeatureFlags
 
 LOG = logging.getLogger("HuskyBot." + __name__)
 
@@ -18,7 +18,7 @@ SHARD_LOCK_NAME = "huskybot-shard-lock"
 SHARD_KEY = "huskybot.shards"
 
 
-class ShardManager(metaclass=UtilClasses.Singleton):
+class ShardManager:
     def __init__(self, bot: HuskyBot):
         self.bot = bot
         self.redis = bot.redis
@@ -47,6 +47,10 @@ class ShardManager(metaclass=UtilClasses.Singleton):
         """
         instance_hostname = socket.gethostname()
 
+        if not StaticFeatureFlags.FF_ENABLE_DYNAMIC_SCALING:
+            shards = [0, 1, 2, 3]
+            return shards, len(shards)
+
         with self.redis.lock(SHARD_LOCK_NAME):
             current_instances: list = self.redis.lrange(SHARD_KEY, 0, -1)
             shard_count = SHARDS_PER_INSTANCE * len(current_instances)
@@ -72,6 +76,9 @@ class ShardManager(metaclass=UtilClasses.Singleton):
         return my_shard_range, shard_count
 
     def remove_host(self, host: str = None):
+        if not StaticFeatureFlags.FF_ENABLE_DYNAMIC_SCALING:
+            return
+
         if not host:
             host = socket.gethostname()
 

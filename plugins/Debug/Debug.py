@@ -35,7 +35,7 @@ class Debug(commands.Cog):
     def __init__(self, bot: HuskyBot):
         self.bot = bot
 
-        # This module may not load on non-development instances.
+        # This plugin may not load on non-development instances.
         if not bot.developer_mode:
             raise PermissionError("Plugin may not be loaded on non-development instances.")
 
@@ -50,7 +50,7 @@ class Debug(commands.Cog):
         """
         Base helper command for most debug applications.
 
-        This command is the general permission manager and entrypoint for most subcommands in the debug module. Unless
+        This command is the general permission manager and entrypoint for most subcommands in the debug plugin. Unless
         otherwise noted, users must be guild administrators in order to run most of these commands.
         """
         if ctx.invoked_subcommand is None:

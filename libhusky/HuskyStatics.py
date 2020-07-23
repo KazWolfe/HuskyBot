@@ -112,3 +112,18 @@ class Regex:
     INVITE_REGEX = r'(discord\.gg|discordapp.com(/*\.{0,2})*/+invite)(/*\.{0,2})*/+(?P<fragment>[0-9a-z\-]+)'
     US_HAM_CALLSIGN_REGEX = r'(([KNW][A-Z]?)|(A[A-L]))\d[A-Z]{1,3}'
     DICE_CONFIG = r'^(?P<count>\d*)d(?P<size>\d+)(?P<modifier>[+-]\d+)?(?P<flag>[ad])?$'
+
+
+class StaticFeatureFlags:
+    """
+    A listing of (static) feature flags that are included with the code directly.
+
+    This system allows certain code features to be enabled or disabled at a code level in lieu of commenting or other
+    weird behavior.
+    """
+
+    # Control dynamic scaling of the bot in response to load. True/False
+    FF_ENABLE_DYNAMIC_SCALING = False
+
+    # Shim for bad init (d.py bug #4108)
+    FF_SHIM_BOT_INIT = True
