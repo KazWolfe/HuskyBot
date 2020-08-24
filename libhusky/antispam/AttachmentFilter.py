@@ -74,7 +74,7 @@ class AttachmentFilter(AntiSpamModule):
     def clear_all(self):
         self._events = {}
 
-    async def process_message(self, message: discord.Message, context):
+    async def process_message(self, message: discord.Message, context, meta: dict = None):
         as_config = self._config.get('antiSpam', {})
         filter_config = as_config.get('AttachmentFilter', {}).get('config', defaults)
 

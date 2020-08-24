@@ -43,7 +43,7 @@ class EmbedFilter(AntiSpamModule):
         # This method has no cleanup - it's an instant ban
         return
 
-    async def process_message(self, message, context):
+    async def process_message(self, message, context, meta: dict = None):
         antispam_config = self._config.get('antiSpam', {})
         filter_config = {**defaults, **antispam_config.get('EmbedFilter', {}).get('config', {})}
 

@@ -65,7 +65,7 @@ class NonAsciiFilter(AntiSpamModule):
 
         return len(nonascii_characters) / float(len(text))
 
-    async def process_message(self, message: discord.Message, context):
+    async def process_message(self, message: discord.Message, context, meta: dict = None):
         antispam_config = self._config.get('antiSpam', {})
         check_config = {**defaults, **antispam_config.get('NonAsciiFilter', {}).get('config', {})}
 

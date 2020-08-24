@@ -57,7 +57,7 @@ class LinkFilter(AntiSpamModule):
     def clear_all(self):
         self._events = {}
 
-    async def process_message(self, message: discord.Message, context):
+    async def process_message(self, message: discord.Message, context, meta: dict = None):
         """
         Prevent link spam by scanning messages for anything that looks link-like.
 

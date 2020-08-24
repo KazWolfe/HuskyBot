@@ -29,7 +29,7 @@ class AntiSpamModule(commands.Group, metaclass=CogMeta):
         raise NotImplementedError
 
     @abstractmethod
-    async def process_message(self, message: discord.Message, context: str):
+    async def process_message(self, message: discord.Message, context: str, meta: dict = None):
         raise NotImplementedError
 
     @abstractmethod

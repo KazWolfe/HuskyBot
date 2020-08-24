@@ -83,13 +83,17 @@ class AntiSpam(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message_edit(self, before: discord.Message, after: discord.Message):
-        await self.process_message(after, context='edited_message')
+        await self.process_message(after, context='edited_message', meta={"before": before, "after": after})
 
-    async def process_message(self, message: discord.Message, context: str):
+    async def process_message(self, message: discord.Message, context: str, meta: dict = None):
         # config loading
         as_config: dict = self._config.get("antiSpam", {})
         global_config: dict = as_config.get("__global__", {})
         exemption_config: list = global_config.get("exemptedRoles", [])
+
+        # Replace meta None with a dict if unset.
+        if not meta:
+            meta = {}
 
         if not HuskyUtils.should_process_message(message):
             return
@@ -98,7 +102,7 @@ class AntiSpam(commands.Cog):
             return
 
         for module in self.__modules__.values():
-            asyncio.ensure_future(module.process_message(message, context))
+            asyncio.ensure_future(module.process_message(message, context, meta))
 
     @commands.group(name="antispam", aliases=['as'], brief="Manage the Antispam configuration for the bot")
     @commands.has_permissions(manage_messages=True)

@@ -52,7 +52,7 @@ class MentionFilter(AntiSpamModule):
     def clear_all(self):
         self._events = {}
 
-    async def process_message(self, message, context):
+    async def process_message(self, message, context, meta: dict = None):
         antispam_config = self._config.get('antiSpam', {})
         ping_config = {**defaults, **antispam_config.get('MentionFilter', {}).get('config', {})}
 

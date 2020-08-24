@@ -59,7 +59,9 @@ class NonUniqueFilter(AntiSpamModule):
     def clear_all(self):
         self._events = {}
 
-    async def process_message(self, message: discord.message, context):
+    async def process_message(self, message: discord.message, context, meta=None):
+        meta = meta or {}
+
         as_config = self._config.get('antiSpam', {})
         nonunique_config = as_config.get('NonUniqueFilter', {}).get('config', defaults)
 
@@ -86,6 +88,19 @@ class NonUniqueFilter(AntiSpamModule):
             "messageCache": {}
         })
         message_cache = cooldown_record['messageCache']  # type: dict
+
+        # Edits are a bit of a special case and need to be treated differently
+        original_message: discord.Message = meta.get('before')
+        if context == "edited_message" and original_message:
+            e_diff = SequenceMatcher(None, original_message.content.lower(), message.content.lower()).ratio()
+            if e_diff >= nonunique_config['threshold']:
+                LOG.debug("User edited a message above threshold. Updating the cooldown record and ignoring strike")
+
+                old_cooldown_data = message_cache.get(original_message.content.lower())
+                if old_cooldown_data is not None:
+                    message_cache[message.content.lower()] = old_cooldown_data
+                    del message_cache[original_message.content.lower()]
+                return
 
         for s_message in message_cache.keys():
             diff = SequenceMatcher(None, s_message.lower(), message.content.lower()).ratio()
