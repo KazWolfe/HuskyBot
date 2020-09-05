@@ -4,14 +4,15 @@ import gzip
 import hashlib
 import imghdr
 import logging
+import math
 import os
 import re
 import struct
 import subprocess
 from logging import handlers
+from typing import Union
 
 import discord
-import math
 import unicodedata
 
 from libhusky import HuskyStatics, HuskyConfig
@@ -36,33 +37,36 @@ def member_has_any_role(member, roles):
     return False
 
 
-def get_fancy_game_data(member):
-    if member.activity is not None:
-        state = {discord.ActivityType.playing: "Playing ",
-                 discord.ActivityType.streaming: "Streaming ",
-                 discord.ActivityType.listening: "Listening to ",
-                 discord.ActivityType.watching: "Watching ",
-                 4: "Custom: "}
+def get_activity_strings_for_member(member: discord.Member) -> list:
+    activities = []
 
-        if isinstance(member.activity, discord.Spotify):
-            m = "(Listening to Spotify)"
+    for activity in member.activities:
+        activities.append(get_activity_string(activity))
 
-            if member.activity.title is not None and member.activity.artist is not None:
-                track_url = "https://open.spotify.com/track/{}"
+    return activities
 
-                m += f"\n\n**Now Playing:** [{member.activity.title} by " \
-                     f"{member.activity.artist}]({track_url.format(member.activity.track_id)})"
 
-            return m
-        # custom status
-        elif member.activity.type == 4:
-            return f"({member.activity.state})"
-        elif not isinstance(member.activity, discord.Game) and member.activity.url is not None:
-            return f"([{state[member.activity.type] + member.activity.name}]({member.activity.url}))"
-        else:
-            return f"({state[member.activity.type] + member.activity.name})"
+def get_activity_string(activity: Union[discord.BaseActivity, discord.Spotify], wrap: bool = False) -> str:
+    state_strs = {
+        discord.ActivityType.playing: "Playing ",
+        discord.ActivityType.listening: "Listening to ",
+        discord.ActivityType.streaming: "Streaming ",
+        discord.ActivityType.watching: "Watching ",
+        discord.ActivityType.custom: "Custom: ",
+    }
 
-    return ""
+    try:
+        a_type = state_strs.get(activity.type, '')
+        a_name = activity.name or ''
+    except AttributeError:
+        return ""
+
+    act_string = f"{a_type}{a_name}".strip()
+
+    if wrap and act_string:
+        act_string = f"({act_string})"
+
+    return act_string
 
 
 def tail(filename, n):

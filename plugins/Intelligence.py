@@ -130,7 +130,8 @@ class Intelligence(commands.Cog):
             member_details = discord.Embed(
                 title=f"User Information for {user}",
                 color=user.color,
-                description=f"Currently in **{user.status}** mode " + HuskyUtils.get_fancy_game_data(user)
+                description=f"Currently in **{user.status}** mode " +
+                            HuskyUtils.get_activity_string(user.activity, True)
             )
         else:
             raise ValueError("Illegal state!")
