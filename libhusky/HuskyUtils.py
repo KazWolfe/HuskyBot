@@ -55,13 +55,49 @@ def get_activity_string(activity: Union[discord.BaseActivity, discord.Spotify], 
         discord.ActivityType.custom: "Custom: ",
     }
 
-    try:
-        a_type = state_strs.get(activity.type, '')
-        a_name = activity.name or ''
-    except AttributeError:
+    if isinstance(activity, discord.Spotify):
+        activity_components = [state_strs.get(activity.type, '')]
+
+        if activity.track_id:
+            song_url = f"https://open.spotify.com/track/{activity.track_id}"
+            song = f"[{activity.title}]({song_url}) by {activity.artist}"
+            activity_components += [song, "on"]
+
+        activity_components += [f"**{activity.name}**"]
+
+    elif isinstance(activity, discord.Streaming):
+        activity_components = [state_strs.get(activity.type, '')]
+
+        if activity.url:
+            stream_string = f"[{activity.name}]({activity.url})"
+        else:
+            stream_string = activity.name
+
+        if activity.platform:
+            stream_string += f" on {activity.platform}"
+
+        activity_components += [stream_string]
+
+    elif isinstance(activity, discord.Game):
+        activity_components = [state_strs.get(activity.type, ''), f"**{activity.name}**"]
+
+    elif isinstance(activity, discord.CustomActivity):
+        activity_components = []
+        if activity.emoji and activity.emoji.is_unicode_emoji():
+            activity_components += [activity.emoji.name]
+
+        activity_components += [discord.utils.escape_markdown(activity.name)]
+
+    elif isinstance(activity, discord.Activity):
+        activity_components = [state_strs.get(activity.type, ''), f"**{activity.name}**"]
+
+        if activity.state:
+            activity_components += [activity.state]
+
+    else:
         return ""
 
-    act_string = f"{a_type}{a_name}".strip()
+    act_string = " ".join(activity_components)
 
     if wrap and act_string:
         act_string = f"({act_string})"

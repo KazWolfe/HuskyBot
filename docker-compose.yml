@@ -8,15 +8,15 @@ services:
     image: huskybot:latest
     env_file: .env
     environment:
-    - HUSKYBOT_PLATFORM=compose
+      - HUSKYBOT_PLATFORM=compose
     ports:
       - "9339:9339"
     networks:
     - resources
     volumes:
-    - ./config:/HuskyBot/config
-    - ./logs:/HuskyBot/logs
-    - ./custom_plugins:/HuskyBot/plugins/custom/:ro
+      - ./config:/HuskyBot/config
+      - ./logs:/HuskyBot/logs
+      - ./custom_plugins:/HuskyBot/plugins/custom/:ro
     restart: on-failure
   db:
     image: postgres
