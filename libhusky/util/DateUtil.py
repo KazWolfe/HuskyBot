@@ -4,7 +4,7 @@ import re
 from libhusky import HuskyStatics
 
 
-def get_timestamp():
+def get_current_timestamp():
     """
     Get the UTC timestamp in YYYY-MM-DD HH:MM:SS format (Bot Standard)
     """

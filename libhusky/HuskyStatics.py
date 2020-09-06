@@ -91,6 +91,9 @@ class Emojis:
     CROWN = "\U0001F451"
     TRASH = "\U0001F5D1"
     WRENCH = "\U0001F527"
+    NEWSPAPER = "\U0001F4F0"
+    SHOPPING_BAGS = "\U0001F6CD"
+    CARD_INDEX = "\U0001F5C2"
 
     # Mod shortcuts
     BAN = NO_ENTRY
