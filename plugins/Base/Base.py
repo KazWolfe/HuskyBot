@@ -133,6 +133,7 @@ class Base(commands.Cog):
         embed.set_footer(text=f"(c) {datetime.datetime.now().year}, KazWolfe | Andwooooooo!",
                          icon_url="https://avatars3.githubusercontent.com/u/5192145")
 
+        LOG.info('woof', extra={"animal": "dog"})  # todo: remove this line
         await ctx.send(embed=embed)
 
     @HuskyHTTP.register("/healthcheck", ["GET"])

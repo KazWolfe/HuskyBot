@@ -1,5 +1,4 @@
 import logging
-import traceback
 
 import discord
 from discord.ext import commands
@@ -36,15 +35,13 @@ class CommandErrorHandler:
 
         await handler(ctx, error, etx)
 
-    async def on_generic_error(self, ctx: commands.Context, error: commands.MissingPermissions, etx: dict):
+    async def on_generic_error(self, ctx: commands.Context, error, etx: dict):
         await ctx.send(embed=discord.Embed(
             title="Bot Error Handler",
             description="The bot has encountered a fatal error running the command given. Logs are below.",
             color=Colors.DANGER
         ).add_field(name="Error Log", value="```" + etx['err'] + "```", inline=False))
-        LOG.error("Error running command %s. See below for trace.\n%s",
-                  ctx.message.content,
-                  ''.join(traceback.format_exception(type(error), error, error.__traceback__)))
+        LOG.error(f"Error running command {ctx.message.content}. Trace attached.", exc_info=error)
 
         # ToDo: Clean this up a bit more so these commands don't have hardcoded exemptions.
         if etx['cmd'].lower() in ["eval", "feval", "requestify"]:
@@ -52,7 +49,7 @@ class CommandErrorHandler:
             return
 
         # Send it over to the main error logger as well.
-        raise error
+        # raise error
 
     async def on_missing_permissions(self, ctx: commands.Context, error: commands.MissingPermissions, etx: dict):
         if ctx.bot.developer_mode:
@@ -88,6 +85,8 @@ class CommandErrorHandler:
                             f"`{etx['prefix']}help` for valid commands.",
                 color=Colors.DANGER
             ))
+
+        LOG.error(f"Command {etx['cmd']} was not found")
 
     async def on_check_failure(self, ctx: commands.Context, error: commands.CheckFailure, etx: dict):
         await ctx.send(embed=discord.Embed(

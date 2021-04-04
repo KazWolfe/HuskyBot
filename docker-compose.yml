@@ -2,7 +2,7 @@ version: '3.7'
 
 services:
   huskybot:
-    image: kazwolfe/huskybot
+    image: kazwolfe/huskybot:ng-dev
     build:
       context: .
       dockerfile: Dockerfile

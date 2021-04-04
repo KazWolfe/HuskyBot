@@ -32,7 +32,7 @@ class HuskyBot(commands.AutoShardedBot):
 
         # initialize logging subsystem
         self.__log_path = "logs/huskybot.log"
-        self.logger = LoggingHelper.initialize_logger(self, self.__log_path)
+        self.logger, self.log_context = LoggingHelper.initialize_logger(self, self.__log_path)
         LOG.info("The bot's log path is: {}".format(self.__log_path))
 
         # datastore initialization and connection
@@ -147,6 +147,12 @@ class HuskyBot(commands.AutoShardedBot):
             status=discord.Status.online,
             shard_id=shard_id
         )
+
+    async def on_message(self, message: discord.Message):
+        # ToDo: (rel logging refactor) this needs to be cleaned/moved.
+        self.log_context.get()['message_id'] = message.id
+
+        await super().on_message(message)
 
     async def on_command_error(self, ctx, error: commands.CommandError):
         await ErrorHandler.get_instance().handle_command_error(ctx, error)
