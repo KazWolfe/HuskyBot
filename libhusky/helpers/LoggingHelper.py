@@ -39,6 +39,32 @@ class ContextFilter(logging.Filter):
 
 
 class JSONFormatter(logging.Formatter):
+    def exception_processor(self, exc_info):
+        exceptions = []  # list of dict of exceptions
+
+        cur_exception = exc_info[1]
+        while cur_exception:
+            trace = []
+            for frame in traceback.extract_tb(cur_exception.__traceback__):
+                trace.append({
+                    "file": frame.filename,
+                    "lineno": frame.lineno,
+                    "name": frame.name,
+                    "line": frame.line
+                })
+
+            exceptions.append({
+                "type": type(cur_exception).__name__,
+                "message": traceback._some_str(cur_exception),
+                "stacktrace": trace
+            })
+
+            cur_exception = cur_exception.__cause__
+
+        exceptions.reverse()  # top of the chain is the first
+
+        return exceptions
+
     def format(self, record: logging.LogRecord) -> str:
         r_dict: dict = record.__dict__
 
@@ -61,11 +87,7 @@ class JSONFormatter(logging.Formatter):
         #       Traceback should be better too, something like each entry should be a list of dicts or at least a list
         #       of (sanely) formatted strings.
         if record.exc_info:
-            my_record['exception'] = {
-                "type": record.exc_info[0].__name__,
-                "message": record.exc_info[1].args,
-                "traceback": traceback.format_exception(*record.exc_info)
-            }
+            my_record['exception'] = self.exception_processor(record.exc_info)
 
         return json.dumps(my_record)
 

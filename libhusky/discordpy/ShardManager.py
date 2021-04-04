@@ -48,7 +48,7 @@ class ShardManager:
         instance_hostname = socket.gethostname()
 
         if not StaticFeatureFlags.FF_ENABLE_DYNAMIC_SCALING:
-            shards = [0, 1, 2, 3]
+            shards = list(range(SHARDS_PER_INSTANCE))
             return shards, len(shards)
 
         with self.redis.lock(SHARD_LOCK_NAME):
